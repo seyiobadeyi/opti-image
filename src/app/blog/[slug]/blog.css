@@ -1,0 +1,158 @@
+/* blog.css - Global markdown component styling designed to match the app aesthetics */
+
+.blog-content {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    line-height: 1.8;
+}
+
+.blog-content h2,
+.blog-content h3,
+.blog-content h4 {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    letter-spacing: -0.01em;
+}
+
+.blog-content h2 {
+    font-size: 2.2rem;
+}
+
+.blog-content h3 {
+    font-size: 1.6rem;
+}
+
+.blog-content h4 {
+    font-size: 1.3rem;
+}
+
+.blog-content p {
+    margin-bottom: 1.5em;
+}
+
+.blog-content a {
+    color: var(--accent-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.2s;
+}
+
+.blog-content a:hover {
+    color: var(--accent-glow);
+}
+
+.blog-content ul,
+.blog-content ol {
+    margin-bottom: 1.5em;
+    padding-left: 1.5em;
+}
+
+.blog-content li {
+    margin-bottom: 0.5em;
+}
+
+.blog-content blockquote {
+    border-left: 4px solid var(--accent-primary);
+    background: var(--bg-card);
+    padding: 1.5em;
+    margin: 2em 0;
+    border-radius: 0 16px 16px 0;
+    font-style: italic;
+    color: var(--text-primary);
+}
+
+.blog-content pre {
+    background: var(--bg-tertiary);
+    padding: 1.5em;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 2em 0;
+    border: 1px solid var(--border);
+    font-size: 0.95rem;
+}
+
+.blog-content code {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg-tertiary);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #e2e8f0;
+}
+
+.blog-content pre code {
+    background: transparent;
+    padding: 0;
+}
+
+.blog-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    margin: 2em 0;
+    display: block;
+    border: 1px solid var(--border);
+}
+
+.blog-content iframe {
+    width: 100%;
+    height: 450px;
+    border-radius: 16px;
+    margin: 2em 0;
+    border: none;
+    background: var(--bg-tertiary);
+}
+
+.blog-content strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.blog-content table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    margin: 2em 0;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.blog-content thead {
+    background: var(--bg-tertiary);
+    border-bottom: 2px solid var(--border);
+}
+
+.blog-content th {
+    padding: 16px 24px;
+    text-align: left;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+}
+
+.blog-content td {
+    padding: 16px 24px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.blog-content tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.blog-content tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.blog-content tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
