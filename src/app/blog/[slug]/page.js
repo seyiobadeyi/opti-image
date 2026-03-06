@@ -6,7 +6,7 @@ export async function generateMetadata({ params }) {
     const resolvedParams = await params;
     const postData = await getPostData(resolvedParams.slug);
     return {
-        title: `${postData.title} - OptiImage Engineering`,
+        title: `${postData.title} - Optimage Engineering`,
         description: postData.excerpt,
     };
 }

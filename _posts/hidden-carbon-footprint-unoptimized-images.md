@@ -124,7 +124,7 @@ The good news is that image optimization is one of the most accessible sustainab
 
 ## Start Reducing Your Digital Carbon Footprint
 
-The easiest first step is to [optimize your images with OptiImage](/). Upload your files, choose a modern format like AVIF or WebP, and download compressed versions that are 60-90% smaller. It is completely free, and every byte you save is a byte the planet does not have to transmit.
+The easiest first step is to [optimize your images with Optimage](/). Upload your files, choose a modern format like AVIF or WebP, and download compressed versions that are 60-90% smaller. It is completely free, and every byte you save is a byte the planet does not have to transmit.
 
 Want more insights on sustainable web development and performance engineering? [Subscribe to our newsletter](/) for weekly research delivered straight to your inbox.
 
@@ -132,6 +132,6 @@ Want more insights on sustainable web development and performance engineering? [
 
 The environmental case for image optimization is overwhelming. A single well-optimized website can save tonnes of CO2 annually. Multiplied across the internet's billions of pages, the potential impact is equivalent to removing millions of cars from the road.
 
-At OptiImage, we think about this every day. Every image we compress, every format we convert, every redundant byte we eliminate is a small contribution to a larger solution. And when millions of developers make the same small contribution, the aggregate impact becomes transformative.
+At Optimage, we think about this every day. Every image we compress, every format we convert, every redundant byte we eliminate is a small contribution to a larger solution. And when millions of developers make the same small contribution, the aggregate impact becomes transformative.
 
 The planet cannot afford unoptimized images. Neither can your users. Start compressing.

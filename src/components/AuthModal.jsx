@@ -87,7 +87,7 @@ export default function AuthModal({ isOpen, onClose }) {
                             <div style={{ width: '40px', height: '40px', background: 'var(--gradient-primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                                 <Zap fill="currentColor" size={22} />
                             </div>
-                            <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'white' }}>OptiImage</span>
+                            <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'white' }}>Optimage</span>
                         </div>
                         <h3 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'white', lineHeight: 1.3, marginBottom: '12px' }}>
                             Optimize without limits

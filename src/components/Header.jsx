@@ -53,7 +53,7 @@ export default function Header() {
                 <Link href="/" className="logo" onClick={() => setIsMobileMenuOpen(false)}>
                     <div className="logo-icon"><Zap fill="currentColor" size={24} /></div>
                     <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                        <span>OptiImage</span>
+                        <span>Optimage</span>
                         <span style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)' }}>by Dream Intrepid Ltd</span>
                     </span>
                 </Link>

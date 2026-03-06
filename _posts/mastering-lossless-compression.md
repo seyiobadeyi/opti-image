@@ -6,7 +6,7 @@ excerpt: "A deep engineering dive into the mathematics, the codecs, and the shee
 
 When the goal is absolute performance optimization on the web, every single kilobyte matters. Developers and photographers are currently locked in an endless war against image bloat. Legacy formats like JPEG and straightforward PNGs simply do not map to the demands of modern Edge-delivered architecture.
 
-To fight latency, we turn to complex modern codecs: **AVIF** and **WebP**. In this expansive technical breakdown, we explore *how* OptiImage handles thousands of gigabytes a day, stripping EXIF layers and crunching numbers to deliver the perfect pixel mathematically while shedding 80% of its disk weight.
+To fight latency, we turn to complex modern codecs: **AVIF** and **WebP**. In this expansive technical breakdown, we explore *how* Optimage handles thousands of gigabytes a day, stripping EXIF layers and crunching numbers to deliver the perfect pixel mathematically while shedding 80% of its disk weight.
 
 ## The Web Vitals Connection
 
@@ -80,7 +80,7 @@ When designing your own pipelines, always inspect the entropy of an image. If it
 
 ## Try It Yourself
 
-Want to see these algorithms in action? [Head over to OptiImage](/) and drag your images into the drop zone. No signup required for processing. You can convert to AVIF, WebP, or any other modern format in seconds, completely free. If you want to stay updated on our latest compression research and engineering insights, [subscribe to our newsletter](/) for weekly deep dives.
+Want to see these algorithms in action? [Head over to Optimage](/) and drag your images into the drop zone. No signup required for processing. You can convert to AVIF, WebP, or any other modern format in seconds, completely free. If you want to stay updated on our latest compression research and engineering insights, [subscribe to our newsletter](/) for weekly deep dives.
 
 ## Summary
 

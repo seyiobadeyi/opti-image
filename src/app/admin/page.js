@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import AdminClient from './AdminClient';
 
 export default async function AdminPage() {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Server-side auth check
     const { data: { user }, error: userError } = await supabase.auth.getUser();

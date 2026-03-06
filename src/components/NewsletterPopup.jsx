@@ -12,7 +12,7 @@ export default function NewsletterPopup() {
     const popupRef = useRef(null);
 
     useEffect(() => {
-        const hasSeenNewsletter = localStorage.getItem('optiimage_newsletter_seen');
+        const hasSeenNewsletter = localStorage.getItem('optimage_newsletter_seen');
 
         if (!hasSeenNewsletter) {
             const handleScroll = () => {
@@ -55,7 +55,7 @@ export default function NewsletterPopup() {
 
     const handleClose = () => {
         setIsOpen(false);
-        localStorage.setItem('optiimage_newsletter_seen', 'true');
+        localStorage.setItem('optimage_newsletter_seen', 'true');
     };
 
     const handleSubscribe = async (e) => {

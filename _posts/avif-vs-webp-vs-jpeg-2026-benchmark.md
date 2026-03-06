@@ -49,7 +49,7 @@ For real-time applications (think user-uploaded profile pictures, social media f
 - **Static site builds** (Gatsby, Next.js SSG): You encode once, serve forever.
 - **CDN edge caching**: Origin encodes once, edge nodes serve the cached AVIF globally.
 - **Batch overnight processing**: E-commerce sites regenerating product images during off-peak hours.
-- **Our pipeline**: OptiImage's backend pre-computes all formats and serves the smallest one based on the browser's `Accept` header.
+- **Our pipeline**: Optimage's backend pre-computes all formats and serves the smallest one based on the browser's `Accept` header.
 
 ## Browser Support in 2026
 
@@ -137,7 +137,7 @@ Then serve with content negotiation:
 
 <iframe width="100%" height="450" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
 
-You do not have to build any of this yourself. [OptiImage](/) handles the entire pipeline for you. Upload your images, choose your format, and download optimized files in seconds. It is completely free for image processing. No credit card needed.
+You do not have to build any of this yourself. [Optimage](/) handles the entire pipeline for you. Upload your images, choose your format, and download optimized files in seconds. It is completely free for image processing. No credit card needed.
 
 Want weekly insights like this delivered to your inbox? [Subscribe to our newsletter](/) and join 10,000+ creators and developers who take performance seriously.
 
@@ -145,4 +145,4 @@ Want weekly insights like this delivered to your inbox? [Subscribe to our newsle
 
 The internet is full of hot takes about image formats. Our position is simple: **let the benchmarks decide**. AVIF is the clear winner on compression efficiency for photographic content, WebP is the pragmatic choice for speed-sensitive pipelines, and JPEG should be your format of last resort in 2026.
 
-The best part? You do not have to choose. A well-engineered pipeline generates all formats and serves the optimal one per request. That is exactly what OptiImage does. Upload once, and we handle the rest.
+The best part? You do not have to choose. A well-engineered pipeline generates all formats and serves the optimal one per request. That is exactly what Optimage does. Upload once, and we handle the rest.

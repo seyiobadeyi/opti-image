@@ -607,15 +607,36 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         {!videoResult ? (
                             <>
                                 <div
-                                    onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('video/')) { setVideoFile(f); setVideoResult(null); setVideoError(null); } }}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        const f = e.dataTransfer.files[0];
+                                        if (f && f.type.startsWith('video/')) {
+                                            if (f.size > 50 * 1024 * 1024) {
+                                                setVideoError('Video exceeds the 50MB maximum limit for the free tier.');
+                                                setVideoFile(null);
+                                            } else {
+                                                setVideoFile(f); setVideoResult(null); setVideoError(null);
+                                            }
+                                        }
+                                    }}
                                     onDragOver={(e) => e.preventDefault()}
                                     style={{ border: '2px dashed var(--border)', borderRadius: '24px', padding: '48px 24px', textAlign: 'center', cursor: 'pointer', background: 'var(--bg-card)', marginBottom: '24px' }}
                                     onClick={() => document.getElementById('dashboard-video-input').click()}
                                 >
                                     <Film size={40} color="var(--text-muted)" style={{ marginBottom: '16px' }} />
                                     <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>Drop a video file here or click to browse</p>
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Requires login</p>
-                                    <input id="dashboard-video-input" type="file" accept="video/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setVideoFile(f); setVideoResult(null); setVideoError(null); } }} style={{ display: 'none' }} />
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max 50MB • Requires login</p>
+                                    <input id="dashboard-video-input" type="file" accept="video/*" onChange={(e) => {
+                                        const f = e.target.files?.[0];
+                                        if (f) {
+                                            if (f.size > 50 * 1024 * 1024) {
+                                                setVideoError('Video exceeds the 50MB maximum limit for the free tier.');
+                                                setVideoFile(null);
+                                            } else {
+                                                setVideoFile(f); setVideoResult(null); setVideoError(null);
+                                            }
+                                        }
+                                    }} style={{ display: 'none' }} />
                                 </div>
 
                                 {videoFile && (

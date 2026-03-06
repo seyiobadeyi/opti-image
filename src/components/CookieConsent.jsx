@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const COOKIE_KEY = 'optiimage_cookie_consent';
+const COOKIE_KEY = 'optimage_cookie_consent';
 
 export default function CookieConsent() {
     const [visible, setVisible] = useState(false);

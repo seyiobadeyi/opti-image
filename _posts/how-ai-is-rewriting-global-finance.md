@@ -104,7 +104,7 @@ The next wave of AI in finance will be defined by:
 
 You might wonder what this has to do with image optimization. The connection is real. The same principles that power financial AI (reduce waste, optimize throughput, never make the end user wait) are identical to the principles behind media compression. The websites these financial institutions build to reach customers all need lightning-fast, perfectly optimized images to convert visitors into clients.
 
-Whether you are building a fintech platform or an e-commerce store, page speed directly impacts your bottom line. [Try OptiImage](/) to optimize your platform's media assets for free, and [subscribe to our newsletter](/) for more cross-industry research on performance, technology, and business strategy.
+Whether you are building a fintech platform or an e-commerce store, page speed directly impacts your bottom line. [Try Optimage](/) to optimize your platform's media assets for free, and [subscribe to our newsletter](/) for more cross-industry research on performance, technology, and business strategy.
 
 ## Conclusion: The Human Element
 

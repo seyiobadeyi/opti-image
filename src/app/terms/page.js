@@ -2,8 +2,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-    title: 'Terms of Service — OptiImage',
-    description: 'Terms of Service for OptiImage bulk image optimizer and converter.',
+    title: 'Terms of Service — Optimage',
+    description: 'Terms of Service for Optimage bulk image optimizer and converter.',
 };
 
 export default function TermsPage() {
@@ -16,13 +16,13 @@ export default function TermsPage() {
 
                 <h2>1. Acceptance of Terms</h2>
                 <p>
-                    By using OptiImage by Dream Intrepid Ltd (&ldquo;the Service&rdquo;), you agree to be bound by these Terms of Service.
+                    By using Optimage by Dream Intrepid Ltd (&ldquo;the Service&rdquo;), you agree to be bound by these Terms of Service.
                     If you do not agree, please do not use the Service.
                 </p>
 
                 <h2>2. Description of Service</h2>
                 <p>
-                    OptiImage provides a free online tool for compressing, converting, and optimizing images.
+                    Optimage provides a free online tool for compressing, converting, and optimizing images.
                     The Service supports various image formats including JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, and BMP.
                 </p>
 

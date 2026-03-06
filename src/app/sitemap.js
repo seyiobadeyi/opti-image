@@ -1,7 +1,7 @@
 import { getAllPostSlugs } from '@/lib/markdown';
 
 export default function sitemap() {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://optiimage.dreamintrepid.com';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintrepid.com';
 
     // Core static routes
     const routes = [

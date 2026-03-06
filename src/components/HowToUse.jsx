@@ -4,7 +4,7 @@ import { Image as ImageIcon, Video, Zap, Download } from 'lucide-react';
 export default function HowToUse() {
     return (
         <section className="how-to-use" style={{ margin: '40px 0', padding: '32px', background: 'var(--bg-card)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)' }}>
-            <h2 style={{ textAlign: 'center', marginBottom: '32px', fontSize: '1.8rem', color: 'var(--text-primary)' }}>How OptiImage Works</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: '32px', fontSize: '1.8rem', color: 'var(--text-primary)' }}>How Optimage Works</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ background: 'var(--bg-tertiary)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--accent-primary)', boxShadow: 'var(--shadow-sm)' }}>

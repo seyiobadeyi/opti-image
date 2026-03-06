@@ -2,8 +2,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-    title: 'Privacy Policy — OptiImage',
-    description: 'Privacy Policy for OptiImage bulk image optimizer and converter.',
+    title: 'Privacy Policy — Optimage',
+    description: 'Privacy Policy for Optimage bulk image optimizer and converter.',
 };
 
 export default function PrivacyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
 
                 <h2>1. Introduction</h2>
                 <p>
-                    Welcome to OptiImage by Dream Intrepid Ltd (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;). This Privacy Policy explains how we collect, use,
+                    Welcome to Optimage by Dream Intrepid Ltd (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;). This Privacy Policy explains how we collect, use,
                     and protect your information when you use our image optimization service.
                 </p>
 

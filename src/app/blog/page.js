@@ -11,7 +11,7 @@ export default function BlogIndex() {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '120px 24px 80px' }}>
-            <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '24px', letterSpacing: '-0.02em' }}>OptiImage Engineering Blog</h1>
+            <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '24px', letterSpacing: '-0.02em' }}>Optimage Engineering Blog</h1>
             <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '64px', lineHeight: 1.6 }}>
                 Technical insights, coding tutorials, and deep dives into the math and architecture powering modern lossless compression algorithms.
             </p>

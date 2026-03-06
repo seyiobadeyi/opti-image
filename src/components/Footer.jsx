@@ -51,13 +51,13 @@ export default function Footer() {
                     <div className="logo" style={{ marginBottom: '16px' }}>
                         <div className="logo-icon"><Zap fill="currentColor" size={24} /></div>
                         <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                            <span>OptiImage</span>
+                            <span>Optimage</span>
                             <span style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)' }}>by Dream Intrepid Ltd</span>
                         </span>
                     </div>
 
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '8px' }}>
-                        © {new Date().getFullYear()} OptiImage by Dream Intrepid Ltd. Free bulk media optimizer.
+                        © {new Date().getFullYear()} Optimage by Dream Intrepid Ltd. Free bulk media optimizer.
                     </p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.6 }}>
                         For enquiries, please contact <a href="mailto:hello@dreamintrepid.com" style={{ color: 'var(--accent-secondary)', textDecoration: 'none' }}>hello@dreamintrepid.com</a>

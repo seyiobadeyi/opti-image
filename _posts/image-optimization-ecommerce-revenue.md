@@ -127,7 +127,7 @@ For e-commerce teams ready to act, here is the high-impact optimization checklis
 
 ## Start Saving Revenue Today
 
-The fastest way to implement all of this is to [try OptiImage right now](/). Upload your product images, select AVIF or WebP, adjust quality, and download optimized files in seconds. It is completely free for processing, and you can handle batches of up to 50 images at once.
+The fastest way to implement all of this is to [try Optimage right now](/). Upload your product images, select AVIF or WebP, adjust quality, and download optimized files in seconds. It is completely free for processing, and you can handle batches of up to 50 images at once.
 
 If you run an e-commerce store and want regular insights on performance optimization and conversion rate strategy, [join our newsletter](/) for weekly data-driven research like this article.
 

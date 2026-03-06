@@ -150,7 +150,7 @@ Based on current trajectories, here are evidence-based predictions for the next 
 
 If you are building digital products for this new era, performance is not optional. Every millisecond of loading time, every unnecessary megabyte of image data creates a barrier that excludes talented people from economic opportunity.
 
-[OptiImage](/) helps you build fast, lightweight digital experiences by optimizing your images in seconds. Upload your files, choose your format, and download compressed versions for free. No signup required for processing.
+[Optimage](/) helps you build fast, lightweight digital experiences by optimizing your images in seconds. Upload your files, choose your format, and download compressed versions for free. No signup required for processing.
 
 Building a remote-first company or a performance-focused platform? [Subscribe to our newsletter](/) for weekly insights on web performance, infrastructure, and the future of work.
 

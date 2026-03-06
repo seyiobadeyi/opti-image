@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-    title: '404 — Page Not Found | OptiImage',
+    title: '404 — Page Not Found | Optimage',
     description: 'The page you are looking for does not exist.',
 };
 

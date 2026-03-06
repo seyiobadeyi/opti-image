@@ -3,7 +3,7 @@ const path = require('path');
 const https = require('https');
 
 // =========================================================================
-// Mass Blog Generator for OptiImage SEO Hub
+// Mass Blog Generator for Optimage SEO Hub
 // =========================================================================
 // This script utilizes the OpenAI API to programmatically generate highly structured,
 // 3000-word Markdown articles for your /blog/[slug] route.
