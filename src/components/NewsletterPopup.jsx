@@ -64,18 +64,16 @@ export default function NewsletterPopup() {
 
         setStatus('loading');
         try {
-            const { error } = await supabase
-                .from('newsletter_subscribers')
-                .insert([{ email }]);
+            // Send the request to our backend
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/newsletter/subscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
 
-            if (error) {
-                if (error.code === 'PGRST205' || error.message?.includes('newsletter_subscribers')) {
-                    console.warn('Newsletter table not found. Treating as success for UX.');
-                    setStatus('success');
-                    setTimeout(() => handleClose(), 2500);
-                    return;
-                }
-                throw error;
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Subscription failed');
             }
 
             setStatus('success');

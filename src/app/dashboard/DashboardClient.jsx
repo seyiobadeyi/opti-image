@@ -611,8 +611,10 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         e.preventDefault();
                                         const f = e.dataTransfer.files[0];
                                         if (f && f.type.startsWith('video/')) {
-                                            if (f.size > 50 * 1024 * 1024) {
-                                                setVideoError('Video exceeds the 50MB maximum limit for the free tier.');
+                                            const maxVideoSizeMb = parseInt(process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50', 10);
+                                            const MAX_SIZE = maxVideoSizeMb * 1024 * 1024;
+                                            if (f.size > MAX_SIZE) {
+                                                setVideoError(`Video exceeds the ${maxVideoSizeMb}MB maximum limit for this environment.`);
                                                 setVideoFile(null);
                                             } else {
                                                 setVideoFile(f); setVideoResult(null); setVideoError(null);
@@ -625,12 +627,14 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 >
                                     <Film size={40} color="var(--text-muted)" style={{ marginBottom: '16px' }} />
                                     <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>Drop a video file here or click to browse</p>
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max 50MB • Requires login</p>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max {process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50'}MB • Requires login</p>
                                     <input id="dashboard-video-input" type="file" accept="video/*" onChange={(e) => {
                                         const f = e.target.files?.[0];
                                         if (f) {
-                                            if (f.size > 50 * 1024 * 1024) {
-                                                setVideoError('Video exceeds the 50MB maximum limit for the free tier.');
+                                            const maxVideoSizeMb = parseInt(process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50', 10);
+                                            const MAX_SIZE = maxVideoSizeMb * 1024 * 1024;
+                                            if (f.size > MAX_SIZE) {
+                                                setVideoError(`Video exceeds the ${maxVideoSizeMb}MB maximum limit for this environment.`);
                                                 setVideoFile(null);
                                             } else {
                                                 setVideoFile(f); setVideoResult(null); setVideoError(null);
