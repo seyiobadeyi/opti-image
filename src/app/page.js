@@ -122,6 +122,20 @@ export default function Home() {
           allResults.push(...response.results);
           totalOriginalSize += response.summary.totalOriginalSize;
           totalProcessedSize += response.summary.totalProcessedSize;
+
+          // Save to localStorage for guest syncing later
+          try {
+            const guestHistory = JSON.parse(localStorage.getItem('guest_processing_history') || '[]');
+            const newHistoryItems = response.results.map(r => ({
+              file_name: r.originalName,
+              action_type: 'compress',
+              original_size: r.originalSize,
+              processed_size: r.processedSize
+            }));
+            localStorage.setItem('guest_processing_history', JSON.stringify([...guestHistory, ...newHistoryItems]));
+          } catch (e) {
+            console.error('Failed to save guest history to localStorage', e);
+          }
         }
         setProcessed(Math.min(i + batchSize, files.length));
       }

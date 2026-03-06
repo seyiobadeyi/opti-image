@@ -7,6 +7,7 @@ import { Zap, LogOut, User, Menu, X, LayoutDashboard, ChevronRight } from 'lucid
 import AuthModal from '@/components/AuthModal';
 import { createClient } from '@/utils/supabase/client';
 import { logout } from '@/app/auth/actions';
+import { apiClient } from '@/lib/api';
 
 export default function Header() {
     const router = useRouter();
@@ -16,6 +17,14 @@ export default function Header() {
     const supabase = createClient();
 
     useEffect(() => {
+        // Ping the server health endpoint immediately, then every 5 minutes
+        // This keeps the Render backend awake while the user has the site open.
+        const pingServer = () => {
+            apiClient.checkHealth().catch(() => { });
+        };
+        pingServer(); // initial ping
+        const keepAliveInterval = setInterval(pingServer, 5 * 60 * 1000);
+
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
         });
@@ -29,6 +38,7 @@ export default function Header() {
         window.addEventListener('open-auth-modal', handleOpenModal);
 
         return () => {
+            clearInterval(keepAliveInterval);
             subscription.unsubscribe();
             window.removeEventListener('open-auth-modal', handleOpenModal);
         }

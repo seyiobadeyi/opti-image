@@ -112,4 +112,32 @@ export const apiClient = {
         const response = await fetch(`${API_BASE}/api/health`);
         return response.json();
     },
+
+    /**
+     * Sync guest history to the logged in user
+     * @param {Array} items - Array of history objects
+     * @returns {Promise<{success: boolean, syncedCount: number}>}
+     */
+    async syncGuestHistory(items) {
+        if (!items || items.length === 0) return { success: false, syncedCount: 0 };
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session?.access_token) return { success: false, syncedCount: 0 };
+
+        const response = await fetch(`${API_BASE}/api/images/sync-history`, {
+            method: 'POST',
+            body: JSON.stringify({ items }),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
+            },
+        });
+
+        if (!response.ok) {
+            return { success: false, syncedCount: 0 };
+        }
+
+        return response.json();
+    }
 };

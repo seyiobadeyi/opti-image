@@ -1,10 +1,13 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { login, signup, resetPassword } from '@/app/auth/actions';
 import { X, Zap, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
+import { apiClient } from '@/lib/api';
 
 export default function AuthModal({ isOpen, onClose }) {
+    const router = useRouter();
     const [view, setView] = useState('login'); // login, signup, forgot
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -14,6 +17,18 @@ export default function AuthModal({ isOpen, onClose }) {
     const [message, setMessage] = useState(null);
 
     if (!isOpen) return null;
+
+    const handleSyncGuestHistory = async () => {
+        try {
+            const guestHistory = JSON.parse(localStorage.getItem('guest_processing_history') || '[]');
+            if (guestHistory.length > 0) {
+                await apiClient.syncGuestHistory(guestHistory);
+                localStorage.removeItem('guest_processing_history');
+            }
+        } catch (e) {
+            console.error('Failed to sync guest history', e);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,11 +45,13 @@ export default function AuthModal({ isOpen, onClose }) {
                 const res = await signup(formData);
                 if (res.error) throw new Error(res.error);
                 setMessage(res.message);
+                await handleSyncGuestHistory();
             } else if (view === 'login') {
                 const res = await login(formData);
                 if (res.error) throw new Error(res.error);
+                await handleSyncGuestHistory();
                 onClose();
-                window.location.reload();
+                router.refresh(); // Soft refresh to update Server Components without losing client state
             } else if (view === 'forgot') {
                 const res = await resetPassword(formData);
                 if (res.error) throw new Error(res.error);
