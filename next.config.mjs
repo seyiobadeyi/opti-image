@@ -18,12 +18,12 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://pagead2.googlesyndication.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://pagead2.googlesyndication.com https://www.googletagmanager.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https://pagead2.googlesyndication.com",
+              "img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com",
               "media-src 'self' data: blob:",
-              "connect-src 'self' http://localhost:4000 ws://localhost:3000 https://*.supabase.co",
+              "connect-src 'self' http://localhost:4000 ws://localhost:3000 https://*.supabase.co https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
               "frame-src 'self' https://googleads.g.doubleclick.net"
             ].join('; '),
           },
