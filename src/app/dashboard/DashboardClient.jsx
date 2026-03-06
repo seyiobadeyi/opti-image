@@ -225,7 +225,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
             </div>
 
             {/* Tab Navigation */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', borderBottom: '1px solid var(--border)', paddingBottom: '0' }}>
+            <div className="dashboard-tabs">
                 {TABS.map(tab => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.key;
@@ -461,19 +461,19 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             {/* Resize */}
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 500 }}>Resize (optional)</label>
-                                <div style={{ display: 'flex', gap: '8px' }}>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                                     <input
                                         type="number" placeholder="Width"
                                         value={imageSettings.width}
                                         onChange={(e) => setImageSettings(prev => ({ ...prev, width: e.target.value }))}
-                                        style={{ flex: 1, padding: '10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none' }}
+                                        style={{ flex: '1 1 40%', minWidth: '80px', padding: '10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none' }}
                                     />
-                                    <span style={{ alignSelf: 'center', color: 'var(--text-muted)' }}>×</span>
+                                    <span style={{ color: 'var(--text-muted)' }}>×</span>
                                     <input
                                         type="number" placeholder="Height"
                                         value={imageSettings.height}
                                         onChange={(e) => setImageSettings(prev => ({ ...prev, height: e.target.value }))}
-                                        style={{ flex: 1, padding: '10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none' }}
+                                        style={{ flex: '1 1 40%', minWidth: '80px', padding: '10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none' }}
                                     />
                                 </div>
                             </div>
