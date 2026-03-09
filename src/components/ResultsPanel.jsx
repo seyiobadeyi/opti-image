@@ -9,6 +9,7 @@ function formatBytes(bytes) {
 }
 
 import { createClient } from '@/utils/supabase/client';
+import { apiClient } from '@/lib/api';
 
 export default function ResultsPanel({ results, summary, serverUrl }) {
     if (!results || results.length === 0) return null;
@@ -40,23 +41,7 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
 
         const fileNames = results.map((r) => r.processedName);
         try {
-            const res = await fetch(`${serverUrl}/api/download/bulk`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileNames }),
-            });
-
-            if (!res.ok) throw new Error('Download failed');
-
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `optimized-images-${Date.now()}.zip`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            await apiClient.downloadBulkImages(fileNames);
         } catch (err) {
             console.error('Bulk download failed:', err);
             alert('Failed to download ZIP. Please try individual downloads.');

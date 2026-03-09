@@ -1,0 +1,266 @@
+﻿
+> client@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+node.exe : ΓÜá The 
+"middleware" file 
+convention is 
+deprecated. Please 
+use "proxy" instead. 
+Learn more: https://ne
+xtjs.org/docs/messages
+/middleware-to-proxy
+At C:\Program Files\no
+dejs\npm.ps1:29 char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (ΓÜá The "m   
+ iddle...leware-to    
+-proxy:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack 
+build failed with 2 
+errors:
+./src/components/Resul
+tsPanel.jsx:12:1
+Export default 
+doesn't exist in 
+target module
+[0m [90m 10 |[39m
+ [90m 11 |[39m 
+[36mimport[39m { 
+createClient } 
+[36mfrom[39m [32m'@
+/utils/supabase/client
+'[39m[33m;[39m
+[31m[1m>[22m[39m[
+90m 12 |[39m 
+[36mimport[39m 
+apiClient 
+[36mfrom[39m [32m'@
+/lib/api'[39m[33m;[
+39m
+ [90m    |[39m [31m
+[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m
+ [90m 13 |[39m
+ [90m 14 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m [3
+3mResultsPanel[39m({ 
+results[33m,[39m 
+summary[33m,[39m 
+serverUrl }) {
+ [90m 15 |[39m     
+[36mif[39m 
+([33m![39mresults 
+[33m||[39m results[
+33m.[39mlength 
+[33m===[39m 
+[35m0[39m) 
+[36mreturn[39m [36m
+null[39m[33m;[39m[
+0m
+
+The export default 
+was not found in 
+module [project]/src/l
+ib/api.js 
+[app-client] 
+(ecmascript).
+Did you mean to 
+import apiClient?
+All exports of the 
+module are statically 
+known (It doesn't 
+have dynamic 
+exports). So it's 
+known statically that 
+the requested export 
+doesn't exist.
+
+Import traces:
+  Client Component 
+Browser:
+    ./src/components/R
+esultsPanel.jsx 
+[Client Component 
+Browser]
+    ./src/app/page.js 
+[Client Component 
+Browser]
+    ./src/app/page.js 
+[Server Component]
+
+  Client Component 
+SSR:
+    ./src/components/R
+esultsPanel.jsx 
+[Client Component SSR]
+    ./src/app/page.js 
+[Client Component SSR]
+    ./src/app/page.js 
+[Server Component]
+
+
+./src/components/Resul
+tsPanel.jsx:12:1
+Export default 
+doesn't exist in 
+target module
+[0m [90m 10 |[39m
+ [90m 11 |[39m 
+[36mimport[39m { 
+createClient } 
+[36mfrom[39m [32m'@
+/utils/supabase/client
+'[39m[33m;[39m
+[31m[1m>[22m[39m[
+90m 12 |[39m 
+[36mimport[39m 
+apiClient 
+[36mfrom[39m [32m'@
+/lib/api'[39m[33m;[
+39m
+ [90m    |[39m [31m
+[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m
+ [90m 13 |[39m
+ [90m 14 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m [3
+3mResultsPanel[39m({ 
+results[33m,[39m 
+summary[33m,[39m 
+serverUrl }) {
+ [90m 15 |[39m     
+[36mif[39m 
+([33m![39mresults 
+[33m||[39m results[
+33m.[39mlength 
+[33m===[39m 
+[35m0[39m) 
+[36mreturn[39m [36m
+null[39m[33m;[39m[
+0m
+
+The export default 
+was not found in 
+module [project]/src/l
+ib/api.js [app-ssr] 
+(ecmascript).
+Did you mean to 
+import apiClient?
+All exports of the 
+module are statically 
+known (It doesn't 
+have dynamic 
+exports). So it's 
+known statically that 
+the requested export 
+doesn't exist.
+
+Import traces:
+  Client Component 
+Browser:
+    ./src/components/R
+esultsPanel.jsx 
+[Client Component 
+Browser]
+    ./src/app/page.js 
+[Client Component 
+Browser]
+    ./src/app/page.js 
+[Server Component]
+
+  Client Component 
+SSR:
+    ./src/components/R
+esultsPanel.jsx 
+[Client Component SSR]
+    ./src/app/page.js 
+[Client Component SSR]
+    ./src/app/page.js 
+[Server Component]
+
+
+    at <unknown> (./sr
+c/components/ResultsPa
+nel.jsx:12:1)
+    at <unknown> (./sr
+c/components/ResultsPa
+nel.jsx:12:1)

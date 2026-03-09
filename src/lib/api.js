@@ -105,6 +105,45 @@ export const apiClient = {
     },
 
     /**
+     * Download multiple processed images as a zip file
+     * @param {string[]} fileNames - Array of processed file names
+     * @returns {Promise<void>}
+     */
+    async downloadBulkImages(fileNames) {
+        if (!fileNames || fileNames.length === 0) return;
+
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+
+        const response = await fetch(`${API_BASE}/api/images/download-bulk`, {
+            method: 'POST',
+            body: JSON.stringify({ fileNames }),
+            headers,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Bulk download failed: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `optimized-images-${Date.now()}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    },
+
+    /**
      * Check server health
      * @returns {Promise<object>}
      */

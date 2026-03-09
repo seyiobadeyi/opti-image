@@ -411,9 +411,28 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     ))}
                                 </div>
 
-                                <button onClick={handleClearAll} className="btn btn-primary" style={{ width: '100%', marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                    <RefreshCw size={18} /> Optimize More
-                                </button>
+                                <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                                    {results.length > 1 && (
+                                        <button
+                                            onClick={async () => {
+                                                const processedNames = results.map(r => r.processedName);
+                                                try {
+                                                    await apiClient.downloadBulkImages(processedNames);
+                                                } catch (err) {
+                                                    console.error('Bulk download failed:', err);
+                                                    alert('Failed to download ZIP. Please try individual downloads.');
+                                                }
+                                            }}
+                                            className="btn btn-secondary"
+                                            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                        >
+                                            📦 Download All as ZIP
+                                        </button>
+                                    )}
+                                    <button onClick={handleClearAll} className="btn btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                        <RefreshCw size={18} /> Optimize More
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
