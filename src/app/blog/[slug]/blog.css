@@ -158,10 +158,23 @@
 
 /* Mobile responsive horizontal scrolling for tables */
 @media (max-width: 768px) {
-    .blog-content table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
+    .blog-content {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .blog-content table,
+    .blog-content pre {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .blog-content table td,
+    .blog-content table th {
+        white-space: nowrap !important;
+        min-width: 120px;
     }
 }

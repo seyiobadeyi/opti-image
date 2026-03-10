@@ -1484,7 +1484,7 @@ body {
 /* ===== GLOBAL RESPONSIVENESS ===== */
 @media (max-width: 768px) {
   html {
-    font-size: 14.5px;
+    font-size: 13.5px !important;
   }
 }
 
@@ -1507,7 +1507,13 @@ body {
   }
 
   .bento-box-padded {
-    padding: 24px !important;
+    padding: 20px !important;
+  }
+
+  .bento-box.bento-box-padded>div:first-child:not(.bento-box-padded) {
+    margin: -20px -20px 20px -20px !important;
+    width: calc(100% + 40px) !important;
+    border-radius: 24px 24px 0 0 !important;
   }
 }
 
@@ -1517,19 +1523,28 @@ body {
     display: none !important;
   }
 
-  .auth-modal-form {
-    padding: 28px 24px !important;
-  }
-
   .auth-modal-container {
-    align-items: flex-end !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-direction: column !important;
     padding: 0 !important;
+    height: 100dvh !important;
   }
 
   .auth-modal-card {
-    border-radius: 24px 24px 0 0 !important;
-    max-height: 90vh !important;
+    border-radius: 28px 28px 0 0 !important;
+    width: 100% !important;
+    max-height: 92dvh !important;
     border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    margin-bottom: 0 !important;
+    position: relative !important;
+  }
+
+  .auth-modal-form {
+    padding: 36px 24px 48px !important;
+    justify-content: flex-start !important;
   }
 }
 
