@@ -57,7 +57,7 @@ export default function Footer() {
                         © {new Date().getFullYear()} Optimage by Dream Intrepid Ltd. Free bulk media optimizer.
                     </p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.6 }}>
-                        For enquiries, please contact <a href="mailto:hello@dreamintrepid.com" style={{ color: 'var(--accent-secondary)', textDecoration: 'none' }}>hello@dreamintrepid.com</a>
+                        For enquiries, please contact <a href="mailto:optimage@dreamintrepid.com" style={{ color: 'var(--accent-secondary)', textDecoration: 'none' }}>optimage@dreamintrepid.com</a>
                     </p>
 
                     {/* Nav Links */}

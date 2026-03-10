@@ -60,7 +60,7 @@ export default function PrivacyPage() {
                 <h2>7. Contact Us</h2>
                 <p>
                     If you have any questions about this Privacy Policy, please contact us at{' '}
-                    <a href="mailto:hello@dreamintrepid.com" style={{ color: 'var(--primary)' }}>hello@dreamintrepid.com</a>.
+                    <a href="mailto:optimage@dreamintrepid.com" style={{ color: 'var(--primary)' }}>optimage@dreamintrepid.com</a>.
                 </p>
             </div>
             <Footer />

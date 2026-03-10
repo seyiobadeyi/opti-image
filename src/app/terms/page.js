@@ -72,7 +72,7 @@ export default function TermsPage() {
                 <h2>9. Contact Us</h2>
                 <p>
                     If you have any questions about these Terms, please contact us at{' '}
-                    <a href="mailto:hello@dreamintrepid.com" style={{ color: 'var(--primary)' }}>hello@dreamintrepid.com</a>.
+                    <a href="mailto:optimage@dreamintrepid.com" style={{ color: 'var(--primary)' }}>optimage@dreamintrepid.com</a>.
                 </p>
             </div>
             <Footer />
