@@ -111,6 +111,8 @@
 }
 
 .blog-content table {
+    display: table;
+    white-space: normal;
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95rem;
@@ -152,4 +154,14 @@
 
 .blog-content tbody tr:hover {
     background: rgba(255, 255, 255, 0.04);
+}
+
+/* Mobile responsive horizontal scrolling for tables */
+@media (max-width: 768px) {
+    .blog-content table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
 }

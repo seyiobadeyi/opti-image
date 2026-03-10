@@ -107,12 +107,12 @@ export default function AuthModal({ isOpen, onClose }) {
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose} style={{
+        <div className="modal-overlay auth-modal-container" onClick={onClose} style={{
             position: 'fixed', inset: 0, zIndex: 10000,
             background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
         }}>
-            <div onClick={(e) => e.stopPropagation()} style={{
+            <div className="auth-modal-card" onClick={(e) => e.stopPropagation()} style={{
                 display: 'flex', maxWidth: '900px', width: '100%', maxHeight: '90vh',
                 borderRadius: '24px', overflow: 'hidden',
                 background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -145,7 +145,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 </div>
 
                 {/* Right: Form Side */}
-                <div style={{ flex: 1, padding: '40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: '300px' }}>
+                <div className="auth-modal-form" style={{ flex: 1, padding: '40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: '300px' }}>
                     {/* Close Button */}
                     <button onClick={onClose} style={{
                         position: 'absolute', top: '16px', right: '16px',

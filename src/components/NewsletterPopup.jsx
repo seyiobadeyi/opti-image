@@ -2,33 +2,23 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { X, Mail, Sparkles } from 'lucide-react';
-import { createClient } from '@/utils/supabase/client';
+import { subscribeNewsletter } from '@/app/actions';
 
 export default function NewsletterPopup() {
     const [isOpen, setIsOpen] = useState(false);
     const [email, setEmail] = useState('');
-    const [status, setStatus] = useState('idle');
-    const supabase = createClient();
+    const [errorMsg, setErrorMsg] = useState('');
     const popupRef = useRef(null);
 
     useEffect(() => {
         const hasSeenNewsletter = localStorage.getItem('optimage_newsletter_seen');
 
         if (!hasSeenNewsletter) {
-            const handleScroll = () => {
-                const scrollPosition = document.documentElement.scrollTop || document.body.scrollTop;
-                const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-                const clientHeight = document.documentElement.clientHeight || window.innerHeight;
-                const scrolledPercent = (scrollPosition / (scrollHeight - clientHeight)) * 100;
+            const timerId = setTimeout(() => {
+                setIsOpen(true);
+            }, 15000);
 
-                if (scrolledPercent > 30) {
-                    setIsOpen(true);
-                    window.removeEventListener('scroll', handleScroll);
-                }
-            };
-
-            window.addEventListener('scroll', handleScroll);
-            return () => window.removeEventListener('scroll', handleScroll);
+            return () => clearTimeout(timerId);
         }
     }, []);
 
@@ -63,17 +53,14 @@ export default function NewsletterPopup() {
         if (!email) return;
 
         setStatus('loading');
+        setErrorMsg('');
         try {
-            // Send the request to our backend
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/newsletter/subscribe`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
+            const result = await subscribeNewsletter(email);
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || 'Subscription failed');
+            if (result.error) {
+                setStatus('error');
+                setErrorMsg(result.error);
+                return;
             }
 
             setStatus('success');
@@ -81,6 +68,7 @@ export default function NewsletterPopup() {
         } catch (err) {
             console.error('Newsletter error:', err);
             setStatus('error');
+            setErrorMsg('An unexpected error occurred.');
             setTimeout(() => setStatus('idle'), 3000);
         }
     };
@@ -190,7 +178,7 @@ export default function NewsletterPopup() {
                         >
                             {status === 'loading' ? 'Subscribing...' : status === 'success' ? '✓ Joined!' : 'Subscribe Free'}
                         </button>
-                        {status === 'error' && <p style={{ color: '#ef4444', fontSize: '0.82rem', textAlign: 'center', margin: '4px 0 0' }}>Failed. Try again.</p>}
+                        {status === 'error' && <p style={{ color: '#ef4444', fontSize: '0.82rem', textAlign: 'center', margin: '4px 0 0' }}>{errorMsg || 'Failed. Try again.'}</p>}
                     </form>
 
                     <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '12px', marginBottom: 0 }}>

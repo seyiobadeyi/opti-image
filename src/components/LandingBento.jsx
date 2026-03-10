@@ -24,7 +24,7 @@ export default function LandingBento() {
                     flexDirection: 'row',
                     flexWrap: 'wrap'
                 }}>
-                    <div style={{ flex: '1 1 400px', padding: '64px 48px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div className="bento-box-padded" style={{ flex: '1 1 400px', padding: '64px 48px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <h3 className="bento-title" style={{ fontSize: '2.5rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.1 }}>Lossless compression isn't a buzzword.</h3>
                         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.1rem' }}>
                             We leverage modern codecs like AVIF and WebP under the hood. When you upload a heavy TIFF file, our engine strips the bloat while calculating the exact mathematical threshold needed to retain human-perceptible perfection. The result? 90% size reductions that your eyes simply cannot detect.
@@ -41,7 +41,7 @@ export default function LandingBento() {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                     gap: '32px',
                 }}>
-                    <div className="bento-box" style={{
+                    <div className="bento-box bento-box-padded" style={{
                         background: 'var(--bg-card)',
                         borderRadius: '24px',
                         border: '1px solid var(--border)',
@@ -59,7 +59,7 @@ export default function LandingBento() {
                         </p>
                     </div>
 
-                    <div className="bento-box" style={{
+                    <div className="bento-box bento-box-padded" style={{
                         background: 'var(--bg-card)',
                         borderRadius: '24px',
                         border: '1px solid var(--border)',
@@ -104,21 +104,21 @@ export default function LandingBento() {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                     gap: '32px',
                 }}>
-                    <div className="bento-box" style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
+                    <div className="bento-box bento-box-padded" style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
                         <div style={{ position: 'relative', height: '160px', width: '100%', marginBottom: '24px', borderRadius: '12px', overflow: 'hidden' }}>
                             <Image unoptimized src="/image-8.png" alt="Developer API" fill style={{ objectFit: 'cover' }} />
                         </div>
                         <h4 style={{ fontSize: '1.4rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>Developer API <span style={{ fontSize: '0.7rem', padding: '4px 8px', background: 'var(--bg-tertiary)', borderRadius: '12px', color: 'var(--text-muted)' }}>Coming Soon</span></h4>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>Architected for builders. Hook directly into our microservices. Push massive media buffers programmatically without writing the compression mathematics yourself.</p>
                     </div>
-                    <div className="bento-box" style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
+                    <div className="bento-box bento-box-padded" style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
                         <div style={{ position: 'relative', height: '160px', width: '100%', marginBottom: '24px', borderRadius: '12px', overflow: 'hidden' }}>
                             <Image unoptimized src="/image-6.png" alt="Batch Processing" fill style={{ objectFit: 'cover' }} />
                         </div>
                         <h4 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Batch Processing</h4>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>Drag 50 images at once. Our engine crunches them into a neat ZIP archive in seconds without locking up your browser.</p>
                     </div>
-                    <div className="bento-box" style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
+                    <div className="bento-box bento-box-padded" style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
                         <div style={{ position: 'relative', height: '160px', width: '100%', marginBottom: '24px', borderRadius: '12px', overflow: 'hidden' }}>
                             <Image unoptimized src="/image-10.png" alt="Asset Management" fill style={{ objectFit: 'cover' }} />
                         </div>
@@ -137,7 +137,7 @@ export default function LandingBento() {
                     flexDirection: 'row-reverse',
                     flexWrap: 'wrap'
                 }}>
-                    <div style={{ flex: '1 1 400px', padding: '64px 48px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div className="bento-box-padded" style={{ flex: '1 1 400px', padding: '64px 48px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <h3 className="bento-title" style={{ fontSize: '2.5rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.1 }}>Built from real work.</h3>
                         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.1rem' }}>
                             Optimage wasn't built in a lab. It started as an internal tool used daily across Shopify builds, WordPress sites, CRO experiments, and marketing campaigns. Every project had the same challenge — images were the heaviest part of the page. So we built a system to fix it automatically. Now, it's open for everyone.
@@ -154,7 +154,7 @@ export default function LandingBento() {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                     gap: '32px',
                 }}>
-                    <div className="bento-box" style={{
+                    <div className="bento-box bento-box-padded" style={{
                         background: 'linear-gradient(135deg, rgba(108, 92, 231, 0.1), transparent)',
                         borderRadius: '24px',
                         border: '1px solid var(--border)',
@@ -172,7 +172,7 @@ export default function LandingBento() {
                         </p>
                     </div>
 
-                    <div className="bento-box" style={{
+                    <div className="bento-box bento-box-padded" style={{
                         background: '#0a0a0f',
                         borderRadius: '24px',
                         border: '1px solid var(--border)',

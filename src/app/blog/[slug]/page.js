@@ -1,5 +1,6 @@
 import { getPostData, getAllPostSlugs } from '@/lib/markdown';
 import Head from 'next/head';
+import NewsletterPopup from '@/components/NewsletterPopup';
 import './blog.css'; // We will create this for styling markdown HTML
 
 export async function generateMetadata({ params }) {
@@ -33,6 +34,8 @@ export default async function Post({ params }) {
                 className="blog-content"
                 dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
             />
+
+            <NewsletterPopup />
         </article>
     );
 }
