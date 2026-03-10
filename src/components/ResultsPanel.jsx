@@ -53,22 +53,22 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
             <h3 className="settings-title">✅ Optimization Complete</h3>
 
             {/* Summary Stats */}
-            <div className="results-summary">
-                <div className="stat-card">
-                    <div className="stat-value">{summary.filesProcessed}</div>
+            <div className="results-summary" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+                <div className="stat-card" style={{ padding: '24px' }}>
+                    <div className="stat-value" style={{ fontSize: '2rem' }}>{summary.filesProcessed}</div>
                     <div className="stat-label">Files Processed</div>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-value">{formatBytes(summary.totalOriginalSize)}</div>
+                <div className="stat-card" style={{ padding: '24px' }}>
+                    <div className="stat-value" style={{ fontSize: '2rem' }}>{formatBytes(summary.totalOriginalSize)}</div>
                     <div className="stat-label">Original Size</div>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-value">{formatBytes(summary.totalProcessedSize)}</div>
-                    <div className="stat-label">New Size</div>
+                <div className="stat-card" style={{ padding: '24px' }}>
+                    <div className="stat-value" style={{ fontSize: '2rem' }}>{formatBytes(summary.totalProcessedSize)}</div>
+                    <div className="stat-label">Optimized Size</div>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-value success">{summary.totalSavingsPercent}%</div>
-                    <div className="stat-label">Total Saved</div>
+                <div className="stat-card" style={{ padding: '24px', border: '2px solid var(--success)', background: 'var(--success-bg)' }}>
+                    <div className="stat-value success" style={{ fontSize: '3rem', fontWeight: 900 }}>{summary.totalSavingsPercent}%</div>
+                    <div className="stat-label" style={{ color: 'var(--success)', fontWeight: 700, fontSize: '1rem' }}>Total Reduction</div>
                 </div>
             </div>
 

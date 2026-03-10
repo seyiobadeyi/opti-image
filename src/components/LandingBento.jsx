@@ -108,7 +108,7 @@ export default function LandingBento() {
                         <div style={{ position: 'relative', height: '160px', width: '100%', marginBottom: '24px', borderRadius: '12px', overflow: 'hidden' }}>
                             <Image unoptimized src="/image-8.png" alt="Developer API" fill style={{ objectFit: 'cover' }} />
                         </div>
-                        <h4 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Developer API</h4>
+                        <h4 style={{ fontSize: '1.4rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>Developer API <span style={{ fontSize: '0.7rem', padding: '4px 8px', background: 'var(--bg-tertiary)', borderRadius: '12px', color: 'var(--text-muted)' }}>Coming Soon</span></h4>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>Architected for builders. Hook directly into our microservices. Push massive media buffers programmatically without writing the compression mathematics yourself.</p>
                     </div>
                     <div className="bento-box" style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
@@ -138,9 +138,9 @@ export default function LandingBento() {
                     flexWrap: 'wrap'
                 }}>
                     <div style={{ flex: '1 1 400px', padding: '64px 48px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <h3 className="bento-title" style={{ fontSize: '2.5rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.1 }}>Smart Analysis Routing</h3>
+                        <h3 className="bento-title" style={{ fontSize: '2.5rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.1 }}>Built from real work.</h3>
                         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.1rem' }}>
-                            AI-assisted routing determines the exact compression threshold per pixel, ensuring gradients stay smooth and text stays crisp. We don't just compress; we understand the visual data inside the container.
+                            Optimage wasn't built in a lab. It started as an internal tool used daily across Shopify builds, WordPress sites, CRO experiments, and marketing campaigns. Every project had the same challenge — images were the heaviest part of the page. So we built a system to fix it automatically. Now, it's open for everyone.
                         </p>
                     </div>
                     <div style={{ flex: '1 1 400px', position: 'relative', minHeight: '400px' }}>
@@ -166,7 +166,7 @@ export default function LandingBento() {
                         <div style={{ position: 'relative', height: '200px', width: '100%', marginBottom: '32px', borderRadius: '16px', overflow: 'hidden' }}>
                             <Image unoptimized src="/image-9.png" alt="Enterprise SLAs" fill style={{ objectFit: 'cover' }} />
                         </div>
-                        <h3 className="bento-subtitle" style={{ fontSize: '1.5rem', marginBottom: '12px', color: 'var(--text-primary)' }}>Enterprise SLAs</h3>
+                        <h3 className="bento-subtitle" style={{ fontSize: '1.5rem', marginBottom: '12px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>Enterprise SLAs <span style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', color: 'var(--text-secondary)' }}>Coming Soon</span></h3>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.6 }}>
                             Custom agreements and dedicated processing clusters for high-volume enterprise pipelines. Run massive marketing catalogs through our premium tier.
                         </p>

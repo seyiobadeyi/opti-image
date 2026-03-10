@@ -283,7 +283,7 @@ body {
 .dropzone {
   border: 2px dashed var(--border);
   border-radius: var(--radius-xl);
-  padding: 60px 40px;
+  padding: 120px 40px;
   text-align: center;
   cursor: pointer;
   transition: all var(--transition-base);
@@ -314,8 +314,8 @@ body {
 }
 
 .dropzone-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
+  font-size: 5rem;
+  margin-bottom: 24px;
   display: block;
   position: relative;
   z-index: 1;
@@ -340,15 +340,15 @@ body {
 }
 
 .dropzone-text h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 12px;
   color: var(--text-primary);
 }
 
 .dropzone-text p {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .dropzone-text .browse-btn {
@@ -371,9 +371,9 @@ body {
 .format-badge {
   background: rgba(108, 92, 231, 0.1);
   color: var(--accent-secondary);
-  padding: 4px 12px;
+  padding: 8px 16px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;

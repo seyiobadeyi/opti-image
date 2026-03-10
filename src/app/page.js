@@ -14,6 +14,7 @@ import Footer from '@/components/Footer';
 import HowToUse from '@/components/HowToUse';
 import LandingHero from '@/components/LandingHero';
 import LandingBento from '@/components/LandingBento';
+import FAQAccordion from '@/components/FAQAccordion';
 import { apiClient } from '@/lib/api';
 import { ImageIcon, Mic, Zap, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -217,8 +218,6 @@ export default function Home() {
         {/* Upload Zone & Tool Area */}
         <section id="dropzone-area" style={{ scrollMarginTop: '100px', maxWidth: '1200px', margin: '0 auto 80px', padding: '0 24px' }}>
 
-          <HowToUse />
-
           {/* Top Ad Banner */}
           {/* <AdBanner slot="top-banner" format="horizontal" /> */}
 
@@ -372,6 +371,8 @@ export default function Home() {
           )}
         </section>
 
+        <HowToUse />
+
         <LandingBento />
 
         {/* Bottom Ad Banner */}
@@ -400,6 +401,8 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        <FAQAccordion />
 
         {/* Bottom Ad Banner */}
         {/* <AdBanner slot="bottom-banner" format="horizontal" /> */}

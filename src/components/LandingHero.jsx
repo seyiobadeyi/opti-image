@@ -42,35 +42,20 @@ export default function LandingHero() {
                 marginBottom: '24px',
                 color: 'var(--text-primary)'
             }}>
-                Respect the <span style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', color: 'transparent' }}>Pixels.</span>
+                Optimize Images in <span style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', color: 'transparent' }}>Seconds.</span>
                 <br />
-                Save the Bandwidth.
+                Smaller Files. Faster Websites.
             </h1>
 
             <p style={{
                 fontSize: '1.2rem',
                 color: 'var(--text-secondary)',
                 maxWidth: '650px',
-                margin: '0 auto 48px',
+                margin: '0 auto', // removed bottom margin since dropzone is right here
                 lineHeight: 1.6
             }}>
-                A fiercely independent media processing suite built for developers, photographers, and creators who need flawless compression without the hassle. Drag, drop, and witness pixel-perfect optimizations locally via the Edge. No subscriptions to process.
+                Free image optimization for JPEG, PNG, WebP, and AVIF. Originally built for agency workflows, now available to everyone.
             </p>
-
-            <button
-                onClick={scrollToDropzone}
-                className="btn btn-primary btn-large"
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '16px 32px',
-                    fontSize: '1.1rem',
-                    boxShadow: 'var(--shadow-glow)'
-                }}>
-                Start Optimizing for Free
-                <ArrowDown size={20} />
-            </button>
 
         </section>
     );
