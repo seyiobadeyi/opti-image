@@ -1,6 +1,6 @@
 ---
 title: "How Image Optimization Directly Increases E-Commerce Revenue: A Data-Driven Analysis"
-date: "2026-02-20"
+date: "2026-01-22T20:30:00Z"
 excerpt: "Google research shows that a 0.1-second improvement in mobile load time increases conversion by 8.4%. We break down exactly why image optimization is the single highest-ROI performance investment for online stores."
 ---
 

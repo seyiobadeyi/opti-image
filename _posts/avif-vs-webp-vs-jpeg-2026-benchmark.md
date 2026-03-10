@@ -1,6 +1,6 @@
 ---
 title: "AVIF vs WebP vs JPEG: The Definitive 2026 Format Showdown with Real Benchmarks"
-date: "2026-02-28"
+date: "2026-01-29T20:30:00Z"
 excerpt: "We ran over 10,000 images through every major codec to answer the question once and for all. Which format should your production pipeline use in 2026?"
 ---
 

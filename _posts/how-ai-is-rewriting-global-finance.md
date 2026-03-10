@@ -1,6 +1,6 @@
 ---
 title: "The Silent Revolution: How AI Is Rewriting the Rules of Global Finance"
-date: "2026-02-14"
+date: "2026-01-15T20:30:00Z"
 excerpt: "From algorithmic trading executing 10,000 trades per second to AI credit scoring giving loans to the unbankable, artificial intelligence is quietly reshaping every corner of the financial world."
 ---
 

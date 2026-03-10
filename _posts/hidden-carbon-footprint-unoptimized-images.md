@@ -1,6 +1,6 @@
 ---
 title: "The Hidden Carbon Footprint of Unoptimized Web Images: An Environmental Investigation"
-date: "2026-02-05"
+date: "2026-01-08T20:30:00Z"
 excerpt: "The internet produces more CO2 than the aviation industry. Unoptimized images are one of the largest and most fixable contributors. Here is the data, the science, and what we can do about it."
 ---
 

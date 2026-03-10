@@ -1,6 +1,6 @@
 ---
 title: "The Global Remote Work Experiment: How Digital Infrastructure Became the New Competitive Advantage"
-date: "2026-01-25"
+date: "2026-01-01T20:30:00Z"
 excerpt: "Five years after the pandemic forced the world's largest remote work experiment, the data is in and it is reshaping everything from real estate to geopolitics. The winners and losers may surprise you."
 ---
 

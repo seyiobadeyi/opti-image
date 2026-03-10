@@ -1,6 +1,6 @@
 ---
 title: "The Ultimate 2026 Guide to Lossless AVIF and WebP Compression"
-date: "2026-03-05"
+date: "2026-02-05T20:30:00Z"
 excerpt: "A deep engineering dive into the mathematics, the codecs, and the sheer infrastructure required to perfectly strip metadata and bloat without dropping a single visible pixel."
 ---
 
