@@ -1,17 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { login, signup, resetPassword } from '@/app/auth/actions';
-import { X, Zap, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { sendOtp, verifyOtp } from '@/app/auth/actions';
+import { X, Zap, Mail, ArrowRight, Key } from 'lucide-react';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api';
 
 export default function AuthModal({ isOpen, onClose }) {
     const router = useRouter();
-    const [view, setView] = useState('login'); // login, signup, forgot
+    const [step, setStep] = useState('email'); // 'email', 'otp'
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    const otpRefs = useRef([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [message, setMessage] = useState(null);
@@ -30,7 +30,26 @@ export default function AuthModal({ isOpen, onClose }) {
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleOtpChange = (index, value) => {
+        if (!/^[0-9]*$/.test(value)) return;
+
+        const newOtp = [...otp];
+        newOtp[index] = value;
+        setOtp(newOtp);
+
+        // Auto focus next input
+        if (value && index < 5 && otpRefs.current[index + 1]) {
+            otpRefs.current[index + 1].focus();
+        }
+    };
+
+    const handleOtpKeyDown = (index, e) => {
+        if (e.key === 'Backspace' && !otp[index] && index > 0 && otpRefs.current[index - 1]) {
+            otpRefs.current[index - 1].focus();
+        }
+    };
+
+    const handleEmailSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
@@ -38,25 +57,12 @@ export default function AuthModal({ isOpen, onClose }) {
 
         const formData = new FormData();
         formData.append('email', email);
-        if (view !== 'forgot') formData.append('password', password);
 
         try {
-            if (view === 'signup') {
-                const res = await signup(formData);
-                if (res.error) throw new Error(res.error);
-                setMessage(res.message);
-                await handleSyncGuestHistory();
-            } else if (view === 'login') {
-                const res = await login(formData);
-                if (res.error) throw new Error(res.error);
-                await handleSyncGuestHistory();
-                onClose();
-                router.refresh(); // Soft refresh to update Server Components without losing client state
-            } else if (view === 'forgot') {
-                const res = await resetPassword(formData);
-                if (res.error) throw new Error(res.error);
-                setMessage(res.message);
-            }
+            const res = await sendOtp(formData);
+            if (res.error) throw new Error(res.error);
+            setStep('otp');
+            setMessage('A 6-digit code has been sent to your email.');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -64,17 +70,40 @@ export default function AuthModal({ isOpen, onClose }) {
         }
     };
 
-    const switchView = (newView) => {
-        setView(newView);
+    const handleOtpSubmit = async (e) => {
+        e.preventDefault();
+        const token = otp.join('');
+        if (token.length !== 6) {
+            setError('Please enter all 6 digits.');
+            return;
+        }
+
+        setLoading(true);
         setError(null);
         setMessage(null);
-        setPassword('');
+
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('token', token);
+
+        try {
+            const res = await verifyOtp(formData);
+            if (res.error) throw new Error(res.error);
+            await handleSyncGuestHistory();
+            onClose();
+            router.refresh();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const titles = {
-        login: { h: 'Welcome Back', p: 'Sign in to access your workspace and download history.' },
-        signup: { h: 'Create Account', p: 'Join thousands of creators optimizing their media.' },
-        forgot: { h: 'Reset Password', p: 'We\'ll send a password reset link to your email.' },
+    const resetFlow = () => {
+        setStep('email');
+        setOtp(['', '', '', '', '', '']);
+        setError(null);
+        setMessage(null);
     };
 
     return (
@@ -130,10 +159,12 @@ export default function AuthModal({ isOpen, onClose }) {
 
                     <div style={{ marginBottom: '32px' }}>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.01em' }}>
-                            {titles[view].h}
+                            {step === 'email' ? 'Welcome to Optimage' : 'Enter Secure Code'}
                         </h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                            {titles[view].p}
+                            {step === 'email'
+                                ? 'Sign in or create an account to securely access your workspace.'
+                                : `We sent a 6-digit code to ${email}.`}
                         </p>
                     </div>
 
@@ -156,83 +187,76 @@ export default function AuthModal({ isOpen, onClose }) {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {/* Email */}
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>Email Address</label>
-                            <div style={{ position: 'relative' }}>
-                                <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@company.com" style={{
-                                    width: '100%', padding: '13px 14px 13px 42px',
-                                    borderRadius: '12px', border: '1px solid var(--border)',
-                                    background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
-                                    outline: 'none', fontSize: '0.95rem', transition: 'border-color 0.2s',
-                                }}
-                                    onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
-                                    onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Password */}
-                        {view !== 'forgot' && (
+                    {step === 'email' ? (
+                        <form onSubmit={handleEmailSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                                    Password
-                                    {view === 'login' && (
-                                        <button type="button" onClick={() => switchView('forgot')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 500 }}>
-                                            Forgot?
-                                        </button>
-                                    )}
-                                </label>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>Email Address</label>
                                 <div style={{ position: 'relative' }}>
-                                    <Lock size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'} value={password}
-                                        onChange={(e) => setPassword(e.target.value)} required minLength={6}
-                                        placeholder="••••••••"
-                                        style={{
-                                            width: '100%', padding: '13px 48px 13px 42px',
-                                            borderRadius: '12px', border: '1px solid var(--border)',
-                                            background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
-                                            outline: 'none', fontSize: '0.95rem', transition: 'border-color 0.2s',
-                                        }}
+                                    <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@company.com" style={{
+                                        width: '100%', padding: '13px 14px 13px 42px',
+                                        borderRadius: '12px', border: '1px solid var(--border)',
+                                        background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                        outline: 'none', fontSize: '0.95rem', transition: 'border-color 0.2s',
+                                    }}
                                         onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
                                         onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
                                     />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
-                                        position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
-                                        background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0,
-                                    }}>
-                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                    </button>
                                 </div>
                             </div>
-                        )}
 
-                        {/* Submit */}
-                        <button type="submit" className="btn btn-primary" disabled={loading} style={{
-                            width: '100%', marginTop: '8px', padding: '14px',
-                            borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                        }}>
-                            {loading ? 'Processing...'
-                                : view === 'login' ? <><span>Log In</span><ArrowRight size={16} /></>
-                                    : view === 'signup' ? <><span>Create Account</span><ArrowRight size={16} /></>
-                                        : 'Send Reset Link'}
-                        </button>
-                    </form>
+                            <button type="submit" className="btn btn-primary" disabled={loading} style={{
+                                width: '100%', marginTop: '8px', padding: '14px',
+                                borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            }}>
+                                {loading ? 'Sending Code...' : <><span>Continue with Email</span><ArrowRight size={16} /></>}
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            <div>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, marginBottom: '12px', color: 'var(--text-primary)' }}>
+                                    <Key size={14} /> Security Code
+                                </label>
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                                    {otp.map((digit, index) => (
+                                        <input
+                                            key={index}
+                                            ref={(el) => otpRefs.current[index] = el}
+                                            type="text"
+                                            inputMode="numeric"
+                                            maxLength={1}
+                                            value={digit}
+                                            onChange={(e) => handleOtpChange(index, e.target.value)}
+                                            onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                                            style={{
+                                                width: '45px', height: '55px', textAlign: 'center',
+                                                borderRadius: '12px', border: '1px solid var(--border)',
+                                                background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                                outline: 'none', fontSize: '1.2rem', fontWeight: 600, transition: 'border-color 0.2s',
+                                            }}
+                                            onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
+                                            onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+                                            required
+                                        />
+                                    ))}
+                                </div>
+                            </div>
 
-                    {/* Footer Links */}
-                    <div style={{ marginTop: '28px', textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                        {view === 'login' ? (
-                            <p>Don't have an account? <button onClick={() => switchView('signup')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}>Sign up free</button></p>
-                        ) : view === 'signup' ? (
-                            <p>Already have an account? <button onClick={() => switchView('login')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}>Log in</button></p>
-                        ) : (
-                            <p>Remember your password? <button onClick={() => switchView('login')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}>Back to login</button></p>
-                        )}
-                    </div>
+                            <button type="submit" className="btn btn-primary" disabled={loading || otp.join('').length < 6} style={{
+                                width: '100%', padding: '14px',
+                                borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            }}>
+                                {loading ? 'Verifying...' : <><span>Verify Secure Code</span><ArrowRight size={16} /></>}
+                            </button>
+
+                            <div style={{ textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                                <p>Entered the wrong email? <button type="button" onClick={resetFlow} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}>Go back</button></p>
+                            </div>
+                        </form>
+                    )}
                 </div>
             </div>
         </div>

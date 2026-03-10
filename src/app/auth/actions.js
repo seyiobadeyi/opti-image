@@ -3,14 +3,33 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 
-export async function login(formData) {
+export async function sendOtp(formData) {
     const supabase = await createClient()
-
     const data = Object.fromEntries(formData.entries())
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithOtp({
         email: data.email,
-        password: data.password,
+        options: {
+            // Automatically creates an account if the user doesn't exist
+            shouldCreateUser: true,
+        }
+    })
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    return { success: true }
+}
+
+export async function verifyOtp(formData) {
+    const supabase = await createClient()
+    const data = Object.fromEntries(formData.entries())
+
+    const { error } = await supabase.auth.verifyOtp({
+        email: data.email,
+        token: data.token,
+        type: 'email'
     })
 
     if (error) {
@@ -19,24 +38,6 @@ export async function login(formData) {
 
     revalidatePath('/', 'layout')
     return { success: true }
-}
-
-export async function signup(formData) {
-    const supabase = await createClient()
-
-    const data = Object.fromEntries(formData.entries())
-
-    const { error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-    })
-
-    if (error) {
-        return { error: error.message }
-    }
-
-    revalidatePath('/', 'layout')
-    return { success: true, message: 'Check your email for the confirmation link.' }
 }
 
 export async function logout() {
@@ -50,18 +51,4 @@ export async function logout() {
 
     revalidatePath('/', 'layout')
     return { success: true }
-}
-
-export async function resetPassword(formData) {
-    const supabase = await createClient()
-
-    const data = Object.fromEntries(formData.entries())
-
-    const { error } = await supabase.auth.resetPasswordForEmail(data.email)
-
-    if (error) {
-        return { error: error.message }
-    }
-
-    return { success: true, message: 'Password reset link sent to your email.' }
 }

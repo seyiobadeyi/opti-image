@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { ArrowDown } from 'lucide-react';
 
-export default function LandingHero() {
+export default function LandingHero({ customHeadline, customSubtext }) {
     const scrollToDropzone = () => {
         document.getElementById('dropzone-area')?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -34,28 +34,37 @@ export default function LandingHero() {
                 <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Unlimited Free Image Processing</span>
             </div>
 
-            <h1 style={{
-                fontSize: 'clamp(3rem, 6vw, 4.5rem)',
-                lineHeight: 1.1,
-                fontWeight: 800,
-                letterSpacing: '-0.02em',
-                marginBottom: '24px',
-                color: 'var(--text-primary)'
-            }}>
-                Optimize Images in <span style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', color: 'transparent' }}>Seconds.</span>
-                <br />
-                Smaller Files. Faster Websites.
-            </h1>
+            {customHeadline ? (
+                <h1 style={{
+                    fontSize: 'clamp(3rem, 6vw, 4.5rem)',
+                    lineHeight: 1.1,
+                    fontWeight: 800,
+                    letterSpacing: '-0.02em',
+                    marginBottom: '24px',
+                    color: 'var(--text-primary)'
+                }} dangerouslySetInnerHTML={{ __html: customHeadline }} />
+            ) : (
+                <h1 style={{
+                    fontSize: 'clamp(3rem, 6vw, 4.5rem)',
+                    lineHeight: 1.1,
+                    fontWeight: 800,
+                    letterSpacing: '-0.02em',
+                    marginBottom: '24px',
+                    color: 'var(--text-primary)'
+                }}>
+                    Optimize Images in <span style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', color: 'transparent' }}>Seconds.</span>
+                    <br />
+                    Smaller Files. Faster Websites.
+                </h1>
+            )}
 
             <p style={{
                 fontSize: '1.2rem',
                 color: 'var(--text-secondary)',
                 maxWidth: '650px',
-                margin: '0 auto', // removed bottom margin since dropzone is right here
+                margin: '0 auto',
                 lineHeight: 1.6
-            }}>
-                Free image optimization for JPEG, PNG, WebP, and AVIF. Originally built for agency workflows, now available to everyone.
-            </p>
+            }} dangerouslySetInnerHTML={{ __html: customSubtext || 'Free image optimization for JPEG, PNG, WebP, and AVIF. Originally built for agency workflows, now available to everyone.' }} />
 
         </section>
     );

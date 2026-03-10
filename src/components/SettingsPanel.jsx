@@ -34,6 +34,24 @@ export default function SettingsPanel({ settings, onSettingsChange }) {
                     </select>
                 </div>
 
+                {/* Rotation */}
+                <div className="setting-group">
+                    <label htmlFor="rotate-select" style={{ display: 'flex', alignItems: 'center' }}>
+                        Rotate Image
+                        <InfoTooltip content="Manually rotate the image. If 0°, EXIF orientation is respected automatically." />
+                    </label>
+                    <select
+                        id="rotate-select"
+                        value={settings.rotate || 0}
+                        onChange={(e) => handleChange('rotate', parseInt(e.target.value))}
+                    >
+                        <option value={0}>Auto (0°)</option>
+                        <option value={90}>Rotate 90° CW</option>
+                        <option value={180}>Rotate 180°</option>
+                        <option value={270}>Rotate 90° CCW</option>
+                    </select>
+                </div>
+
                 {/* Quality Slider */}
                 <div className="setting-group">
                     <div className="quality-slider-container">
@@ -90,6 +108,20 @@ export default function SettingsPanel({ settings, onSettingsChange }) {
 
             {/* Toggles */}
             <div style={{ marginTop: 24 }}>
+                <div className="toggle-row">
+                    <span className="toggle-label" style={{ display: 'flex', alignItems: 'center' }}>
+                        Auto-Enhance (Cleanup Colors)
+                        <InfoTooltip content="Automatically normalizes contrast and luminance to make dull photos pop." />
+                    </span>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={settings.autoEnhance || false}
+                            onChange={(e) => handleChange('autoEnhance', e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                    </label>
+                </div>
                 <div className="toggle-row">
                     <span className="toggle-label" style={{ display: 'flex', alignItems: 'center' }}>
                         Strip metadata (EXIF, GPS, etc.)

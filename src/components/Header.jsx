@@ -73,7 +73,15 @@ export default function Header() {
                     <Link href="/" className="header-nav-link">Home</Link>
                     <Link href="/blog" className="header-nav-link">Blog</Link>
                     {user ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '8px', paddingLeft: '20px', borderLeft: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '8px', paddingLeft: '20px', borderLeft: '1px solid var(--border)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
+                                    <User size={16} />
+                                </div>
+                                <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {user.email}
+                                </span>
+                            </div>
                             <Link href="/dashboard" className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '0.9rem', borderRadius: '100px' }}>
                                 <LayoutDashboard size={16} /> Dashboard
                             </Link>

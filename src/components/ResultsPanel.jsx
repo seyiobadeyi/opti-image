@@ -8,10 +8,18 @@ function formatBytes(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+import { useState } from 'react';
+import {
+    Share2, CheckCircle2, Zap, Package, Download,
+    ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check
+} from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { apiClient } from '@/lib/api';
 
 export default function ResultsPanel({ results, summary, serverUrl }) {
+    const [showShareMenu, setShowShareMenu] = useState(false);
+    const [copied, setCopied] = useState(false);
+
     if (!results || results.length === 0) return null;
 
     const supabase = createClient();
@@ -48,9 +56,37 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
         }
     };
 
+    const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareText = `I just shrunk my website images by ${summary.totalSavingsPercent}% using Optimage! Faster load times, better SEO.`;
+
+    const handleShare = async () => {
+        const shareData = { title: 'Optimage', text: shareText, url: shareUrl };
+
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData) && /Mobi|Android/i.test(navigator.userAgent)) {
+            // Use native share on strictly mobile devices
+            try { await navigator.share(shareData); } catch (err) { console.error('Error sharing:', err); }
+        } else {
+            // Toggle custom share menu on Desktop
+            setShowShareMenu(!showShareMenu);
+        }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    // Calculate PageSpeed Estimate
+    // Assuming a Slow 4G/Fast 3G connection of roughly ~1.5 Mbps (187.5 KB/s)
+    const bytesSaved = summary.totalOriginalSize - summary.totalProcessedSize;
+    const estimatedSecondsSaved = bytesSaved > 0 ? (bytesSaved / 1024 / 187.5).toFixed(1) : 0;
+
     return (
         <div className="results-panel">
-            <h3 className="settings-title">✅ Optimization Complete</h3>
+            <h3 className="settings-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 color="var(--success)" size={24} /> Optimization Complete
+            </h3>
 
             {/* Summary Stats */}
             <div className="results-summary" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '24px', marginBottom: '32px' }}>
@@ -72,14 +108,79 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
                 </div>
             </div>
 
-            {/* Download All Button */}
-            {results.length > 1 && (
-                <div className="action-bar">
-                    <button className="btn btn-success btn-large" onClick={handleBulkDownload}>
-                        📦 Download All as ZIP
-                    </button>
+            {/* SEO Impact Banner */}
+            {estimatedSecondsSaved > 0 && (
+                <div style={{
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '16px 24px',
+                    marginBottom: '32px',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    color: 'var(--text-primary)'
+                }}>
+                    <Zap size={24} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                        <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '4px' }}>SEO & Performance Impact</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                            You just shaved an estimated <strong>~{estimatedSecondsSaved} seconds</strong> off your page load time (on 3G) and improved your Core Web Vitals.
+                        </div>
+                    </div>
                 </div>
             )}
+
+            {/* Action Buttons */}
+            <div className="action-bar" style={{ position: 'relative' }}>
+                {results.length > 1 && (
+                    <button className="btn btn-success btn-large" onClick={handleBulkDownload} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Package size={20} /> Download All as ZIP
+                    </button>
+                )}
+                <div style={{ position: 'relative' }}>
+                    <button
+                        className="btn btn-primary btn-large"
+                        onClick={handleShare}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center' }}
+                    >
+                        <Share2 size={20} /> Share Optimage
+                    </button>
+
+                    {/* Custom Share Dropdown for Desktop */}
+                    {showShareMenu && (
+                        <div style={{
+                            position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                            background: 'var(--bg-card)', border: '1px solid var(--border)',
+                            borderRadius: '12px', padding: '8px', zIndex: 50,
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.5)', minWidth: '200px',
+                            display: 'flex', flexDirection: 'column', gap: '4px'
+                        }}>
+                            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                                target="_blank" rel="noopener noreferrer"
+                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
+                                onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                            >
+                                <Twitter size={18} color="#1DA1F2" /> Twitter
+                            </a>
+                            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                                target="_blank" rel="noopener noreferrer"
+                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
+                                onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                            >
+                                <Linkedin size={18} color="#0A66C2" /> LinkedIn
+                            </a>
+                            <button onClick={copyToClipboard}
+                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '8px', transition: 'background 0.2s', width: '100%', textAlign: 'left', fontSize: '0.95rem' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                                {copied ? <Check size={18} color="var(--success)" /> : <Copy size={18} />}
+                                {copied ? 'Copied!' : 'Copy Link'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
 
             {/* Individual File Results */}
             <div className="result-file-list">
@@ -93,18 +194,19 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
                                 </div>
                                 <div className="result-file-sizes">
                                     <span>{formatBytes(result.originalSize)}</span>
-                                    <span className="size-arrow">→</span>
+                                    <span className="size-arrow" style={{ padding: '0 8px' }}>→</span>
                                     <span>{formatBytes(result.processedSize)}</span>
-                                    <span className={`savings-badge ${savingsNum < 0 ? 'negative' : ''}`}>
-                                        {savingsNum >= 0 ? '↓' : '↑'} {Math.abs(savingsNum)}%
+                                    <span className={`savings-badge ${savingsNum < 0 ? 'negative' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                                        {savingsNum >= 0 ? <ArrowDown size={14} /> : <ArrowUp size={14} />} {Math.abs(savingsNum)}%
                                     </span>
                                 </div>
                             </div>
                             <button
                                 className="result-file-download"
                                 onClick={() => handleDownload(result.processedName)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
-                                ⬇ Download
+                                <Download size={16} /> Download
                             </button>
                         </div>
                     );

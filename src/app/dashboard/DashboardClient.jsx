@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import {
     History, Zap, Image as ImageIcon, Settings, SlidersHorizontal,
-    ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film
+    ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package
 } from 'lucide-react';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
@@ -208,7 +208,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
             </div>
 
             {/* Stats Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px', marginBottom: '32px' }}>
                 <div style={{ padding: '20px', background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}><ImageIcon size={16} /> Images Processed</div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed}</div>
@@ -249,9 +249,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
             {/* ═══════════ Tab: Optimize ═══════════ */}
             {activeTab === 'optimize' && (
-                <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
                     {/* Left: Dropzone + File List */}
-                    <div style={{ flex: '1 1 55%', minWidth: '300px' }}>
+                    <div style={{ flex: '1 1 55%', minWidth: '280px' }}>
                         {!results ? (
                             <>
                                 {/* Drop Zone */}
@@ -426,7 +426,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                             className="btn btn-secondary"
                                             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                         >
-                                            📦 Download All as ZIP
+                                            <Package size={20} /> Download All as ZIP
                                         </button>
                                     )}
                                     <button onClick={handleClearAll} className="btn btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
@@ -620,9 +620,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
             {/* ═══════════ Tab: Video ═══════════ */}
             {activeTab === 'video' && (
-                <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
                     {/* Left: Video Dropzone & Results */}
-                    <div style={{ flex: '1 1 55%', minWidth: '300px' }}>
+                    <div style={{ flex: '1 1 55%', minWidth: '280px' }}>
                         {!videoResult ? (
                             <>
                                 <div

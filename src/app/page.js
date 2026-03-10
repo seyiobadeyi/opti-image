@@ -24,6 +24,8 @@ const DEFAULT_IMAGE_SETTINGS = {
   quality: 80,
   width: '',
   height: '',
+  rotate: 0,
+  autoEnhance: false,
   stripMetadata: true,
   maintainAspectRatio: true,
 };
@@ -110,13 +112,16 @@ export default function Home() {
     setProcessed(0);
 
     try {
-      const batchSize = 10;
       const allResults = [];
       let totalOriginalSize = 0;
       let totalProcessedSize = 0;
+      let completedCount = 0;
 
-      for (let i = 0; i < files.length; i += batchSize) {
-        const batch = files.slice(i, i + batchSize);
+      // Process in small batches of 2-3 to ensure smooth progress bar update
+      const concurrencyLimit = 3;
+
+      for (let i = 0; i < files.length; i += concurrencyLimit) {
+        const batch = files.slice(i, i + concurrencyLimit);
         const response = await apiClient.convertImages(batch, { ...imageSettings, bypassCode });
 
         if (response.success) {
@@ -138,7 +143,9 @@ export default function Home() {
             console.error('Failed to save guest history to localStorage', e);
           }
         }
-        setProcessed(Math.min(i + batchSize, files.length));
+
+        completedCount += batch.length;
+        setProcessed(completedCount);
       }
 
       const totalSavings = totalOriginalSize - totalProcessedSize;

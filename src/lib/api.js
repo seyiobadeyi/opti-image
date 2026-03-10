@@ -33,6 +33,10 @@ export const apiClient = {
             formData.append('stripMetadata', String(options.stripMetadata));
         if (options.maintainAspectRatio !== undefined)
             formData.append('maintainAspectRatio', String(options.maintainAspectRatio));
+        if (options.rotate !== undefined)
+            formData.append('rotate', String(options.rotate));
+        if (options.autoEnhance !== undefined)
+            formData.append('autoEnhance', String(options.autoEnhance));
 
         const response = await fetch(`${API_BASE}/api/images/convert`, {
             method: 'POST',
