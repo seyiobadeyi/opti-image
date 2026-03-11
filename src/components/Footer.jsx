@@ -40,7 +40,15 @@ export default function Footer() {
 
     return (
         <footer style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px 32px', display: 'flex', flexWrap: 'wrap', gap: '40px', justifyContent: 'space-between' }}>
+            <div style={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: '48px 24px 32px',
+                display: 'flex',
+                flexDirection: 'column-reverse', /* Newsletter first on mobile */
+                gap: '40px',
+                justifyContent: 'space-between'
+            }} className="footer-container">
 
                 {/* Left: Branding + Links */}
                 <div style={{ flex: '1 1 320px', minWidth: '260px' }}>
@@ -71,7 +79,7 @@ export default function Footer() {
                     </nav>
                 </div>
 
-                {/* Right: Newsletter */}
+                {/* Right: Newsletter (Ordered First on Mobile) */}
                 <div style={{ flex: '1 1 300px', maxWidth: '380px', background: 'var(--bg-card)', padding: '28px', borderRadius: '20px', border: '1px solid var(--border)' }}>
                     <h4 style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 600 }}>
                         <Mail size={18} /> Join our Newsletter

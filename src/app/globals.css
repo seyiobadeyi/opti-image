@@ -42,9 +42,10 @@
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-glow: 0 0 30px rgba(108, 92, 231, 0.2);
 
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.25s ease;
-  --transition-slow: 0.4s ease;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-glossy: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *,
@@ -59,6 +60,16 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base Transition for Interactions */
+* {
+  transition: background-color 0.25s var(--transition-base),
+    border-color 0.25s var(--transition-base),
+    color 0.25s var(--transition-base),
+    box-shadow 0.25s var(--transition-base),
+    transform 0.25s var(--transition-base),
+    opacity 0.25s var(--transition-base);
 }
 
 body {
@@ -640,8 +651,12 @@ body {
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 0 40px rgba(108, 92, 231, 0.35);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 40px rgba(108, 92, 231, 0.4);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn-primary:disabled {
@@ -658,6 +673,7 @@ body {
 .btn-secondary:hover {
   border-color: var(--border-hover);
   background: var(--bg-card-hover);
+  transform: translateY(-1px);
 }
 
 .btn-success {
@@ -1543,6 +1559,44 @@ body {
     padding: 36px 24px 48px !important;
     justify-content: flex-start !important;
   }
+}
+
+/* ===== FOOTER RESPONSIVE ===== */
+@media (min-width: 850px) {
+  .footer-container {
+    flex-direction: row !important;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-entrance {
+  animation: slideUpFade 0.5s var(--transition-glossy);
+}
+
+.overlay-entrance {
+  animation: fadeIn 0.3s var(--transition-base);
 }
 
 /* ===== DASHBOARD ===== */
