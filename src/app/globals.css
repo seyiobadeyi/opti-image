@@ -1561,6 +1561,16 @@ body {
   }
 }
 
+/* ===== BLOG STYLES ===== */
+.blog-post-title {
+  color: var(--accent-primary);
+  transition: color 0.2s ease;
+}
+
+.blog-post-title:hover {
+  color: var(--accent-glow);
+}
+
 /* ===== FOOTER RESPONSIVE ===== */
 .footer-inner-container {
   display: flex;

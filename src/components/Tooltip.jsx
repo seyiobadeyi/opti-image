@@ -13,7 +13,7 @@ export function Tooltip({ children, content, side = 'top' }) {
                 </TooltipPrimitive.Trigger>
                 <TooltipPrimitive.Portal>
                     <TooltipPrimitive.Content
-                        side={side}
+                        side={/** @type {'top' | 'right' | 'bottom' | 'left'} */ (side)}
                         sideOffset={5}
                         className="tooltip-content"
                     >

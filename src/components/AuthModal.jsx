@@ -241,7 +241,7 @@ export default function AuthModal({ isOpen, onClose }) {
                                     {otp.map((digit, index) => (
                                         <input
                                             key={index}
-                                            ref={(el) => otpRefs.current[index] = el}
+                                            ref={(el) => { if (el) otpRefs.current[index] = el; }}
                                             type="text"
                                             inputMode="numeric"
                                             maxLength={1}

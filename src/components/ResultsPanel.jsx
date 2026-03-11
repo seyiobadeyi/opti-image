@@ -159,14 +159,14 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
                             <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
                                 target="_blank" rel="noopener noreferrer"
                                 style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
-                                onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                                 <Twitter size={18} color="#1DA1F2" /> Twitter
                             </a>
                             <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
                                 target="_blank" rel="noopener noreferrer"
                                 style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
-                                onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                                 <Linkedin size={18} color="#0A66C2" /> LinkedIn
                             </a>

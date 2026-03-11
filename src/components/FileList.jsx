@@ -45,7 +45,7 @@ export default function FileList({ files, onRemove }) {
                             alt={file.name}
                             className="file-thumbnail"
                             onLoad={() => {/* Keep URL until component unmounts */ }}
-                            onError={(e) => { e.target.style.display = 'none'; }}
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }}
                         />
                         <div className="file-info" style={{ flex: 1, minWidth: 0 }}>

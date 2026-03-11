@@ -21,7 +21,7 @@ export default function BlogIndex() {
                 {allPostsData.map(({ slug, date, title, excerpt }) => (
                     <li key={slug} style={{ marginBottom: '48px' }}>
                         <Link href={`/blog/${slug}`} style={{ textDecoration: 'none' }}>
-                            <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '8px', color: 'var(--accent-primary)', transition: 'color 0.2s', ':hover': { color: 'var(--accent-glow)' } }}>
+                            <h2 className="blog-post-title" style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '8px' }}>
                                 {title}
                             </h2>
                         </Link>
