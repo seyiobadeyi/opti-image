@@ -103,7 +103,7 @@ export default function AdminClient({ bypassCodes }) {
                             })}
                             {!bypassCodes?.length && (
                                 <tr>
-                                    <td colSpan="4" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                                    <td colSpan={4} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
                                         No bypass codes generated yet.
                                     </td>
                                 </tr>
