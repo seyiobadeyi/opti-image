@@ -8,6 +8,7 @@ export default function NewsletterPopup() {
     const [isOpen, setIsOpen] = useState(false);
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState('idle'); // idle, loading, success, error
+    const [errorMsg, setErrorMsg] = useState('');
     const [isAlreadySubscribed, setIsAlreadySubscribed] = useState(false);
     const popupRef = useRef(null);
 

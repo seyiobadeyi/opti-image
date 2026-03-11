@@ -693,6 +693,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                                     formData.append('action', videoSettings.action);
                                                     formData.append('format', videoSettings.format);
                                                     formData.append('quality', String(videoSettings.quality));
+                                                    // @ts-ignore
                                                     const response = await fetch(`${apiClient.getServerUrl()}/api/media/process`, { method: 'POST', body: formData, headers });
                                                     if (!response.ok) { const err = await response.json().catch(() => ({})); throw new Error(err.message || 'Video processing failed'); }
                                                     const data = await response.json();

@@ -109,7 +109,7 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
             </div>
 
             {/* SEO Impact Banner */}
-            {estimatedSecondsSaved > 0 && (
+            {Number(estimatedSecondsSaved) > 0 && (
                 <div style={{
                     background: 'var(--bg-tertiary)',
                     border: '1px solid var(--border)',

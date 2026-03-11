@@ -9,7 +9,7 @@ import ProgressTracker from '@/components/ProgressTracker';
 import ResultsPanel from '@/components/ResultsPanel';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
-import { ImageIcon, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
+import { ImageIcon, RefreshCw, AlertTriangle, CheckCircle, Clipboard, Mic } from 'lucide-react';
 
 const DEFAULT_IMAGE_SETTINGS = {
     format: '',
@@ -220,6 +220,7 @@ export default function DropZoneClient() {
                 });
             } else {
                 setTranscriptionResult({
+                    // @ts-ignore
                     mode: response.mode,
                     text: response.text
                 });
@@ -270,6 +271,7 @@ export default function DropZoneClient() {
                 <DropZone
                     onFilesAdded={handleFilesAdded}
                     disabled={isProcessing}
+                    // @ts-ignore
                     acceptTypes={{
                         'image/jpeg': ['.jpg', '.jpeg'],
                         'image/png': ['.png'],

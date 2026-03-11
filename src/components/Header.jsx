@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { LogOut, User, Menu, X, LayoutDashboard, ChevronRight } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
 import { createClient } from '@/utils/supabase/client';

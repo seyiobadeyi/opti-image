@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { sendOtp, verifyOtp } from '@/app/auth/actions';
 import { X, Mail, ArrowRight, Key } from 'lucide-react';

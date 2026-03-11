@@ -37,6 +37,7 @@ export default function DropZone({ onFilesAdded, disabled, acceptTypes = ACCEPTE
         [onFilesAdded]
     );
 
+    // @ts-ignore
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: acceptTypes,

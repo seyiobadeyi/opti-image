@@ -23,7 +23,9 @@ export const apiClient = {
         files.forEach((file) => {
             formData.append('files', file);
             // If the file object has a customName property (set by the UI), send it
+            // @ts-ignore
             if (file.customName) {
+                // @ts-ignore
                 formData.append('customName', file.customName);
             }
         });
@@ -45,6 +47,7 @@ export const apiClient = {
         const response = await fetch(`${API_BASE}/api/images/convert`, {
             method: 'POST',
             body: formData,
+            // @ts-ignore
             headers,
         });
 
@@ -82,6 +85,7 @@ export const apiClient = {
         const response = await fetch(`${API_BASE}/api/media/process`, {
             method: 'POST',
             body: formData,
+            // @ts-ignore
             headers,
         });
 

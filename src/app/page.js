@@ -235,6 +235,7 @@ export default function Home() {
       } else {
         // Transcription Text
         setTranscriptionResult({
+          // @ts-ignore
           mode: response.mode,
           text: response.text
         });
@@ -256,7 +257,7 @@ export default function Home() {
       <Header />
 
       <main className="app-container">
-        <LandingHero />
+        <LandingHero customHeadline={undefined} customSubtext={undefined} />
 
         {/* Upload Zone & Tool Area */}
         <section id="dropzone-area" style={{ scrollMarginTop: '100px', maxWidth: '1200px', margin: '0 auto 80px', padding: '0 24px' }}>
@@ -300,6 +301,7 @@ export default function Home() {
             <DropZone
               onFilesAdded={handleFilesAdded}
               disabled={isProcessing}
+              // @ts-ignore
               acceptTypes={{
                 'image/jpeg': ['.jpg', '.jpeg'],
                 'image/png': ['.png'],

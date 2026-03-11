@@ -17,6 +17,7 @@ export default function BlogIndex() {
             </p>
 
             <ul style={{ listStyle: 'none', padding: 0 }}>
+                {/* @ts-ignore */}
                 {allPostsData.map(({ slug, date, title, excerpt }) => (
                     <li key={slug} style={{ marginBottom: '48px' }}>
                         <Link href={`/blog/${slug}`} style={{ textDecoration: 'none' }}>

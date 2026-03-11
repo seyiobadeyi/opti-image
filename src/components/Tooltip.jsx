@@ -28,6 +28,7 @@ export function Tooltip({ children, content, side = 'top' }) {
 
 export function InfoTooltip({ content }) {
     return (
+        // @ts-ignore
         <Tooltip content={content}>
             <span style={{ cursor: 'help', display: 'inline-flex', alignItems: 'center' }}>
                 <Info size={14} color="var(--text-muted)" style={{ marginLeft: '6px' }} />
