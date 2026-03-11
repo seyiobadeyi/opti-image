@@ -52,7 +52,7 @@ export default function FileList({ files, onRemove }) {
                             <input
                                 type="text"
                                 className="file-name-input"
-                                defaultValue={path.parse(file.name).name}
+                                defaultValue={file.name.substring(0, file.name.lastIndexOf('.')) || file.name}
                                 onChange={(e) => {
                                     file.customName = e.target.value;
                                 }}
