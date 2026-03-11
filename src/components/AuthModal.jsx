@@ -8,7 +8,7 @@ import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 
 export default function AuthModal({ isOpen, onClose }) {
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const router = useRouter();
     const [step, setStep] = useState('email'); // 'email', 'otp'
     const [email, setEmail] = useState('');

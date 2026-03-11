@@ -14,7 +14,7 @@ export default function Header() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState(null);
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     useEffect(() => {
         // Ping the server health endpoint immediately, then every 5 minutes
@@ -42,7 +42,7 @@ export default function Header() {
             subscription.unsubscribe();
             window.removeEventListener('open-auth-modal', handleOpenModal);
         }
-    }, [supabase]);
+    }, [supabase, router]);
 
     useEffect(() => {
         document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import DropZone from '@/components/DropZone';
 import FileList from '@/components/FileList';
 import SettingsPanel from '@/components/SettingsPanel';
@@ -40,7 +40,7 @@ export default function DropZoneClient() {
     const [transcriptionResult, setTranscriptionResult] = useState(null);
     const [bypassCode, setBypassCode] = useState('');
     const [user, setUser] = useState(null);
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -108,7 +108,11 @@ export default function DropZoneClient() {
 
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-            window.dispatchEvent(new CustomEvent('open-auth-modal'));
+            if (!window.authModalDispatching) {
+                window.authModalDispatching = true;
+                window.dispatchEvent(new CustomEvent('open-auth-modal'));
+                setTimeout(() => { window.authModalDispatching = false; }, 500);
+            }
             return;
         }
 
@@ -183,7 +187,11 @@ export default function DropZoneClient() {
 
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-            window.dispatchEvent(new CustomEvent('open-auth-modal'));
+            if (!window.authModalDispatching) {
+                window.authModalDispatching = true;
+                window.dispatchEvent(new CustomEvent('open-auth-modal'));
+                setTimeout(() => { window.authModalDispatching = false; }, 500);
+            }
             return;
         }
 

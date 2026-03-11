@@ -8,7 +8,7 @@ function formatBytes(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
     Share2, CheckCircle2, Package, Download,
     ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check
@@ -22,7 +22,7 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
 
     if (!results || results.length === 0) return null;
 
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     const handleDownload = async (processedName) => {
         const { data: { session } } = await supabase.auth.getSession();
