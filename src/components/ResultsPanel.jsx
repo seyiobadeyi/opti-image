@@ -187,16 +187,27 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
                 {results.map((result, index) => {
                     const savingsNum = parseFloat(result.savingsPercent);
                     return (
-                        <div key={index} className="result-file-card">
-                            <div className="result-file-info">
-                                <div className="result-file-name" title={result.originalName}>
+                        <div key={index} className="result-file-card" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '16px',
+                            flexWrap: 'wrap' // Allow wrapping on very small screens
+                        }}>
+                            <div className="result-file-info" style={{ flex: '1', minWidth: '150px', overflow: 'hidden' }}>
+                                <div className="result-file-name" title={result.originalName} style={{
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: '100%'
+                                }}>
                                     {result.originalName}
                                 </div>
-                                <div className="result-file-sizes">
+                                <div className="result-file-sizes" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: '4px' }}>
                                     <span>{formatBytes(result.originalSize)}</span>
                                     <span className="size-arrow" style={{ padding: '0 8px' }}>→</span>
                                     <span>{formatBytes(result.processedSize)}</span>
-                                    <span className={`savings-badge ${savingsNum < 0 ? 'negative' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                                    <span className={`savings-badge ${savingsNum < 0 ? 'negative' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', marginLeft: '8px' }}>
                                         {savingsNum >= 0 ? <ArrowDown size={14} /> : <ArrowUp size={14} />} {Math.abs(savingsNum)}%
                                     </span>
                                 </div>
@@ -204,7 +215,14 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
                             <button
                                 className="result-file-download"
                                 onClick={() => handleDownload(result.processedName)}
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    flexShrink: 0,
+                                    width: 'auto', // Ensure it doesn't stretch
+                                    minWidth: 'fit-content'
+                                }}
                             >
                                 <Download size={16} /> Download
                             </button>

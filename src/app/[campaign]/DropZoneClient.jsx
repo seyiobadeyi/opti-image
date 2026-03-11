@@ -106,7 +106,8 @@ export default function DropZoneClient() {
     const handleOptimizeImages = async () => {
         if (files.length === 0) return;
 
-        if (!user) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
             window.dispatchEvent(new CustomEvent('open-auth-modal'));
             return;
         }
@@ -180,7 +181,8 @@ export default function DropZoneClient() {
     const handleProcessMedia = async () => {
         if (files.length === 0) return;
 
-        if (!user) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
             window.dispatchEvent(new CustomEvent('open-auth-modal'));
             return;
         }

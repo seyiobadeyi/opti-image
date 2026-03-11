@@ -22,6 +22,10 @@ export const apiClient = {
 
         files.forEach((file) => {
             formData.append('files', file);
+            // If the file object has a customName property (set by the UI), send it
+            if (file.customName) {
+                formData.append('customName', file.customName);
+            }
         });
 
         // Append options as form fields
