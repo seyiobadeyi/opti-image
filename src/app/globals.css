@@ -1613,10 +1613,12 @@ body {
 
 .modal-entrance {
   animation: slideUpFade 0.5s var(--transition-glossy);
+  transition: none !important;
 }
 
 .overlay-entrance {
   animation: fadeIn 0.3s var(--transition-base);
+  transition: none !important;
 }
 
 /* ===== DASHBOARD ===== */

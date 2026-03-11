@@ -14,6 +14,7 @@ export default function Header() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState(null);
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
     const supabase = useMemo(() => createClient(), []);
 
     const handleSyncGuestHistory = async () => {
@@ -41,17 +42,26 @@ export default function Header() {
             if (session?.user) {
                 setUser(session.user);
             }
+            setIsAuthLoading(false);
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             const newUser = session?.user ?? null;
             setUser(newUser);
 
-            if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
+            // Only close the modal on fresh SIGNED_IN. 
+            // Don't close on INITIAL_SESSION to avoid hydration flicker.
+            if (event === 'SIGNED_IN') {
                 await handleSyncGuestHistory();
                 setIsAuthModalOpen(false);
-                // Only refresh if truly needed to minimize flickering
-                if (event === 'SIGNED_IN') router.refresh();
+                router.refresh();
+            }
+
+            // Still sync guest history if we just discovered a session on mount,
+            // but don't force the modal shut unless it was a fresh login event.
+            if (event === 'INITIAL_SESSION' && session) {
+                await handleSyncGuestHistory();
+                setIsAuthLoading(false);
             }
         });
 
@@ -93,7 +103,9 @@ export default function Header() {
                 <nav className="header-desktop-nav">
                     <Link href="/" className="header-nav-link">Home</Link>
                     <Link href="/blog" className="header-nav-link">Blog</Link>
-                    {user ? (
+                    {isAuthLoading ? (
+                        <div style={{ width: '100px', height: '36px', background: 'var(--bg-tertiary)', borderRadius: '100px', opacity: 0.5, marginLeft: '8px' }}></div>
+                    ) : user ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '8px', paddingLeft: '20px', borderLeft: '1px solid var(--border)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
@@ -144,7 +156,9 @@ export default function Header() {
                         </nav>
 
                         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {user ? (
+                            {isAuthLoading ? (
+                                <div style={{ width: '100%', height: '50px', background: 'var(--bg-tertiary)', borderRadius: '16px', opacity: 0.5 }}></div>
+                            ) : user ? (
                                 <>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '16px' }}>
                                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
