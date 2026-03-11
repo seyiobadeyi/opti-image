@@ -264,7 +264,7 @@ export default function DropZoneClient() {
                                 <><span className="spinner"></span>Processing...</>
                             ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                    <img src="/logo.png" alt="Process" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                                    <img src="/logo.png" alt="Process" style={{ height: '1.2em', width: 'auto', objectFit: 'contain' }} />
                                     <span>Process {activeTab === 'image' ? files.length : ''} {activeTab === 'image' ? (files.length !== 1 ? 'Images' : 'Image') : 'Media'}</span>
                                 </div>
                             )}

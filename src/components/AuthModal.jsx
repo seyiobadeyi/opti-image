@@ -130,9 +130,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
                     <div style={{ position: 'relative', zIndex: 2, padding: '40px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <img src="/logo.png" alt="Optimage Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-                            </div>
+                            <img src="/logo.png" alt="Optimage Logo" style={{ height: '1.3rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
                             <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'white' }}>Optimage</span>
                         </div>
                         <h3 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'white', lineHeight: 1.3, marginBottom: '12px' }}>

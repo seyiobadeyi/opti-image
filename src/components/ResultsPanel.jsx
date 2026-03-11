@@ -121,7 +121,7 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
                     gap: '12px',
                     color: 'var(--text-primary)'
                 }}>
-                    <img src="/logo.png" alt="Impact" style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0, marginTop: '2px' }} />
+                    <img src="/logo.png" alt="Impact" style={{ height: '1.2rem', width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
                     <div>
                         <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '4px' }}>SEO & Performance Impact</div>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>

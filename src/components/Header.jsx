@@ -61,9 +61,7 @@ export default function Header() {
             <div className="site-header-inner">
                 {/* Logo */}
                 <Link href="/" className="logo" onClick={() => setIsMobileMenuOpen(false)}>
-                    <div className="logo-icon">
-                        <img src="/logo.png" alt="Optimage Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
-                    </div>
+                    <img src="/logo.png" alt="Optimage Logo" style={{ height: '1.3rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
                     <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
                         <span>Optimage</span>
                         <span style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)' }}>by Dream Intrepid Ltd</span>

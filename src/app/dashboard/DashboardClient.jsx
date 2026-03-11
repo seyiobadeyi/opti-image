@@ -26,7 +26,7 @@ function formatDate(dateString) {
 }
 
 // ─── Tabs ────────────────────────────────────────────────────────
-const LogoIcon = () => <img src="/logo.png" alt="Optimage" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />;
+const LogoIcon = () => <img src="/logo.png" alt="Optimage" style={{ height: '1.1em', width: 'auto', objectFit: 'contain', verticalAlign: 'middle' }} />;
 
 const TABS = [
     { key: 'optimize', label: 'Images', icon: LogoIcon },
@@ -217,7 +217,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                 </div>
                 <div style={{ padding: '20px', background: 'var(--gradient-primary)', borderRadius: '20px', color: 'white', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9, fontSize: '0.9rem', marginBottom: '8px' }}>
-                        <img src="/logo.png" alt="Bandwidth" style={{ width: '16px', height: '16px', objectFit: 'contain' }} /> Bandwidth Saved
+                        <img src="/logo.png" alt="Bandwidth" style={{ height: '1.2em', width: 'auto', objectFit: 'contain' }} /> Bandwidth Saved
                     </div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{formatBytes(totalSaved)}</div>
                     <img src="/logo.png" alt="" style={{ position: 'absolute', right: '-10px', bottom: '-10px', width: '80px', height: '80px', opacity: 0.15, objectFit: 'contain' }} />
@@ -352,7 +352,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                                 {isProcessing ? (
                                                     <><RefreshCw size={18} className="spinner" /> Processing {processed}/{files.length}...</>
                                                 ) : (
-                                                    <><img src="/logo.png" alt="Optimize" style={{ width: '18px', height: '18px', objectFit: 'contain' }} /> Optimize {files.length} Image{files.length !== 1 ? 's' : ''}</>
+                                                    <><img src="/logo.png" alt="Optimize" style={{ height: '1.2em', width: 'auto', objectFit: 'contain' }} /> Optimize {files.length} Image{files.length !== 1 ? 's' : ''}</>
                                                 )}
                                             </button>
                                         </div>
@@ -710,7 +710,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                             }}
                                             style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                         >
-                                            {videoProcessing ? <><RefreshCw size={18} className="spinner" /> Compressing...</> : <><img src="/logo.png" alt="Compress" style={{ width: '18px', height: '18px', objectFit: 'contain' }} /> Compress Video</>}
+                                            {videoProcessing ? <> <RefreshCw size={18} className="spinner" /> Compressing...</> : <><img src="/logo.png" alt="Compress" style={{ height: '1.2em', width: 'auto', objectFit: 'contain' }} /> Compress Video</>}
                                         </button>
                                     </div>
                                 )}
