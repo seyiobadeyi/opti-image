@@ -30,20 +30,7 @@ export default function AuthModal({ isOpen, onClose }) {
         }
     };
 
-    // Listen for cross-device authentication (Magic Link or external confirmation)
-    useEffect(() => {
-        if (!isOpen) return;
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN') {
-                await handleSyncGuestHistory();
-                onClose();
-                router.refresh();
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, [isOpen, supabase, router]);
+    // Listen for cross-device authentication is now handled in Header.jsx
 
     if (!isOpen) return null;
 
@@ -156,7 +143,7 @@ export default function AuthModal({ isOpen, onClose }) {
                         <div>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'white', marginBottom: '12px' }}>Professional Media Suite</h2>
                             <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                                Log in to access high-performance image compression, format conversion, and video optimization tools.
+                                Sign in to access high-performance image compression, format conversion, and video optimization tools.
                             </p>
                         </div>
                     </div>
@@ -177,7 +164,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
                     <div style={{ marginBottom: '32px' }}>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.01em' }}>
-                            {step === 'email' ? 'Log in to Optimage' : 'Enter Secure Code'}
+                            {step === 'email' ? 'Sign in to Optimage' : 'Enter Secure Code'}
                         </h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
                             {step === 'email'
@@ -228,7 +215,7 @@ export default function AuthModal({ isOpen, onClose }) {
                                 borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                             }}>
-                                {loading ? 'Sending Code...' : <><span>Continue to Login</span><ArrowRight size={16} /></>}
+                                {loading ? 'Sending Code...' : <><span>Continue to Sign In</span><ArrowRight size={16} /></>}
                             </button>
                         </form>
                     ) : (

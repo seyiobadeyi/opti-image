@@ -16,22 +16,43 @@ export default function Header() {
     const [user, setUser] = useState(null);
     const supabase = useMemo(() => createClient(), []);
 
+    const handleSyncGuestHistory = async () => {
+        try {
+            const guestHistory = JSON.parse(localStorage.getItem('guest_processing_history') || '[]');
+            if (guestHistory.length > 0) {
+                await apiClient.syncGuestHistory(guestHistory);
+                localStorage.removeItem('guest_processing_history');
+            }
+        } catch (e) {
+            console.error('Failed to sync guest history', e);
+        }
+    };
+
     useEffect(() => {
         // Ping the server health endpoint immediately, then every 5 minutes
-        // This keeps the Render backend awake while the user has the site open.
         const pingServer = () => {
             apiClient.checkHealth().catch(() => { });
         };
-        pingServer(); // initial ping
+        pingServer();
         const keepAliveInterval = setInterval(pingServer, 5 * 60 * 1000);
 
+        // Initial session load
         supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
+            if (session?.user) {
+                setUser(session.user);
+            }
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            if (session?.user) setIsAuthModalOpen(false);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            const newUser = session?.user ?? null;
+            setUser(newUser);
+
+            if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
+                await handleSyncGuestHistory();
+                setIsAuthModalOpen(false);
+                // Only refresh if truly needed to minimize flickering
+                if (event === 'SIGNED_IN') router.refresh();
+            }
         });
 
         const handleOpenModal = () => setIsAuthModalOpen(true);
@@ -89,8 +110,7 @@ export default function Header() {
                         </div>
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '8px' }}>
-                            <button onClick={() => setIsAuthModalOpen(true)} className="text-btn" style={{ fontWeight: 600, fontSize: '0.95rem' }}>Log In</button>
-                            <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', borderRadius: '100px', fontWeight: 600 }}>Sign Up Free</button>
+                            <button onClick={() => setIsAuthModalOpen(true)} className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', borderRadius: '100px', fontWeight: 600 }}>Sign In</button>
                         </div>
                     )}
                 </nav>
@@ -141,11 +161,8 @@ export default function Header() {
                                 </>
                             ) : (
                                 <>
-                                    <button onClick={() => { setIsMobileMenuOpen(false); setIsAuthModalOpen(true); }} className="btn btn-secondary" style={{ width: '100%', padding: '16px', fontSize: '1rem', borderRadius: '16px' }}>
-                                        Log In
-                                    </button>
                                     <button onClick={() => { setIsMobileMenuOpen(false); setIsAuthModalOpen(true); }} className="btn btn-primary" style={{ width: '100%', padding: '16px', fontSize: '1rem', borderRadius: '16px', fontWeight: 600 }}>
-                                        Sign Up Free
+                                        Sign In
                                     </button>
                                 </>
                             )}
