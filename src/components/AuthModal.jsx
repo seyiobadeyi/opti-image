@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { sendOtp, verifyOtp } from '@/app/auth/actions';
-import { X, Zap, Mail, ArrowRight, Key } from 'lucide-react';
+import { X, Mail, ArrowRight, Key } from 'lucide-react';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api';
 
@@ -131,7 +131,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     <div style={{ position: 'relative', zIndex: 2, padding: '40px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                             <div style={{ width: '40px', height: '40px', background: 'var(--gradient-primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                                <Zap fill="currentColor" size={22} />
+                                <img src="/logo.png" alt="Optimage Logo" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
                             </div>
                             <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'white' }}>Optimage</span>
                         </div>

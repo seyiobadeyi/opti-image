@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Zap, LogOut, User, Menu, X, LayoutDashboard, ChevronRight } from 'lucide-react';
+import { LogOut, User, Menu, X, LayoutDashboard, ChevronRight } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
 import { createClient } from '@/utils/supabase/client';
 import { logout } from '@/app/auth/actions';
@@ -61,7 +61,9 @@ export default function Header() {
             <div className="site-header-inner">
                 {/* Logo */}
                 <Link href="/" className="logo" onClick={() => setIsMobileMenuOpen(false)}>
-                    <div className="logo-icon"><Zap fill="currentColor" size={24} /></div>
+                    <div className="logo-icon">
+                        <img src="/logo.png" alt="Optimage Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+                    </div>
                     <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
                         <span>Optimage</span>
                         <span style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)' }}>by Dream Intrepid Ltd</span>

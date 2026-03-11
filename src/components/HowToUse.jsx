@@ -1,5 +1,5 @@
 'use client';
-import { Image as ImageIcon, Video, Zap, Download } from 'lucide-react';
+import { Image as ImageIcon, Video, Download } from 'lucide-react';
 
 export default function HowToUse() {
     return (
@@ -22,7 +22,7 @@ export default function HowToUse() {
                 </div>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ background: 'var(--bg-tertiary)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--success)', boxShadow: 'var(--shadow-sm)' }}>
-                        <Zap size={32} />
+                        <img src="/logo.png" alt="Process" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
                     </div>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '8px' }}>3. Process</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>Our servers rapidly compress your images or utilize OpenAI to process your media.</p>

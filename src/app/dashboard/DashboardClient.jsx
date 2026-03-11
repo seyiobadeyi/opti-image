@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import {
-    History, Zap, Image as ImageIcon, Settings, SlidersHorizontal,
+    History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package
 } from 'lucide-react';
 import Link from 'next/link';
@@ -26,8 +26,10 @@ function formatDate(dateString) {
 }
 
 // ─── Tabs ────────────────────────────────────────────────────────
+const LogoIcon = () => <img src="/logo.png" alt="Optimage" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />;
+
 const TABS = [
-    { key: 'optimize', label: 'Images', icon: Zap },
+    { key: 'optimize', label: 'Images', icon: LogoIcon },
     { key: 'video', label: 'Video', icon: Film },
     { key: 'history', label: 'History', icon: History },
     { key: 'settings', label: 'Preferences', icon: Settings },
@@ -214,9 +216,11 @@ export default function DashboardClient({ user, profile, history: initialHistory
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed}</div>
                 </div>
                 <div style={{ padding: '20px', background: 'var(--gradient-primary)', borderRadius: '20px', color: 'white', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9, fontSize: '0.9rem', marginBottom: '8px' }}><Zap size={16} /> Bandwidth Saved</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9, fontSize: '0.9rem', marginBottom: '8px' }}>
+                        <img src="/logo.png" alt="Bandwidth" style={{ width: '16px', height: '16px', objectFit: 'contain' }} /> Bandwidth Saved
+                    </div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{formatBytes(totalSaved)}</div>
-                    <Zap size={80} style={{ position: 'absolute', right: '-10px', bottom: '-10px', opacity: 0.15 }} />
+                    <img src="/logo.png" alt="" style={{ position: 'absolute', right: '-10px', bottom: '-10px', width: '80px', height: '80px', opacity: 0.15, objectFit: 'contain' }} />
                 </div>
                 <div style={{ padding: '20px', background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}><BarChart3 size={16} /> Avg Compression</div>
@@ -348,7 +352,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                                 {isProcessing ? (
                                                     <><RefreshCw size={18} className="spinner" /> Processing {processed}/{files.length}...</>
                                                 ) : (
-                                                    <><Zap size={18} fill="currentColor" /> Optimize {files.length} Image{files.length !== 1 ? 's' : ''}</>
+                                                    <><img src="/logo.png" alt="Optimize" style={{ width: '18px', height: '18px', objectFit: 'contain' }} /> Optimize {files.length} Image{files.length !== 1 ? 's' : ''}</>
                                                 )}
                                             </button>
                                         </div>
@@ -706,7 +710,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                             }}
                                             style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                         >
-                                            {videoProcessing ? <><RefreshCw size={18} className="spinner" /> Compressing...</> : <><Zap size={18} fill="currentColor" /> Compress Video</>}
+                                            {videoProcessing ? <><RefreshCw size={18} className="spinner" /> Compressing...</> : <><img src="/logo.png" alt="Compress" style={{ width: '18px', height: '18px', objectFit: 'contain' }} /> Compress Video</>}
                                         </button>
                                     </div>
                                 )}

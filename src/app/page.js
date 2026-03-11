@@ -16,7 +16,7 @@ import LandingHero from '@/components/LandingHero';
 import LandingBento from '@/components/LandingBento';
 import FAQAccordion from '@/components/FAQAccordion';
 import { apiClient } from '@/lib/api';
-import { ImageIcon, Mic, Zap, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
+import { ImageIcon, Mic, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DEFAULT_IMAGE_SETTINGS = {
@@ -322,7 +322,7 @@ export default function Home() {
                     <><span className="spinner"></span>Processing...</>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                      <Zap size={18} fill="currentColor" />
+                      <img src="/logo.png" alt="Optimage Symbol" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
                       <span>Process {activeTab === 'image' ? files.length : ''} {activeTab === 'image' ? (files.length !== 1 ? 'Images' : 'Image') : 'Media'}</span>
                     </div>
                   )}

@@ -36,7 +36,7 @@ export const metadata = {
     siteName: 'Optimage',
     images: [
       {
-        url: '/image-1.png',
+        url: '/image-2.png',
         width: 1200,
         height: 630,
         alt: 'Optimage - Bulk Image Optimizer',
@@ -49,7 +49,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Optimage — Bulk Image Optimizer',
     description: 'Compress and optimize your images in bulk with zero quality loss.',
-    images: ['/image-1.png'],
+    images: ['/image-2.png'],
     creator: '@dreamintrepid',
   },
   icons: {

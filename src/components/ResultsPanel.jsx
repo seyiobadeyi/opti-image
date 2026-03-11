@@ -10,7 +10,7 @@ function formatBytes(bytes) {
 
 import { useState } from 'react';
 import {
-    Share2, CheckCircle2, Zap, Package, Download,
+    Share2, CheckCircle2, Package, Download,
     ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
@@ -121,7 +121,7 @@ export default function ResultsPanel({ results, summary, serverUrl }) {
                     gap: '12px',
                     color: 'var(--text-primary)'
                 }}>
-                    <Zap size={24} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <img src="/logo.png" alt="Impact" style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0, marginTop: '2px' }} />
                     <div>
                         <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '4px' }}>SEO & Performance Impact</div>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>

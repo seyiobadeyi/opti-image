@@ -8,7 +8,7 @@ import MediaPanel from '@/components/MediaPanel';
 import ProgressTracker from '@/components/ProgressTracker';
 import ResultsPanel from '@/components/ResultsPanel';
 import { apiClient } from '@/lib/api';
-import { ImageIcon, Zap, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
+import { ImageIcon, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
 
 const DEFAULT_IMAGE_SETTINGS = {
     format: '',
@@ -264,7 +264,7 @@ export default function DropZoneClient() {
                                 <><span className="spinner"></span>Processing...</>
                             ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                    <Zap size={18} fill="currentColor" />
+                                    <img src="/logo.png" alt="Process" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
                                     <span>Process {activeTab === 'image' ? files.length : ''} {activeTab === 'image' ? (files.length !== 1 ? 'Images' : 'Image') : 'Media'}</span>
                                 </div>
                             )}

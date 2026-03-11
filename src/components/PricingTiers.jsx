@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, X, Zap } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 export default function PricingTiers() {
     const tiers = [
@@ -68,7 +68,7 @@ export default function PricingTiers() {
             <div className="pricing-grid">
                 {tiers.map((tier, index) => (
                     <div key={index} className={`pricing-card ${tier.popular ? 'popular' : ''}`}>
-                        {tier.popular && <div className="popular-badge"><Zap size={14} /> Most Popular</div>}
+                        {tier.popular && <div className="popular-badge"><img src="/logo.png" alt="Popular" style={{ width: '14px', height: '14px', objectFit: 'contain', marginRight: '4px' }} /> Most Popular</div>}
 
                         <div className="pricing-header">
                             <h3>{tier.name}</h3>
