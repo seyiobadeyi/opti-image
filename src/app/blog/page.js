@@ -24,7 +24,9 @@ export default function BlogIndex() {
                                 {title}
                             </h2>
                         </Link>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>{date}</div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                            {new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </div>
                         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>{excerpt}</p>
                         <Link href={`/blog/${slug}`} style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '12px', display: 'inline-block' }}>
                             Read exactly how we built it →

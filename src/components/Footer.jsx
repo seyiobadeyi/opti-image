@@ -60,9 +60,9 @@ export default function Footer() {
                 padding: '48px 24px 32px',
                 display: 'flex',
                 flexDirection: 'column-reverse', /* Newsletter first on mobile */
-                gap: '40px',
+                gap: '32px',
                 justifyContent: 'space-between'
-            }} className="footer-container">
+            }} className="footer-inner-container">
 
                 {/* Left: Branding + Links */}
                 <div style={{ flex: '1 1 320px', minWidth: '260px' }}>

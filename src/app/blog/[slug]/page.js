@@ -23,7 +23,7 @@ export default async function Post({ params }) {
                     {postData.title}
                 </h1>
                 <div style={{ fontSize: '1rem', color: 'var(--text-muted)', display: 'flex', gap: '16px', alignItems: 'center' }}>
-                    <span>{postData.date}</span>
+                    <span>{new Date(postData.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     <span style={{ width: '4px', height: '4px', background: 'var(--text-muted)', borderRadius: '50%' }}></span>
                     <span>By Engineering Team</span>
                 </div>

@@ -263,15 +263,25 @@ export default function Home() {
               <ImageIcon size={18} /> Image Optimization
             </button>
 
-            {/*
-          <button
-            className={`tab-btn ${activeTab === 'media' ? 'active' : ''}`}
-            onClick={() => handleTabChange('media')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <Mic size={18} /> Video & Audio AI
-          </button>
-          */}
+            <button
+              className={`tab-btn ${activeTab === 'media' ? 'active' : ''}`}
+              onClick={() => handleTabChange('media')}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }}
+            >
+              <Mic size={18} /> Video & Audio AI
+              <span style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                background: 'var(--gradient-primary)',
+                fontSize: '0.65rem',
+                padding: '2px 6px',
+                borderRadius: '10px',
+                color: 'white',
+                fontWeight: 700,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+              }}>SOON</span>
+            </button>
           </div>
 
           {/* Upload Zone */}
@@ -292,20 +302,43 @@ export default function Home() {
               formatLabels={['JPEG', 'PNG', 'WebP', 'AVIF', 'TIFF', 'GIF', 'SVG', 'BMP']}
             />
           ) : (
-            <DropZone
-              onFilesAdded={handleFilesAdded}
-              disabled={isProcessing}
-              acceptTypes={{
-                'video/mp4': ['.mp4'],
-                'video/webm': ['.webm'],
-                'video/quicktime': ['.mov'],
-                'video/x-msvideo': ['.avi'],
-                'audio/mpeg': ['.mp3'],
-                'audio/wav': ['.wav'],
-                'audio/x-wav': ['.wav'],
-              }}
-              formatLabels={['MP4', 'MOV', 'AVI', 'WebM', 'MP3', 'WAV']}
-            />
+            <div style={{
+              padding: '80px 40px',
+              background: 'var(--bg-card)',
+              borderRadius: '24px',
+              border: '2px dashed var(--border)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '20px'
+            }}>
+              <div style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: 'rgba(108, 92, 231, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--accent-primary)'
+              }}>
+                <Mic size={40} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '12px' }}>AI Media Processing Coming Soon</h3>
+                <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto', lineHeight: 1.6, fontSize: '1.1rem' }}>
+                  Our engineering team is currently optimizing the high-performance video pipeline and OpenAI transcription models. We'll notify all members once this feature is live!
+                </p>
+              </div>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setActiveTab('image')}
+                style={{ marginTop: '12px' }}
+              >
+                Go Back to Images
+              </button>
+            </div>
           )}
 
           {/* File List & Settings */}

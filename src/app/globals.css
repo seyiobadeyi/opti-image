@@ -1615,3 +1615,10 @@ body {
 .dashboard-tabs::-webkit-scrollbar {
   display: none;
 }
+
+@media (max-width: 768px) {
+  .footer-inner-container {
+    padding: 32px 20px 12px !important;
+    gap: 24px !important;
+  }
+}

@@ -1,16 +1,18 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { sendOtp, verifyOtp } from '@/app/auth/actions';
 import { X, Mail, ArrowRight, Key } from 'lucide-react';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api';
+import { createClient } from '@/utils/supabase/client';
 
 export default function AuthModal({ isOpen, onClose }) {
+    const supabase = createClient();
     const router = useRouter();
     const [step, setStep] = useState('email'); // 'email', 'otp'
     const [email, setEmail] = useState('');
-    const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    const [otp, setOtp] = useState(['', '', '', '', '', '', '', '']);
     const otpRefs = useRef([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -30,6 +32,21 @@ export default function AuthModal({ isOpen, onClose }) {
         }
     };
 
+    // Listen for cross-device authentication (Magic Link or external confirmation)
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN') {
+                await handleSyncGuestHistory();
+                onClose();
+                router.refresh();
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [isOpen, supabase, router]);
+
     const handleOtpChange = (index, value) => {
         if (!/^[0-9]*$/.test(value)) return;
 
@@ -38,7 +55,7 @@ export default function AuthModal({ isOpen, onClose }) {
         setOtp(newOtp);
 
         // Auto focus next input
-        if (value && index < 5 && otpRefs.current[index + 1]) {
+        if (value && index < 7 && otpRefs.current[index + 1]) {
             otpRefs.current[index + 1].focus();
         }
     };
@@ -62,7 +79,7 @@ export default function AuthModal({ isOpen, onClose }) {
             const res = await sendOtp(formData);
             if (res.error) throw new Error(res.error);
             setStep('otp');
-            setMessage('A 6-digit code has been sent to your email.');
+            setMessage('An 8-digit code has been sent to your email.');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -73,8 +90,8 @@ export default function AuthModal({ isOpen, onClose }) {
     const handleOtpSubmit = async (e) => {
         e.preventDefault();
         const token = otp.join('');
-        if (token.length !== 6) {
-            setError('Please enter all 6 digits.');
+        if (token.length !== 8) {
+            setError('Please enter all 8 digits.');
             return;
         }
 
@@ -101,7 +118,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
     const resetFlow = () => {
         setStep('email');
-        setOtp(['', '', '', '', '', '']);
+        setOtp(['', '', '', '', '', '', '', '']);
         setError(null);
         setMessage(null);
     };
@@ -165,7 +182,7 @@ export default function AuthModal({ isOpen, onClose }) {
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
                             {step === 'email'
                                 ? 'Enter your email to sign in or create a new account.'
-                                : `We sent a 6-digit code to ${email}.`}
+                                : `We sent an 8-digit code to ${email}.`}
                         </p>
                     </div>
 
@@ -220,7 +237,7 @@ export default function AuthModal({ isOpen, onClose }) {
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, marginBottom: '12px', color: 'var(--text-primary)' }}>
                                     <Key size={14} /> Security Code
                                 </label>
-                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', gap: '6px', justifyContent: 'space-between' }}>
                                     {otp.map((digit, index) => (
                                         <input
                                             key={index}
@@ -232,10 +249,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                             onChange={(e) => handleOtpChange(index, e.target.value)}
                                             onKeyDown={(e) => handleOtpKeyDown(index, e)}
                                             style={{
-                                                width: '45px', height: '55px', textAlign: 'center',
-                                                borderRadius: '12px', border: '1px solid var(--border)',
+                                                width: '38px', height: '50px', textAlign: 'center',
+                                                borderRadius: '10px', border: '1px solid var(--border)',
                                                 background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
-                                                outline: 'none', fontSize: '1.2rem', fontWeight: 600, transition: 'border-color 0.2s',
+                                                outline: 'none', fontSize: '1.1rem', fontWeight: 600, transition: 'border-color 0.2s',
                                             }}
                                             onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
                                             onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
@@ -245,7 +262,7 @@ export default function AuthModal({ isOpen, onClose }) {
                                 </div>
                             </div>
 
-                            <button type="submit" className="btn btn-primary" disabled={loading || otp.join('').length < 6} style={{
+                            <button type="submit" className="btn btn-primary" disabled={loading || otp.join('').length < 8} style={{
                                 width: '100%', padding: '14px',
                                 borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',

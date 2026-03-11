@@ -18,7 +18,7 @@ export default function HowToUse() {
                         <Video size={40} />
                     </div>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '8px' }}>2. Configure</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>Toggle the settings. Choose WebP for the smallest file sizes, or request an AI Transcription.</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>Toggle the settings. Choose WebP for the smallest file sizes. <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>(Video AI Coming Soon)</span></p>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
