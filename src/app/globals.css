@@ -1562,9 +1562,19 @@ body {
 }
 
 /* ===== FOOTER RESPONSIVE ===== */
+.footer-inner-container {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 48px;
+  width: 100%;
+}
+
 @media (min-width: 850px) {
-  .footer-container {
+  .footer-inner-container {
     flex-direction: row !important;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
   }
 }
 

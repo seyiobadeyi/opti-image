@@ -53,14 +53,11 @@ export default function Footer() {
     };
 
     return (
-        <footer style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
+        <footer style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
             <div style={{
                 maxWidth: '1200px',
                 margin: '0 auto',
-                padding: '48px 24px 32px',
-                display: 'flex',
-                flexDirection: 'column-reverse', /* Newsletter first on mobile */
-                gap: '32px',
+                padding: '48px 24px 20px',
                 justifyContent: 'space-between'
             }} className="footer-inner-container">
 
