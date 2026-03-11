@@ -18,8 +18,6 @@ export default function AuthModal({ isOpen, onClose }) {
     const [error, setError] = useState(null);
     const [message, setMessage] = useState(null);
 
-    if (!isOpen) return null;
-
     const handleSyncGuestHistory = async () => {
         try {
             const guestHistory = JSON.parse(localStorage.getItem('guest_processing_history') || '[]');
@@ -46,6 +44,8 @@ export default function AuthModal({ isOpen, onClose }) {
 
         return () => subscription.unsubscribe();
     }, [isOpen, supabase, router]);
+
+    if (!isOpen) return null;
 
     const handleOtpChange = (index, value) => {
         if (!/^[0-9]*$/.test(value)) return;
