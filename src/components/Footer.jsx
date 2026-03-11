@@ -9,6 +9,7 @@ export default function Footer() {
     const supabase = createClient();
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState('idle'); // idle, loading, success, error
+    const [isAlreadySubscribed, setIsAlreadySubscribed] = useState(false);
 
     const handleSubscribe = async (e) => {
         e.preventDefault();
@@ -28,9 +29,22 @@ export default function Footer() {
                 throw new Error(errorData.message || 'Subscription failed');
             }
 
-            setStatus('success');
-            setEmail('');
-            setTimeout(() => setStatus('idle'), 3000);
+            const data = await response.json();
+
+            if (data.alreadySubscribed) {
+                setIsAlreadySubscribed(true);
+                setStatus('success');
+                setEmail('');
+                setTimeout(() => {
+                    setStatus('idle');
+                    setIsAlreadySubscribed(false);
+                }, 4000);
+            } else {
+                setStatus('success');
+                setIsAlreadySubscribed(false);
+                setEmail('');
+                setTimeout(() => setStatus('idle'), 3000);
+            }
         } catch (err) {
             console.error('Newsletter error:', err);
             setStatus('error');
@@ -53,10 +67,10 @@ export default function Footer() {
                 {/* Left: Branding + Links */}
                 <div style={{ flex: '1 1 320px', minWidth: '260px' }}>
                     {/* Logo — uses the same CSS classes as the Header */}
-                    <div className="logo" style={{ marginBottom: '16px' }}>
-                        <img src="/logo.png" alt="Optimage Logo" style={{ height: '1.4rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
-                        <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                            <span>Optimage</span>
+                    <div className="logo" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <img src="/logo.png" alt="Optimage Logo" style={{ height: '2.4rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
+                        <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, justifyContent: 'center' }}>
+                            <span style={{ fontSize: '1.3rem', fontWeight: 700, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Optimage</span>
                             <span style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)' }}>by Dream Intrepid Ltd</span>
                         </span>
                     </div>
@@ -96,7 +110,7 @@ export default function Footer() {
                             disabled={status === 'loading'}
                         />
                         <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.9rem', borderRadius: '10px', fontWeight: 600, background: status === 'success' ? 'var(--success)' : '' }} disabled={status === 'loading'}>
-                            {status === 'loading' ? 'Processing...' : status === 'success' ? '✓ Subscribed!' : 'Subscribe Now'}
+                            {status === 'loading' ? 'Processing...' : status === 'success' ? (isAlreadySubscribed ? '✨ Already on the list!' : '✓ Subscribed!') : 'Subscribe Now'}
                         </button>
                     </form>
                     {status === 'error' && <p style={{ color: '#ef4444', fontSize: '0.82rem', marginTop: '8px', textAlign: 'center' }}>Something went wrong. Try again.</p>}

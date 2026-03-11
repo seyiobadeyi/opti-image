@@ -16,6 +16,7 @@ import LandingHero from '@/components/LandingHero';
 import LandingBento from '@/components/LandingBento';
 import FAQAccordion from '@/components/FAQAccordion';
 import { apiClient } from '@/lib/api';
+import { createClient } from '@/utils/supabase/client';
 import { ImageIcon, Mic, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -48,6 +49,20 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [transcriptionResult, setTranscriptionResult] = useState(null);
   const [bypassCode, setBypassCode] = useState('');
+  const [user, setUser] = useState(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   useEffect(() => {
     // Request notification permission on mount
@@ -104,6 +119,11 @@ export default function Home() {
 
   const handleOptimizeImages = async () => {
     if (files.length === 0) return;
+
+    if (!user) {
+      window.dispatchEvent(new CustomEvent('open-auth-modal'));
+      return;
+    }
 
     setIsProcessing(true);
     setError(null);
@@ -170,6 +190,11 @@ export default function Home() {
 
   const handleProcessMedia = async () => {
     if (files.length === 0) return;
+
+    if (!user) {
+      window.dispatchEvent(new CustomEvent('open-auth-modal'));
+      return;
+    }
 
     setIsProcessing(true);
     setError(null);
@@ -322,7 +347,7 @@ export default function Home() {
                     <><span className="spinner"></span>Processing...</>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                      <img src="/logo.png" alt="Optimage Symbol" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                      <img src="/logo.png" alt="Optimage Symbol" style={{ height: '1.2em', width: 'auto', objectFit: 'contain' }} />
                       <span>Process {activeTab === 'image' ? files.length : ''} {activeTab === 'image' ? (files.length !== 1 ? 'Images' : 'Image') : 'Media'}</span>
                     </div>
                   )}

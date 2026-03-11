@@ -8,6 +8,7 @@ import MediaPanel from '@/components/MediaPanel';
 import ProgressTracker from '@/components/ProgressTracker';
 import ResultsPanel from '@/components/ResultsPanel';
 import { apiClient } from '@/lib/api';
+import { createClient } from '@/utils/supabase/client';
 import { ImageIcon, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
 
 const DEFAULT_IMAGE_SETTINGS = {
@@ -38,6 +39,20 @@ export default function DropZoneClient() {
     const [error, setError] = useState(null);
     const [transcriptionResult, setTranscriptionResult] = useState(null);
     const [bypassCode, setBypassCode] = useState('');
+    const [user, setUser] = useState(null);
+    const supabase = createClient();
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null);
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [supabase]);
 
     useEffect(() => {
         if ('Notification' in window && Notification.permission === 'default') {
@@ -90,6 +105,11 @@ export default function DropZoneClient() {
 
     const handleOptimizeImages = async () => {
         if (files.length === 0) return;
+
+        if (!user) {
+            window.dispatchEvent(new CustomEvent('open-auth-modal'));
+            return;
+        }
 
         setIsProcessing(true);
         setError(null);
@@ -159,6 +179,11 @@ export default function DropZoneClient() {
 
     const handleProcessMedia = async () => {
         if (files.length === 0) return;
+
+        if (!user) {
+            window.dispatchEvent(new CustomEvent('open-auth-modal'));
+            return;
+        }
 
         setIsProcessing(true);
         setError(null);

@@ -129,16 +129,19 @@ export default function AuthModal({ isOpen, onClose }) {
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,26,0.95) 0%, rgba(10,10,26,0.4) 50%, transparent 100%)' }} />
 
                     <div style={{ position: 'relative', zIndex: 2, padding: '40px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                            <img src="/logo.png" alt="Optimage Logo" style={{ height: '1.3rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
-                            <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'white' }}>Optimage</span>
+                        <div className="logo" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <img src="/logo.png" alt="Optimage Logo" style={{ height: '2.4rem', width: 'auto', objectFit: 'contain' }} />
+                            <div className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                                <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white' }}>Optimage</span>
+                                <span style={{ fontSize: '0.6em', color: 'rgba(255,255,255,0.7)', fontWeight: 'normal' }}>by Dream Intrepid Ltd</span>
+                            </div>
                         </div>
-                        <h3 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'white', lineHeight: 1.3, marginBottom: '12px' }}>
-                            Optimize without limits
-                        </h3>
-                        <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-                            Free image compression, format conversion, and video optimization — all in one workspace.
-                        </p>
+                        <div>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'white', marginBottom: '12px' }}>Professional Media Suite</h2>
+                            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+                                Log in to access high-performance image compression, format conversion, and video optimization tools.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -157,11 +160,11 @@ export default function AuthModal({ isOpen, onClose }) {
 
                     <div style={{ marginBottom: '32px' }}>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.01em' }}>
-                            {step === 'email' ? 'Welcome to Optimage' : 'Enter Secure Code'}
+                            {step === 'email' ? 'Log in to Optimage' : 'Enter Secure Code'}
                         </h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
                             {step === 'email'
-                                ? 'Sign in or create an account to securely access your workspace.'
+                                ? 'Enter your email to sign in or create a new account.'
                                 : `We sent a 6-digit code to ${email}.`}
                         </p>
                     </div>
@@ -208,7 +211,7 @@ export default function AuthModal({ isOpen, onClose }) {
                                 borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                             }}>
-                                {loading ? 'Sending Code...' : <><span>Continue with Email</span><ArrowRight size={16} /></>}
+                                {loading ? 'Sending Code...' : <><span>Continue to Login</span><ArrowRight size={16} /></>}
                             </button>
                         </form>
                     ) : (

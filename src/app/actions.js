@@ -25,7 +25,7 @@ export async function subscribeNewsletter(email) {
         if (error) {
             // Postgres unique constraint error code
             if (error.code === '23505') {
-                return { error: 'This email is already subscribed!' };
+                return { success: true, alreadySubscribed: true, message: 'This email is already subscribed!' };
             }
             console.error('Newsletter subscription error:', error);
             return { error: 'An error occurred while subscribing. Please try again later.' };

@@ -7,7 +7,8 @@ import { subscribeNewsletter } from '@/app/actions';
 export default function NewsletterPopup() {
     const [isOpen, setIsOpen] = useState(false);
     const [email, setEmail] = useState('');
-    const [errorMsg, setErrorMsg] = useState('');
+    const [status, setStatus] = useState('idle'); // idle, loading, success, error
+    const [isAlreadySubscribed, setIsAlreadySubscribed] = useState(false);
     const popupRef = useRef(null);
 
     useEffect(() => {
@@ -63,8 +64,15 @@ export default function NewsletterPopup() {
                 return;
             }
 
-            setStatus('success');
-            setTimeout(() => handleClose(), 2500);
+            if (result.alreadySubscribed) {
+                setIsAlreadySubscribed(true);
+                setStatus('success');
+                setTimeout(() => handleClose(), 3000);
+            } else {
+                setStatus('success');
+                setIsAlreadySubscribed(false);
+                setTimeout(() => handleClose(), 2500);
+            }
         } catch (err) {
             console.error('Newsletter error:', err);
             setStatus('error');
@@ -176,7 +184,7 @@ export default function NewsletterPopup() {
                             }}
                             disabled={status === 'loading'}
                         >
-                            {status === 'loading' ? 'Subscribing...' : status === 'success' ? '✓ Joined!' : 'Subscribe Free'}
+                            {status === 'loading' ? 'Subscribing...' : status === 'success' ? (isAlreadySubscribed ? '✨ Already on the list!' : '✓ Joined!') : 'Subscribe Free'}
                         </button>
                         {status === 'error' && <p style={{ color: '#ef4444', fontSize: '0.82rem', textAlign: 'center', margin: '4px 0 0' }}>{errorMsg || 'Failed. Try again.'}</p>}
                     </form>

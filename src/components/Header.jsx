@@ -60,10 +60,10 @@ export default function Header() {
         <header className="site-header">
             <div className="site-header-inner">
                 {/* Logo */}
-                <Link href="/" className="logo" onClick={() => setIsMobileMenuOpen(false)}>
-                    <img src="/logo.png" alt="Optimage Logo" style={{ height: '1.3rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
-                    <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                        <span>Optimage</span>
+                <Link href="/" className="logo" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img src="/logo.png" alt="Optimage Logo" style={{ height: '2.4rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
+                    <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, justifyContent: 'center' }}>
+                        <span style={{ fontSize: '1.3rem', fontWeight: 700, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Optimage</span>
                         <span style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)' }}>by Dream Intrepid Ltd</span>
                     </span>
                 </Link>
