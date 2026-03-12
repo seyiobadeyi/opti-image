@@ -14,8 +14,11 @@ export default async function AdminPage() {
         redirect('/?login=true');
     }
 
-    // In a real app, verify user.email is an admin email 
-    // e.g., if (user.email !== 'admin@example.com') redirect('/');
+    // Admin email whitelist check
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+    if (adminEmails.length > 0 && !adminEmails.includes(user.email?.toLowerCase())) {
+        redirect('/');
+    }
 
     // Fetch active bypass codes (we can use the regular client here since RLS allows select on active ones,
     // but we want to see ALL of them including inactive for the admin panel. 

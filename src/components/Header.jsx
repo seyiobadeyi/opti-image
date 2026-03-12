@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import { LogOut, User, Menu, X, LayoutDashboard, ChevronRight } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import AuthModal from '@/components/AuthModal';
 import { createClient } from '@/utils/supabase/client';
 import { logout } from '@/app/auth/actions';
@@ -185,7 +186,11 @@ export default function Header() {
                 </div>
             )}
 
-            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+            <AnimatePresence>
+                {isAuthModalOpen && (
+                    <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+                )}
+            </AnimatePresence>
         </header>
     );
 }

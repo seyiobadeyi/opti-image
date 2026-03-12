@@ -70,7 +70,7 @@ export default function RootLayout({ children }) {
         {/* Google AdSense — Replace with your publisher ID */}
         {/* <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXX" crossOrigin="anonymous"></script> */}
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <NewsletterPopup />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />

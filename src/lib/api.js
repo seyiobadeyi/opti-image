@@ -2,6 +2,21 @@ import { createClient } from '@/utils/supabase/client';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
+/**
+ * Get auth headers for API requests
+ * @returns {Promise<Record<string, string>>}
+ */
+async function getAuthHeaders() {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    /** @type {Record<string, string>} */
+    const headers = {};
+    if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+    return headers;
+}
+
 export const apiClient = {
     /**
      * Upload and convert images
@@ -10,25 +25,23 @@ export const apiClient = {
      * @returns {Promise<{success: boolean, results: Array, summary: object}>}
      */
     async convertImages(files, options = {}) {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-
-        const headers = {};
-        if (session?.access_token) {
-            headers['Authorization'] = `Bearer ${session.access_token}`;
-        }
+        const headers = await getAuthHeaders();
 
         const formData = new FormData();
 
+        // Collect custom names as a JSON array to properly map to files
+        const customNames = [];
+
         files.forEach((file) => {
             formData.append('files', file);
-            // If the file object has a customName property (set by the UI), send it
-            // @ts-ignore
-            if (file.customName) {
-                // @ts-ignore
-                formData.append('customName', file.customName);
-            }
+            customNames.push(/** @type {any} */ (file).customName || '');
         });
+
+        // Send custom names as JSON so the server can map each name to its file
+        const hasCustomNames = customNames.some(n => n !== '');
+        if (hasCustomNames) {
+            formData.append('customNames', JSON.stringify(customNames));
+        }
 
         // Append options as form fields
         if (options.format) formData.append('format', options.format);
@@ -47,7 +60,6 @@ export const apiClient = {
         const response = await fetch(`${API_BASE}/api/images/convert`, {
             method: 'POST',
             body: formData,
-            // @ts-ignore
             headers,
         });
 
@@ -60,19 +72,13 @@ export const apiClient = {
     },
 
     /**
-   * Upload and process media (audio/video extraction/transcription)
-   * @param {File} file - Audio or Video file
-   * @param {object} options - Processing options (action, extractAudioOnly)
-   * @returns {Promise<{success: boolean, text?: string, downloadName?: string}>}
-   */
+     * Upload and process media (audio/video extraction/transcription)
+     * @param {File} file - Audio or Video file
+     * @param {object} options - Processing options (action, extractAudioOnly)
+     * @returns {Promise<{success: boolean, text?: string, downloadName?: string}>}
+     */
     async processMedia(file, options = {}) {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-
-        const headers = {};
-        if (session?.access_token) {
-            headers['Authorization'] = `Bearer ${session.access_token}`;
-        }
+        const headers = await getAuthHeaders();
 
         const formData = new FormData();
         formData.append('file', file);
@@ -85,7 +91,6 @@ export const apiClient = {
         const response = await fetch(`${API_BASE}/api/media/process`, {
             method: 'POST',
             body: formData,
-            // @ts-ignore
             headers,
         });
 
@@ -103,15 +108,13 @@ export const apiClient = {
      * @returns {string}
      */
     getDownloadUrl(fileName) {
-        // Images and audio are both served from the same uploads directory via the image controller downloads for now,
-        // or we can just point it to the generic download endpoint
-        return `${API_BASE}/api/images/${fileName}/download`;
+        return `${API_BASE}/api/images/${encodeURIComponent(fileName)}/download`;
     },
 
     /**
      * Get the server base URL
-       * @returns {string}
-       */
+     * @returns {string}
+     */
     getServerUrl() {
         return API_BASE;
     },
@@ -124,20 +127,15 @@ export const apiClient = {
     async downloadBulkImages(fileNames) {
         if (!fileNames || fileNames.length === 0) return;
 
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-        if (session?.access_token) {
-            headers['Authorization'] = `Bearer ${session.access_token}`;
-        }
+        const authHeaders = await getAuthHeaders();
 
         const response = await fetch(`${API_BASE}/api/images/download-bulk`, {
             method: 'POST',
             body: JSON.stringify({ fileNames }),
-            headers,
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders,
+            },
         });
 
         if (!response.ok) {
@@ -157,11 +155,16 @@ export const apiClient = {
 
     /**
      * Check server health
-     * @returns {Promise<object>}
+     * @returns {Promise<{status: string} | null>}
      */
     async checkHealth() {
-        const response = await fetch(`${API_BASE}/api/health`);
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/api/health`);
+            if (!response.ok) return null;
+            return response.json();
+        } catch {
+            return null;
+        }
     },
 
     /**
@@ -171,17 +174,16 @@ export const apiClient = {
      */
     async syncGuestHistory(items) {
         if (!items || items.length === 0) return { success: false, syncedCount: 0 };
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
 
-        if (!session?.access_token) return { success: false, syncedCount: 0 };
+        const authHeaders = await getAuthHeaders();
+        if (!authHeaders['Authorization']) return { success: false, syncedCount: 0 };
 
         const response = await fetch(`${API_BASE}/api/images/sync-history`, {
             method: 'POST',
             body: JSON.stringify({ items }),
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session.access_token}`
+                ...authHeaders,
             },
         });
 

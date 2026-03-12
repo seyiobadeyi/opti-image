@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { Paperclip, X } from 'lucide-react';
 
 function formatBytes(bytes) {
@@ -12,12 +12,27 @@ function formatBytes(bytes) {
 }
 
 export default function FileList({ files, onRemove }) {
+    const prevUrlsRef = useRef([]);
+
     const thumbnails = useMemo(() => {
-        return files.map((file) => ({
+        // Revoke previous URLs to prevent memory leaks
+        prevUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+
+        const newThumbnails = files.map((file) => ({
             file,
             url: URL.createObjectURL(file),
         }));
+
+        prevUrlsRef.current = newThumbnails.map((t) => t.url);
+        return newThumbnails;
     }, [files]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            prevUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+        };
+    }, []);
 
     if (files.length === 0) return null;
 
@@ -44,7 +59,6 @@ export default function FileList({ files, onRemove }) {
                             src={url}
                             alt={file.name}
                             className="file-thumbnail"
-                            onLoad={() => {/* Keep URL until component unmounts */ }}
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }}
                         />

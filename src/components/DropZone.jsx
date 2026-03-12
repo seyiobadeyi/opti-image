@@ -37,14 +37,13 @@ export default function DropZone({ onFilesAdded, disabled, acceptTypes = ACCEPTE
         [onFilesAdded]
     );
 
-    // @ts-ignore
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone(/** @type {any} */ ({
         onDrop,
         accept: acceptTypes,
         maxSize: 100 * 1024 * 1024, // 100MB
         maxFiles: 50,
         disabled,
-    });
+    }));
 
     return (
         <div className="dropzone-wrapper">

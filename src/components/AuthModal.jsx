@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { sendOtp, verifyOtp } from '@/app/auth/actions';
 import { X, Mail, ArrowRight, Key } from 'lucide-react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 
@@ -32,7 +33,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
     // Listen for cross-device authentication is now handled in Header.jsx
 
-    if (!isOpen) return null;
 
     const handleOtpChange = (index, value) => {
         if (!/^[0-9]*$/.test(value)) return;
@@ -110,18 +110,35 @@ export default function AuthModal({ isOpen, onClose }) {
         setMessage(null);
     };
 
+
     return (
-        <div className="modal-overlay auth-modal-container overlay-entrance" onClick={onClose} style={{
-            position: 'fixed', inset: 0, zIndex: 10000,
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
-        }}>
-            <div className="auth-modal-card modal-entrance" onClick={(e) => e.stopPropagation()} style={{
-                display: 'flex', maxWidth: '900px', width: '100%', maxHeight: '90vh',
-                borderRadius: '24px', overflow: 'hidden',
-                background: 'var(--bg-card)', border: '1px solid var(--border)',
-                boxShadow: '0 32px 64px rgba(0,0,0,0.5), 0 0 80px rgba(108,92,231,0.1)',
-            }}>
+        <motion.div
+            className="modal-overlay auth-modal-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={onClose}
+            style={{
+                position: 'fixed', inset: 0, zIndex: 10000,
+                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+            }}
+        >
+            <motion.div
+                className="auth-modal-card"
+                initial={{ scale: 0.98, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.98, opacity: 0, y: 10 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                    display: 'flex', maxWidth: '900px', width: '100%', maxHeight: '90vh',
+                    borderRadius: '24px', overflow: 'hidden',
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    boxShadow: '0 32px 64px rgba(0,0,0,0.5), 0 0 80px rgba(108,92,231,0.1)',
+                }}
+            >
                 {/* Left: Visual Side (hidden on mobile) */}
                 <div className="auth-modal-visual" style={{
                     flex: '0 0 380px', position: 'relative', overflow: 'hidden',
@@ -263,7 +280,7 @@ export default function AuthModal({ isOpen, onClose }) {
                         </form>
                     )}
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }

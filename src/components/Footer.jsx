@@ -2,11 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { Mail } from 'lucide-react';
 
 export default function Footer() {
-    const supabase = createClient();
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState('idle'); // idle, loading, success, error
     const [isAlreadySubscribed, setIsAlreadySubscribed] = useState(false);
