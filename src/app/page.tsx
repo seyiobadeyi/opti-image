@@ -16,6 +16,7 @@ import LandingHero from '@/components/LandingHero';
 import LandingBento from '@/components/LandingBento';
 import FAQAccordion from '@/components/FAQAccordion';
 import ScrollReveal from '@/components/ScrollReveal';
+import SubscriptionPaywall from '@/components/SubscriptionPaywall';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
@@ -51,8 +52,8 @@ export default function Home(): React.JSX.Element {
   const [summary, setSummary] = useState<ProcessingSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [transcriptionResult, setTranscriptionResult] = useState<TranscriptionResult | null>(null);
-  const [bypassCode, setBypassCode] = useState('');
   const [user, setUser] = useState<User | null>(null);
+  const [showPaywall, setShowPaywall] = useState<boolean>(false);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -66,6 +67,20 @@ export default function Home(): React.JSX.Element {
 
     return () => subscription.unsubscribe();
   }, [supabase]);
+
+  // Capture referral code from URL (?ref=XXXX)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+      localStorage.setItem('optimage_referral_code', ref);
+      // Clean the URL without reloading the page
+      const url = new URL(window.location.href);
+      url.searchParams.delete('ref');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
 
   useEffect(() => {
     // Request notification permission on mount
@@ -121,10 +136,8 @@ export default function Home(): React.JSX.Element {
     setProcessed(0);
   }, []);
 
-  const handleOptimizeImages = async (): Promise<void> => {
-    if (files.length === 0) return;
-
-    // Robust session check
+  /** Checks auth + subscription. Returns true if OK to proceed. */
+  const checkAuthAndSubscription = async (): Promise<boolean> => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       if (!window.authModalDispatching) {
@@ -132,8 +145,24 @@ export default function Home(): React.JSX.Element {
         window.dispatchEvent(new CustomEvent('open-auth-modal'));
         setTimeout(() => { window.authModalDispatching = false; }, 500);
       }
-      return;
+      return false;
     }
+
+    // Check subscription status
+    const subStatus = await apiClient.getSubscriptionStatus();
+    if (!subStatus.active) {
+      setShowPaywall(true);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleOptimizeImages = async (): Promise<void> => {
+    if (files.length === 0) return;
+
+    const canProceed = await checkAuthAndSubscription();
+    if (!canProceed) return;
 
     setIsProcessing(true);
     setError(null);
@@ -152,7 +181,7 @@ export default function Home(): React.JSX.Element {
 
       for (let i = 0; i < files.length; i += concurrencyLimit) {
         const batch = files.slice(i, i + concurrencyLimit);
-        const response = await apiClient.convertImages(batch, { ...imageSettings, bypassCode });
+        const response = await apiClient.convertImages(batch, { ...imageSettings });
 
         if (response.success) {
           allResults.push(...response.results);
@@ -191,7 +220,13 @@ export default function Home(): React.JSX.Element {
       notifySuccess('Optimization Complete', `Successfully processed ${allResults.length} images.`);
     } catch (err: unknown) {
       console.error('Processing error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during image processing.');
+      const message = err instanceof Error ? err.message : 'An error occurred during image processing.';
+      // Handle 402 Payment Required from server
+      if (message.toLowerCase().includes('subscribe') || message.toLowerCase().includes('subscription')) {
+        setShowPaywall(true);
+      } else {
+        setError(message);
+      }
       notifySuccess('Optimization Failed', 'An error occurred while processing images.');
     } finally {
       setIsProcessing(false);
@@ -201,15 +236,8 @@ export default function Home(): React.JSX.Element {
   const handleProcessMedia = async (): Promise<void> => {
     if (files.length === 0) return;
 
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      if (!window.authModalDispatching) {
-        window.authModalDispatching = true;
-        window.dispatchEvent(new CustomEvent('open-auth-modal'));
-        setTimeout(() => { window.authModalDispatching = false; }, 500);
-      }
-      return;
-    }
+    const canProceed = await checkAuthAndSubscription();
+    if (!canProceed) return;
 
     setIsProcessing(true);
     setError(null);
@@ -220,7 +248,7 @@ export default function Home(): React.JSX.Element {
       // Process one media file at a time
       const file = files[0];
       if (!file) return;
-      const response = await apiClient.processMedia(file, { ...mediaSettings, bypassCode });
+      const response = await apiClient.processMedia(file, { ...mediaSettings });
 
       if (mediaSettings.extractAudioOnly) {
         // Show as a generic result card
@@ -253,7 +281,12 @@ export default function Home(): React.JSX.Element {
 
     } catch (err: unknown) {
       console.error('Media processing error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during media processing.');
+      const message = err instanceof Error ? err.message : 'An error occurred during media processing.';
+      if (message.toLowerCase().includes('subscribe') || message.toLowerCase().includes('subscription')) {
+        setShowPaywall(true);
+      } else {
+        setError(message);
+      }
       notifySuccess('Media Processing Failed', 'An error occurred while processing media.');
     } finally {
       setIsProcessing(false);
@@ -501,6 +534,14 @@ export default function Home(): React.JSX.Element {
 
       <Footer />
       <CookieConsent />
+
+      {/* Subscription Paywall Modal */}
+      {showPaywall && (
+        <SubscriptionPaywall
+          onClose={() => setShowPaywall(false)}
+          onSubscribed={() => setShowPaywall(false)}
+        />
+      )}
     </>
   );
 }

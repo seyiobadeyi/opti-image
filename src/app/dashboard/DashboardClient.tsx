@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
-    ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package
+    ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
+    Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
@@ -11,7 +12,7 @@ import { createClient } from '@/utils/supabase/client';
 import type {
     DashboardClientProps, DashboardTab, DashboardFileNames, ImageSettings,
     VideoSettings, VideoResult, ProcessedImage, ProcessingSummary,
-    FileWithCustomName, ProcessingHistoryItem,
+    FileWithCustomName, ProcessingHistoryItem, SubscriptionStatus, ReferralStats,
 } from '@/types';
 
 // ─── Helper Functions ───────────────────────────────────────────
@@ -37,6 +38,7 @@ const TABS: { key: DashboardTab; label: string; icon: React.ComponentType<{ size
     { key: 'optimize', label: 'Images', icon: LogoIcon },
     { key: 'video', label: 'Video', icon: Film },
     { key: 'history', label: 'History', icon: History },
+    { key: 'referrals', label: 'Referrals', icon: Users },
     { key: 'settings', label: 'Preferences', icon: Settings },
 ];
 
@@ -71,6 +73,78 @@ export default function DashboardClient({ user, profile, history: initialHistory
     const [videoProcessing, setVideoProcessing] = useState<boolean>(false);
     const [videoResult, setVideoResult] = useState<VideoResult | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
+
+    // ── Subscription & Referral state ────────────────────
+    const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
+    const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
+    const [referralLoading, setReferralLoading] = useState<boolean>(true);
+    const [copied, setCopied] = useState<boolean>(false);
+
+    useEffect(() => {
+        // Load subscription status
+        apiClient.getSubscriptionStatus().then(setSubscriptionStatus).catch(() => {
+            setSubscriptionStatus({ active: false, expiresAt: null });
+        });
+
+        // Load referral stats
+        apiClient.getReferralStats()
+            .then(setReferralStats)
+            .catch(() => setReferralStats(null))
+            .finally(() => setReferralLoading(false));
+    }, []);
+
+    const referralLink = referralStats?.referralCode
+        ? `${typeof window !== 'undefined' ? window.location.origin : 'https://optimage.dreamintrepid.com'}/?ref=${referralStats.referralCode}`
+        : null;
+
+    const handleCopyReferralLink = (): void => {
+        if (!referralLink) return;
+        navigator.clipboard.writeText(referralLink).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }).catch(() => {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = referralLink;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    const handleShareTwitter = (): void => {
+        if (!referralLink) return;
+        const text = encodeURIComponent('Check out Optimage — the fastest way to optimize images, compress videos, and transcribe media! 🚀');
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(referralLink)}`, '_blank');
+    };
+
+    const handleShareWhatsApp = (): void => {
+        if (!referralLink) return;
+        const text = encodeURIComponent(`Check out Optimage — optimize images, compress videos & transcribe media! ${referralLink}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    };
+
+    const handleShareEmail = (): void => {
+        if (!referralLink) return;
+        const subject = encodeURIComponent('Try Optimage — Image & Media Optimization');
+        const body = encodeURIComponent(`Hey! I've been using Optimage to optimize images and compress videos. Check it out:\n\n${referralLink}`);
+        window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
+    };
+
+    const formatSubscriptionDate = (dateStr: string): string => {
+        return new Date(dateStr).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric',
+        });
+    };
+
+    const getSubscriptionDaysLeft = (expiresAt: string): number => {
+        const now = new Date();
+        const expires = new Date(expiresAt);
+        return Math.max(0, Math.ceil((expires.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    };
 
     // ── Stats ──────────────────────────────────────────
     const totalProcessed = history?.length || 0;
@@ -236,6 +310,45 @@ export default function DashboardClient({ user, profile, history: initialHistory
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed > 0 && totalSaved > 0 ? `${((totalSaved / (totalSaved + (history?.reduce((a, c) => a + (c.processed_size || 0), 0) || 1))) * 100).toFixed(0)}%` : '—'}</div>
                 </div>
             </div>
+
+            {/* Subscription Status Banner */}
+            {subscriptionStatus && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '16px 24px', borderRadius: '16px', marginBottom: '24px',
+                    background: subscriptionStatus.active
+                        ? 'rgba(46,213,115,0.08)'
+                        : 'rgba(239,68,68,0.08)',
+                    border: `1px solid ${subscriptionStatus.active ? 'rgba(46,213,115,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                    flexWrap: 'wrap', gap: '12px',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Crown size={20} style={{ color: subscriptionStatus.active ? '#2ed573' : '#ef4444' }} />
+                        <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                                {subscriptionStatus.active ? 'Active Subscription' : 'No Active Subscription'}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                {subscriptionStatus.active && subscriptionStatus.expiresAt ? (
+                                    <>
+                                        <Calendar size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                                        Expires {formatSubscriptionDate(subscriptionStatus.expiresAt)} ({getSubscriptionDaysLeft(subscriptionStatus.expiresAt)} days left)
+                                    </>
+                                ) : subscriptionStatus.active ? (
+                                    'VIP — Permanent access'
+                                ) : (
+                                    'Subscribe to process images, compress videos, and transcribe media'
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    {!subscriptionStatus.active && (
+                        <Link href="/#pricing" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '0.85rem', borderRadius: '100px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                            Subscribe Now
+                        </Link>
+                    )}
+                </div>
+            )}
 
             {/* Tab Navigation */}
             <div className="dashboard-tabs">
@@ -580,6 +693,187 @@ export default function DashboardClient({ user, profile, history: initialHistory
                 </div>
             )}
 
+            {/* ═══════════ Tab: Referrals ═══════════ */}
+            {activeTab === 'referrals' && (
+                <div style={{ maxWidth: '700px' }}>
+                    {/* Referral Hero Card */}
+                    <div style={{
+                        background: 'var(--gradient-primary)', borderRadius: '24px',
+                        padding: '32px', marginBottom: '24px', color: 'white', position: 'relative', overflow: 'hidden',
+                    }}>
+                        <img src="/logo.png" alt="" style={{ position: 'absolute', right: '-20px', bottom: '-20px', width: '120px', height: '120px', opacity: 0.1, objectFit: 'contain' }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                            <Gift size={28} />
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Invite Friends, Get Rewarded</h2>
+                        </div>
+                        <p style={{ opacity: 0.9, lineHeight: 1.6, maxWidth: '500px', margin: 0 }}>
+                            Share your unique referral link. When a friend subscribes, you both win — they get a discount and you earn free subscription time.
+                        </p>
+                    </div>
+
+                    {/* Referral Link Card */}
+                    <div style={{
+                        background: 'var(--bg-card)', borderRadius: '24px',
+                        border: '1px solid var(--border)', padding: '28px', marginBottom: '24px',
+                    }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', marginBottom: '16px' }}>
+                            <Share2 size={20} /> Your Referral Link
+                        </h3>
+
+                        {referralLoading ? (
+                            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+                        ) : referralLink ? (
+                            <>
+                                {/* Link display + copy */}
+                                <div style={{
+                                    display: 'flex', gap: '8px', marginBottom: '20px',
+                                }}>
+                                    <div style={{
+                                        flex: 1, padding: '12px 16px', borderRadius: '12px',
+                                        background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+                                        fontSize: '0.9rem', color: 'var(--text-primary)',
+                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                        fontFamily: 'monospace',
+                                    }}>
+                                        {referralLink}
+                                    </div>
+                                    <button
+                                        onClick={handleCopyReferralLink}
+                                        className="btn btn-primary"
+                                        style={{
+                                            padding: '12px 20px', borderRadius: '12px',
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            fontSize: '0.9rem', whiteSpace: 'nowrap', flexShrink: 0,
+                                        }}
+                                    >
+                                        {copied ? <><Check size={16} /> Copied!</> : <><Copy size={16} /> Copy</>}
+                                    </button>
+                                </div>
+
+                                {/* Share buttons */}
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                    <button
+                                        onClick={handleShareTwitter}
+                                        style={{
+                                            flex: '1 1 auto', padding: '12px 16px', borderRadius: '12px',
+                                            border: '1px solid var(--border)', background: 'var(--bg-tertiary)',
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)',
+                                            transition: 'border-color 0.2s',
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                                        Share on X
+                                    </button>
+                                    <button
+                                        onClick={handleShareWhatsApp}
+                                        style={{
+                                            flex: '1 1 auto', padding: '12px 16px', borderRadius: '12px',
+                                            border: '1px solid var(--border)', background: 'var(--bg-tertiary)',
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)',
+                                            transition: 'border-color 0.2s',
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                                        WhatsApp
+                                    </button>
+                                    <button
+                                        onClick={handleShareEmail}
+                                        style={{
+                                            flex: '1 1 auto', padding: '12px 16px', borderRadius: '12px',
+                                            border: '1px solid var(--border)', background: 'var(--bg-tertiary)',
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)',
+                                            transition: 'border-color 0.2s',
+                                        }}
+                                    >
+                                        <ExternalLink size={16} /> Email
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                Your referral code will be generated when your account is fully set up.
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div style={{
+                        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                        gap: '16px', marginBottom: '24px',
+                    }}>
+                        <div style={{
+                            padding: '24px', background: 'var(--bg-card)', borderRadius: '20px',
+                            border: '1px solid var(--border)', textAlign: 'center',
+                        }}>
+                            <Users size={24} color="var(--accent-primary)" style={{ marginBottom: '12px' }} />
+                            <div style={{ fontSize: '2rem', fontWeight: 800 }}>
+                                {referralStats?.totalReferred ?? 0}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                Friends Referred
+                            </div>
+                        </div>
+                        <div style={{
+                            padding: '24px', background: 'var(--bg-card)', borderRadius: '20px',
+                            border: '1px solid var(--border)', textAlign: 'center',
+                        }}>
+                            <Check size={24} color="#2ed573" style={{ marginBottom: '12px' }} />
+                            <div style={{ fontSize: '2rem', fontWeight: 800 }}>
+                                {referralStats?.totalConverted ?? 0}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                Subscribed
+                            </div>
+                        </div>
+                        <div style={{
+                            padding: '24px', background: 'var(--bg-card)', borderRadius: '20px',
+                            border: '1px solid var(--border)', textAlign: 'center',
+                        }}>
+                            <Gift size={24} color="var(--accent-secondary)" style={{ marginBottom: '12px' }} />
+                            <div style={{ fontSize: '1.3rem', fontWeight: 800 }}>
+                                {referralStats?.rewardEarned ?? 'None yet'}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                Reward Earned
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* How It Works */}
+                    <div style={{
+                        background: 'var(--bg-card)', borderRadius: '24px',
+                        border: '1px solid var(--border)', padding: '28px',
+                    }}>
+                        <h3 style={{ fontSize: '1.1rem', marginBottom: '20px' }}>How It Works</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {[
+                                { step: '1', title: 'Share your link', desc: 'Send your unique referral link to friends or share on social media.' },
+                                { step: '2', title: 'Friend subscribes', desc: 'When they sign up and subscribe through your link, they get a discount.' },
+                                { step: '3', title: 'You get rewarded', desc: 'You earn free subscription time for every friend who subscribes.' },
+                            ].map((item) => (
+                                <div key={item.step} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                                    <div style={{
+                                        width: '36px', height: '36px', borderRadius: '50%',
+                                        background: 'var(--gradient-primary)', color: 'white',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontWeight: 800, fontSize: '0.9rem', flexShrink: 0,
+                                    }}>
+                                        {item.step}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 600, marginBottom: '4px' }}>{item.title}</div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{item.desc}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* ═══════════ Tab: Settings/Preferences ═══════════ */}
             {activeTab === 'settings' && (
                 <div style={{ maxWidth: '600px' }}>
@@ -624,8 +918,39 @@ export default function DashboardClient({ user, profile, history: initialHistory
                     <div style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--border)', padding: '32px' }}>
                         <h3 style={{ fontSize: '1.3rem', marginBottom: '8px' }}>Account</h3>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>Signed in as <strong style={{ color: 'var(--text-primary)' }}>{user.email}</strong></p>
+
+                        {/* Subscription Info */}
+                        {subscriptionStatus && (
+                            <div style={{
+                                marginTop: '16px', padding: '16px', borderRadius: '12px',
+                                background: 'var(--bg-tertiary)',
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                    <Crown size={16} style={{ color: subscriptionStatus.active ? '#2ed573' : 'var(--text-muted)' }} />
+                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                                        {subscriptionStatus.active ? 'Active Subscription' : 'No Subscription'}
+                                    </span>
+                                </div>
+                                {subscriptionStatus.active && subscriptionStatus.expiresAt && (
+                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+                                        Renews on {formatSubscriptionDate(subscriptionStatus.expiresAt)}
+                                    </p>
+                                )}
+                                {subscriptionStatus.active && !subscriptionStatus.expiresAt && (
+                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+                                        VIP — Lifetime access
+                                    </p>
+                                )}
+                                {!subscriptionStatus.active && (
+                                    <Link href="/#pricing" style={{ color: 'var(--accent-primary)', fontSize: '0.85rem' }}>
+                                        Subscribe to unlock all features →
+                                    </Link>
+                                )}
+                            </div>
+                        )}
+
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '16px', lineHeight: 1.6 }}>
-                            Need to change your password or manage your account? Head to the <Link href="/" style={{ color: 'var(--accent-primary)' }}>homepage</Link> and click "Forgot Password" in the login modal.
+                            Need to change your password or manage your account? Head to the <Link href="/" style={{ color: 'var(--accent-primary)' }}>homepage</Link> and click &quot;Forgot Password&quot; in the login modal.
                         </p>
                     </div>
                 </div>

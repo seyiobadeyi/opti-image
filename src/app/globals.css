@@ -1581,8 +1581,8 @@ body {
 /* ===== FOOTER RESPONSIVE ===== */
 .footer-inner-container {
   display: flex;
-  flex-direction: column-reverse;
-  gap: 48px;
+  flex-direction: column;
+  gap: 32px;
   width: 100%;
 }
 
@@ -1649,5 +1649,12 @@ body {
   .footer-inner-container {
     padding: 32px 20px 12px !important;
     gap: 24px !important;
+  }
+
+  .footer-inner-container nav a {
+    padding: 8px 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
 }

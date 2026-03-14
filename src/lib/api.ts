@@ -8,6 +8,10 @@ import type {
     ConvertImageOptions,
     ProcessMediaOptions,
     FileWithCustomName,
+    SubscriptionStatus,
+    CheckoutResponse,
+    PriceInfo,
+    ReferralStats,
 } from '@/types';
 
 const API_BASE: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -192,5 +196,68 @@ export const apiClient = {
         }
 
         return response.json() as Promise<SyncHistoryResponse>;
+    },
+
+    // ── Subscription & Payment ──
+
+    /**
+     * Check if the current user has an active subscription.
+     */
+    async getSubscriptionStatus(): Promise<SubscriptionStatus> {
+        const headers = await getAuthHeaders();
+        if (!headers['Authorization']) return { active: false, expiresAt: null };
+
+        try {
+            const response = await fetch(`${API_BASE}/api/payment/subscription/status`, { headers });
+            if (!response.ok) return { active: false, expiresAt: null };
+            return response.json() as Promise<SubscriptionStatus>;
+        } catch {
+            return { active: false, expiresAt: null };
+        }
+    },
+
+    /**
+     * Create a Paystack checkout session for a yearly subscription.
+     */
+    async createSubscriptionCheckout(promoCode?: string, referralCode?: string): Promise<CheckoutResponse> {
+        const headers = await getAuthHeaders();
+
+        const response = await fetch(`${API_BASE}/api/payment/checkout/subscription`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ promoCode, referralCode }),
+        });
+
+        if (!response.ok) {
+            const error: { message?: string } = await response.json().catch(() => ({ message: 'Checkout failed' }));
+            throw new Error(error.message || 'Checkout failed');
+        }
+
+        return response.json() as Promise<CheckoutResponse>;
+    },
+
+    /**
+     * Get the current subscription price with optional promo code.
+     */
+    async getPrice(promoCode?: string): Promise<PriceInfo> {
+        const params = promoCode ? `?promoCode=${encodeURIComponent(promoCode)}` : '';
+        const response = await fetch(`${API_BASE}/api/payment/price${params}`);
+        return response.json() as Promise<PriceInfo>;
+    },
+
+    /**
+     * Get referral stats for the current user.
+     */
+    async getReferralStats(): Promise<ReferralStats | null> {
+        const headers = await getAuthHeaders();
+        if (!headers['Authorization']) return null;
+
+        try {
+            const response = await fetch(`${API_BASE}/api/payment/referrals`, { headers });
+            if (!response.ok) return null;
+            return response.json() as Promise<ReferralStats>;
+        } catch {
+            return null;
+        }
     },
 };

@@ -23,7 +23,7 @@ export type AuthStep = 'email' | 'otp';
 export type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
 /** Dashboard navigation tab keys. */
-export type DashboardTab = 'optimize' | 'video' | 'history' | 'settings';
+export type DashboardTab = 'optimize' | 'video' | 'history' | 'referrals' | 'settings';
 
 /** Values persisted to localStorage for cookie consent. */
 export type CookieConsentValue = 'accepted' | 'declined';
@@ -233,6 +233,9 @@ export interface BypassCode {
 export interface UserProfile {
   id: string;
   credits: number;
+  subscription_expires_at: string | null;
+  referral_code: string | null;
+  referred_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -351,7 +354,47 @@ export interface DashboardClientProps {
 }
 
 // ──────────────────────────────────────────────
-// 11. Window Extensions (Global Augmentation)
+// 11. Subscription & Payment Types
+// ──────────────────────────────────────────────
+
+/** Response from GET /api/payment/subscription/status */
+export interface SubscriptionStatus {
+  active: boolean;
+  expiresAt: string | null;
+  isVip?: boolean;
+}
+
+/** Response from POST /api/payment/checkout/subscription */
+export interface CheckoutResponse {
+  success: boolean;
+  authorization_url: string;
+  reference: string;
+}
+
+/** Response from GET /api/payment/price */
+export interface PriceInfo {
+  originalPrice: number;
+  finalPrice: number;
+  discount: number;
+  promoApplied: string | null;
+}
+
+/** Response from GET /api/payment/referrals */
+export interface ReferralStats {
+  referralCode: string;
+  totalReferred: number;
+  totalConverted: number;
+  rewardEarned: string;
+}
+
+/** Props for the SubscriptionPaywall component. */
+export interface SubscriptionPaywallProps {
+  onSubscribed?: () => void;
+  onClose?: () => void;
+}
+
+// ──────────────────────────────────────────────
+// 12. Window Extensions (Global Augmentation)
 // ──────────────────────────────────────────────
 
 declare global {
@@ -364,7 +407,7 @@ declare global {
 }
 
 // ──────────────────────────────────────────────
-// 12. Re-exports
+// 13. Re-exports
 // ──────────────────────────────────────────────
 
 /** Re-export Supabase User type for convenience across the app. */
