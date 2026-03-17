@@ -1,7 +1,6 @@
 'use client';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { sendOtp, verifyOtp } from '@/app/auth/actions';
 import { X, Mail, ArrowRight, Key } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -92,12 +91,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
         setError(null);
         setMessage(null);
 
-        const formData = new FormData();
-        formData.append('email', email);
-
         try {
-            const res = await sendOtp(formData);
-            if (res.error) throw new Error(res.error);
+            const { error: otpError } = await supabase.auth.signInWithOtp({
+                email,
+                options: { shouldCreateUser: true },
+            });
+            if (otpError) throw new Error(otpError.message);
             setStep('otp');
             setMessage('An 8-digit code has been sent to your email.');
         } catch (err: unknown) {
@@ -119,13 +118,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
         setError(null);
         setMessage(null);
 
-        const formData = new FormData();
-        formData.append('email', email);
-        formData.append('token', token);
-
         try {
-            const res = await verifyOtp(formData);
-            if (res.error) throw new Error(res.error);
+            const { error: verifyError } = await supabase.auth.verifyOtp({
+                email,
+                token,
+                type: 'email',
+            });
+            if (verifyError) throw new Error(verifyError.message);
             await handleSyncGuestHistory();
             onClose();
             router.push('/dashboard');
