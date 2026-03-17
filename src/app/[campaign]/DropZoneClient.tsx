@@ -7,6 +7,7 @@ import SettingsPanel from '@/components/SettingsPanel';
 import MediaPanel from '@/components/MediaPanel';
 import ProgressTracker from '@/components/ProgressTracker';
 import ResultsPanel from '@/components/ResultsPanel';
+import SubscriptionPaywall from '@/components/SubscriptionPaywall';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import { ImageIcon, RefreshCw, AlertTriangle, CheckCircle, Clipboard, Mic } from 'lucide-react';
@@ -39,7 +40,7 @@ export default function DropZoneClient(): React.JSX.Element {
     const [summary, setSummary] = useState<ProcessingSummary | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [transcriptionResult, setTranscriptionResult] = useState<TranscriptionResult | null>(null);
-    const [bypassCode, setBypassCode] = useState<string>('');
+    const [showPaywall, setShowPaywall] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const supabase = useMemo(() => createClient(), []);
 
@@ -105,9 +106,8 @@ export default function DropZoneClient(): React.JSX.Element {
         setProcessed(0);
     }, []);
 
-    const handleOptimizeImages = async (): Promise<void> => {
-        if (files.length === 0) return;
-
+    /** Returns true if the user is authenticated AND has an active subscription. */
+    const checkAuthAndSubscription = async (): Promise<boolean> => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
             if (!window.authModalDispatching) {
@@ -115,8 +115,19 @@ export default function DropZoneClient(): React.JSX.Element {
                 window.dispatchEvent(new CustomEvent('open-auth-modal'));
                 setTimeout(() => { window.authModalDispatching = false; }, 500);
             }
-            return;
+            return false;
         }
+        const status = await apiClient.getSubscriptionStatus();
+        if (!status.active) {
+            setShowPaywall(true);
+            return false;
+        }
+        return true;
+    };
+
+    const handleOptimizeImages = async (): Promise<void> => {
+        if (files.length === 0) return;
+        if (!(await checkAuthAndSubscription())) return;
 
         setIsProcessing(true);
         setError(null);
@@ -139,7 +150,7 @@ export default function DropZoneClient(): React.JSX.Element {
 
                 // We still send a small batch to the API, but the progress bar updates
                 // much more frequently than sending chunks of 10-50.
-                const response = await apiClient.convertImages(batch, { ...imageSettings, bypassCode });
+                const response = await apiClient.convertImages(batch, { ...imageSettings });
 
                 if (response.success) {
                     allResults.push(...response.results);
@@ -186,16 +197,7 @@ export default function DropZoneClient(): React.JSX.Element {
 
     const handleProcessMedia = async (): Promise<void> => {
         if (files.length === 0) return;
-
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            if (!window.authModalDispatching) {
-                window.authModalDispatching = true;
-                window.dispatchEvent(new CustomEvent('open-auth-modal'));
-                setTimeout(() => { window.authModalDispatching = false; }, 500);
-            }
-            return;
-        }
+        if (!(await checkAuthAndSubscription())) return;
 
         setIsProcessing(true);
         setError(null);
@@ -205,7 +207,7 @@ export default function DropZoneClient(): React.JSX.Element {
         try {
             const file = files[0];
             if (!file) return;
-            const response = await apiClient.processMedia(file, { ...mediaSettings, bypassCode });
+            const response = await apiClient.processMedia(file, { ...mediaSettings });
 
             if (mediaSettings.extractAudioOnly) {
                 setResults([{
@@ -409,6 +411,13 @@ export default function DropZoneClient(): React.JSX.Element {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {showPaywall && (
+                <SubscriptionPaywall
+                    onSubscribed={() => setShowPaywall(false)}
+                    onClose={() => setShowPaywall(false)}
+                />
             )}
         </section>
     );

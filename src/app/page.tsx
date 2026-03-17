@@ -405,23 +405,6 @@ export default function Home(): React.JSX.Element {
                 <MediaPanel settings={mediaSettings} onSettingsChange={setMediaSettings} />
               )}
 
-              {/* <div className="bypass-code-input" style={{ marginTop: '16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  placeholder="Got a bypass code? (Optional)"
-                  value={bypassCode}
-                  onChange={(e) => setBypassCode(e.target.value)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-card)',
-                    color: 'var(--text-primary)',
-                    flex: 1
-                  }}
-                />
-              </div> */}
-
               {/* Action Buttons */}
               <div className="action-bar">
                 <button

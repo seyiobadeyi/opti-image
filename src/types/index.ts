@@ -181,14 +181,12 @@ export interface ConvertImageOptions {
   maintainAspectRatio?: boolean;
   rotate?: ImageRotation;
   autoEnhance?: boolean;
-  bypassCode?: string;
 }
 
 /** Options passed to apiClient.processMedia(). */
 export interface ProcessMediaOptions {
   action?: MediaAction | null;
   extractAudioOnly?: boolean;
-  bypassCode?: string;
 }
 
 // ──────────────────────────────────────────────
@@ -207,26 +205,8 @@ export interface NewsletterResult extends ServerActionResult {
   message?: string;
 }
 
-/** Return type for generateBypassCode admin action. */
-export interface GenerateBypassCodeResult extends ServerActionResult {
-  code?: BypassCode;
-}
-
 // ──────────────────────────────────────────────
-// 7. Admin Types
-// ──────────────────────────────────────────────
-
-/** A bypass code record from the Supabase bypass_codes table. */
-export interface BypassCode {
-  id: string;
-  code: string;
-  is_active: boolean;
-  expires_at: string;
-  created_at?: string;
-}
-
-// ──────────────────────────────────────────────
-// 8. Dashboard Types
+// 7. Dashboard Types
 // ──────────────────────────────────────────────
 
 /** User profile record from the Supabase profiles table. */
@@ -341,10 +321,6 @@ export interface TooltipProps {
 
 export interface InfoTooltipProps {
   content: React.ReactNode;
-}
-
-export interface AdminClientProps {
-  bypassCodes: BypassCode[];
 }
 
 export interface DashboardClientProps {
