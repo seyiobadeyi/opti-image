@@ -11,16 +11,34 @@ function formatBytes(bytes: number): string {
 import React, { useState, useMemo } from 'react';
 import {
     Share2, CheckCircle2, Package, Download,
-    ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check
+    ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check, Sparkles, Mail
 } from 'lucide-react';
+import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { apiClient } from '@/lib/api';
-import type { ResultsPanelProps } from '@/types';
+import { subscribeNewsletter } from '@/app/actions';
+import type { ResultsPanelProps, FormStatus, NewsletterResult } from '@/types';
 
 export default function ResultsPanel({ results, summary, serverUrl }: ResultsPanelProps): React.JSX.Element | null {
     const [showShareMenu, setShowShareMenu] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
+    const [newsletterEmail, setNewsletterEmail] = useState<string>('');
+    const [newsletterStatus, setNewsletterStatus] = useState<FormStatus>('idle');
     const supabase = useMemo(() => createClient(), []);
+
+    const handleNewsletterSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        if (!newsletterEmail.trim()) return;
+        setNewsletterStatus('loading');
+        try {
+            const result: NewsletterResult = await subscribeNewsletter(newsletterEmail.trim());
+            if (result.error) { setNewsletterStatus('error'); return; }
+            setNewsletterStatus('success');
+        } catch {
+            setNewsletterStatus('error');
+            setTimeout(() => setNewsletterStatus('idle'), 3000);
+        }
+    };
 
     if (!results || results.length === 0) return null;
 
@@ -31,13 +49,22 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
             return;
         }
 
-        const url = `${serverUrl}/api/images/${processedName}/download`;
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = processedName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        try {
+            const response = await fetch(`${serverUrl}/api/images/${processedName}/download`);
+            if (!response.ok) throw new Error('Download failed');
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = processedName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (err: unknown) {
+            console.error('Download failed:', err instanceof Error ? err.message : 'Unknown error');
+            alert('Download failed. Please try again.');
+        }
     };
 
     const handleBulkDownload = async (): Promise<void> => {
@@ -181,6 +208,90 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                     )}
                 </div>
             </div>
+
+            {/* Dashboard Upsell Banner */}
+            <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                    padding: '16px 20px', marginBottom: '20px',
+                    background: 'linear-gradient(135deg, rgba(108,92,231,0.12), rgba(162,155,254,0.08))',
+                    border: '1px solid rgba(108,92,231,0.25)',
+                    borderRadius: 'var(--radius-lg)',
+                    cursor: 'pointer', transition: 'border-color 0.2s',
+                }}>
+                    <div style={{
+                        width: '38px', height: '38px', borderRadius: '10px', flexShrink: 0,
+                        background: 'var(--gradient-primary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        <Sparkles size={18} color="#fff" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                            Want more power? Head to your Dashboard →
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                            Rotation, auto-enhance, custom file names, processing history &amp; video compression — all in one place.
+                        </div>
+                    </div>
+                </div>
+            </Link>
+
+            {/* Newsletter nudge — shown after successful processing */}
+            {newsletterStatus !== 'success' && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '14px 18px', marginBottom: '20px',
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    flexWrap: 'wrap',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <Mail size={15} color="var(--accent-primary)" />
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                            Get weekly performance tips:
+                        </span>
+                    </div>
+                    <form onSubmit={handleNewsletterSubmit} style={{ display: 'flex', gap: '6px', flex: 1, minWidth: '200px' }}>
+                        <input
+                            type="email"
+                            placeholder="your@email.com"
+                            value={newsletterEmail}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewsletterEmail(e.target.value)}
+                            disabled={newsletterStatus === 'loading'}
+                            required
+                            style={{
+                                flex: 1, padding: '7px 11px', borderRadius: '8px',
+                                border: '1px solid var(--border)', background: 'var(--bg-card)',
+                                color: 'var(--text-primary)', fontSize: '0.82rem', outline: 'none',
+                                minWidth: 0,
+                            }}
+                        />
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={newsletterStatus === 'loading'}
+                            style={{ padding: '7px 14px', fontSize: '0.8rem', borderRadius: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        >
+                            {newsletterStatus === 'loading' ? '...' : 'Subscribe'}
+                        </button>
+                    </form>
+                    {newsletterStatus === 'error' && (
+                        <span style={{ fontSize: '0.78rem', color: '#ef4444' }}>Try again.</span>
+                    )}
+                </div>
+            )}
+            {newsletterStatus === 'success' && (
+                <div style={{
+                    padding: '12px 18px', marginBottom: '20px',
+                    background: 'rgba(46,213,115,0.08)', border: '1px solid rgba(46,213,115,0.25)',
+                    borderRadius: 'var(--radius-lg)', fontSize: '0.85rem',
+                    color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '8px',
+                }}>
+                    <Check size={15} /> You are subscribed! Tips landing in your inbox soon.
+                </div>
+            )}
 
             {/* Individual File Results */}
             <div className="result-file-list">

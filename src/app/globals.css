@@ -1501,6 +1501,25 @@ body {
   }
 }
 
+/* Newsletter popup: center on mobile, bottom-right on desktop */
+@media (max-width: 480px) {
+  .newsletter-popup-card {
+    bottom: 16px !important;
+    right: 50% !important;
+    transform: translateX(50%);
+    border-radius: 18px !important;
+  }
+}
+
+/* Ensure newsletter popup never overlaps mobile browser chrome */
+@media (max-width: 480px) {
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .newsletter-popup-card {
+      bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    }
+  }
+}
+
 /* ===== GLOBAL RESPONSIVENESS ===== */
 @media (max-width: 768px) {
   html {

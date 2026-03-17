@@ -7,6 +7,7 @@ import {
     Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
+import SubscriptionPaywall from '@/components/SubscriptionPaywall';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import type {
@@ -79,6 +80,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
     const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
     const [referralLoading, setReferralLoading] = useState<boolean>(true);
     const [copied, setCopied] = useState<boolean>(false);
+    const [showPaywall, setShowPaywall] = useState<boolean>(false);
 
     useEffect(() => {
         // Load subscription status
@@ -92,6 +94,35 @@ export default function DashboardClient({ user, profile, history: initialHistory
             .catch(() => setReferralStats(null))
             .finally(() => setReferralLoading(false));
     }, []);
+
+    // ── Load preferences from localStorage on mount ───
+    useEffect(() => {
+        try {
+            const storedAutoWebP = localStorage.getItem('pref_auto_webp');
+            const storedStripMeta = localStorage.getItem('pref_strip_meta');
+            const autoWebP = storedAutoWebP !== null ? storedAutoWebP === 'true' : false;
+            const stripMeta = storedStripMeta !== null ? storedStripMeta !== 'false' : true;
+            if (storedAutoWebP !== null) setPrefsAutoWebP(autoWebP);
+            if (storedStripMeta !== null) setPrefsStripMeta(stripMeta);
+            setImageSettings(prev => ({
+                ...prev,
+                ...(storedAutoWebP !== null && { format: autoWebP ? 'webp' : prev.format }),
+                ...(storedStripMeta !== null && { stripMetadata: stripMeta }),
+            }));
+        } catch { /* localStorage not available */ }
+    }, []);
+
+    const handlePrefsAutoWebPChange = (val: boolean): void => {
+        setPrefsAutoWebP(val);
+        try { localStorage.setItem('pref_auto_webp', String(val)); } catch { /* ignore */ }
+        setImageSettings(prev => ({ ...prev, format: val ? 'webp' : '' }));
+    };
+
+    const handlePrefsStripMetaChange = (val: boolean): void => {
+        setPrefsStripMeta(val);
+        try { localStorage.setItem('pref_strip_meta', String(val)); } catch { /* ignore */ }
+        setImageSettings(prev => ({ ...prev, stripMetadata: val }));
+    };
 
     const referralLink = referralStats?.referralCode
         ? `${typeof window !== 'undefined' ? window.location.origin : 'https://optimage.dreamintrepid.com'}/?ref=${referralStats.referralCode}`
@@ -270,15 +301,26 @@ export default function DashboardClient({ user, profile, history: initialHistory
         }
     };
 
-    const handleDownload = (processedName: string, index: number): void => {
+    const handleDownload = async (processedName: string, index: number): Promise<void> => {
         const customName = fileNames[index];
-        const url = apiClient.getDownloadUrl(processedName);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = customName ? `${customName}.${processedName.split('.').pop()}` : processedName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const ext = processedName.split('.').pop() ?? '';
+        const downloadFileName = customName ? `${customName}.${ext}` : processedName;
+        try {
+            const response = await fetch(apiClient.getDownloadUrl(processedName));
+            if (!response.ok) throw new Error('Download failed');
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = downloadFileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (err: unknown) {
+            console.error('Download failed:', err instanceof Error ? err.message : 'Unknown error');
+            alert('Download failed. Please try again.');
+        }
     };
 
     // ────────────────────────────────────────────────────
@@ -343,9 +385,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         </div>
                     </div>
                     {!subscriptionStatus.active && (
-                        <Link href="/#pricing" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '0.85rem', borderRadius: '100px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                        <button onClick={() => setShowPaywall(true)} className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '0.85rem', borderRadius: '100px', whiteSpace: 'nowrap', border: 'none', cursor: 'pointer' }}>
                             Subscribe Now
-                        </Link>
+                        </button>
                     )}
                 </div>
             )}
@@ -623,8 +665,30 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 </div>
                             </div>
 
+                            {/* Rotation */}
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 500 }}>Rotation</label>
+                                <select
+                                    value={imageSettings.rotate ?? 0}
+                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setImageSettings(prev => ({ ...prev, rotate: parseInt(e.target.value) as ImageSettings['rotate'] }))}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none' }}
+                                >
+                                    <option value={0}>No rotation</option>
+                                    <option value={90}>90° Clockwise</option>
+                                    <option value={180}>180° Flip</option>
+                                    <option value={270}>270° (90° Counter-CW)</option>
+                                </select>
+                            </div>
+
                             {/* Toggles */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-tertiary)', borderRadius: '12px', cursor: 'pointer' }}>
+                                    <div>
+                                        <span style={{ fontSize: '0.9rem', fontWeight: 500, display: 'block' }}>Auto-Enhance</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Boost brightness, contrast &amp; sharpness</span>
+                                    </div>
+                                    <input type="checkbox" checked={imageSettings.autoEnhance ?? false} onChange={(e) => setImageSettings(prev => ({ ...prev, autoEnhance: e.target.checked }))} style={{ accentColor: 'var(--accent-primary)', width: '20px', height: '20px', flexShrink: 0 }} />
+                                </label>
                                 <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-tertiary)', borderRadius: '12px', cursor: 'pointer' }}>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Strip Metadata</span>
                                     <input type="checkbox" checked={imageSettings.stripMetadata} onChange={(e) => setImageSettings(prev => ({ ...prev, stripMetadata: e.target.checked }))} style={{ accentColor: 'var(--accent-primary)', width: '20px', height: '20px' }} />
@@ -888,7 +952,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Automatically output all images as WebP for maximum compression.</div>
                                 </div>
                                 <button
-                                    onClick={() => setPrefsAutoWebP(!prefsAutoWebP)}
+                                    onClick={() => handlePrefsAutoWebPChange(!prefsAutoWebP)}
                                     style={{
                                         width: '48px', height: '28px', borderRadius: '20px', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0,
                                         background: prefsAutoWebP ? 'var(--accent-primary)' : 'var(--border)', transition: 'background 0.2s',
@@ -903,7 +967,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Remove GPS, camera model, and other metadata from exported images.</div>
                                 </div>
                                 <button
-                                    onClick={() => setPrefsStripMeta(!prefsStripMeta)}
+                                    onClick={() => handlePrefsStripMetaChange(!prefsStripMeta)}
                                     style={{
                                         width: '48px', height: '28px', borderRadius: '20px', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0,
                                         background: prefsStripMeta ? 'var(--accent-primary)' : 'var(--border)', transition: 'background 0.2s',
@@ -942,9 +1006,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     </p>
                                 )}
                                 {!subscriptionStatus.active && (
-                                    <Link href="/#pricing" style={{ color: 'var(--accent-primary)', fontSize: '0.85rem' }}>
+                                    <button onClick={() => setShowPaywall(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', fontSize: '0.85rem', padding: 0, textAlign: 'left' }}>
                                         Subscribe to unlock all features →
-                                    </Link>
+                                    </button>
                                 )}
                             </div>
                         )}
@@ -954,6 +1018,17 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         </p>
                     </div>
                 </div>
+            )}
+
+            {/* ═══════════ Subscription Paywall Modal ═══════════ */}
+            {showPaywall && (
+                <SubscriptionPaywall
+                    onSubscribed={() => {
+                        setShowPaywall(false);
+                        apiClient.getSubscriptionStatus().then(setSubscriptionStatus).catch(() => {});
+                    }}
+                    onClose={() => setShowPaywall(false)}
+                />
             )}
 
             {/* ═══════════ Tab: Video ═══════════ */}
@@ -1077,9 +1152,31 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         <div style={{ fontWeight: 500 }}>{videoResult.originalName}</div>
                                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{formatBytes(videoResult.originalSize)} → {formatBytes(videoResult.processedSize)}</div>
                                     </div>
-                                    <a href={`${apiClient.getServerUrl()}/api/media/${videoResult.processedName}/download`} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '0.85rem', borderRadius: '100px', textDecoration: 'none' }}>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={async () => {
+                                            try {
+                                                const url = `${apiClient.getServerUrl()}/api/media/${videoResult.processedName}/download`;
+                                                const response = await fetch(url);
+                                                if (!response.ok) throw new Error('Download failed');
+                                                const blob = await response.blob();
+                                                const objUrl = URL.createObjectURL(blob);
+                                                const link = document.createElement('a');
+                                                link.href = objUrl;
+                                                link.download = videoResult.processedName;
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                                URL.revokeObjectURL(objUrl);
+                                            } catch (err: unknown) {
+                                                console.error('Video download failed:', err instanceof Error ? err.message : 'Unknown error');
+                                                alert('Download failed. Please try again.');
+                                            }
+                                        }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '0.85rem', borderRadius: '100px' }}
+                                    >
                                         <Download size={16} /> Download
-                                    </a>
+                                    </button>
                                 </div>
 
                                 <button onClick={() => { setVideoFile(null); setVideoResult(null); }} className="btn btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

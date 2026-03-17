@@ -20,6 +20,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
 
+    // Notify the newsletter popup so it doesn't conflict with this modal
+    useEffect(() => {
+        window.dispatchEvent(new CustomEvent(isOpen ? 'optimage:overlay:open' : 'optimage:overlay:close'));
+    }, [isOpen]);
+
     const handleGoogleSignIn = async (): Promise<void> => {
         setLoading(true);
         setError(null);
@@ -123,7 +128,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
             if (res.error) throw new Error(res.error);
             await handleSyncGuestHistory();
             onClose();
-            router.refresh();
+            router.push('/dashboard');
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {

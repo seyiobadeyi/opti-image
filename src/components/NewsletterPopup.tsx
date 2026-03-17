@@ -12,17 +12,52 @@ export default function NewsletterPopup(): React.JSX.Element | null {
     const [errorMsg, setErrorMsg] = useState<string>('');
     const [isAlreadySubscribed, setIsAlreadySubscribed] = useState<boolean>(false);
     const popupRef = useRef<HTMLDivElement | null>(null);
+    // Track whether any other overlay (AuthModal, SubscriptionPaywall) is open
+    const overlayOpenRef = useRef<boolean>(false);
+    const pendingShowRef = useRef<boolean>(false);
 
+    // Listen for other modals/overlays opening and closing
+    useEffect(() => {
+        const handleOverlayOpen = (): void => {
+            overlayOpenRef.current = true;
+            // If we were about to show, hide temporarily
+            if (isOpen) setIsOpen(false);
+        };
+
+        const handleOverlayClose = (): void => {
+            overlayOpenRef.current = false;
+            // If there was a pending show request, show now after a short delay
+            if (pendingShowRef.current) {
+                pendingShowRef.current = false;
+                setTimeout(() => {
+                    if (!overlayOpenRef.current) setIsOpen(true);
+                }, 600);
+            }
+        };
+
+        window.addEventListener('optimage:overlay:open', handleOverlayOpen);
+        window.addEventListener('optimage:overlay:close', handleOverlayClose);
+        return () => {
+            window.removeEventListener('optimage:overlay:open', handleOverlayOpen);
+            window.removeEventListener('optimage:overlay:close', handleOverlayClose);
+        };
+    }, [isOpen]);
+
+    // Show popup after 15 seconds if user hasn't seen it
     useEffect(() => {
         const hasSeenNewsletter = localStorage.getItem('optimage_newsletter_seen');
+        if (hasSeenNewsletter) return;
 
-        if (!hasSeenNewsletter) {
-            const timerId = setTimeout(() => {
+        const timerId = setTimeout(() => {
+            if (overlayOpenRef.current) {
+                // Another modal is open — mark as pending, show after it closes
+                pendingShowRef.current = true;
+            } else {
                 setIsOpen(true);
-            }, 15000);
+            }
+        }, 15000);
 
-            return () => clearTimeout(timerId);
-        }
+        return () => clearTimeout(timerId);
     }, []);
 
     // Close on outside click
@@ -35,7 +70,6 @@ export default function NewsletterPopup(): React.JSX.Element | null {
             }
         };
 
-        // Delay adding the listener so the popup opening click doesn't immediately close it
         const timer = setTimeout(() => {
             document.addEventListener('mousedown', handleClickOutside);
         }, 100);
@@ -86,116 +120,114 @@ export default function NewsletterPopup(): React.JSX.Element | null {
     if (!isOpen) return null;
 
     return (
-        <>
-            {/* Backdrop — clicking it closes the popup */}
-            <div
-                style={{
-                    position: 'fixed', inset: 0, zIndex: 9998,
-                    background: 'rgba(0,0,0,0.4)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)',
-                }}
-                onClick={handleClose}
-            />
+        <div
+            ref={popupRef}
+            className="newsletter-popup-card"
+            style={{
+                position: 'fixed',
+                bottom: '24px',
+                right: '24px',
+                zIndex: 9999,
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: '24px',
+                padding: '24px',
+                width: 'min(360px, calc(100vw - 32px))',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,92,231,0.15)',
+                overflow: 'hidden',
+                animation: 'newsletterSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+        >
+            {/* Decorative glow */}
+            <div style={{
+                position: 'absolute', top: '-50px', right: '-50px',
+                width: '150px', height: '150px',
+                background: 'var(--accent-glow)', filter: 'blur(50px)',
+                borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
+            }} />
 
-            {/* Popup Card */}
-            <div
-                ref={popupRef}
-                className="newsletter-popup-card"
+            {/* Close button */}
+            <button
+                onClick={handleClose}
+                aria-label="Close newsletter popup"
                 style={{
-                    position: 'fixed',
-                    bottom: '24px',
-                    right: '24px',
-                    zIndex: 9999,
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '24px',
-                    padding: '28px',
-                    width: 'min(380px, calc(100vw - 48px))',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,92,231,0.15)',
-                    overflow: 'hidden',
-                    animation: 'newsletterSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                    position: 'absolute', top: '14px', right: '14px',
+                    background: 'var(--bg-tertiary)', border: 'none',
+                    color: 'var(--text-muted)', cursor: 'pointer',
+                    padding: '6px', borderRadius: '50%', zIndex: 10,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
             >
-                {/* Decorative glow */}
-                <div style={{
-                    position: 'absolute', top: '-50px', right: '-50px',
-                    width: '150px', height: '150px',
-                    background: 'var(--accent-glow)', filter: 'blur(50px)',
-                    borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
-                }} />
+                <X size={16} />
+            </button>
 
-                {/* Close button */}
-                <button
-                    onClick={handleClose}
-                    style={{
-                        position: 'absolute', top: '14px', right: '14px',
-                        background: 'var(--bg-tertiary)', border: 'none',
-                        color: 'var(--text-muted)', cursor: 'pointer',
-                        padding: '6px', borderRadius: '50%', zIndex: 10,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                >
-                    <X size={16} />
-                </button>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <div style={{
+                        background: 'var(--gradient-primary)', width: '34px', height: '34px',
+                        borderRadius: '10px', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', color: 'white', flexShrink: 0,
+                    }}>
+                        <Sparkles size={17} />
+                    </div>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Join 10k+ Creators</h3>
+                </div>
 
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                        <div style={{
-                            background: 'var(--gradient-primary)', width: '36px', height: '36px',
-                            borderRadius: '10px', display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', color: 'white', flexShrink: 0,
-                        }}>
-                            <Sparkles size={18} />
-                        </div>
-                        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Join 10k+ Creators</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.55, marginBottom: '16px' }}>
+                    Weekly insights on image optimization, performance, and web speed. No spam, ever.
+                </p>
+
+                <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ position: 'relative' }}>
+                        <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                        <input
+                            type="email"
+                            placeholder="your@email.com"
+                            value={email}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                            style={{
+                                width: '100%', padding: '10px 13px 10px 36px',
+                                borderRadius: '10px', border: '1px solid var(--border)',
+                                background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                outline: 'none', fontSize: '0.88rem',
+                                boxSizing: 'border-box',
+                            }}
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = 'var(--accent-primary)'; }}
+                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = 'var(--border)'; }}
+                            required
+                            disabled={status === 'loading'}
+                        />
                     </div>
 
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '20px' }}>
-                        Weekly insights on image optimization, lossless math, and Next.js scale pipelines.
-                    </p>
+                    <button
+                        type="submit"
+                        className="btn btn-primary"
+                        style={{
+                            width: '100%', padding: '10px', fontSize: '0.88rem',
+                            borderRadius: '10px', fontWeight: 600,
+                            background: status === 'success' ? 'var(--success)' : '',
+                        }}
+                        disabled={status === 'loading'}
+                    >
+                        {status === 'loading'
+                            ? 'Subscribing...'
+                            : status === 'success'
+                                ? (isAlreadySubscribed ? '✨ Already on the list!' : '✓ You are in!')
+                                : 'Subscribe Free'
+                        }
+                    </button>
 
-                    <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ position: 'relative' }}>
-                            <Mail size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                            <input
-                                type="email"
-                                placeholder="hello@yourcompany.com"
-                                value={email}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                                style={{
-                                    width: '100%', padding: '12px 14px 12px 40px',
-                                    borderRadius: '12px', border: '1px solid var(--border)',
-                                    background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
-                                    outline: 'none', fontSize: '0.9rem',
-                                }}
-                                onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--accent-primary)'}
-                                onBlur={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--border)'}
-                                required
-                                disabled={status === 'loading'}
-                            />
-                        </div>
+                    {status === 'error' && (
+                        <p style={{ color: '#ef4444', fontSize: '0.8rem', textAlign: 'center', margin: '2px 0 0' }}>
+                            {errorMsg || 'Failed. Try again.'}
+                        </p>
+                    )}
+                </form>
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            style={{
-                                width: '100%', padding: '12px', fontSize: '0.9rem',
-                                borderRadius: '12px', fontWeight: 600,
-                                background: status === 'success' ? 'var(--success)' : '',
-                            }}
-                            disabled={status === 'loading'}
-                        >
-                            {status === 'loading' ? 'Subscribing...' : status === 'success' ? (isAlreadySubscribed ? '✨ Already on the list!' : '✓ Joined!') : 'Subscribe Free'}
-                        </button>
-                        {status === 'error' && <p style={{ color: '#ef4444', fontSize: '0.82rem', textAlign: 'center', margin: '4px 0 0' }}>{errorMsg || 'Failed. Try again.'}</p>}
-                    </form>
-
-                    <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '12px', marginBottom: 0 }}>
-                        No spam. Unsubscribe at any time.
-                    </p>
-                </div>
+                <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '10px', marginBottom: 0 }}>
+                    No spam. Unsubscribe any time.
+                </p>
             </div>
-        </>
+        </div>
     );
 }
