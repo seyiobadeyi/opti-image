@@ -116,3 +116,10 @@ Before diving into service worker caching strategies, bundle splitting, or serve
 [Upload your images to Optimage](/), convert to WebP or AVIF, and see the size difference immediately. For a 20-image product catalog, the entire batch takes under two minutes.
 
 The users you are trying to reach are already online, already spending, and actively looking for products and services that respect the realities of the network they are on. The technical bar is low. Most competitors have not cleared it.
+
+---
+
+**Related reading:**
+- [The Nigerian E-Commerce Seller's Guide to Image Optimization](/blog/image-optimization-for-nigerian-ecommerce-sellers) — practical steps for Jumia, Konga, and Jiji sellers specifically
+- [Why Your Nigerian Startup's Website Is Losing Investors](/blog/nigerian-startup-website-performance-guide) — how slow pages affect funding conversations and customer trust
+- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it) — the technical fix for the single most impactful Core Web Vitals metric

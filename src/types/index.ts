@@ -353,6 +353,27 @@ export interface PriceInfo {
   finalPrice: number;
   discount: number;
   promoApplied: string | null;
+  planId: string;
+  planLabel: string;
+  durationDays: number;
+}
+
+/** A single subscription plan from GET /api/payment/plans */
+export interface SubscriptionPlan {
+  id: string;
+  days: number;
+  price: number;
+  label: string;
+}
+
+/** A single USD plan from GET /api/payment/usd-plans (Lemon Squeezy) */
+export interface UsdPlan {
+  id: string;
+  label: string;
+  days: number;
+  priceUsd: number; // cents
+  variantId: string;
+  isPopular: boolean;
 }
 
 /** Response from GET /api/payment/referrals */

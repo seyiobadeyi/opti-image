@@ -31,7 +31,7 @@ export default function BlogIndex(): React.JSX.Element {
                         </div>
                         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>{excerpt}</p>
                         <Link href={`/blog/${slug}`} style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '12px', display: 'inline-block' }}>
-                            Read exactly how we built it →
+                            Read more →
                         </Link>
                     </li>
                 ))}
@@ -40,7 +40,7 @@ export default function BlogIndex(): React.JSX.Element {
             {allPostsData.length === 0 && (
                 <div style={{ padding: '40px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border)', textAlign: 'center' }}>
                     <h3 style={{ marginBottom: '16px' }}>Content Generating...</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Our engineering team is currently pushing new technical write-ups. Check back soon.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>New articles are on the way. Check back soon.</p>
                 </div>
             )}
         </div>

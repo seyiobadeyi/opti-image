@@ -8,7 +8,7 @@ function formatBytes(bytes: number): string {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
     Share2, CheckCircle2, Package, Download,
     ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check, Sparkles, Mail
@@ -24,6 +24,7 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
     const [copied, setCopied] = useState<boolean>(false);
     const [newsletterEmail, setNewsletterEmail] = useState<string>('');
     const [newsletterStatus, setNewsletterStatus] = useState<FormStatus>('idle');
+    const [badgeCopied, setBadgeCopied] = useState<boolean>(false);
     const supabase = useMemo(() => createClient(), []);
 
     const handleNewsletterSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -296,6 +297,7 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
             {/* Individual File Results */}
             <div className="result-file-list">
                 {results.map((result, index) => {
+
                     const savingsNum = parseFloat(result.savingsPercent);
                     return (
                         <div key={index} className="result-file-card" style={{
@@ -340,6 +342,53 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                         </div>
                     );
                 })}
+            </div>
+
+            {/* "Powered by Optimage" embed badge — creates natural backlinks */}
+            <div style={{
+                marginTop: '28px',
+                padding: '20px',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        Share the love on your site
+                    </span>
+                    <button
+                        onClick={() => {
+                            const badge = `<a href="https://optimage.dreamintrepid.com" title="Images optimized with Optimage" target="_blank" rel="noopener">Images optimized with Optimage</a>`;
+                            navigator.clipboard.writeText(badge).then(() => {
+                                setBadgeCopied(true);
+                                setTimeout(() => setBadgeCopied(false), 2500);
+                            });
+                        }}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '6px 12px', borderRadius: '8px',
+                            background: badgeCopied ? 'rgba(46,213,115,0.12)' : 'var(--bg-card)',
+                            border: `1px solid ${badgeCopied ? 'rgba(46,213,115,0.4)' : 'var(--border)'}`,
+                            color: badgeCopied ? 'var(--success)' : 'var(--text-secondary)',
+                            fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        {badgeCopied ? <Check size={13} /> : <Copy size={13} />}
+                        {badgeCopied ? 'Copied!' : 'Copy HTML'}
+                    </button>
+                </div>
+                <code style={{
+                    display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)',
+                    background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px',
+                    border: '1px solid var(--border)', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+                    lineHeight: 1.6,
+                }}>
+                    {`<a href="https://optimage.dreamintrepid.com" title="Images optimized with Optimage" target="_blank" rel="noopener">Images optimized with Optimage</a>`}
+                </code>
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                    Drop this anywhere on your site. It helps others find the tool and keeps it free.
+                </p>
             </div>
         </div>
     );

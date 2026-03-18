@@ -44,5 +44,20 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     // NOTE: You can also protect other routes here by checking if `!user`
     // and redirecting to the login page.
 
+    // ── Geo: set country cookie for client-side currency auto-detection ──
+    // Vercel injects x-vercel-ip-country on every request (ISO 3166-1 alpha-2).
+    // Falls back to 'NG' locally (no Vercel header). The paywall reads this
+    // cookie to default Nigerian users to NGN and everyone else to USD.
+    if (!request.cookies.has('optimage_country')) {
+        const country = request.headers.get('x-vercel-ip-country') ?? 'NG';
+        supabaseResponse.cookies.set('optimage_country', country, {
+            path: '/',
+            maxAge: 60 * 60 * 24, // 24 hours
+            httpOnly: false,       // must be readable by client-side JS
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
+        });
+    }
+
     return supabaseResponse
 }

@@ -16,7 +16,7 @@ export default function PricingTiers(): React.JSX.Element {
 
     useEffect(() => {
         apiClient.getPrice().then(setPricing).catch(() => {
-            setPricing({ originalPrice: 6000, finalPrice: 6000, discount: 0, promoApplied: null });
+            setPricing({ originalPrice: 6000, finalPrice: 6000, discount: 0, promoApplied: null, planId: '1y', planLabel: '1 Year', durationDays: 365 });
         });
 
         const supabase = createClient();

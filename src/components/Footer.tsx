@@ -87,8 +87,8 @@ export default function Footer(): React.JSX.Element {
                     </nav>
                 </div>
 
-                {/* Right: Newsletter (Ordered First on Mobile) */}
-                <div style={{ flex: '1 1 300px', maxWidth: '380px', background: 'var(--bg-card)', padding: '28px', borderRadius: '20px', border: '1px solid var(--border)' }}>
+                {/* Newsletter — pulled to top on mobile via CSS order */}
+                <div className="footer-newsletter" style={{ flex: '1 1 300px', maxWidth: '380px', background: 'var(--bg-card)', padding: '28px', borderRadius: '20px', border: '1px solid var(--border)' }}>
                     <h4 style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 600 }}>
                         <Mail size={18} /> Join our Newsletter
                     </h4>

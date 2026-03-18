@@ -11,6 +11,8 @@ import type {
     SubscriptionStatus,
     CheckoutResponse,
     PriceInfo,
+    SubscriptionPlan,
+    UsdPlan,
     ReferralStats,
 } from '@/types';
 
@@ -217,15 +219,25 @@ export const apiClient = {
     },
 
     /**
-     * Create a Paystack checkout session for a yearly subscription.
+     * Fetch all available subscription plans.
      */
-    async createSubscriptionCheckout(promoCode?: string, referralCode?: string): Promise<CheckoutResponse> {
+    async getPlans(): Promise<SubscriptionPlan[]> {
+        const response = await fetch(`${API_BASE}/api/payment/plans`);
+        if (!response.ok) return [];
+        const data: { plans: SubscriptionPlan[] } = await response.json();
+        return data.plans ?? [];
+    },
+
+    /**
+     * Create a Paystack checkout session for the selected subscription plan.
+     */
+    async createSubscriptionCheckout(promoCode?: string, referralCode?: string, planId?: string): Promise<CheckoutResponse> {
         const headers = await getAuthHeaders();
 
         const response = await fetch(`${API_BASE}/api/payment/checkout/subscription`, {
             method: 'POST',
             headers: { ...headers, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ promoCode, referralCode }),
+            body: JSON.stringify({ promoCode, referralCode, planId }),
         });
 
         if (!response.ok) {
@@ -237,11 +249,14 @@ export const apiClient = {
     },
 
     /**
-     * Get the current subscription price with optional promo code.
+     * Get the price for a plan with optional promo code applied.
      */
-    async getPrice(promoCode?: string): Promise<PriceInfo> {
-        const params = promoCode ? `?promoCode=${encodeURIComponent(promoCode)}` : '';
-        const response = await fetch(`${API_BASE}/api/payment/price${params}`);
+    async getPrice(promoCode?: string, planId?: string): Promise<PriceInfo> {
+        const params = new URLSearchParams();
+        if (promoCode) params.set('promoCode', promoCode);
+        if (planId) params.set('planId', planId);
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${API_BASE}/api/payment/price${qs}`);
         return response.json() as Promise<PriceInfo>;
     },
 
@@ -259,5 +274,32 @@ export const apiClient = {
         } catch {
             return null;
         }
+    },
+
+    /**
+     * Fetch all available USD plans (Lemon Squeezy).
+     */
+    async getUsdPlans(): Promise<UsdPlan[]> {
+        const response = await fetch(`${API_BASE}/api/payment/usd-plans`);
+        if (!response.ok) return [];
+        const data: { plans: UsdPlan[] } = await response.json();
+        return data.plans ?? [];
+    },
+
+    /**
+     * Create a Lemon Squeezy checkout URL for USD payment.
+     */
+    async createUsdCheckout(planId: string): Promise<{ checkoutUrl: string }> {
+        const response = await fetch(`${API_BASE}/api/payment/checkout/usd`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ planId }),
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'USD checkout failed');
+        }
+        return response.json();
     },
 };
