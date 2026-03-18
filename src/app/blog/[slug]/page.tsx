@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
             section: 'Media Optimization',
             images: [
                 {
-                    url: `${SITE_URL}/image-2.png`,
+                    url: `${SITE_URL}/og-blog.jpg`,
                     width: 1200,
                     height: 630,
                     alt: postData.title,
@@ -82,7 +82,7 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
         },
         image: {
             '@type': 'ImageObject',
-            url: `${SITE_URL}/image-2.png`,
+            url: `${SITE_URL}/og-blog.jpg`,
             width: 1200,
             height: 630,
         },

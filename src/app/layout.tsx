@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     siteName: 'Optimage',
     images: [
       {
-        url: `${SITE_URL}/image-2.png`,
+        url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: 'Optimage — Bulk Image and Media Optimizer by Dream Intrepid Ltd',
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Optimage — Compress, Convert & Optimize Images in Bulk',
     description: 'WebP, AVIF, video compression, AI transcription — all in one tool. Free to start.',
-    images: [`${SITE_URL}/image-2.png`],
+    images: [`${SITE_URL}/og-image.jpg`],
     creator: '@dreamintrepid',
     site: '@dreamintrepid',
   },
@@ -184,7 +184,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                     },
                   ],
                   publisher: { '@id': `${SITE_URL}/#organization` },
-                  screenshot: `${SITE_URL}/image-2.png`,
+                  screenshot: `${SITE_URL}/og-image.jpg`,
                 },
               ],
             }),
