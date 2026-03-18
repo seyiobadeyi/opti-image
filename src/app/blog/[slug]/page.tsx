@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     const { slug } = await params;
     const postData: BlogPostData = await getPostData(slug);
     return {
-        title: `${postData.title} - Optimage Engineering`,
+        title: `${postData.title} - The Optimage Journal`,
         description: postData.excerpt,
     };
 }
@@ -30,7 +30,7 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                 <div style={{ fontSize: '1rem', color: 'var(--text-muted)', display: 'flex', gap: '16px', alignItems: 'center' }}>
                     <span>{new Date(postData.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     <span style={{ width: '4px', height: '4px', background: 'var(--text-muted)', borderRadius: '50%' }}></span>
-                    <span>By Engineering Team</span>
+                    <span>By Optimage</span>
                 </div>
             </header>
 

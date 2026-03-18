@@ -1,5 +1,6 @@
 import './globals.css';
 import NewsletterPopup from '@/components/NewsletterPopup';
+import InactivityWatcher from '@/components/InactivityWatcher';
 
 import { GoogleAnalytics } from '@next/third-parties/google';
 import type { Metadata, Viewport } from 'next';
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       <body suppressHydrationWarning>
         {children}
         <NewsletterPopup />
+        <InactivityWatcher />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? ''} />
       </body>
     </html>

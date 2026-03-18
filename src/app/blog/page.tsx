@@ -4,8 +4,8 @@ import type { Metadata } from 'next';
 import type { BlogPostMeta } from '@/types';
 
 export const metadata: Metadata = {
-    title: 'Blog - Performance & Image Optimization Engineering',
-    description: 'Deep technical diving into lossless algorithms, edge computing, audio transcription, and maximizing Web Vitals via precise media compression.',
+    title: 'The Optimage Journal — Insights on Media, Performance & the Web',
+    description: 'Practical guides, data-driven research, and real-world insights on image optimization, web performance, and building faster digital products.',
 };
 
 export default function BlogIndex(): React.JSX.Element {
@@ -13,9 +13,9 @@ export default function BlogIndex(): React.JSX.Element {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '120px 24px 80px' }}>
-            <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '24px', letterSpacing: '-0.02em' }}>Optimage Engineering Blog</h1>
+            <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '24px', letterSpacing: '-0.02em' }}>The Optimage Journal</h1>
             <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '64px', lineHeight: 1.6 }}>
-                Technical insights, coding tutorials, and deep dives into the math and architecture powering modern lossless compression algorithms.
+                Practical guides, data-driven research, and real-world insights on image optimization, web performance, and building faster digital products.
             </p>
 
             <ul style={{ listStyle: 'none', padding: 0 }}>
