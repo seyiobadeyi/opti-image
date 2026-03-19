@@ -16,25 +16,57 @@ export async function subscribeNewsletter(email: string): Promise<NewsletterResu
         return { error: 'Please enter a valid email address.' };
     }
 
+    const API_BASE: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+    // Prefer the server API (bypasses Supabase RLS using service role on the server).
+    try {
+        const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: cleanEmail }),
+        });
+
+        const data: unknown = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            const message = (typeof data === 'object' && data && 'message' in data && typeof (data as { message?: unknown }).message === 'string')
+                ? (data as { message: string }).message
+                : 'An error occurred while subscribing. Please try again later.';
+            return { error: message };
+        }
+
+        if (typeof data === 'object' && data) {
+            const alreadySubscribed = 'alreadySubscribed' in data ? Boolean((data as { alreadySubscribed?: unknown }).alreadySubscribed) : false;
+            const message = 'message' in data && typeof (data as { message?: unknown }).message === 'string'
+                ? (data as { message: string }).message
+                : 'Successfully subscribed to the newsletter!';
+            return { success: true, alreadySubscribed, message };
+        }
+
+        return { success: true, message: 'Successfully subscribed to the newsletter!' };
+    } catch (err: unknown) {
+        console.error('Newsletter API error:', err);
+    }
+
+    // Fallback: attempt direct Supabase insert (may fail if RLS blocks anonymous inserts).
     try {
         const supabase = await createClient();
 
         const { error } = await supabase
-            .from('subscribers')
+            .from('newsletter_subscribers')
             .insert([{ email: cleanEmail }]);
 
         if (error) {
-            // Postgres unique constraint error code
             if (error.code === '23505') {
-                return { success: true, alreadySubscribed: true, message: 'This email is already subscribed!' };
+                return { success: true, alreadySubscribed: true, message: 'Already subscribed' };
             }
-            console.error('Newsletter subscription error:', error);
+            console.error('Newsletter subscription fallback error:', error);
             return { error: 'An error occurred while subscribing. Please try again later.' };
         }
 
         return { success: true, message: 'Successfully subscribed to the newsletter!' };
     } catch (err: unknown) {
-        console.error('Unexpected error during subscription:', err);
+        console.error('Unexpected error during subscription fallback:', err);
         return { error: 'An unexpected error occurred.' };
     }
 }

@@ -33,20 +33,21 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
     const [error, setError]               = useState<string | null>(null);
 
     // Currency toggle — auto-detected from geo cookie set by middleware
-    const [currency, setCurrency]         = useState<'ngn' | 'usd'>('ngn');
+    // Default to USD; switch to NGN only for Nigeria (NG)
+    const [currency, setCurrency]         = useState<'ngn' | 'usd'>('usd');
     const [usdPlans, setUsdPlans]         = useState<UsdPlan[]>([]);
     const [selectedUsdPlanId, setSelectedUsdPlanId] = useState<string>('1y');
 
-    // Auto-select USD for non-Nigerian visitors
+    // Auto-select NGN only for Nigerian visitors
     useEffect(() => {
         if (typeof document === 'undefined') return;
         const country = document.cookie
             .split('; ')
             .find(row => row.startsWith('optimage_country='))
             ?.split('=')[1];
-        // Default to NGN only for Nigeria (NG); everyone else gets USD
-        if (country && country !== 'NG') {
-            setCurrency('usd');
+        // Default to USD; switch to NGN only for Nigeria (NG)
+        if (country === 'NG') {
+            setCurrency('ngn');
         }
     }, []);
 
@@ -156,13 +157,22 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
         }
     };
 
-    const formatPrice = (amount: number): string => {
+    const formatNgnPrice = (amount: number): string => {
         return new Intl.NumberFormat('en-NG', {
             style: 'currency', currency: 'NGN', minimumFractionDigits: 0,
         }).format(amount);
     };
 
-    const effectiveDuration = pricing?.planLabel ?? plans.find((p) => p.id === selectedPlanId)?.label ?? '1 Year';
+    const formatUsdPrice = (amountInCents: number): string => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency', currency: 'USD', minimumFractionDigits: 2,
+        }).format(amountInCents / 100);
+    };
+
+    const selectedUsdPlan = usdPlans.find((p) => p.id === selectedUsdPlanId);
+    const effectiveDuration = currency === 'usd'
+        ? (selectedUsdPlan?.label ?? '1 Year')
+        : (pricing?.planLabel ?? plans.find((p) => p.id === selectedPlanId)?.label ?? '1 Year');
 
     return (
         <div
@@ -222,33 +232,39 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
 
                     {/* Price Display */}
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-                        {pricing?.discount && pricing.discount > 0 ? (
-                            <>
-                                <span style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through' }}>
-                                    {formatPrice(pricing.originalPrice)}
-                                </span>
-                                <span style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white', letterSpacing: '-0.03em' }}>
-                                    {formatPrice(pricing.finalPrice)}
-                                </span>
-                            </>
-                        ) : (
+                        {currency === 'usd' ? (
                             <span style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white', letterSpacing: '-0.03em' }}>
-                                {pricing ? formatPrice(pricing.originalPrice) : '...'}
+                                {selectedUsdPlan ? formatUsdPrice(selectedUsdPlan.priceUsd) : '...'}
                             </span>
+                        ) : (
+                            pricing?.discount && pricing.discount > 0 ? (
+                                <>
+                                    <span style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through' }}>
+                                        {formatNgnPrice(pricing.originalPrice)}
+                                    </span>
+                                    <span style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white', letterSpacing: '-0.03em' }}>
+                                        {formatNgnPrice(pricing.finalPrice)}
+                                    </span>
+                                </>
+                            ) : (
+                                <span style={{ fontSize: '2.2rem', fontWeight: 900, color: 'white', letterSpacing: '-0.03em' }}>
+                                    {pricing ? formatNgnPrice(pricing.originalPrice) : '...'}
+                                </span>
+                            )
                         )}
                         <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
                             / {effectiveDuration.toLowerCase()}
                         </span>
                     </div>
 
-                    {pricing?.promoApplied && (
+                    {currency === 'ngn' && pricing?.promoApplied && (
                         <div style={{
                             marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '5px',
                             background: 'rgba(46,213,115,0.18)', border: '1px solid rgba(46,213,115,0.35)',
                             borderRadius: '100px', padding: '4px 12px', fontSize: '0.78rem', color: '#2ed573',
                         }}>
                             <Check size={11} />
-                            &quot;{pricing.promoApplied}&quot; applied — {effectiveDuration} access {pricing.discount > 0 ? `saves ${formatPrice(pricing.discount)}` : 'FREE'}
+                            &quot;{pricing.promoApplied}&quot; applied — {effectiveDuration} access {pricing.discount > 0 ? `saves ${formatNgnPrice(pricing.discount)}` : 'FREE'}
                         </div>
                     )}
                 </div>
@@ -332,7 +348,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                         {plan.label}
                                                     </div>
                                                     <div style={{ fontSize: '0.75rem', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: 600 }}>
-                                                        ${(plan.priceUsd / 100).toFixed(2)}
+                                                        {formatUsdPrice(plan.priceUsd)}
                                                     </div>
                                                 </button>
                                             );
@@ -383,7 +399,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                     : (() => {
                                         const usdPlan = usdPlans.find(p => p.id === selectedUsdPlanId);
                                         return usdPlan
-                                            ? `Subscribe — $${(usdPlan.priceUsd / 100).toFixed(2)}/${usdPlan.label.toLowerCase()}`
+                                            ? `Subscribe — ${formatUsdPrice(usdPlan.priceUsd)}/${usdPlan.label.toLowerCase()}`
                                             : 'Subscribe';
                                     })()
                                 }
@@ -442,7 +458,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                         {plan.label}
                                                     </div>
                                                     <div style={{ fontSize: '0.75rem', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: 600 }}>
-                                                        {formatPrice(plan.price)}
+                                                        {formatNgnPrice(plan.price)}
                                                     </div>
                                                 </button>
                                             );
@@ -538,7 +554,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                     ? 'Redirecting to payment...'
                                     : pricing?.finalPrice === 0
                                         ? `Activate Free Access (${effectiveDuration})`
-                                        : `Subscribe — ${pricing ? formatPrice(pricing.finalPrice) : '...'}/${effectiveDuration.toLowerCase()}`
+                                            : `Subscribe — ${pricing ? formatNgnPrice(pricing.finalPrice) : '...'}/${effectiveDuration.toLowerCase()}`
                                 }
                             </button>
 
