@@ -202,6 +202,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
         }).format(amountInCents / 100);
     };
 
+    const usdPaymentsLive = process.env.NEXT_PUBLIC_USD_PAYMENTS_LIVE === 'true';
     const selectedUsdPlan = usdPlans.find((p) => p.id === selectedUsdPlanId);
     const effectiveDuration = currency === 'usd'
         ? (selectedUsdPlan?.label ?? '1 Year')
@@ -474,27 +475,59 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                             )}
 
                             {/* USD CTA Button */}
-                            <button
-                                onClick={handleUsdSubscribe}
-                                disabled={checkoutStatus === 'loading' || usdPlans.length === 0}
-                                className="btn btn-primary"
-                                style={{ width: '100%', padding: '14px', fontSize: '1rem', borderRadius: '14px', fontWeight: 700 }}
-                            >
-                                {checkoutStatus === 'loading'
-                                    ? (pricing?.finalPrice === 0 ? 'Activating access...' : 'Redirecting to payment...')
-                                    : pricing?.finalPrice === 0
-                                        ? `Activate Free Access (${effectiveDuration})`
-                                        : (() => {
-                                            const usdPlan = usdPlans.find(p => p.id === selectedUsdPlanId);
-                                            return usdPlan
-                                                ? `Subscribe — ${formatUsdPrice(usdPlan.priceUsd)}/${usdPlan.label.toLowerCase()}`
-                                                : 'Subscribe';
-                                        })()
-                                }
-                            </button>
+                            {/* Free promo codes (100% off) always work regardless of usdPaymentsLive */}
+                            {!usdPaymentsLive && pricing?.finalPrice !== 0 ? (
+                                <>
+                                    <div style={{
+                                        width: '100%', padding: '12px 16px',
+                                        borderRadius: '14px', marginBottom: '10px',
+                                        background: 'rgba(251,191,36,0.08)',
+                                        border: '1px solid rgba(251,191,36,0.25)',
+                                        display: 'flex', alignItems: 'flex-start', gap: '10px',
+                                    }}>
+                                        <span style={{ fontSize: '1rem', flexShrink: 0 }}>🔒</span>
+                                        <div>
+                                            <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'rgba(251,191,36,0.9)', margin: 0, marginBottom: '3px' }}>
+                                                International payments coming soon
+                                            </p>
+                                            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+                                                USD card payments are being activated. Have a promo code? Enter it above for free access. Otherwise, switch to NGN to pay now.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setCurrency('ngn')}
+                                        className="btn btn-primary"
+                                        style={{ width: '100%', padding: '14px', fontSize: '1rem', borderRadius: '14px', fontWeight: 700 }}
+                                    >
+                                        Pay in NGN instead
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={handleUsdSubscribe}
+                                    disabled={checkoutStatus === 'loading' || usdPlans.length === 0}
+                                    className="btn btn-primary"
+                                    style={{ width: '100%', padding: '14px', fontSize: '1rem', borderRadius: '14px', fontWeight: 700 }}
+                                >
+                                    {checkoutStatus === 'loading'
+                                        ? (pricing?.finalPrice === 0 ? 'Activating access...' : 'Redirecting to payment...')
+                                        : pricing?.finalPrice === 0
+                                            ? `Activate Free Access (${effectiveDuration})`
+                                            : (() => {
+                                                const usdPlan = usdPlans.find(p => p.id === selectedUsdPlanId);
+                                                return usdPlan
+                                                    ? `Subscribe — ${formatUsdPrice(usdPlan.priceUsd)}/${usdPlan.label.toLowerCase()}`
+                                                    : 'Subscribe';
+                                            })()
+                                    }
+                                </button>
+                            )}
 
                             <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '10px' }}>
-                                Secure checkout via Lemon Squeezy · Prices in USD · Works with any international card
+                                {usdPaymentsLive
+                                    ? 'Secure checkout via Lemon Squeezy · Prices in USD · Works with any international card'
+                                    : 'Secure NGN checkout via Paystack · Instant activation · Cancel anytime'}
                             </p>
                         </>
                     ) : (
