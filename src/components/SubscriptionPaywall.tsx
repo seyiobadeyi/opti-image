@@ -280,34 +280,6 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                     }}
                 >
 
-                    {/* Currency Toggle */}
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-                        <button
-                            onClick={() => setCurrency('ngn')}
-                            style={{
-                                flex: 1, padding: '9px 14px', borderRadius: '100px', fontWeight: 700,
-                                fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s ease',
-                                border: '2px solid var(--accent-primary)',
-                                background: currency === 'ngn' ? 'var(--gradient-primary)' : 'transparent',
-                                color: currency === 'ngn' ? '#fff' : 'var(--text-secondary)',
-                            }}
-                        >
-                            Pay in NGN ₦
-                        </button>
-                        <button
-                            onClick={() => setCurrency('usd')}
-                            style={{
-                                flex: 1, padding: '9px 14px', borderRadius: '100px', fontWeight: 700,
-                                fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.15s ease',
-                                border: '2px solid var(--accent-primary)',
-                                background: currency === 'usd' ? 'var(--gradient-primary)' : 'transparent',
-                                color: currency === 'usd' ? '#fff' : 'var(--text-secondary)',
-                            }}
-                        >
-                            Pay in USD $
-                        </button>
-                    </div>
-
                     {currency === 'usd' ? (
                         <>
                             {/* USD Plan Selector */}
