@@ -100,12 +100,20 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
             if (otpError) throw new Error(otpError.message);
             setStep('otp');
             setMessage('An 8-digit code has been sent to your email.');
-            setResendCooldownMs(30_000);
+            setResendCooldownMs(60_000);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
             setLoading(false);
         }
+    };
+
+    const parseRetryAfterSeconds = (msg: string): number | null => {
+        // Supabase commonly returns: "For security purposes, you can only request this after 23 seconds."
+        const match = msg.match(/after\s+(\d+)\s+seconds?/i);
+        if (!match) return null;
+        const secs = Number(match[1]);
+        return Number.isFinite(secs) && secs > 0 ? secs : null;
     };
 
     const handleResendCode = async (): Promise<void> => {
@@ -123,9 +131,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
             setOtp(['', '', '', '', '', '', '', '']);
             otpRefs.current[0]?.focus();
             setMessage('New code sent. Enter it on this device to sign in here.');
-            setResendCooldownMs(30_000);
+            setResendCooldownMs(60_000);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Failed to resend code');
+            const msg = err instanceof Error ? err.message : 'Failed to resend code';
+            const retryAfter = parseRetryAfterSeconds(msg);
+            if (retryAfter) {
+                setResendCooldownMs(retryAfter * 1000);
+            }
+            setError(msg);
         } finally {
             setLoading(false);
         }

@@ -194,7 +194,8 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                 position: 'relative',
                 boxShadow: '0 32px 64px rgba(0,0,0,0.4), 0 0 80px rgba(108,92,231,0.1)',
                 maxHeight: '90vh',
-                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
             }}>
                 {/* Close Button */}
                 {onClose && (
@@ -270,7 +271,14 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                 </div>
 
                 {/* Body */}
-                <div style={{ padding: '22px 28px' }}>
+                <div
+                    className="paywall-scroll"
+                    style={{
+                        padding: '22px 28px',
+                        overflowY: 'auto',
+                        flex: 1,
+                    }}
+                >
 
                     {/* Currency Toggle */}
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>

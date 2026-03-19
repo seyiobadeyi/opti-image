@@ -1327,6 +1327,17 @@ body {
   padding: 0 24px;
 }
 
+/* ===== PAYWALL MODAL ===== */
+.paywall-scroll {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge legacy */
+}
+
+.paywall-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

@@ -46,16 +46,23 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
     // ── Geo: set country cookie for client-side currency auto-detection ──
     // Vercel injects x-vercel-ip-country on every request (ISO 3166-1 alpha-2).
-    // Falls back to 'NG' locally (no Vercel header). The paywall reads this
-    // cookie to default Nigerian users to NGN and everyone else to USD.
-    if (!request.cookies.has('optimage_country')) {
-        const country = request.headers.get('x-vercel-ip-country') ?? 'NG';
+    // In local/dev, default to 'US' so USD is the baseline.
+    // The paywall reads this cookie to default Nigerian users to NGN and everyone else to USD.
+    const vercelCountry = request.headers.get('x-vercel-ip-country');
+    const isProd = process.env.NODE_ENV === 'production';
+
+    // In production, always trust the Vercel header when present (keeps users correct if they travel/VPN).
+    // In dev, keep it stable as US unless you manually set the cookie for testing.
+    const shouldSetGeoCookie = (!isProd && !request.cookies.has('optimage_country')) || (isProd && !!vercelCountry) || (!isProd && !!vercelCountry);
+
+    if (shouldSetGeoCookie) {
+        const country = vercelCountry ?? (isProd ? 'US' : 'US');
         supabaseResponse.cookies.set('optimage_country', country, {
             path: '/',
             maxAge: 60 * 60 * 24, // 24 hours
-            httpOnly: false,       // must be readable by client-side JS
+            httpOnly: false, // must be readable by client-side JS
             sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
+            secure: isProd,
         });
     }
 
