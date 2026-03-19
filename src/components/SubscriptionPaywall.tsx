@@ -24,22 +24,22 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
         };
     }, []);
 
-    const [plans, setPlans]               = useState<SubscriptionPlan[]>([]);
+    const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
     const [selectedPlanId, setSelectedPlanId] = useState<string>('1y');
-    const [promoCode, setPromoCode]       = useState<string>('');
-    const [showPromo, setShowPromo]       = useState<boolean>(false);
-    const [promoStatus, setPromoStatus]   = useState<FormStatus>('idle');
-    const [pricing, setPricing]           = useState<PriceInfo | null>(null);
+    const [promoCode, setPromoCode] = useState<string>('');
+    const [showPromo, setShowPromo] = useState<boolean>(false);
+    const [promoStatus, setPromoStatus] = useState<FormStatus>('idle');
+    const [pricing, setPricing] = useState<PriceInfo | null>(null);
     const [checkoutStatus, setCheckoutStatus] = useState<FormStatus>('idle');
-    const [error, setError]               = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     // Currency toggle — auto-detected from geo cookie set by middleware
     // Default to USD; switch to NGN only for Nigeria (NG)
-    const [currency, setCurrency]         = useState<'ngn' | 'usd'>(() => {
+    const [currency, setCurrency] = useState<'ngn' | 'usd'>(() => {
         const country = getCookie('optimage_country');
         return country === 'NG' ? 'ngn' : 'usd';
     });
-    const [usdPlans, setUsdPlans]         = useState<UsdPlan[]>([]);
+    const [usdPlans, setUsdPlans] = useState<UsdPlan[]>([]);
     const [selectedUsdPlanId, setSelectedUsdPlanId] = useState<string>('1y');
 
     // Auto-select NGN only for Nigerian visitors (in case the cookie arrives later)
@@ -67,7 +67,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
 
     // Load USD plans on mount
     useEffect(() => {
-        apiClient.getUsdPlans().then(setUsdPlans).catch(() => {});
+        apiClient.getUsdPlans().then(setUsdPlans).catch(() => { });
     }, []);
 
     // Re-fetch price whenever selected plan or promo code changes (after promo is applied)
@@ -79,7 +79,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                 setPricing({ originalPrice: plan.price, finalPrice: plan.price, discount: 0, promoApplied: null, planId: plan.id, planLabel: plan.label, durationDays: plan.days });
             }
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedPlanId, plans]);
 
     const handleSelectPlan = (planId: string) => {
@@ -87,7 +87,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
         // Re-apply existing promo (if any) to the new plan
         const appliedPromo = pricing?.promoApplied;
         if (appliedPromo) {
-            apiClient.getPrice(appliedPromo, planId).then(setPricing).catch(() => {});
+            apiClient.getPrice(appliedPromo, planId).then(setPricing).catch(() => { });
         }
     };
 
@@ -95,8 +95,28 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
         if (!promoCode.trim()) return;
         setPromoStatus('loading');
         setError(null);
+
         try {
+            // 1. First, check if this is a "local" promo code (from .env)
             const result = await apiClient.getPrice(promoCode.trim(), selectedPlanId);
+
+            // If it's a 100% off code, it's universal!
+            if (result.finalPrice === 0 && result.promoApplied) {
+                setPricing(result);
+                setPromoStatus('success');
+                return;
+            }
+
+            // 2. If we are in USD mode and it's not a 100% off code, 
+            // treat it as a Lemon Squeezy specific code.
+            if (currency === 'usd') {
+                setTimeout(() => {
+                    setPromoStatus('success');
+                }, 600);
+                return;
+            }
+
+            // 3. Normal NGN promo logic
             setPricing(result);
             if (result.promoApplied) {
                 setPromoStatus('success');
@@ -106,6 +126,10 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                 setTimeout(() => setPromoStatus('idle'), 3000);
             }
         } catch {
+            if (currency === 'usd') {
+                setPromoStatus('success'); // Revert to assume LS code if price check fails
+                return;
+            }
             setPromoStatus('error');
             setError('Failed to validate promo code');
             setTimeout(() => setPromoStatus('idle'), 3000);
@@ -146,10 +170,19 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
     };
 
     const handleUsdSubscribe = async (): Promise<void> => {
+        // If it's a 100% off global promo, use the standard free activation path
+        if (pricing?.finalPrice === 0 && promoStatus === 'success') {
+            handleSubscribe();
+            return;
+        }
+
         setCheckoutStatus('loading');
         setError(null);
         try {
-            const result = await apiClient.createUsdCheckout(selectedUsdPlanId);
+            const result = await apiClient.createUsdCheckout(
+                selectedUsdPlanId,
+                promoCode.trim() || undefined
+            );
             window.location.href = result.checkoutUrl;
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Checkout failed');
@@ -360,6 +393,79 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                 })}
                             </div>
 
+                            {/* Promo Code — collapsible, for USD (handled by Lemon Squeezy) */}
+                            {promoStatus !== 'success' && (
+                                <div style={{ marginBottom: '16px' }}>
+                                    {!showPromo ? (
+                                        <button
+                                            onClick={() => setShowPromo(true)}
+                                            style={{
+                                                background: 'none', border: 'none', cursor: 'pointer',
+                                                color: 'var(--text-muted)', fontSize: '0.8rem',
+                                                display: 'flex', alignItems: 'center', gap: '5px', padding: 0,
+                                            }}
+                                        >
+                                            <Tag size={12} /> Have a promo code? <ChevronDown size={12} />
+                                        </button>
+                                    ) : (
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <div style={{ flex: 1, position: 'relative' }}>
+                                                <Tag size={13} style={{
+                                                    position: 'absolute', left: '11px', top: '50%',
+                                                    transform: 'translateY(-50%)', color: 'var(--text-muted)',
+                                                }} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter code"
+                                                    value={promoCode}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPromoCode(e.target.value)}
+                                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                                        if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); }
+                                                    }}
+                                                    autoFocus
+                                                    style={{
+                                                        width: '100%', padding: '9px 11px 9px 32px',
+                                                        borderRadius: '10px', border: '1px solid var(--border)',
+                                                        background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                                        fontSize: '0.85rem', outline: 'none',
+                                                    }}
+                                                    disabled={promoStatus === 'loading'}
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={handleApplyPromo}
+                                                disabled={promoStatus === 'loading' || !promoCode.trim()}
+                                                className="btn btn-secondary"
+                                                style={{ padding: '9px 14px', fontSize: '0.82rem', borderRadius: '10px', whiteSpace: 'nowrap' }}
+                                            >
+                                                {promoStatus === 'loading' ? '...' : 'Add'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {promoStatus === 'success' && currency === 'usd' && (
+                                <div style={{
+                                    marginBottom: '10px', display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                    background: 'rgba(46,213,115,0.18)', border: '1px solid rgba(46,213,115,0.35)',
+                                    borderRadius: '100px', padding: '6px 12px', fontSize: '0.78rem', color: '#2ed573',
+                                    width: '100%', justifyContent: 'center',
+                                }}>
+                                    {pricing?.finalPrice === 0 ? (
+                                        <>
+                                            <Check size={11} />
+                                            &quot;{promoCode.toUpperCase()}&quot; applied — FREE ACCESS
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check size={11} />
+                                            Code &quot;{promoCode.toUpperCase()}&quot; will be applied at checkout
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Error */}
                             {error && (
                                 <p style={{ color: '#ef4444', fontSize: '0.82rem', marginBottom: '10px', textAlign: 'center' }}>
@@ -375,13 +481,15 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                 style={{ width: '100%', padding: '14px', fontSize: '1rem', borderRadius: '14px', fontWeight: 700 }}
                             >
                                 {checkoutStatus === 'loading'
-                                    ? 'Redirecting to payment...'
-                                    : (() => {
-                                        const usdPlan = usdPlans.find(p => p.id === selectedUsdPlanId);
-                                        return usdPlan
-                                            ? `Subscribe — ${formatUsdPrice(usdPlan.priceUsd)}/${usdPlan.label.toLowerCase()}`
-                                            : 'Subscribe';
-                                    })()
+                                    ? (pricing?.finalPrice === 0 ? 'Activating access...' : 'Redirecting to payment...')
+                                    : pricing?.finalPrice === 0
+                                        ? `Activate Free Access (${effectiveDuration})`
+                                        : (() => {
+                                            const usdPlan = usdPlans.find(p => p.id === selectedUsdPlanId);
+                                            return usdPlan
+                                                ? `Subscribe — ${formatUsdPrice(usdPlan.priceUsd)}/${usdPlan.label.toLowerCase()}`
+                                                : 'Subscribe';
+                                        })()
                                 }
                             </button>
 
@@ -534,7 +642,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                     ? 'Redirecting to payment...'
                                     : pricing?.finalPrice === 0
                                         ? `Activate Free Access (${effectiveDuration})`
-                                            : `Subscribe — ${pricing ? formatNgnPrice(pricing.finalPrice) : '...'}/${effectiveDuration.toLowerCase()}`
+                                        : `Subscribe — ${pricing ? formatNgnPrice(pricing.finalPrice) : '...'}/${effectiveDuration.toLowerCase()}`
                                 }
                             </button>
 

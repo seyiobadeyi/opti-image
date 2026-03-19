@@ -289,12 +289,16 @@ export const apiClient = {
     /**
      * Create a Lemon Squeezy checkout URL for USD payment.
      */
-    async createUsdCheckout(planId: string): Promise<{ checkoutUrl: string }> {
+    async createUsdCheckout(planId: string, promoCode?: string): Promise<{ checkoutUrl: string }> {
+        const authHeaders = await getAuthHeaders();
         const response = await fetch(`${API_BASE}/api/payment/checkout/usd`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders,
+            },
             credentials: 'include',
-            body: JSON.stringify({ planId }),
+            body: JSON.stringify({ planId, promoCode }),
         });
         if (!response.ok) {
             const err: { message?: string } = await response.json().catch(() => ({}));
