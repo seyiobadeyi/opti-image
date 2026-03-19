@@ -1642,6 +1642,12 @@ body {
   }
 }
 
+/* ===== SKELETON LOADING ===== */
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ===== ANIMATIONS ===== */
 @keyframes slideUpFade {
   from {

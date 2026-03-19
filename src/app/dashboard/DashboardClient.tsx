@@ -32,6 +32,21 @@ function formatDate(dateString: string): string {
     });
 }
 
+// ─── Skeleton ────────────────────────────────────────────────────
+function SkeletonBox({ width, height, style }: { width?: string; height?: string; style?: React.CSSProperties }): React.JSX.Element {
+    return (
+        <div style={{
+            width: width || '100%',
+            height: height || '16px',
+            background: 'linear-gradient(90deg, #1e1e2e 25%, #2a2a3e 50%, #1e1e2e 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'skeletonPulse 1.5s ease-in-out infinite',
+            borderRadius: '8px',
+            ...style,
+        }} />
+    );
+}
+
 // ─── Tabs ────────────────────────────────────────────────────────
 const LogoIcon = ({ size: _size }: { size?: number }): React.JSX.Element => <img src="/logo.png" alt="Optimage" style={{ height: '1.1em', width: 'auto', objectFit: 'contain', verticalAlign: 'middle' }} />;
 
@@ -77,6 +92,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
     // ── Subscription & Referral state ────────────────────
     const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
+    const [subscriptionLoading, setSubscriptionLoading] = useState<boolean>(true);
     const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
     const [referralLoading, setReferralLoading] = useState<boolean>(true);
     const [copied, setCopied] = useState<boolean>(false);
@@ -84,9 +100,12 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
     useEffect(() => {
         // Load subscription status
-        apiClient.getSubscriptionStatus().then(setSubscriptionStatus).catch(() => {
-            setSubscriptionStatus({ active: false, expiresAt: null });
-        });
+        apiClient.getSubscriptionStatus()
+            .then(setSubscriptionStatus)
+            .catch(() => {
+                setSubscriptionStatus({ active: false, expiresAt: null });
+            })
+            .finally(() => setSubscriptionLoading(false));
 
         // Load referral stats
         apiClient.getReferralStats()
@@ -351,43 +370,93 @@ export default function DashboardClient({ user, profile, history: initialHistory
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}><BarChart3 size={16} /> Avg Compression</div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed > 0 && totalSaved > 0 ? `${((totalSaved / (totalSaved + (history?.reduce((a, c) => a + (c.processed_size || 0), 0) || 1))) * 100).toFixed(0)}%` : '—'}</div>
                 </div>
+                {/* Subscription stat skeleton */}
+                {subscriptionLoading && (
+                    <div style={{ padding: '20px', background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border)' }}>
+                        <SkeletonBox height="14px" width="70%" style={{ marginBottom: '12px' }} />
+                        <SkeletonBox height="28px" width="50%" />
+                    </div>
+                )}
             </div>
 
-            {/* Subscription Status Banner */}
-            {subscriptionStatus && (
-                <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '16px 24px', borderRadius: '16px', marginBottom: '24px',
-                    background: subscriptionStatus.active
-                        ? 'rgba(46,213,115,0.08)'
-                        : 'rgba(239,68,68,0.08)',
-                    border: `1px solid ${subscriptionStatus.active ? 'rgba(46,213,115,0.2)' : 'rgba(239,68,68,0.2)'}`,
-                    flexWrap: 'wrap', gap: '12px',
-                }}>
+            {/* Subscription Status Card */}
+            {subscriptionLoading ? (
+                <div style={{ padding: '20px 24px', borderRadius: '20px', marginBottom: '24px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Crown size={20} style={{ color: subscriptionStatus.active ? '#2ed573' : '#ef4444' }} />
-                        <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
-                                {subscriptionStatus.active ? 'Active Subscription' : 'No Active Subscription'}
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                {subscriptionStatus.active && subscriptionStatus.expiresAt ? (
-                                    <>
-                                        <Calendar size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-                                        Expires {formatSubscriptionDate(subscriptionStatus.expiresAt)} ({getSubscriptionDaysLeft(subscriptionStatus.expiresAt)} days left)
-                                    </>
-                                ) : subscriptionStatus.active ? (
-                                    'VIP — Permanent access'
+                        <SkeletonBox width="20px" height="20px" style={{ borderRadius: '50%', flexShrink: 0 }} />
+                        <div style={{ flex: 1 }}>
+                            <SkeletonBox height="14px" width="160px" style={{ marginBottom: '8px' }} />
+                            <SkeletonBox height="12px" width="240px" />
+                        </div>
+                        <SkeletonBox width="110px" height="36px" style={{ borderRadius: '100px', flexShrink: 0 }} />
+                    </div>
+                </div>
+            ) : subscriptionStatus && (
+                <div style={{
+                    borderRadius: '20px', marginBottom: '24px',
+                    background: subscriptionStatus.active ? 'rgba(46,213,115,0.06)' : 'rgba(239,68,68,0.06)',
+                    border: `1px solid ${subscriptionStatus.active ? 'rgba(46,213,115,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                    overflow: 'hidden',
+                }}>
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '20px 24px', flexWrap: 'wrap', gap: '12px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <Crown size={22} style={{ color: subscriptionStatus.active ? '#2ed573' : '#ef4444', flexShrink: 0 }} />
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                                    {subscriptionStatus.active ? 'Active Subscription' : 'No Active Subscription'}
+                                </div>
+                                {subscriptionStatus.active && subscriptionStatus.expiresAt ? (() => {
+                                    const daysLeft = getSubscriptionDaysLeft(subscriptionStatus.expiresAt);
+                                    const daysColor = daysLeft > 7 ? '#2ed573' : daysLeft >= 3 ? '#fdcb6e' : '#ef4444';
+                                    return (
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <Calendar size={13} style={{ verticalAlign: 'middle' }} />
+                                                Expires {formatSubscriptionDate(subscriptionStatus.expiresAt)}
+                                            </span>
+                                            <span style={{
+                                                padding: '2px 10px', borderRadius: '100px', fontSize: '0.78rem',
+                                                fontWeight: 700, color: daysColor,
+                                                background: daysLeft > 7 ? 'rgba(46,213,115,0.1)' : daysLeft >= 3 ? 'rgba(253,203,110,0.1)' : 'rgba(239,68,68,0.1)',
+                                            }}>
+                                                {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
+                                            </span>
+                                        </div>
+                                    );
+                                })() : subscriptionStatus.active ? (
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>VIP - Permanent access</div>
                                 ) : (
-                                    'Subscribe to process images, compress videos, and transcribe media'
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>Subscribe to process images, compress videos, and more</div>
                                 )}
                             </div>
                         </div>
+                        {!subscriptionStatus.active && (
+                            <button
+                                onClick={() => setShowPaywall(true)}
+                                className="btn btn-primary"
+                                style={{ padding: '10px 24px', fontSize: '0.9rem', borderRadius: '100px', whiteSpace: 'nowrap', border: 'none', cursor: 'pointer' }}
+                            >
+                                Upgrade
+                            </button>
+                        )}
                     </div>
-                    {!subscriptionStatus.active && (
-                        <button onClick={() => setShowPaywall(true)} className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '0.85rem', borderRadius: '100px', whiteSpace: 'nowrap', border: 'none', cursor: 'pointer' }}>
-                            Subscribe Now
-                        </button>
+
+                    {/* Cancellation info */}
+                    {subscriptionStatus.active && (
+                        <div style={{
+                            padding: '12px 24px',
+                            borderTop: `1px solid ${subscriptionStatus.active ? 'rgba(46,213,115,0.15)' : 'rgba(239,68,68,0.15)'}`,
+                            fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.6,
+                        }}>
+                            To cancel your subscription, contact us at{' '}
+                            <a href="mailto:optimage@dreamintrepid.com" style={{ color: 'var(--accent-secondary)', textDecoration: 'none' }}>
+                                optimage@dreamintrepid.com
+                            </a>{' '}
+                            or manage it directly via your payment provider.
+                        </div>
                     )}
                 </div>
             )}
@@ -984,7 +1053,12 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>Signed in as <strong style={{ color: 'var(--text-primary)' }}>{user.email}</strong></p>
 
                         {/* Subscription Info */}
-                        {subscriptionStatus && (
+                        {subscriptionLoading ? (
+                            <div style={{ marginTop: '16px', padding: '16px', borderRadius: '12px', background: 'var(--bg-tertiary)' }}>
+                                <SkeletonBox height="14px" width="50%" style={{ marginBottom: '10px' }} />
+                                <SkeletonBox height="12px" width="75%" />
+                            </div>
+                        ) : subscriptionStatus && (
                             <div style={{
                                 marginTop: '16px', padding: '16px', borderRadius: '12px',
                                 background: 'var(--bg-tertiary)',
@@ -995,19 +1069,28 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         {subscriptionStatus.active ? 'Active Subscription' : 'No Subscription'}
                                     </span>
                                 </div>
-                                {subscriptionStatus.active && subscriptionStatus.expiresAt && (
+                                {subscriptionStatus.active && subscriptionStatus.expiresAt ? (() => {
+                                    const daysLeft = getSubscriptionDaysLeft(subscriptionStatus.expiresAt);
+                                    const daysColor = daysLeft > 7 ? '#2ed573' : daysLeft >= 3 ? '#fdcb6e' : '#ef4444';
+                                    return (
+                                        <>
+                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 6px' }}>
+                                                Expires {formatSubscriptionDate(subscriptionStatus.expiresAt)}
+                                            </p>
+                                            <span style={{
+                                                fontSize: '0.8rem', fontWeight: 700, color: daysColor,
+                                            }}>
+                                                {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
+                                            </span>
+                                        </>
+                                    );
+                                })() : subscriptionStatus.active ? (
                                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
-                                        Renews on {formatSubscriptionDate(subscriptionStatus.expiresAt)}
+                                        VIP - Lifetime access
                                     </p>
-                                )}
-                                {subscriptionStatus.active && !subscriptionStatus.expiresAt && (
-                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
-                                        VIP — Lifetime access
-                                    </p>
-                                )}
-                                {!subscriptionStatus.active && (
+                                ) : (
                                     <button onClick={() => setShowPaywall(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', fontSize: '0.85rem', padding: 0, textAlign: 'left' }}>
-                                        Subscribe to unlock all features →
+                                        Subscribe to unlock all features
                                     </button>
                                 )}
                             </div>
@@ -1218,6 +1301,79 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 </p>
                             </div>
                         </div>
+
+                        {/* AI Transcription Card */}
+                        {(() => {
+                            const transcriptionAvailable = process.env.NEXT_PUBLIC_OPENAI_AVAILABLE === 'true';
+                            return (
+                                <div style={{
+                                    marginTop: '20px',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '24px',
+                                    border: '1px solid var(--border)',
+                                    padding: '24px',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    opacity: transcriptionAvailable ? 1 : 0.8,
+                                }}>
+                                    {/* Coming Soon overlay badge */}
+                                    {!transcriptionAvailable && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '14px',
+                                            right: '14px',
+                                            background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                                            color: 'white',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 700,
+                                            letterSpacing: '0.5px',
+                                            textTransform: 'uppercase',
+                                            padding: '4px 10px',
+                                            borderRadius: '100px',
+                                        }}>
+                                            Coming Soon
+                                        </div>
+                                    )}
+
+                                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '1rem', paddingRight: transcriptionAvailable ? 0 : '90px' }}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                            <line x1="12" y1="19" x2="12" y2="23" />
+                                            <line x1="8" y1="23" x2="16" y2="23" />
+                                        </svg>
+                                        AI Audio Transcription
+                                    </h3>
+                                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '16px' }}>
+                                        Automatically transcribe audio tracks from your media files using AI.
+                                    </p>
+
+                                    <div title={transcriptionAvailable ? undefined : 'AI transcription is being activated - check back soon.'}>
+                                        <button
+                                            disabled={!transcriptionAvailable}
+                                            style={{
+                                                width: '100%',
+                                                padding: '11px',
+                                                borderRadius: '12px',
+                                                border: '1px solid var(--border)',
+                                                background: 'var(--bg-tertiary)',
+                                                color: transcriptionAvailable ? 'var(--text-primary)' : 'var(--text-muted)',
+                                                fontSize: '0.88rem',
+                                                fontWeight: 600,
+                                                cursor: transcriptionAvailable ? 'pointer' : 'not-allowed',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '8px',
+                                                fontFamily: 'inherit',
+                                            }}
+                                        >
+                                            {transcriptionAvailable ? 'Transcribe Audio' : 'AI transcription is being activated - check back soon.'}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             )}
