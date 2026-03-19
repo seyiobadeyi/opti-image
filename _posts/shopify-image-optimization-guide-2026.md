@@ -112,7 +112,7 @@ If you have been running a Shopify store for more than a year, you almost certai
 
 Before compressing anything, understand what you are working with. Use Google PageSpeed Insights (free, at [pagespeed.web.dev](https://pagespeed.web.dev)) to analyze your most important pages: your homepage, your bestselling collection page, and your top three product pages. PageSpeed will flag oversized images specifically and give you estimated savings.
 
-The HTTP Archive project, which crawls millions of sites regularly, reports that the median web page transfers about 1MB of image data. The median Shopify store product page in their data set transfers significantly more than this. If your product pages are loading more than 2MB of images total, you have a problem worth addressing.
+The [HTTP Archive Web Almanac](https://almanac.httparchive.org/en/2024/media), which crawls millions of sites regularly, reports that images account for roughly 46% of total bytes transferred on the median web page. The median ecommerce product page transfers considerably more. If your product pages are loading more than 2MB of images total, you have a problem worth addressing.
 
 ### Step 2: Export and batch process
 
@@ -146,7 +146,7 @@ Shopify operates one of the most capable CDNs in the ecommerce industry. Every S
 
 **Global delivery:** Shopify's CDN (built on Fastly) caches your images across edge nodes around the world. When a customer in Vancouver requests your product image, it is served from a node geographically close to them, rather than from a central origin server. This reduces latency significantly, especially for international customers.
 
-**Automatic size variants:** When you upload an image to Shopify, the platform automatically generates multiple size variants (100px, 160px, 240px, 320px, 480px, 640px, 800px, 1024px, 1200px, 2048px). These variants are served via the `_100x`, `_1200x` etc. suffixes in Shopify image URLs. Themes that are properly coded use these variants in `srcset` attributes to serve appropriately sized images for different viewports.
+**Automatic size variants:** When you upload an image to Shopify, the platform automatically generates multiple size variants (100px, 160px, 240px, 320px, 480px, 640px, 800px, 1024px, 1200px, 2048px). These variants are served via the `_100x`, `_1200x` etc. suffixes in Shopify image URLs. Themes that are properly coded use these variants in `srcset` attributes to serve appropriately sized images for different viewports. Shopify's own [image optimization documentation](https://help.shopify.com/en/manual/online-store/images/theme-images) explains how these URL parameters work and what transformations are available.
 
 **HTTP/2 and HTTP/3 delivery:** Shopify's CDN uses modern HTTP protocols that allow multiple files to be downloaded in parallel, improving overall page load performance.
 
@@ -266,7 +266,7 @@ Work through this list systematically. Each item is actionable and produces meas
 12. Verify your Shopify theme uses `srcset` attributes with multiple size variants for product images
 13. Confirm lazy loading is enabled for below-the-fold images in your theme settings
 14. Test your product pages with Google PageSpeed Insights and target LCP under 2.5 seconds
-15. Check Core Web Vitals in Google Search Console monthly
+15. Check Core Web Vitals in [Google Search Console](https://search.google.com/search-console) monthly
 
 **Ongoing workflow:**
 
@@ -314,8 +314,8 @@ Open Chrome DevTools, go to the Network tab, filter by images, and reload your p
 ---
 
 **Related reading:**
-- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark) — Real compression data comparing every major format so you can make an informed format choice.
-- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it) — A deep dive into the Core Web Vitals metric most Shopify stores struggle with.
-- [Image Optimization and Ecommerce Revenue](/blog/image-optimization-ecommerce-revenue) — The research connecting faster images to actual revenue growth, with ecommerce-specific data.
-- [Browser vs. Server: Which Is Better for Compression](/blog/browser-vs-server-which-is-better-for-compression) — Understanding where in your stack image optimization should happen.
-- [Cloud Storage Costs of Unoptimized Images](/blog/cloud-storage-costs-unoptimized-images) — How unoptimized image libraries silently inflate your infrastructure costs.
+- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark): Real compression data comparing every major format so you can make an informed format choice.
+- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it): A deep dive into the Core Web Vitals metric most Shopify stores struggle with.
+- [Image Optimization and Ecommerce Revenue](/blog/image-optimization-ecommerce-revenue): The research connecting faster images to actual revenue growth, with ecommerce-specific data.
+- [Browser vs. Server: Which Is Better for Compression](/blog/browser-vs-server-which-is-better-for-compression): Understanding where in your stack image optimization should happen.
+- [Cloud Storage Costs of Unoptimized Images](/blog/cloud-storage-costs-unoptimized-images): How unoptimized image libraries silently inflate your infrastructure costs.

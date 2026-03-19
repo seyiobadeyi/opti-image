@@ -22,7 +22,7 @@ excerpt: "Food photography is the hardest category to compress without visible q
 
 Your panna cotta photo is perfect. The light catches the surface just right. The berry compote has that jewel-toned intensity. You spent 45 minutes on the shoot and another hour editing in Lightroom. It looks genuinely beautiful.
 
-Then you upload it to your WordPress recipe blog at 100% export quality and your Google PageSpeed score drops to 31. Seventeen seconds after someone searches for "easy panna cotta recipe" and clicks your result, the page is still loading. They have already hit the back button and clicked the result below yours instead.
+Then you upload it to your WordPress recipe blog at 100% export quality and your Google PageSpeed score drops to 31. Seventeen seconds after someone searches for "easy panna cotta recipe" and clicks your result, the page is still loading. They have already hit the back button and clicked the result below yours instead. [Google's own research](https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/) shows that 53% of mobile visitors abandon pages that take longer than three seconds to load. Recipe blogs routinely exceed that threshold by a factor of three or four.
 
 Food photography is the category where the tension between image quality and file size is most painfully felt. Smooth cream, glossy glaze, intricate crumb structure, the deep greens of fresh herbs: these are exactly the kinds of high-frequency visual detail that compression algorithms find most challenging. Compress too aggressively and the image looks muddy, plastic, or pixelated in ways that food enthusiasts notice immediately. Compress too conservatively and you are sending your visitors a file that belongs on a billboard, delivered through a mobile phone screen.
 
@@ -169,7 +169,7 @@ The consequence is direct: food bloggers who pass Core Web Vitals thresholds (LC
 
 ### Recipe schema and image requirements
 
-Google's recipe rich results (the visual recipe cards that appear in Google Search and at the top of recipe searches) require a `recipeImage` property in the structured data markup. Google specifies that this image should be at a 16:9, 4:3, or 1:1 aspect ratio and recommends at minimum 1200 x 628 pixels (16:9).
+Google's recipe rich results (the visual recipe cards that appear in Google Search and at the top of recipe searches) require a `recipeImage` property in the structured data markup. [Google's recipe structured data documentation](https://developers.google.com/search/docs/appearance/structured-data/recipe) specifies that this image should be at a 16:9, 4:3, or 1:1 aspect ratio and recommends at minimum 1200 x 628 pixels (16:9).
 
 Importantly: Google displays this image in the rich result even before someone clicks through to your site. If your recipe image is compelling and high quality, it drives more clicks. If it is blurry or shows compression artifacts in the preview, it drives fewer clicks, even if your recipe ranks highly.
 
@@ -247,7 +247,7 @@ A restaurant website typically includes several image-heavy sections: the hero b
 
 **Menu photography:** Individual dish photos displayed at menu item size (typically 300 to 600px wide) should be uploaded at maximum 1200 x 800 pixels, WebP quality 82. Well-composed, properly lit dish photography at this setting produces files under 200 KB that display beautifully at menu thumbnail size.
 
-**Google Business Profile images:** Google recommends high-quality photos of at least 720 x 720 pixels for Google Business Profile. Upload JPEG at quality 85. Google applies its own processing but starts from the quality you provide.
+**Google Business Profile images:** [Google's Business Profile photo guidelines](https://support.google.com/business/answer/6103862) recommend high-quality photos of at least 720 x 720 pixels for Google Business Profile. Upload JPEG at quality 85. Google applies its own processing but starts from the quality you provide.
 
 ### DoorDash
 
@@ -283,6 +283,8 @@ The workflow above is only practical if the tools are fast and do not require te
 [Optimage](https://optimage.dreamintrepid.com) handles all of these in a drag-and-drop interface designed for content creators, not software engineers. You can process an entire 25-image recipe shoot from 180 MB of Lightroom exports to under 8 MB of publication-ready WebP files in under 2 minutes, with per-folder quality settings that match the editorial/functional image split described in this guide.
 
 The investment in learning a proper optimization workflow pays for itself on the first post where your recipe ranks because of improved Core Web Vitals, or the first time a user mentions in the comments that your site finally "feels fast."
+
+[Cloudinary's annual State of Visual Media report](https://cloudinary.com/state-of-visual-media-report) consistently shows that websites adopting modern formats and proper compression see median page weight reductions of 40 to 60% and measurable improvements in engagement metrics. Food and recipe sites, given their image density, sit at the upper end of both the problem and the potential upside.
 
 For a broader look at how image optimization connects to revenue metrics, the analysis in [image optimization and ecommerce revenue](/blog/image-optimization-ecommerce-revenue) applies directly to food bloggers running affiliate-monetized or ad-monetized sites where page views and session depth translate directly to income.
 
@@ -373,8 +375,8 @@ Focus on your highest-traffic posts first. Use Google Search Console to identify
 ---
 
 **Related reading:**
-- [Social Media Image Size Guide for All Platforms 2026](/blog/social-media-image-size-guide-all-platforms-2026) — Exact pixel dimensions and format recommendations for Instagram, Pinterest, Facebook, and TikTok.
-- [Image Optimization and Ecommerce Revenue](/blog/image-optimization-ecommerce-revenue) — The data connecting faster images to higher revenue, applicable to ad and affiliate-monetized food blogs.
-- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark) — Benchmark data for choosing the right compression format for photographic content.
-- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it) — How your hero food photo affects your Core Web Vitals score and what to do about it.
-- [Social Media Image Optimization Guide 2026](/blog/social-media-image-optimization-guide-2026) — A comprehensive guide to optimizing food photography for social media distribution.
+- [Social Media Image Size Guide for All Platforms 2026](/blog/social-media-image-size-guide-all-platforms-2026): Exact pixel dimensions and format recommendations for Instagram, Pinterest, Facebook, and TikTok.
+- [Image Optimization and Ecommerce Revenue](/blog/image-optimization-ecommerce-revenue): The data connecting faster images to higher revenue, applicable to ad and affiliate-monetized food blogs.
+- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark): Benchmark data for choosing the right compression format for photographic content.
+- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it): How your hero food photo affects your Core Web Vitals score and what to do about it.
+- [Social Media Image Optimization Guide 2026](/blog/social-media-image-optimization-guide-2026): A comprehensive guide to optimizing food photography for social media distribution.

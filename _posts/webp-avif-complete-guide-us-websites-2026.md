@@ -410,8 +410,8 @@ JPEG XL (JXL) is a next-generation format with excellent compression and a uniqu
 ---
 
 **Related reading:**
-- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark) — The full benchmark data behind the numbers referenced in this guide.
-- [PNG vs WebP for UI Design Assets](/blog/png-vs-webp-for-ui-design-assets) — Format decision guidance specifically for interface graphics and design assets.
-- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it) — How format choice feeds into Core Web Vitals LCP scores and what else affects them.
-- [Mastering Lossless Compression](/blog/mastering-lossless-compression) — When you need zero quality loss alongside format conversion.
-- [Browser vs. Server: Which Is Better for Compression](/blog/browser-vs-server-which-is-better-for-compression) — Architectural decisions about where in your pipeline format conversion should happen.
+- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark): The full benchmark data behind the numbers referenced in this guide.
+- [PNG vs WebP for UI Design Assets](/blog/png-vs-webp-for-ui-design-assets): Format decision guidance specifically for interface graphics and design assets.
+- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it): How format choice feeds into Core Web Vitals LCP scores and what else affects them.
+- [Mastering Lossless Compression](/blog/mastering-lossless-compression): When you need zero quality loss alongside format conversion.
+- [Browser vs. Server: Which Is Better for Compression](/blog/browser-vs-server-which-is-better-for-compression): Architectural decisions about where in your pipeline format conversion should happen.

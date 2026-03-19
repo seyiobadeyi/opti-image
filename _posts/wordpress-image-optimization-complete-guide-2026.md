@@ -109,7 +109,7 @@ The WordPress plugin ecosystem offers multiple image optimization options. Here 
 
 ### ShortPixel
 
-ShortPixel is a cloud-based optimization service with a WordPress plugin. Images are sent to ShortPixel's servers for compression and returned to your media library. ShortPixel supports JPEG, PNG, GIF, WebP, and AVIF output.
+[ShortPixel](https://shortpixel.com) is a cloud-based optimization service with a WordPress plugin. Images are sent to ShortPixel's servers for compression and returned to your media library. ShortPixel supports JPEG, PNG, GIF, WebP, and AVIF output.
 
 **Strengths:** Excellent compression quality, particularly for the Lossy and Glossy compression modes. Supports bulk optimization of existing media libraries. The API-based approach means it can achieve better compression than purely on-server processing in some cases. WebP and AVIF conversion are well-implemented.
 
@@ -188,7 +188,7 @@ For this to work correctly:
 - The image sizes must be registered with `add_image_size()` in the theme
 - The image must be output via WordPress's `wp_get_attachment_image()` function or equivalent, not a hardcoded `<img>` tag
 
-Page builders frequently output hardcoded image URLs without proper srcset, which means all visitors receive the same image size regardless of device. Check the source HTML of your pages to verify that your hero and featured images have proper srcset attributes.
+The [MDN documentation on responsive images](https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images) explains the full srcset and sizes specification in detail, which is useful background for any developer troubleshooting srcset behavior in a WordPress theme. Page builders frequently output hardcoded image URLs without proper srcset, which means all visitors receive the same image size regardless of device. Check the source HTML of your pages to verify that your hero and featured images have proper srcset attributes.
 
 ### Lazy loading in WordPress
 
@@ -337,8 +337,8 @@ Mobile tests simulate a slower CPU and network connection, and mobile results ar
 ---
 
 **Related reading:**
-- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it) — The definitive guide to diagnosing and fixing your Largest Contentful Paint score.
-- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark) — Real compression data for choosing the right format for your WordPress content.
-- [PNG vs WebP for UI Design Assets](/blog/png-vs-webp-for-ui-design-assets) — When to use PNG and when WebP is the better choice for interface graphics.
-- [Browser vs. Server: Which Is Better for Compression](/blog/browser-vs-server-which-is-better-for-compression) — Understanding where in the stack image optimization should happen for WordPress sites.
-- [Mastering Lossless Compression](/blog/mastering-lossless-compression) — For WordPress sites where image quality cannot be compromised, lossless compression strategies.
+- [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it): The definitive guide to diagnosing and fixing your Largest Contentful Paint score.
+- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark): Real compression data for choosing the right format for your WordPress content.
+- [PNG vs WebP for UI Design Assets](/blog/png-vs-webp-for-ui-design-assets): When to use PNG and when WebP is the better choice for interface graphics.
+- [Browser vs. Server: Which Is Better for Compression](/blog/browser-vs-server-which-is-better-for-compression): Understanding where in the stack image optimization should happen for WordPress sites.
+- [Mastering Lossless Compression](/blog/mastering-lossless-compression): For WordPress sites where image quality cannot be compromised, lossless compression strategies.

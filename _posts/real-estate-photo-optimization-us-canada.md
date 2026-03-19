@@ -113,7 +113,7 @@ For real estate photographers and agents: use a batch EXIF stripping tool as par
 
 ## Virtual Tours and Drone Photography: File Optimization {#virtual-tours-drone-optimization}
 
-The market for virtual tours accelerated dramatically during the 2020 to 2022 period and has remained a standard feature for mid-to-upper tier listings in both the US and Canadian markets. Matterport reports that listings with virtual tours receive 87% more views than those without. However, virtual tour content introduces new file management challenges.
+The market for virtual tours accelerated dramatically during the 2020 to 2022 period and has remained a standard feature for mid-to-upper tier listings in both the US and Canadian markets. [Matterport's own research](https://matterport.com/industries/real-estate) reports that listings with virtual tours receive 87% more views than those without. However, virtual tour content introduces new file management challenges.
 
 ### Drone photography
 
@@ -177,7 +177,7 @@ For the MLS and major portals, JPEG remains the standard because platform compat
 
 WebP images are 25 to 35% smaller than JPEG at equivalent visual quality. For a 25-image property listing on an agent website, this difference translates to the page loading in under 3 seconds on a typical mobile connection versus 5 to 8 seconds with unoptimized JPEGs. That speed difference directly affects how many buyers actually browse all the photos versus giving up after the first three load.
 
-All major browsers in use in 2026 support WebP: Chrome, Safari (since iOS 14 and macOS Big Sur), Firefox, Edge, and Samsung Internet. The practical browser coverage for WebP in the US and Canadian market is above 97%, meaning fewer than 3% of your visitors would need a JPEG fallback.
+All major browsers in use in 2026 support WebP: Chrome, Safari (since iOS 14 and macOS Big Sur), Firefox, Edge, and Samsung Internet. According to [Can I Use browser compatibility data](https://caniuse.com/webp), global WebP support sits above 97%, meaning fewer than 3% of your visitors would need a JPEG fallback.
 
 **Recommendation for agent websites:** Serve WebP as the primary format. Use the HTML `<picture>` element to provide a JPEG fallback for any remaining legacy browsers if your website platform supports it. Most modern WordPress themes, Squarespace, and Wix sites handle this automatically when you upload WebP files.
 
@@ -284,8 +284,8 @@ NAR data suggests that listings with more than 20 photos receive more interest t
 ---
 
 **Related reading:**
-- [What Is EXIF Metadata and Why Strip It](/blog/what-is-exif-metadata-and-why-strip-it) — The privacy risks embedded in every photo your clients' homes and why removing metadata is a professional obligation.
-- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark) — Comprehensive format comparison data to inform your delivery format decisions.
-- [Cloud Storage Costs of Unoptimized Images](/blog/cloud-storage-costs-unoptimized-images) — What a library of unoptimized listing photos costs you in hosting and bandwidth over time.
-- [Social Media Image Size Guide for All Platforms 2026](/blog/social-media-image-size-guide-all-platforms-2026) — Exact specifications for exporting listing photos for Instagram, Facebook, LinkedIn, and Pinterest.
-- [What Your Phone Photos Reveal About You](/blog/what-your-phone-photos-reveal-about-you) — A broader look at the metadata your mobile device embeds in every image.
+- [What Is EXIF Metadata and Why Strip It](/blog/what-is-exif-metadata-and-why-strip-it): The privacy risks embedded in every photo your clients' homes and why removing metadata is a professional obligation.
+- [AVIF vs WebP vs JPEG: 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark): Comprehensive format comparison data to inform your delivery format decisions.
+- [Cloud Storage Costs of Unoptimized Images](/blog/cloud-storage-costs-unoptimized-images): What a library of unoptimized listing photos costs you in hosting and bandwidth over time.
+- [Social Media Image Size Guide for All Platforms 2026](/blog/social-media-image-size-guide-all-platforms-2026): Exact specifications for exporting listing photos for Instagram, Facebook, LinkedIn, and Pinterest.
+- [What Your Phone Photos Reveal About You](/blog/what-your-phone-photos-reveal-about-you): A broader look at the metadata your mobile device embeds in every image.
