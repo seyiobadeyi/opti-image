@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Check, Tag, Sparkles } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
+import { getCookie } from '@/utils/cookies';
 import type { PriceInfo, FormStatus } from '@/types';
 
 export default function PricingTiers(): React.JSX.Element {
@@ -55,9 +56,9 @@ export default function PricingTiers(): React.JSX.Element {
         setError(null);
 
         try {
-            const referralCode = typeof window !== 'undefined'
-                ? localStorage.getItem('optimage_referral_code') || undefined
-                : undefined;
+            const referralCode = getCookie('optimage_referral_code')
+                || (typeof window !== 'undefined' ? localStorage.getItem('optimage_referral_code') : null)
+                || undefined;
 
             const result = await apiClient.createSubscriptionCheckout(
                 pricing?.promoApplied || undefined,

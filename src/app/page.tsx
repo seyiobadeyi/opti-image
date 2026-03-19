@@ -74,6 +74,9 @@ export default function Home(): React.JSX.Element {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
     if (ref) {
+      // Store as cookie (works across tabs + survives stricter storage policies)
+      document.cookie = `optimage_referral_code=${encodeURIComponent(ref)}; Max-Age=${60 * 60 * 24 * 30}; Path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+      // Backward compatibility for existing reads
       localStorage.setItem('optimage_referral_code', ref);
       // Clean the URL without reloading the page
       const url = new URL(window.location.href);

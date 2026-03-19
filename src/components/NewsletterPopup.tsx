@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Mail, Sparkles } from 'lucide-react';
 import { subscribeNewsletter } from '@/app/actions';
+import { getCookie, setCookie } from '@/utils/cookies';
 import type { FormStatus, NewsletterResult } from '@/types';
 
 export default function NewsletterPopup(): React.JSX.Element | null {
@@ -45,7 +46,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
 
     // Show popup after 15 seconds if user hasn't seen it
     useEffect(() => {
-        const hasSeenNewsletter = localStorage.getItem('optimage_newsletter_seen');
+        const hasSeenNewsletter = getCookie('optimage_newsletter_seen') ?? localStorage.getItem('optimage_newsletter_seen');
         if (hasSeenNewsletter) return;
 
         const timerId = setTimeout(() => {
@@ -82,7 +83,8 @@ export default function NewsletterPopup(): React.JSX.Element | null {
 
     const handleClose = (): void => {
         setIsOpen(false);
-        localStorage.setItem('optimage_newsletter_seen', 'true');
+        setCookie('optimage_newsletter_seen', 'true', { maxAge: 60 * 60 * 24 * 30 }); // 30 days
+        localStorage.setItem('optimage_newsletter_seen', 'true'); // backward compatibility
     };
 
     const handleSubscribe = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {

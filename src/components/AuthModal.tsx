@@ -18,6 +18,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const [resendCooldownMs, setResendCooldownMs] = useState<number>(0);
 
     // Notify the newsletter popup so it doesn't conflict with this modal
     useEffect(() => {
@@ -99,12 +100,45 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
             if (otpError) throw new Error(otpError.message);
             setStep('otp');
             setMessage('An 8-digit code has been sent to your email.');
+            setResendCooldownMs(30_000);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
             setLoading(false);
         }
     };
+
+    const handleResendCode = async (): Promise<void> => {
+        if (!email) return;
+        if (resendCooldownMs > 0) return;
+        setLoading(true);
+        setError(null);
+        setMessage(null);
+        try {
+            const { error: otpError } = await supabase.auth.signInWithOtp({
+                email,
+                options: { shouldCreateUser: true },
+            });
+            if (otpError) throw new Error(otpError.message);
+            setOtp(['', '', '', '', '', '', '', '']);
+            otpRefs.current[0]?.focus();
+            setMessage('New code sent. Enter it on this device to sign in here.');
+            setResendCooldownMs(30_000);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to resend code');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (step !== 'otp') return;
+        if (resendCooldownMs <= 0) return;
+        const t = window.setInterval(() => {
+            setResendCooldownMs((ms) => Math.max(0, ms - 1000));
+        }, 1000);
+        return () => window.clearInterval(t);
+    }, [step, resendCooldownMs]);
 
     const handleOtpSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
@@ -140,6 +174,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
         setOtp(['', '', '', '', '', '', '', '']);
         setError(null);
         setMessage(null);
+        setResendCooldownMs(0);
     };
 
 
@@ -218,7 +253,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
                             {step === 'email'
                                 ? 'Enter your email to sign in or create a new account.'
-                                : `We sent an 8-digit code to ${email}.`}
+                                : `We sent an 8-digit code to ${email}. This code signs you in on the device where you enter it.`}
                         </p>
                     </div>
 
@@ -356,7 +391,31 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
                             </button>
 
                             <div style={{ textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                                <p>Entered the wrong email? <button type="button" onClick={resetFlow} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}>Go back</button></p>
+                                <p style={{ marginBottom: '10px' }}>
+                                    Didn’t get a code?{' '}
+                                    <button
+                                        type="button"
+                                        onClick={handleResendCode}
+                                        disabled={loading || resendCooldownMs > 0}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: resendCooldownMs > 0 ? 'var(--text-muted)' : 'var(--accent-primary)',
+                                            cursor: resendCooldownMs > 0 ? 'not-allowed' : 'pointer',
+                                            fontWeight: 700,
+                                            fontSize: 'inherit',
+                                            padding: 0,
+                                        }}
+                                    >
+                                        {resendCooldownMs > 0 ? `Resend in ${Math.ceil(resendCooldownMs / 1000)}s` : 'Resend code'}
+                                    </button>
+                                </p>
+                                <p>
+                                    Entered the wrong email?{' '}
+                                    <button type="button" onClick={resetFlow} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}>
+                                        Go back
+                                    </button>
+                                </p>
                             </div>
                         </form>
                     )}

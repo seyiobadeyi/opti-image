@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Check, Tag, Zap, Image, Film, Mic, Clock, ChevronDown } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import { deleteCookie, getCookie } from '@/utils/cookies';
 import type { PriceInfo, SubscriptionPlan, UsdPlan, SubscriptionPaywallProps, FormStatus } from '@/types';
 
 const FEATURES: { icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; label: string }[] = [
@@ -34,18 +35,16 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
 
     // Currency toggle — auto-detected from geo cookie set by middleware
     // Default to USD; switch to NGN only for Nigeria (NG)
-    const [currency, setCurrency]         = useState<'ngn' | 'usd'>('usd');
+    const [currency, setCurrency]         = useState<'ngn' | 'usd'>(() => {
+        const country = getCookie('optimage_country');
+        return country === 'NG' ? 'ngn' : 'usd';
+    });
     const [usdPlans, setUsdPlans]         = useState<UsdPlan[]>([]);
     const [selectedUsdPlanId, setSelectedUsdPlanId] = useState<string>('1y');
 
-    // Auto-select NGN only for Nigerian visitors
+    // Auto-select NGN only for Nigerian visitors (in case the cookie arrives later)
     useEffect(() => {
-        if (typeof document === 'undefined') return;
-        const country = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('optimage_country='))
-            ?.split('=')[1];
-        // Default to USD; switch to NGN only for Nigeria (NG)
+        const country = getCookie('optimage_country');
         if (country === 'NG') {
             setCurrency('ngn');
         }
@@ -117,9 +116,9 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
         setCheckoutStatus('loading');
         setError(null);
         try {
-            const referralCode = typeof window !== 'undefined'
-                ? localStorage.getItem('optimage_referral_code') || undefined
-                : undefined;
+            const referralCode = getCookie('optimage_referral_code')
+                || (typeof window !== 'undefined' ? localStorage.getItem('optimage_referral_code') : null)
+                || undefined;
 
             const result = await apiClient.createSubscriptionCheckout(
                 pricing?.promoApplied || undefined,
@@ -132,6 +131,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                     if (typeof window !== 'undefined') {
                         localStorage.removeItem('optimage_referral_code');
                     }
+                    deleteCookie('optimage_referral_code');
                     onSubscribed?.();
                     window.location.href = result.authorization_url;
                 } else {

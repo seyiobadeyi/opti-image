@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getCookie, setCookie } from '@/utils/cookies';
 
 const COOKIE_KEY: string = 'optimage_cookie_consent';
 
@@ -9,7 +10,7 @@ export default function CookieConsent(): React.JSX.Element | null {
     const [visible, setVisible] = useState<boolean>(false);
 
     useEffect(() => {
-        const consent = localStorage.getItem(COOKIE_KEY);
+        const consent = getCookie(COOKIE_KEY) ?? localStorage.getItem(COOKIE_KEY);
         if (!consent) {
             // Small delay for smoother UX
             const timer = setTimeout(() => setVisible(true), 1000);
@@ -18,12 +19,14 @@ export default function CookieConsent(): React.JSX.Element | null {
     }, []);
 
     const handleAccept = (): void => {
-        localStorage.setItem(COOKIE_KEY, 'accepted');
+        setCookie(COOKIE_KEY, 'accepted', { maxAge: 60 * 60 * 24 * 365 }); // 1 year
+        localStorage.setItem(COOKIE_KEY, 'accepted'); // backward compatibility
         setVisible(false);
     };
 
     const handleDecline = (): void => {
-        localStorage.setItem(COOKIE_KEY, 'declined');
+        setCookie(COOKIE_KEY, 'declined', { maxAge: 60 * 60 * 24 * 365 }); // 1 year
+        localStorage.setItem(COOKIE_KEY, 'declined'); // backward compatibility
         setVisible(false);
     };
 
