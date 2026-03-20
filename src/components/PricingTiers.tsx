@@ -85,7 +85,7 @@ export default function PricingTiers(): React.JSX.Element {
 
     const features = [
         'All image formats (JPEG, PNG, WebP, AVIF, TIFF, GIF)',
-        'Bulk processing — up to 50 files per batch',
+        'Bulk processing: up to 50 files per batch',
         'Video compression with FFmpeg',
         'Audio extraction from video',
         'AI-powered transcription & translation',
@@ -141,7 +141,7 @@ export default function PricingTiers(): React.JSX.Element {
                                 gap: '4px',
                             }}>
                                 <Check size={14} />
-                                Code &quot;{pricing.promoApplied}&quot; applied — save {formatPrice(pricing.discount)}
+                                Code &quot;{pricing.promoApplied}&quot; applied, saves you {formatPrice(pricing.discount)}
                             </p>
                         )}
                         <p className="description">

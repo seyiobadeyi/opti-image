@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Terms of Service — Optimage',
+    title: 'Terms of Service | Optimage',
     description: 'Terms of Service for Optimage bulk image optimizer and converter.',
 };
 

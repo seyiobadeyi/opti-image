@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import type { BlogPostMeta } from '@/types';
 
 export const metadata: Metadata = {
-    title: 'The Optimage Journal — Insights on Media, Performance & the Web',
+    title: 'The Optimage Journal: Insights on Media, Performance & the Web',
     description: 'Practical guides, data-driven research, and real-world insights on image optimization, web performance, and building faster digital products.',
 };
 

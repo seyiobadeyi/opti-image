@@ -167,19 +167,19 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
     const handleShareTwitter = (): void => {
         if (!referralLink) return;
-        const text = encodeURIComponent('Check out Optimage — the fastest way to optimize images, compress videos, and transcribe media! 🚀');
+        const text = encodeURIComponent('Check out Optimage, the fastest way to optimize images, compress videos, and transcribe media! 🚀');
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(referralLink)}`, '_blank');
     };
 
     const handleShareWhatsApp = (): void => {
         if (!referralLink) return;
-        const text = encodeURIComponent(`Check out Optimage — optimize images, compress videos & transcribe media! ${referralLink}`);
+        const text = encodeURIComponent(`Check out Optimage: optimize images, compress videos & transcribe media! ${referralLink}`);
         window.open(`https://wa.me/?text=${text}`, '_blank');
     };
 
     const handleShareEmail = (): void => {
         if (!referralLink) return;
-        const subject = encodeURIComponent('Try Optimage — Image & Media Optimization');
+        const subject = encodeURIComponent('Try Optimage: Image & Media Optimization');
         const body = encodeURIComponent(`Hey! I've been using Optimage to optimize images and compress videos. Check it out:\n\n${referralLink}`);
         window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
     };
@@ -368,7 +368,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                 </div>
                 <div style={{ padding: '20px', background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}><BarChart3 size={16} /> Avg Compression</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed > 0 && totalSaved > 0 ? `${((totalSaved / (totalSaved + (history?.reduce((a, c) => a + (c.processed_size || 0), 0) || 1))) * 100).toFixed(0)}%` : '—'}</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed > 0 && totalSaved > 0 ? `${((totalSaved / (totalSaved + (history?.reduce((a, c) => a + (c.processed_size || 0), 0) || 1))) * 100).toFixed(0)}%` : 'N/A'}</div>
                 </div>
                 {/* Subscription stat skeleton */}
                 {subscriptionLoading && (
@@ -688,13 +688,13 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none' }}
                                 >
                                     <option value="">Same as input</option>
-                                    <option value="webp">WebP — Best for web</option>
-                                    <option value="avif">AVIF — Maximum compression</option>
-                                    <option value="jpeg">JPEG — Universal compatibility</option>
-                                    <option value="png">PNG — Lossless transparency</option>
-                                    <option value="tiff">TIFF — Print quality</option>
-                                    <option value="gif">GIF — Animated/simple graphics</option>
-                                    <option value="heif">HEIF — Apple ecosystem</option>
+                                    <option value="webp">WebP (Best for web)</option>
+                                    <option value="avif">AVIF (Maximum compression)</option>
+                                    <option value="jpeg">JPEG (Universal compatibility)</option>
+                                    <option value="png">PNG (Lossless transparency)</option>
+                                    <option value="tiff">TIFF (Print quality)</option>
+                                    <option value="gif">GIF (Animated/simple graphics)</option>
+                                    <option value="heif">HEIF (Apple ecosystem)</option>
                                 </select>
                             </div>
 
@@ -803,7 +803,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                             <td style={{ padding: '16px 24px' }}>
                                                 {item.action_type === 'compress' ? (
                                                     <span style={{ color: 'var(--success)', fontWeight: 600 }}>{formatBytes(item.original_size)} → {formatBytes(item.processed_size)}</span>
-                                                ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                                                ) : <span style={{ color: 'var(--text-muted)' }}>-</span>}
                                             </td>
                                             <td style={{ padding: '16px 24px', color: 'var(--text-secondary)' }}>{formatDate(item.created_at)}</td>
                                         </tr>
@@ -840,7 +840,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Invite Friends, Get Rewarded</h2>
                         </div>
                         <p style={{ opacity: 0.9, lineHeight: 1.6, maxWidth: '500px', margin: 0 }}>
-                            Share your unique referral link. When a friend subscribes, you both win — they get a discount and you earn free subscription time.
+                            Share your unique referral link. When a friend subscribes, you both win: they get a discount and you earn free subscription time.
                         </p>
                     </div>
 
@@ -1277,9 +1277,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 500 }}>Output Format</label>
                                 <select value={videoSettings.format} onChange={(e) => setVideoSettings(prev => ({ ...prev, format: e.target.value }))} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none' }}>
-                                    <option value="mp4">MP4 — Universal</option>
-                                    <option value="webm">WebM — Web optimized</option>
-                                    <option value="avi">AVI — Legacy</option>
+                                    <option value="mp4">MP4 (Universal)</option>
+                                    <option value="webm">WebM (Web optimized)</option>
+                                    <option value="avi">AVI (Legacy)</option>
                                 </select>
                             </div>
 

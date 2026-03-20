@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: '404 — Page Not Found | Optimage',
+    title: '404: Page Not Found | Optimage',
     description: 'The page you are looking for does not exist.',
 };
 
@@ -32,7 +32,7 @@ export default function NotFound(): React.JSX.Element {
                 </h2>
 
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '40px' }}>
-                    Looks like this page was optimized a little too aggressively — it no longer exists. Let's get you back to something real.
+                    Looks like this page was optimized a little too aggressively. It no longer exists. Let's get you back to something real.
                 </p>
 
                 <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -45,7 +45,7 @@ export default function NotFound(): React.JSX.Element {
                 </div>
 
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: '48px' }}>
-                    Error Code: 404 — Resource Not Found
+                    Error Code: 404 / Resource Not Found
                 </p>
             </div>
         </div>

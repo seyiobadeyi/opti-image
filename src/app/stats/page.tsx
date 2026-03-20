@@ -23,14 +23,14 @@ interface PublicStats {
 // ── Metadata ─────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
-    title: 'Optimage Impact — Live Compression Statistics',
+    title: 'Optimage Impact: Live Compression Statistics',
     description:
         'See real-time compression statistics for Optimage. Discover how many files have been processed, how much data has been saved, and the environmental impact of optimizing images and videos at scale.',
     alternates: {
         canonical: `${SITE_URL}/stats`,
     },
     openGraph: {
-        title: 'Optimage Impact — Live Compression Statistics',
+        title: 'Optimage Impact: Live Compression Statistics',
         description:
             'Real-time stats: total files processed, data saved, images compressed, videos optimised. See the collective impact of Optimage users worldwide.',
         url: `${SITE_URL}/stats`,
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Optimage Impact — Live Compression Statistics',
+        title: 'Optimage Impact: Live Compression Statistics',
         description: 'How many files has Optimage processed? How much data has been saved? Find out.',
         images: [`${SITE_URL}/image-2.png`],
         creator: '@dreamintrepid',
@@ -141,7 +141,7 @@ function NewsletterSignup({ totalFiles }: { totalFiles: number }) {
                 Join {joinCount} others saving bandwidth
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '28px' }}>
-                Get tips on image optimisation, web performance, and new Optimage features — delivered to your inbox.
+                Get tips on image optimisation, web performance, and new Optimage features, delivered straight to your inbox.
             </p>
             <form
                 action={`${API_URL}/newsletter/subscribe`}
@@ -198,7 +198,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
         '@type': 'WebPage',
         '@id': pageUrl,
         url: pageUrl,
-        name: 'Optimage Impact — Live Compression Statistics',
+        name: 'Optimage Impact: Live Compression Statistics',
         description:
             'Real-time aggregated statistics showing the total number of files processed, data saved, and environmental impact of the Optimage image and media optimisation platform.',
         inLanguage: 'en-US',
@@ -257,7 +257,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                             marginBottom: '20px',
                         }}
                     >
-                        Optimage Impact —{' '}
+                        Optimage Impact:{' '}
                         <span style={{ color: '#a29bfe' }}>By the Numbers</span>
                     </h1>
                     <p
@@ -270,7 +270,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                         }}
                     >
                         Every file optimised through Optimage contributes to a faster, lighter web. Here is the
-                        collective impact of our community — updated every hour.
+                        collective impact of our community, updated every hour.
                     </p>
                 </section>
 
@@ -381,7 +381,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                                 {
                                     step: '01',
                                     title: 'Upload your files',
-                                    body: 'Drag and drop up to 50 images or a video/audio file into the Optimage tool — no sign-up needed to start.',
+                                    body: 'Drag and drop up to 50 images or a video/audio file into the Optimage tool. No sign-up needed to start.',
                                 },
                                 {
                                     step: '02',
@@ -460,7 +460,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                         >
                             Images and videos account for more than 70% of the average web page's total transfer
                             size. Every megabyte shaved off a page load translates directly into faster Time-to-Interactive
-                            scores, lower bounce rates, and better Core Web Vitals — all of which Google uses as ranking
+                            scores, lower bounce rates, and better Core Web Vitals, all of which Google uses as ranking
                             signals. For users on mobile data plans or slower connections, the savings are felt immediately
                             in the form of pages that simply load.
                         </p>

@@ -18,7 +18,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintr
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Optimage — Bulk Image & Media Optimizer | WebP, AVIF, Video Compression',
+    default: 'Optimage: Bulk Image & Media Optimizer | WebP, AVIF, Video Compression',
     template: '%s | Optimage',
   },
   description:
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Optimage — Bulk Image & Media Optimizer',
+    title: 'Optimage: Bulk Image & Media Optimizer',
     description: 'Compress, convert, and optimize images and videos in bulk. WebP, AVIF, video compression, AI transcription. Free to start.',
     url: SITE_URL,
     siteName: 'Optimage',
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: 'Optimage — Bulk Image and Media Optimizer by Dream Intrepid Ltd',
+        alt: 'Optimage: Bulk Image and Media Optimizer by Dream Intrepid Ltd',
         type: 'image/png',
       },
     ],
@@ -70,8 +70,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Optimage — Compress, Convert & Optimize Images in Bulk',
-    description: 'WebP, AVIF, video compression, AI transcription — all in one tool. Free to start.',
+    title: 'Optimage: Compress, Convert & Optimize Images in Bulk',
+    description: 'WebP, AVIF, video compression, AI transcription. All in one tool. Free to start.',
     images: [`${SITE_URL}/og-image.jpg`],
     creator: '@dreamintrepid',
     site: '@dreamintrepid',
@@ -132,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   '@id': `${SITE_URL}/#website`,
                   url: SITE_URL,
                   name: 'Optimage',
-                  description: 'Bulk image and media optimization suite — compress, convert, and optimize images and videos.',
+                  description: 'Bulk image and media optimization suite. Compress, convert, and optimize images and videos.',
                   publisher: { '@id': `${SITE_URL}/#organization` },
                   inLanguage: 'en-US',
                   potentialAction: {
@@ -168,7 +168,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       name: 'Free Tier',
                       price: '0',
                       priceCurrency: 'NGN',
-                      description: 'Basic image compression — free, no account required',
+                      description: 'Basic image compression. Free, no account required.',
                     },
                     {
                       '@type': 'Offer',

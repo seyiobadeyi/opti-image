@@ -232,7 +232,7 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                             Want more power? Head to your Dashboard →
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                            Rotation, auto-enhance, custom file names, processing history &amp; video compression — all in one place.
+                            Rotation, auto-enhance, custom file names, processing history &amp; video compression. All in one place.
                         </div>
                     </div>
                 </div>

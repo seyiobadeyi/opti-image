@@ -299,7 +299,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                             borderRadius: '100px', padding: '4px 12px', fontSize: '0.78rem', color: '#2ed573',
                         }}>
                             <Check size={11} />
-                            &quot;{pricing.promoApplied}&quot; applied — {effectiveDuration} access {pricing.discount > 0 ? `saves ${formatNgnPrice(pricing.discount)}` : 'FREE'}
+                            &quot;{pricing.promoApplied}&quot; applied: {effectiveDuration} access {pricing.discount > 0 ? `saves you ${formatNgnPrice(pricing.discount)}` : '(FREE)'}
                         </div>
                     )}
                 </div>
@@ -456,7 +456,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                     {pricing?.finalPrice === 0 ? (
                                         <>
                                             <Check size={11} />
-                                            &quot;{promoCode.toUpperCase()}&quot; applied — FREE ACCESS
+                                            &quot;{promoCode.toUpperCase()}&quot; applied: FREE ACCESS
                                         </>
                                     ) : (
                                         <>
@@ -517,7 +517,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                             : (() => {
                                                 const usdPlan = usdPlans.find(p => p.id === selectedUsdPlanId);
                                                 return usdPlan
-                                                    ? `Subscribe — ${formatUsdPrice(usdPlan.priceUsd)}/${usdPlan.label.toLowerCase()}`
+                                                    ? `Subscribe: ${formatUsdPrice(usdPlan.priceUsd)}/${usdPlan.label.toLowerCase()}`
                                                     : 'Subscribe';
                                             })()
                                     }
@@ -675,7 +675,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                     ? 'Redirecting to payment...'
                                     : pricing?.finalPrice === 0
                                         ? `Activate Free Access (${effectiveDuration})`
-                                        : `Subscribe — ${pricing ? formatNgnPrice(pricing.finalPrice) : '...'}/${effectiveDuration.toLowerCase()}`
+                                        : `Subscribe: ${pricing ? formatNgnPrice(pricing.finalPrice) : '...'}/${effectiveDuration.toLowerCase()}`
                                 }
                             </button>
 

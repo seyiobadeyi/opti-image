@@ -141,7 +141,7 @@ export default function LandingBento(): React.JSX.Element {
                     <div className="bento-box-padded" style={{ flex: '1 1 400px', padding: '64px 48px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <h3 className="bento-title" style={{ fontSize: '2.5rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.1 }}>Built from real work.</h3>
                         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.1rem' }}>
-                            Optimage wasn't built in a lab. It started as an internal tool used daily across Shopify builds, WordPress sites, CRO experiments, and marketing campaigns. Every project had the same challenge — images were the heaviest part of the page. So we built a system to fix it automatically. Now, it's open for everyone.
+                            Optimage wasn't built in a lab. It started as an internal tool used daily across Shopify builds, WordPress sites, CRO experiments, and marketing campaigns. Every project had the same challenge: images were the heaviest part of the page. So we built a system to fix it automatically. Now it's open for everyone.
                         </p>
                     </div>
                     <div style={{ flex: '1 1 400px', position: 'relative', minHeight: '400px' }}>

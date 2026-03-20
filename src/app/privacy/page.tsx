@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Privacy Policy — Optimage',
+    title: 'Privacy Policy | Optimage',
     description: 'Privacy Policy for Optimage bulk image optimizer and converter.',
 };
 
