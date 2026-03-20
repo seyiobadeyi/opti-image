@@ -2,6 +2,7 @@ import { getPostData, getAllPostSlugs } from '@/lib/markdown';
 import './blog.css';
 import type { Metadata } from 'next';
 import type { BlogPostData } from '@/types';
+import Link from 'next/link';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintrepid.com';
 
@@ -115,9 +116,9 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
             <article style={{ maxWidth: '800px', margin: '0 auto', padding: '120px 24px 80px' }}>
                 {/* Visible breadcrumb trail */}
                 <nav aria-label="Breadcrumb" style={{ marginBottom: '32px', fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <a href={SITE_URL} style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Home</a>
+                    <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Home</Link>
                     <span>/</span>
-                    <a href={`${SITE_URL}/blog`} style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>The Optimage Journal</a>
+                    <Link href="/blog" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>The Optimage Journal</Link>
                     <span>/</span>
                     <span style={{ color: 'var(--text-secondary)' }}>{postData.title}</span>
                 </nav>
@@ -144,15 +145,15 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                 <footer style={{ marginTop: '64px', padding: '28px', background: 'linear-gradient(135deg, rgba(108,92,231,0.1), rgba(162,155,254,0.06))', borderRadius: '16px', border: '1px solid rgba(108,92,231,0.2)', textAlign: 'center' }}>
                     <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '8px' }}>Try Optimage Free</p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>Compress, convert, and optimize your images in seconds. No sign-up needed to start.</p>
-                    <a href={SITE_URL} className="btn btn-primary" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600 }}>
+                    <Link href="/" className="btn btn-primary" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600 }}>
                         Start Optimizing Free
-                    </a>
+                    </Link>
                 </footer>
 
                 <div style={{ marginTop: '32px', textAlign: 'center' }}>
-                    <a href={`${SITE_URL}/blog`} style={{ color: 'var(--text-muted)', fontSize: '0.88rem', textDecoration: 'none' }}>
+                    <Link href="/blog" style={{ color: 'var(--text-muted)', fontSize: '0.88rem', textDecoration: 'none' }}>
                         Back to The Optimage Journal
-                    </a>
+                    </Link>
                 </div>
             </article>
         </>

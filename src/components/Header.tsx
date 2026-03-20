@@ -102,7 +102,7 @@ export default function Header(): React.JSX.Element {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav className="header-desktop-nav">
+                <nav className="header-desktop-nav" aria-label="Main navigation">
                     <Link href="/" className="header-nav-link">Home</Link>
                     <Link href="/blog" className="header-nav-link">Blog</Link>
                     {isAuthLoading ? (
@@ -133,7 +133,9 @@ export default function Header(): React.JSX.Element {
                 <button
                     className="header-mobile-toggle"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    aria-label="Toggle menu"
+                    aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                    aria-expanded={isMobileMenuOpen}
+                    aria-controls="mobile-nav-overlay"
                 >
                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -141,14 +143,14 @@ export default function Header(): React.JSX.Element {
 
             {/* Mobile Overlay — conditionally rendered */}
             {isMobileMenuOpen && (
-                <div className="header-mobile-overlay">
+                <div id="mobile-nav-overlay" className="header-mobile-overlay" role="dialog" aria-modal="true" aria-label="Navigation menu">
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '80px 24px 32px' }}>
-                        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>
+                        <nav aria-label="Mobile navigation" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>
                             <Link href="/" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
                                 Home <ChevronRight size={18} color="var(--text-muted)" />
                             </Link>
                             <Link href="/blog" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
-                                Engineering Blog <ChevronRight size={18} color="var(--text-muted)" />
+                                Blog <ChevronRight size={18} color="var(--text-muted)" />
                             </Link>
                             {user && (
                                 <Link href="/dashboard" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--accent-primary)' }}>
