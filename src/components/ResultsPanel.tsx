@@ -8,16 +8,271 @@ function formatBytes(bytes: number): string {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import {
     Share2, CheckCircle2, Package, Download,
-    ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check, Sparkles, Mail
+    ArrowDown, ArrowUp, Twitter, Linkedin, Copy, Check, Sparkles, Mail,
+    Link2, Code2, ExternalLink, ChevronDown, FileImage
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { apiClient } from '@/lib/api';
 import { subscribeNewsletter } from '@/app/actions';
 import type { ResultsPanelProps, FormStatus, NewsletterResult } from '@/types';
+
+// ─── Per-file result row with rich "Use image" menu ─────────────────────────
+
+/**
+ * Appends UTM tracking parameters to a URL.
+ * Only call on navigable links (not on image src / background-image URLs —
+ * those are resource fetches that never run GA, so UTM there is wasted).
+ */
+function withUtm(url: string, content: string): string {
+    const base = url.split('?')[0] ?? url;
+    const params = new URLSearchParams({
+        utm_source: 'optimage',
+        utm_medium: 'hosted_image',
+        utm_campaign: 'user_share',
+        utm_content: content,
+    });
+    return `${base}?${params.toString()}`;
+}
+
+interface FileResultRowProps {
+    result: import('@/types').ProcessedImage;
+    savingsNum: number;
+    onDownload: () => void;
+}
+
+function FileResultRow({ result, savingsNum, onDownload }: FileResultRowProps) {
+    const [open, setOpen] = useState(false);
+    const [copiedKey, setCopiedKey] = useState<string | null>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    // Close on outside click
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+
+    const copy = (text: string, key: string) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopiedKey(key);
+            setTimeout(() => setCopiedKey(null), 2000);
+        });
+    };
+
+    const { hostedUrl, width, height, originalName, id } = result;
+    const altText = originalName.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+
+    // UTM-tagged link for shareable/clickable contexts (navigable links only).
+    // Raw image resource URLs (src, background-image) stay clean — GA never
+    // fires on resource fetches, so UTM on those is meaningless.
+    const utmContent = id ?? originalName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const trackedUrl = hostedUrl ? withUtm(hostedUrl, utmContent) : undefined;
+
+    const menuItems: { key: string; icon: React.ReactNode; label: string; value: string; description: string }[] =
+        hostedUrl && trackedUrl ? [
+            {
+                key: 'url',
+                icon: <Link2 size={15} />,
+                label: 'Copy link',
+                // UTM-tagged: when someone pastes and clicks this link, GA sees
+                // source=optimage / medium=hosted_image / campaign=user_share
+                value: trackedUrl,
+                description: 'Paste anywhere — Notion, WhatsApp, Slack, docs',
+            },
+            {
+                key: 'html',
+                icon: <Code2 size={15} />,
+                label: 'Copy as HTML',
+                // src stays clean (resource fetch — UTM not tracked by GA).
+                // The wrapping anchor links back to Optimage with UTM so any
+                // click on the image drives trackable referral traffic.
+                value: `<a href="https://optimage.dreamintrepid.com?utm_source=optimage&utm_medium=img_link&utm_campaign=user_embed&utm_content=${utmContent}" title="Optimized with Optimage" target="_blank" rel="noopener">\n  <img src="${hostedUrl}" alt="${altText}" width="${width}" height="${height}" loading="lazy">\n</a>`,
+                description: 'Ready to paste into any website or HTML editor',
+            },
+            {
+                key: 'md',
+                icon: <FileImage size={15} />,
+                label: 'Copy as Markdown',
+                // Image src stays clean; standard Markdown ![alt](url) syntax.
+                value: `![${altText}](${hostedUrl})`,
+                description: 'For GitHub, Notion, Obsidian, or any .md file',
+            },
+            {
+                key: 'css',
+                icon: <Code2 size={15} />,
+                label: 'Copy as CSS',
+                // Resource URL — no UTM needed.
+                value: `background-image: url('${hostedUrl}');`,
+                description: 'Use as a CSS background image',
+            },
+        ] : [];
+
+    return (
+        <div className="result-file-card" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: '12px', flexWrap: 'wrap',
+        }}>
+            <div className="result-file-info" style={{ flex: '1', minWidth: '150px', overflow: 'hidden' }}>
+                <div className="result-file-name" title={result.originalName} style={{
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+                }}>
+                    {result.originalName}
+                </div>
+                <div className="result-file-sizes" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: '4px' }}>
+                    <span>{formatBytes(result.originalSize)}</span>
+                    <span className="size-arrow" style={{ padding: '0 8px' }}>→</span>
+                    <span>{formatBytes(result.processedSize)}</span>
+                    <span className={`savings-badge ${savingsNum < 0 ? 'negative' : ''}`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', marginLeft: '8px' }}>
+                        {savingsNum >= 0 ? <ArrowDown size={14} /> : <ArrowUp size={14} />} {Math.abs(savingsNum)}%
+                    </span>
+                </div>
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                <button className="result-file-download" onClick={onDownload}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', minWidth: 'fit-content' }}>
+                    <Download size={16} /> Download
+                </button>
+
+                {/* "Use image" menu — only shown when hosted URL exists */}
+                {hostedUrl && (
+                    <div style={{ position: 'relative' }} ref={menuRef}>
+                        <button
+                            onClick={() => setOpen(v => !v)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '5px',
+                                padding: '8px 12px', borderRadius: '8px',
+                                background: open ? 'var(--bg-tertiary)' : 'var(--bg-card)',
+                                border: '1px solid var(--border)',
+                                color: 'var(--text-primary)', fontSize: '0.85rem',
+                                fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+                                transition: 'background 0.15s',
+                            }}
+                            title="Use this image"
+                        >
+                            <Link2 size={15} /> Use <ChevronDown size={13} style={{ opacity: 0.6 }} />
+                        </button>
+
+                        {open && (
+                            <div style={{
+                                position: 'absolute', top: 'calc(100% + 6px)', right: 0,
+                                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                                borderRadius: '12px', padding: '6px',
+                                zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                                minWidth: '260px',
+                            }}>
+                                {/* Preview / open link — UTM-tagged so GA records the click */}
+                                <a
+                                    href={trackedUrl ?? hostedUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'flex', alignItems: 'flex-start', gap: '10px',
+                                        padding: '10px 12px', borderRadius: '8px',
+                                        color: 'var(--text-primary)', textDecoration: 'none',
+                                        transition: 'background 0.15s',
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                >
+                                    <span style={{ marginTop: '1px', flexShrink: 0, color: 'var(--accent-primary)' }}>
+                                        <ExternalLink size={15} />
+                                    </span>
+                                    <div>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Preview in browser</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                            Open the hosted image in a new tab
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <div style={{ height: '1px', background: 'var(--border)', margin: '4px 6px' }} />
+
+                                {/* Native share on mobile */}
+                                {typeof navigator !== 'undefined' && 'share' in navigator && (
+                                    <>
+                                        <button
+                                            onClick={() => {
+                                                // UTM-tagged URL so any resulting visit is attributed in GA
+                                                navigator.share({ url: trackedUrl ?? hostedUrl, title: altText }).catch(() => {});
+                                                setOpen(false);
+                                            }}
+                                            style={{
+                                                display: 'flex', alignItems: 'flex-start', gap: '10px',
+                                                padding: '10px 12px', width: '100%', borderRadius: '8px',
+                                                background: 'transparent', border: 'none',
+                                                color: 'var(--text-primary)', cursor: 'pointer', textAlign: 'left',
+                                                transition: 'background 0.15s',
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            <span style={{ marginTop: '1px', flexShrink: 0, color: 'var(--accent-primary)' }}>
+                                                <Share2 size={15} />
+                                            </span>
+                                            <div>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Share</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                                    WhatsApp, Messages, email, and more
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <div style={{ height: '1px', background: 'var(--border)', margin: '4px 6px' }} />
+                                    </>
+                                )}
+
+                                {/* Copy options */}
+                                {menuItems.map(item => (
+                                    <button
+                                        key={item.key}
+                                        onClick={() => { copy(item.value, item.key); }}
+                                        style={{
+                                            display: 'flex', alignItems: 'flex-start', gap: '10px',
+                                            padding: '10px 12px', width: '100%', borderRadius: '8px',
+                                            background: copiedKey === item.key ? 'rgba(46,213,115,0.08)' : 'transparent',
+                                            border: 'none', color: 'var(--text-primary)',
+                                            cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s',
+                                        }}
+                                        onMouseEnter={e => { if (copiedKey !== item.key) e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                                        onMouseLeave={e => { if (copiedKey !== item.key) e.currentTarget.style.background = 'transparent'; }}
+                                    >
+                                        <span style={{
+                                            marginTop: '1px', flexShrink: 0,
+                                            color: copiedKey === item.key ? 'var(--success)' : 'var(--accent-primary)',
+                                        }}>
+                                            {copiedKey === item.key ? <Check size={15} /> : item.icon}
+                                        </span>
+                                        <div>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                                                {copiedKey === item.key ? 'Copied!' : item.label}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                                {item.description}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function ResultsPanel({ results, summary, serverUrl }: ResultsPanelProps): React.JSX.Element | null {
     const [showShareMenu, setShowShareMenu] = useState<boolean>(false);
@@ -84,7 +339,7 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
         }
     };
 
-    const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareUrl: string = typeof window !== 'undefined' ? (window.location.href.split('?')[0] ?? window.location.href) : '';
     const shareText = `I just shrunk my website images by ${summary.totalSavingsPercent}% using Optimage! Faster load times, better SEO.`;
 
     const handleShare = async (): Promise<void> => {
@@ -297,49 +552,14 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
             {/* Individual File Results */}
             <div className="result-file-list">
                 {results.map((result, index) => {
-
                     const savingsNum = parseFloat(result.savingsPercent);
                     return (
-                        <div key={index} className="result-file-card" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '16px',
-                            flexWrap: 'wrap' // Allow wrapping on very small screens
-                        }}>
-                            <div className="result-file-info" style={{ flex: '1', minWidth: '150px', overflow: 'hidden' }}>
-                                <div className="result-file-name" title={result.originalName} style={{
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    maxWidth: '100%'
-                                }}>
-                                    {result.originalName}
-                                </div>
-                                <div className="result-file-sizes" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: '4px' }}>
-                                    <span>{formatBytes(result.originalSize)}</span>
-                                    <span className="size-arrow" style={{ padding: '0 8px' }}>→</span>
-                                    <span>{formatBytes(result.processedSize)}</span>
-                                    <span className={`savings-badge ${savingsNum < 0 ? 'negative' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', marginLeft: '8px' }}>
-                                        {savingsNum >= 0 ? <ArrowDown size={14} /> : <ArrowUp size={14} />} {Math.abs(savingsNum)}%
-                                    </span>
-                                </div>
-                            </div>
-                            <button
-                                className="result-file-download"
-                                onClick={() => handleDownload(result.processedName)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    flexShrink: 0,
-                                    width: 'auto', // Ensure it doesn't stretch
-                                    minWidth: 'fit-content'
-                                }}
-                            >
-                                <Download size={16} /> Download
-                            </button>
-                        </div>
+                        <FileResultRow
+                            key={index}
+                            result={result}
+                            savingsNum={savingsNum}
+                            onDownload={() => handleDownload(result.processedName)}
+                        />
                     );
                 })}
             </div>
@@ -358,7 +578,9 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                     </span>
                     <button
                         onClick={() => {
-                            const badge = `<a href="https://optimage.dreamintrepid.com" title="Images optimized with Optimage" target="_blank" rel="noopener">Images optimized with Optimage</a>`;
+                            // UTM on the badge link so GA shows exactly how many clicks
+                            // are coming from "Powered by" placements on third-party sites.
+                            const badge = `<a href="https://optimage.dreamintrepid.com?utm_source=badge&utm_medium=website_badge&utm_campaign=powered_by" title="Images optimized with Optimage" target="_blank" rel="noopener">Images optimized with Optimage</a>`;
                             navigator.clipboard.writeText(badge).then(() => {
                                 setBadgeCopied(true);
                                 setTimeout(() => setBadgeCopied(false), 2500);
@@ -384,7 +606,7 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                     border: '1px solid var(--border)', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
                     lineHeight: 1.6,
                 }}>
-                    {`<a href="https://optimage.dreamintrepid.com" title="Images optimized with Optimage" target="_blank" rel="noopener">Images optimized with Optimage</a>`}
+                    {`<a href="https://optimage.dreamintrepid.com?utm_source=badge&utm_medium=website_badge&utm_campaign=powered_by" title="Images optimized with Optimage" target="_blank" rel="noopener">Images optimized with Optimage</a>`}
                 </code>
                 <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '8px' }}>
                     Drop this anywhere on your site. It helps others find the tool and keeps it free.

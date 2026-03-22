@@ -77,6 +77,8 @@ export interface ProcessedImage {
   height: number;
   format: string;
   savingsPercent: string;
+  /** Permanent hosted URL — present when Cloudinary is configured on the server */
+  hostedUrl?: string;
 }
 
 /** Aggregate summary of a batch processing operation. */

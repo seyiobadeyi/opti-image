@@ -2,10 +2,17 @@
 const nextConfig = {
   // Proxy API requests to the NestJS backend during development
   async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     return [
       {
         source: '/api/:path*',
         destination: 'http://localhost:4000/api/:path*',
+      },
+      // Proxy hosted image links through the main domain
+      // GET optimage.dreamintrepid.com/i/:filename → Railway /i/:filename
+      {
+        source: '/i/:path*',
+        destination: `${apiBase}/i/:path*`,
       },
     ];
   },
@@ -21,7 +28,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://pagead2.googlesyndication.com https://www.googletagmanager.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com",
+              "img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com",
               "media-src 'self' data: blob:",
               "connect-src 'self' http://localhost:4000 ws://localhost:3000 https://optimageservice.dreamintrepid.com https://optimageservice.vercel.app https://*.supabase.co https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://accounts.google.com",
               "frame-src 'self' https://googleads.g.doubleclick.net https://accounts.google.com"
