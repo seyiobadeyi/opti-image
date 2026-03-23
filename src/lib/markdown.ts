@@ -8,11 +8,31 @@ import type { BlogPostMeta, BlogPostData } from '@/types';
 
 const postsDirectory: string = path.join(process.cwd(), '_posts');
 
+export const POSTS_PER_PAGE = 9;
+
 /** Frontmatter shape expected in each markdown file. */
 interface PostFrontmatter {
     title: string;
     date: string;
     excerpt: string;
+}
+
+/** Total number of blog posts. */
+export function getPostCount(): number {
+    if (!fs.existsSync(postsDirectory)) return 0;
+    return fs.readdirSync(postsDirectory).filter(f => f.endsWith('.md')).length;
+}
+
+/** Total number of pages given POSTS_PER_PAGE. */
+export function getTotalPages(): number {
+    return Math.max(1, Math.ceil(getPostCount() / POSTS_PER_PAGE));
+}
+
+/** Posts for a specific page (1-indexed). Returns [] for out-of-range pages. */
+export function getPostsForPage(page: number): BlogPostMeta[] {
+    const all = getSortedPostsData();
+    const start = (page - 1) * POSTS_PER_PAGE;
+    return all.slice(start, start + POSTS_PER_PAGE);
 }
 
 export function getSortedPostsData(): BlogPostMeta[] {
