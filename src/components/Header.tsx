@@ -105,6 +105,7 @@ export default function Header(): React.JSX.Element {
                 <nav className="header-desktop-nav" aria-label="Main navigation">
                     <Link href="/" className="header-nav-link">Home</Link>
                     <Link href="/blog" className="header-nav-link">Blog</Link>
+                    <Link href="/pricing" className="header-nav-link">Pricing</Link>
                     {isAuthLoading ? (
                         <div style={{ width: '100px', height: '36px', background: 'var(--bg-tertiary)', borderRadius: '100px', opacity: 0.5, marginLeft: '8px' }}></div>
                     ) : user ? (
@@ -151,6 +152,9 @@ export default function Header(): React.JSX.Element {
                             </Link>
                             <Link href="/blog" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
                                 Blog <ChevronRight size={18} color="var(--text-muted)" />
+                            </Link>
+                            <Link href="/pricing" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
+                                Pricing <ChevronRight size={18} color="var(--text-muted)" />
                             </Link>
                             {user && (
                                 <Link href="/dashboard" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--accent-primary)' }}>
