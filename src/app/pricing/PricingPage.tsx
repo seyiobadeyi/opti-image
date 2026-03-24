@@ -116,7 +116,7 @@ export default function PricingPage(): React.JSX.Element {
         if (!plan) return;
         setUsdStatus('loading');
         try {
-            const result = await apiClient.createLsCheckout(plan.variantId, plan.id);
+            const result = await apiClient.createUsdCheckout(plan.id);
             if (result?.checkoutUrl) window.location.href = result.checkoutUrl;
         } catch {
             setUsdStatus('idle');
