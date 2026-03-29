@@ -17,13 +17,13 @@ export type MediaAction = 'transcribe' | 'translate';
 export type ActiveTab = 'image' | 'media';
 
 /** Authentication flow step in the AuthModal. */
-export type AuthStep = 'email' | 'otp';
+export type AuthStep = 'email' | 'otp' | 'onboarding';
 
 /** Generic async form status used by newsletter and subscription forms. */
 export type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
 /** Dashboard navigation tab keys. */
-export type DashboardTab = 'optimize' | 'video' | 'history' | 'referrals' | 'settings';
+export type DashboardTab = 'optimize' | 'video' | 'history' | 'referrals' | 'galleries' | 'settings';
 
 /** Values persisted to localStorage for cookie consent. */
 export type CookieConsentValue = 'accepted' | 'declined';
@@ -41,6 +41,9 @@ export type CampaignSlug = 'bwai' | 'seo' | 'marketers' | 'wordpress' | 'shopify
 // 2. Domain Models
 // ──────────────────────────────────────────────
 
+/** Filter presets for basic image adjustments. */
+export type FilterPreset = 'vivid' | 'muted' | 'bw' | 'warm' | 'cool' | '';
+
 /** Image optimization settings controlled by the SettingsPanel. */
 export interface ImageSettings {
   format: ImageFormat;
@@ -51,6 +54,9 @@ export interface ImageSettings {
   autoEnhance: boolean;
   stripMetadata: boolean;
   maintainAspectRatio: boolean;
+  exposure: number;         // 0.25–4.0, default 1.0
+  saturation: number;       // 0–3.0, default 1.0
+  filter: FilterPreset;     // preset override
 }
 
 /** Media processing settings controlled by the MediaPanel. */
@@ -177,6 +183,11 @@ export interface GuestHistoryItem {
 export interface ConvertImageOptions {
   format?: ImageFormat;
   quality?: number;
+  exposure?: number;
+  saturation?: number;
+  filter?: FilterPreset;
+  /** When true the server sends the processing-complete email. Set only on the last batch call. */
+  notifyOnComplete?: boolean;
   width?: string | number;
   height?: string | number;
   stripMetadata?: boolean;
@@ -218,8 +229,19 @@ export interface UserProfile {
   subscription_expires_at: string | null;
   referral_code: string | null;
   referred_by: string | null;
+  display_name: string | null;
+  use_case: string | null;
+  phone_number: string | null;
+  date_of_birth: string | null;  // ISO date YYYY-MM-DD
   created_at: string;
   updated_at: string;
+}
+
+/** Payload sent to PATCH /api/profile */
+export interface UpdateProfileData {
+  display_name?: string;
+  phone_number?: string;
+  date_of_birth?: string;
 }
 
 /** A single processing history record from the Supabase processing_history table. */
@@ -230,6 +252,7 @@ export interface ProcessingHistoryItem {
   action_type: string;
   original_size: number;
   processed_size: number;
+  hosted_url?: string | null;
   created_at: string;
 }
 
@@ -262,6 +285,8 @@ export interface BlogPostData extends BlogPostMeta {
 export interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Override the initial step — used when Google OAuth users need onboarding */
+  initialStep?: AuthStep;
 }
 
 export interface DropZoneProps {
@@ -393,7 +418,52 @@ export interface SubscriptionPaywallProps {
 }
 
 // ──────────────────────────────────────────────
-// 12. Window Extensions (Global Augmentation)
+// 12. Gallery Types
+// ──────────────────────────────────────────────
+
+export interface Gallery {
+  id: string;
+  owner_id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  cover_image_url: string | null;
+  access_type: 'public' | 'pin' | 'email_list';
+  allow_download: boolean;
+  watermark: boolean;
+  status: 'active' | 'archived';
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GalleryItem {
+  id: string;
+  gallery_id: string;
+  display_url: string;
+  original_url: string;
+  filename: string;
+  original_size: number;
+  display_size: number | null;
+  width: number | null;
+  height: number | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface GalleryPublicMeta {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  cover_image_url: string | null;
+  access_type: 'public' | 'pin' | 'email_list';
+  allow_download: boolean;
+  created_at: string;
+}
+
+// ──────────────────────────────────────────────
+// 13. Window Extensions (Global Augmentation)
 // ──────────────────────────────────────────────
 
 declare global {

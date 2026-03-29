@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import { LogOut, User as UserIcon, Menu, X, LayoutDashboard, ChevronRight } from 'lucide-react';
-import type { User, GuestHistoryItem } from '@/types';
+import type { User, GuestHistoryItem, AuthStep } from '@/types';
 import { AnimatePresence } from 'framer-motion';
 import AuthModal from '@/components/AuthModal';
 import { createClient } from '@/utils/supabase/client';
@@ -14,6 +14,7 @@ import { apiClient } from '@/lib/api';
 export default function Header(): React.JSX.Element {
     const router = useRouter();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+    const [authModalInitialStep, setAuthModalInitialStep] = useState<AuthStep>('email');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
@@ -77,6 +78,20 @@ export default function Header(): React.JSX.Element {
         }
     }, [supabase, router]);
 
+    // Detect ?onboarding=1 from Google OAuth callback and open modal at onboarding step
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('onboarding') === '1') {
+            setAuthModalInitialStep('onboarding');
+            setIsAuthModalOpen(true);
+            // Clean the URL without reloading
+            const url = new URL(window.location.href);
+            url.searchParams.delete('onboarding');
+            window.history.replaceState({}, '', url.toString());
+        }
+    }, []);
+
     useEffect(() => {
         document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';
     }, [isMobileMenuOpen]);
@@ -97,7 +112,7 @@ export default function Header(): React.JSX.Element {
                     <img src="/logo.png" alt="Optimage Logo" style={{ height: '2.4rem', width: 'auto', objectFit: 'contain', display: 'block' }} />
                     <span className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, justifyContent: 'center' }}>
                         <span style={{ fontSize: '1.3rem', fontWeight: 700, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Optimage</span>
-                        <span style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)' }}>by Dream Intrepid Ltd</span>
+                        <a href="https://dreamintrepid.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.55em', color: 'var(--text-muted)', fontWeight: 'normal', WebkitTextFillColor: 'var(--text-muted)', textDecoration: 'none' }}>by Dream Intrepid Ltd</a>
                     </span>
                 </Link>
 
@@ -195,7 +210,11 @@ export default function Header(): React.JSX.Element {
 
             <AnimatePresence>
                 {isAuthModalOpen && (
-                    <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+                    <AuthModal
+                        isOpen={isAuthModalOpen}
+                        onClose={() => { setIsAuthModalOpen(false); setAuthModalInitialStep('email'); }}
+                        initialStep={authModalInitialStep}
+                    />
                 )}
             </AnimatePresence>
         </header>

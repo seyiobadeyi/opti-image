@@ -14,6 +14,10 @@ import type {
     SubscriptionPlan,
     UsdPlan,
     ReferralStats,
+    UpdateProfileData,
+    Gallery,
+    GalleryItem,
+    GalleryPublicMeta,
 } from '@/types';
 
 const API_BASE: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -70,6 +74,14 @@ export const apiClient = {
             formData.append('rotate', String(options.rotate));
         if (options.autoEnhance !== undefined)
             formData.append('autoEnhance', String(options.autoEnhance));
+        if (options.exposure !== undefined && options.exposure !== 1.0)
+            formData.append('exposure', String(options.exposure));
+        if (options.saturation !== undefined && options.saturation !== 1.0)
+            formData.append('saturation', String(options.saturation));
+        if (options.filter)
+            formData.append('filter', options.filter);
+        if (options.notifyOnComplete)
+            formData.append('notifyOnComplete', 'true');
 
         const response = await fetch(`${API_BASE}/api/images/convert`, {
             method: 'POST',
@@ -284,6 +296,129 @@ export const apiClient = {
         if (!response.ok) return [];
         const data: { plans: UsdPlan[] } = await response.json();
         return data.plans ?? [];
+    },
+
+    /**
+     * Update the current user's profile (display_name, use_case).
+     */
+    async updateProfile(data: UpdateProfileData): Promise<{ success: boolean }> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/payment/profile`, {
+            method: 'PATCH',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) return { success: false };
+        return response.json() as Promise<{ success: boolean }>;
+    },
+
+    // ── Gallery ──
+
+    async listGalleries(): Promise<Gallery[]> {
+        const headers = await getAuthHeaders();
+        if (!headers['Authorization']) return [];
+        const response = await fetch(`${API_BASE}/api/gallery`, { headers });
+        if (!response.ok) return [];
+        return response.json() as Promise<Gallery[]>;
+    },
+
+    async createGallery(data: {
+        title: string;
+        description?: string;
+        pin?: string;
+        access_type?: 'public' | 'pin' | 'email_list';
+        allow_download?: boolean;
+    }): Promise<Gallery> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to create gallery');
+        }
+        return response.json() as Promise<Gallery>;
+    },
+
+    async updateGallery(id: string, data: Partial<{
+        title: string;
+        description: string;
+        pin: string;
+        clearPin: boolean;
+        access_type: 'public' | 'pin' | 'email_list';
+        allow_download: boolean;
+        watermark: boolean;
+        status: 'active' | 'archived';
+    }>): Promise<Gallery> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}`, {
+            method: 'PUT',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to update gallery');
+        }
+        return response.json() as Promise<Gallery>;
+    },
+
+    async deleteGallery(id: string): Promise<void> {
+        const headers = await getAuthHeaders();
+        await fetch(`${API_BASE}/api/gallery/${id}`, { method: 'DELETE', headers });
+    },
+
+    async uploadGalleryImage(galleryId: string, file: File): Promise<GalleryItem> {
+        const headers = await getAuthHeaders();
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/items`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Upload failed');
+        }
+        const data: { success: boolean; item: GalleryItem } = await response.json();
+        return data.item;
+    },
+
+    async deleteGalleryItem(galleryId: string, itemId: string): Promise<void> {
+        const headers = await getAuthHeaders();
+        await fetch(`${API_BASE}/api/gallery/${galleryId}/items/${itemId}`, { method: 'DELETE', headers });
+    },
+
+    async getGalleryPublic(slug: string): Promise<GalleryPublicMeta> {
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}`);
+        if (!response.ok) throw new Error('Gallery not found');
+        return response.json() as Promise<GalleryPublicMeta>;
+    },
+
+    async verifyGalleryAccess(slug: string, pin?: string, email?: string): Promise<string> {
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pin, email }),
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Access denied');
+        }
+        const data: { success: boolean; accessToken: string } = await response.json();
+        return data.accessToken;
+    },
+
+    async getGalleryItems(slug: string, accessToken: string): Promise<GalleryItem[]> {
+        const response = await fetch(
+            `${API_BASE}/api/gallery/public/${slug}/items?token=${encodeURIComponent(accessToken)}`,
+        );
+        if (!response.ok) throw new Error('Failed to load gallery');
+        const data: { items: GalleryItem[] } = await response.json();
+        return data.items;
     },
 
     /**

@@ -3,7 +3,7 @@
 import React from 'react';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { InfoTooltip } from '@/components/Tooltip';
-import type { SettingsPanelProps, ImageSettings } from '@/types';
+import type { SettingsPanelProps, ImageSettings, FilterPreset } from '@/types';
 
 export default function SettingsPanel({ settings, onSettingsChange }: SettingsPanelProps): React.JSX.Element {
     const handleChange = <K extends keyof ImageSettings>(key: K, value: ImageSettings[K]): void => {
@@ -149,6 +149,75 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
                         />
                         <span className="toggle-slider"></span>
                     </label>
+                </div>
+            </div>
+
+            {/* Filter Presets */}
+            <div style={{ marginTop: 24 }}>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+                    Filter Presets
+                </label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {(['', 'vivid', 'muted', 'bw', 'warm', 'cool'] as FilterPreset[]).map((preset) => (
+                        <button
+                            key={preset}
+                            type="button"
+                            onClick={() => handleChange('filter', preset)}
+                            style={{
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                border: `1px solid ${settings.filter === preset ? 'var(--accent-primary)' : 'var(--border)'}`,
+                                background: settings.filter === preset ? 'var(--accent-primary)' : 'var(--bg-card)',
+                                color: settings.filter === preset ? '#ffffff' : 'var(--text-primary)',
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'background 0.15s, border-color 0.15s, color 0.15s',
+                            }}
+                        >
+                            {preset === '' ? 'None' : preset === 'bw' ? 'B&W' : preset.charAt(0).toUpperCase() + preset.slice(1)}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Exposure & Saturation Sliders */}
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center' }}>
+                            Exposure
+                            <InfoTooltip content="Brighten or darken the image. 1.0 is unchanged; 2.0 is twice as bright." />
+                        </label>
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)', minWidth: '36px', textAlign: 'right' }}>{(settings.exposure ?? 1.0).toFixed(2)}x</span>
+                    </div>
+                    <input
+                        type="range"
+                        min="0.25"
+                        max="4"
+                        step="0.05"
+                        value={settings.exposure ?? 1.0}
+                        onChange={(e) => handleChange('exposure', parseFloat(e.target.value))}
+                        className="quality-slider"
+                    />
+                </div>
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center' }}>
+                            Saturation
+                            <InfoTooltip content="Boost or reduce color intensity. 0 is grayscale; 1.0 is unchanged; 3.0 is highly saturated." />
+                        </label>
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)', minWidth: '36px', textAlign: 'right' }}>{(settings.saturation ?? 1.0).toFixed(2)}x</span>
+                    </div>
+                    <input
+                        type="range"
+                        min="0"
+                        max="3"
+                        step="0.05"
+                        value={settings.saturation ?? 1.0}
+                        onChange={(e) => handleChange('saturation', parseFloat(e.target.value))}
+                        className="quality-slider"
+                    />
                 </div>
             </div>
         </div>

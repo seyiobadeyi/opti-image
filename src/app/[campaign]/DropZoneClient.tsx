@@ -22,6 +22,9 @@ const DEFAULT_IMAGE_SETTINGS: ImageSettings = {
     autoEnhance: false,
     stripMetadata: true,
     maintainAspectRatio: true,
+    exposure: 1.0,
+    saturation: 1.0,
+    filter: '',
 };
 
 const DEFAULT_MEDIA_SETTINGS: MediaSettings = {

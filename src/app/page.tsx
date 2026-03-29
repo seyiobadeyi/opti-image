@@ -33,6 +33,9 @@ const DEFAULT_IMAGE_SETTINGS: ImageSettings = {
   autoEnhance: false,
   stripMetadata: true,
   maintainAspectRatio: true,
+  exposure: 1.0,
+  saturation: 1.0,
+  filter: '',
 };
 
 const DEFAULT_MEDIA_SETTINGS: MediaSettings = {
@@ -179,12 +182,13 @@ export default function Home(): React.JSX.Element {
       let totalProcessedSize = 0;
       let completedCount = 0;
 
-      // Process in small batches of 2-3 to ensure smooth progress bar update
-      const concurrencyLimit = 3;
+      // Process 1 file at a time so the progress bar advances smoothly per-file
+      const concurrencyLimit = 1;
 
       for (let i = 0; i < files.length; i += concurrencyLimit) {
         const batch = files.slice(i, i + concurrencyLimit);
-        const response = await apiClient.convertImages(batch, { ...imageSettings });
+        const isLastBatch = i + concurrencyLimit >= files.length;
+        const response = await apiClient.convertImages(batch, { ...imageSettings, notifyOnComplete: isLastBatch });
 
         if (response.success) {
           allResults.push(...response.results);

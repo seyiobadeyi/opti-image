@@ -82,9 +82,9 @@ export default function LandingBento(): React.JSX.Element {
                         <div className="bento-card-img" style={{ position: 'relative', height: '220px', width: '100%', marginBottom: '28px', borderRadius: '12px', overflow: 'hidden' }}>
                             <Image unoptimized src="/image-11.png" alt="Privacy architecture" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                         </div>
-                        <h3 className="bento-subtitle" style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Zero Retention Policy</h3>
+                        <h3 className="bento-subtitle" style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Your Data, Your Control</h3>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.65 }}>
-                            Your data is yours. The moment your files are converted and downloaded, our server scripts meticulously purge them from the temporary drives. No model training, no silent hoarding.
+                            Processed files are cleared from our servers within 30 minutes. Subscribers can also save work to a personal cloud gallery for download anytime. We never use your images for model training.
                         </p>
                     </div>
                 </div>
@@ -230,6 +230,24 @@ export default function LandingBento(): React.JSX.Element {
                     </div>
                 </div>
 
+            </div>
+
+            {/* Dream Intrepid attribution */}
+            <div style={{ textAlign: 'center', marginTop: '56px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    Optimage is one of several professional tools built by
+                </p>
+                <a
+                    href="https://dreamintrepid.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '12px 24px', borderRadius: '100px', border: '1px solid var(--border)', background: 'var(--bg-card)', textDecoration: 'none', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg-card)'; }}
+                >
+                    <span style={{ fontSize: '0.95rem', fontWeight: 700, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Dream Intrepid</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>— digital products &amp; creative tools →</span>
+                </a>
             </div>
         </section>
     );

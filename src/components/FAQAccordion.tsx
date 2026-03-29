@@ -23,7 +23,7 @@ const QA_DATA: FAQItem[] = [
     },
     {
         question: "Is the privacy of my images ensured?",
-        answer: "Absolutely. We operate a strict Zero Retention Policy. Your data is yours. The moment your files are converted and downloaded, our edge servers meticulously purge them from temporary storage. We do not use your images for model training or silent hoarding."
+        answer: "Yes. Temporary files are cleared from our processing servers within 30 minutes of conversion. If you use the hosted gallery feature (available on subscription), your images are stored securely in your private cloud folder and accessible only to you or anyone you share the link with. We never use your images for model training."
     },
     {
         question: "How does Optimage optimize images without losing quality?",

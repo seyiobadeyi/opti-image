@@ -425,6 +425,21 @@ export default function PricingPage(): React.JSX.Element {
                     </div>
                 ))}
             </div>
+
+            {/* Dream Intrepid attribution */}
+            <div style={{ textAlign: 'center', marginTop: '64px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                    Optimage is crafted and maintained by
+                </p>
+                <a
+                    href="https://dreamintrepid.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '1.05rem', fontWeight: 700, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', textDecoration: 'none' }}
+                >
+                    Dream Intrepid Ltd — Building professional digital tools
+                </a>
+            </div>
         </div>
     );
 }

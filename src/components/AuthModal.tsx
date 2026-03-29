@@ -8,10 +8,11 @@ import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import type { AuthModalProps, AuthStep, GuestHistoryItem } from '@/types';
 
-export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JSX.Element | null {
+
+export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalProps): React.JSX.Element | null {
     const supabase = useMemo(() => createClient(), []);
     const router = useRouter();
-    const [step, setStep] = useState<AuthStep>('email');
+    const [step, setStep] = useState<AuthStep>(initialStep ?? 'email');
     const [email, setEmail] = useState<string>('');
     const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '', '', '']);
     const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -19,6 +20,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     const [resendCooldownMs, setResendCooldownMs] = useState<number>(0);
+    const [displayName, setDisplayName] = useState<string>('');
+    const [phone, setPhone] = useState<string>('');
+    const [phoneCode, setPhoneCode] = useState<string>('+1');
+    const [dobDay, setDobDay] = useState<string>('');
+    const [dobMonth, setDobMonth] = useState<string>('');
+    const [dobYear, setDobYear] = useState<string>('');
 
     // Notify the newsletter popup so it doesn't conflict with this modal
     useEffect(() => {
@@ -173,6 +180,22 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
             });
             if (verifyError) throw new Error(verifyError.message);
             await handleSyncGuestHistory();
+
+            // Check if this user has a display_name — if not, show onboarding
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user?.id) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('display_name')
+                    .eq('id', session.user.id)
+                    .single();
+                if (!profile?.display_name) {
+                    setStep('onboarding');
+                    setLoading(false);
+                    return;
+                }
+            }
+
             onClose();
             router.push('/dashboard');
         } catch (err: unknown) {
@@ -180,6 +203,29 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleOnboardingSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        if (!displayName.trim()) return;
+        setLoading(true);
+        const dobString = dobYear && dobMonth && dobDay
+            ? `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`
+            : undefined;
+        const fullPhone = phone.trim() ? `${phoneCode}${phone.trim().replace(/^0+/, '')}` : undefined;
+        try {
+            await apiClient.updateProfile({
+                display_name: displayName.trim(),
+                phone_number: fullPhone,
+                date_of_birth: dobString,
+            });
+        } catch {
+            // Non-blocking — proceed even if update fails
+        } finally {
+            setLoading(false);
+        }
+        onClose();
+        router.push('/dashboard');
     };
 
     const resetFlow = (): void => {
@@ -234,7 +280,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
                             <img src="/logo.png" alt="Optimage Logo" style={{ height: '2.4rem', width: 'auto', objectFit: 'contain' }} />
                             <div className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
                                 <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white' }}>Optimage</span>
-                                <span style={{ fontSize: '0.6em', color: 'rgba(255,255,255,0.7)', fontWeight: 'normal' }}>by Dream Intrepid Ltd</span>
+                                <a href="https://dreamintrepid.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.6em', color: 'rgba(255,255,255,0.7)', fontWeight: 'normal', textDecoration: 'none' }}>by Dream Intrepid Ltd</a>
                             </div>
                         </div>
                         <div>
@@ -261,12 +307,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
 
                     <div style={{ marginBottom: '32px' }}>
                         <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.01em' }}>
-                            {step === 'email' ? 'Sign in to Optimage' : 'Enter Secure Code'}
+                            {step === 'email' ? 'Sign in to Optimage' : step === 'otp' ? 'Enter Secure Code' : 'One last thing'}
                         </h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
                             {step === 'email'
                                 ? 'Enter your email to sign in or create a new account.'
-                                : `We sent an 8-digit code to ${email}. This code signs you in on the device where you enter it.`}
+                                : step === 'otp'
+                                    ? `We sent an 8-digit code to ${email}. This code signs you in on the device where you enter it.`
+                                    : 'Tell us a bit about yourself so we can personalise your experience.'}
                         </p>
                     </div>
 
@@ -289,7 +337,106 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps): React.JS
                         </div>
                     )}
 
-                    {step === 'email' ? (
+                    {step === 'onboarding' ? (
+                        <form onSubmit={handleOnboardingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>
+                                    What should we call you?
+                                </label>
+                                <input
+                                    type="text"
+                                    value={displayName}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)}
+                                    placeholder="Your name"
+                                    maxLength={80}
+                                    required
+                                    autoFocus
+                                    style={{
+                                        width: '100%', padding: '13px 14px',
+                                        borderRadius: '12px', border: '1px solid var(--border)',
+                                        background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                        outline: 'none', fontSize: '0.95rem',
+                                    }}
+                                    onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--accent-primary)'}
+                                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--border)'}
+                                />
+                            </div>
+                            {/* Phone number */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>
+                                    Phone number <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span>
+                                </label>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <select
+                                        value={phoneCode}
+                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPhoneCode(e.target.value)}
+                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0 }}
+                                    >
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+44">🇬🇧 +44</option>
+                                        <option value="+234">🇳🇬 +234</option>
+                                        <option value="+27">🇿🇦 +27</option>
+                                        <option value="+233">🇬🇭 +233</option>
+                                        <option value="+254">🇰🇪 +254</option>
+                                        <option value="+49">🇩🇪 +49</option>
+                                        <option value="+33">🇫🇷 +33</option>
+                                        <option value="+91">🇮🇳 +91</option>
+                                        <option value="+61">🇦🇺 +61</option>
+                                        <option value="+55">🇧🇷 +55</option>
+                                        <option value="+52">🇲🇽 +52</option>
+                                        <option value="+1-CA">🇨🇦 +1</option>
+                                        <option value="+971">🇦🇪 +971</option>
+                                        <option value="+65">🇸🇬 +65</option>
+                                    </select>
+                                    <input
+                                        type="tel"
+                                        value={phone}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value.replace(/[^\d\s\-().]/g, ''))}
+                                        placeholder="800 000 0000"
+                                        maxLength={15}
+                                        style={{ flex: 1, padding: '13px 14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.95rem' }}
+                                        onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--accent-primary)'}
+                                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--border)'}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Date of birth */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>
+                                    Date of birth <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span>
+                                </label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                                    <select value={dobDay} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDobDay(e.target.value)}
+                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: dobDay ? 'var(--text-primary)' : 'var(--text-muted)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                        <option value="">Day</option>
+                                        {Array.from({ length: 31 }, (_, i) => i + 1).map(d => <option key={d} value={String(d)}>{d}</option>)}
+                                    </select>
+                                    <select value={dobMonth} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDobMonth(e.target.value)}
+                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: dobMonth ? 'var(--text-primary)' : 'var(--text-muted)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                        <option value="">Month</option>
+                                        {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m, i) => <option key={i} value={String(i + 1)}>{m}</option>)}
+                                    </select>
+                                    <select value={dobYear} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDobYear(e.target.value)}
+                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: dobYear ? 'var(--text-primary)' : 'var(--text-muted)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                        <option value="">Year</option>
+                                        {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 18 - i).map(y => <option key={y} value={String(y)}>{y}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" className="btn btn-primary" disabled={loading || !displayName.trim()} style={{
+                                width: '100%', marginTop: '8px', padding: '14px',
+                                borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            }}>
+                                {loading ? 'Saving...' : <><span>Get Started</span><ArrowRight size={16} /></>}
+                            </button>
+                            <button type="button" onClick={() => { onClose(); router.push('/dashboard'); }}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'center' }}>
+                                Skip for now
+                            </button>
+                        </form>
+                    ) : step === 'email' ? (
                         <>
                             {/* Google OAuth */}
                             <button

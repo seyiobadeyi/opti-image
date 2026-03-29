@@ -133,7 +133,8 @@ function FileResultRow({ result, savingsNum, onDownload }: FileResultRowProps) {
                     <span>{formatBytes(result.processedSize)}</span>
                     <span className={`savings-badge ${savingsNum < 0 ? 'negative' : ''}`}
                         style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', marginLeft: '8px' }}>
-                        {savingsNum >= 0 ? <ArrowDown size={14} /> : <ArrowUp size={14} />} {Math.abs(savingsNum)}%
+                        {savingsNum >= 0 ? <ArrowDown size={14} /> : <ArrowUp size={14} />}
+                        {Math.abs(savingsNum)}%{savingsNum < 0 ? ' larger' : ''}
                     </span>
                 </div>
             </div>
@@ -385,10 +386,35 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                     <div className="stat-value" style={{ fontSize: '2rem' }}>{formatBytes(summary.totalProcessedSize)}</div>
                     <div className="stat-label">Optimized Size</div>
                 </div>
-                <div className="stat-card" style={{ padding: '24px', border: '2px solid var(--success)', background: 'var(--success-bg)' }}>
-                    <div className="stat-value success" style={{ fontSize: '3rem', fontWeight: 900 }}>{summary.totalSavingsPercent}%</div>
-                    <div className="stat-label" style={{ color: 'var(--success)', fontWeight: 700, fontSize: '1rem' }}>Total Reduction</div>
-                </div>
+                {(() => {
+                    const savPct = parseFloat(summary.totalSavingsPercent);
+                    const isNeg = savPct < 0;
+                    return (
+                        <div className="stat-card" style={{
+                            padding: '24px',
+                            border: `2px solid ${isNeg ? 'rgba(239,68,68,0.4)' : 'var(--success)'}`,
+                            background: isNeg ? 'rgba(239,68,68,0.06)' : 'var(--success-bg)',
+                        }}>
+                            <div className={`stat-value ${isNeg ? '' : 'success'}`} style={{
+                                fontSize: '3rem', fontWeight: 900,
+                                color: isNeg ? '#ef4444' : undefined,
+                            }}>
+                                {isNeg ? '+' : ''}{Math.abs(savPct)}%
+                            </div>
+                            <div className="stat-label" style={{
+                                color: isNeg ? '#ef4444' : 'var(--success)',
+                                fontWeight: 700, fontSize: '1rem',
+                            }}>
+                                {isNeg ? '⚠ Size Increased' : 'Total Reduction'}
+                            </div>
+                            {isNeg && (
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>
+                                    Lower quality setting or switch to WebP/AVIF to reduce file size.
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
             </div>
 
             {/* SEO Impact Banner */}

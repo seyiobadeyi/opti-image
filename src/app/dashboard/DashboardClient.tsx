@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
-    Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink,
+    Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images,
 } from 'lucide-react';
 import Link from 'next/link';
 import SubscriptionPaywall from '@/components/SubscriptionPaywall';
@@ -14,6 +14,7 @@ import type {
     DashboardClientProps, DashboardTab, DashboardFileNames, ImageSettings,
     VideoSettings, VideoResult, ProcessedImage, ProcessingSummary,
     FileWithCustomName, ProcessingHistoryItem, SubscriptionStatus, ReferralStats,
+    Gallery,
 } from '@/types';
 
 // ─── Helper Functions ───────────────────────────────────────────
@@ -54,9 +55,221 @@ const TABS: { key: DashboardTab; label: string; icon: React.ComponentType<{ size
     { key: 'optimize', label: 'Images', icon: LogoIcon },
     { key: 'video', label: 'Video', icon: Film },
     { key: 'history', label: 'History', icon: History },
+    { key: 'galleries', label: 'Galleries', icon: Images },
     { key: 'referrals', label: 'Referrals', icon: Users },
     { key: 'settings', label: 'Preferences', icon: Settings },
 ];
+
+// ─── History Row ─────────────────────────────────────────────────
+function HistoryRow({ item }: { item: import('@/types').ProcessingHistoryItem }): React.JSX.Element {
+    const [copied, setCopied] = useState(false);
+    const copyLink = () => {
+        if (!item.hosted_url) return;
+        navigator.clipboard.writeText(item.hosted_url).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+    return (
+        <tr style={{ borderBottom: '1px solid var(--border)' }}>
+            <td style={{ padding: '16px 24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {item.hosted_url ? (
+                        <img src={item.hosted_url} alt={item.file_name} style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, background: 'var(--bg-tertiary)' }} />
+                    ) : (
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <ImageIcon size={18} color="var(--text-muted)" />
+                        </div>
+                    )}
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500, maxWidth: '200px' }}>{item.file_name}</span>
+                </div>
+            </td>
+            <td style={{ padding: '16px 24px' }}>
+                <span style={{ padding: '4px 12px', borderRadius: '100px', background: 'rgba(46,213,115,0.1)', color: '#2ed573', fontSize: '0.85rem', fontWeight: 600, textTransform: 'capitalize' }}>{item.action_type}</span>
+            </td>
+            <td style={{ padding: '16px 24px' }}>
+                {item.action_type === 'compress' ? (
+                    <span style={{ color: 'var(--success)', fontWeight: 600 }}>{formatBytes(item.original_size)} → {formatBytes(item.processed_size)}</span>
+                ) : <span style={{ color: 'var(--text-muted)' }}>-</span>}
+            </td>
+            <td style={{ padding: '16px 24px' }}>
+                {item.hosted_url ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <button
+                            onClick={copyLink}
+                            title="Copy hosted URL"
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '8px', border: '1px solid var(--border)', background: copied ? 'rgba(46,213,115,0.1)' : 'var(--bg-tertiary)', color: copied ? 'var(--success)' : 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                        >
+                            {copied ? <Check size={13} /> : <Copy size={13} />}
+                            {copied ? 'Copied' : 'Copy'}
+                        </button>
+                        <a href={item.hosted_url} target="_blank" rel="noopener noreferrer" title="Open image" style={{ display: 'flex', alignItems: 'center', padding: '5px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-muted)', transition: 'color 0.15s' }}>
+                            <ExternalLink size={13} />
+                        </a>
+                    </div>
+                ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>—</span>}
+            </td>
+            <td style={{ padding: '16px 24px', color: 'var(--text-secondary)' }}>{formatDate(item.created_at)}</td>
+        </tr>
+    );
+}
+
+// ─── Galleries Tab ───────────────────────────────────────────────
+function GalleriesTab(): React.JSX.Element {
+    const [galleries, setGalleries] = useState<Gallery[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [showCreate, setShowCreate] = useState<boolean>(false);
+    const [createTitle, setCreateTitle] = useState<string>('');
+    const [createPin, setCreatePin] = useState<string>('');
+    const [createDesc, setCreateDesc] = useState<string>('');
+    const [createAllowDownload, setCreateAllowDownload] = useState<boolean>(true);
+    const [creating, setCreating] = useState<boolean>(false);
+    const [createError, setCreateError] = useState<string | null>(null);
+
+    useEffect(() => {
+        apiClient.listGalleries().then(data => {
+            setGalleries(data);
+            setLoading(false);
+        }).catch(() => setLoading(false));
+    }, []);
+
+    const handleCreate = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        if (!createTitle.trim()) return;
+        setCreating(true);
+        setCreateError(null);
+        try {
+            const gallery = await apiClient.createGallery({
+                title: createTitle.trim(),
+                description: createDesc.trim() || undefined,
+                pin: createPin.trim() || undefined,
+                access_type: createPin.trim() ? 'pin' : 'public',
+                allow_download: createAllowDownload,
+            });
+            setGalleries(prev => [gallery, ...prev]);
+            setShowCreate(false);
+            setCreateTitle('');
+            setCreatePin('');
+            setCreateDesc('');
+        } catch (err: unknown) {
+            setCreateError(err instanceof Error ? err.message : 'Failed to create gallery');
+        } finally {
+            setCreating(false);
+        }
+    };
+
+    const copyLink = (slug: string): void => {
+        const url = `${window.location.origin}/g/${slug}`;
+        navigator.clipboard.writeText(url).catch(() => null);
+    };
+
+    const handleDelete = async (id: string): Promise<void> => {
+        if (!window.confirm('Delete this gallery? This cannot be undone.')) return;
+        await apiClient.deleteGallery(id).catch(() => null);
+        setGalleries(prev => prev.filter(g => g.id !== id));
+    };
+
+    if (loading) {
+        return <div style={{ padding: '40px', color: 'var(--text-muted)', textAlign: 'center' }}>Loading galleries...</div>;
+    }
+
+    return (
+        <div style={{ maxWidth: '800px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                    <h3 style={{ fontSize: '1.4rem', marginBottom: '4px' }}>Client Galleries</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Share PIN-protected photo galleries with clients for download.</p>
+                </div>
+                <button onClick={() => setShowCreate(true)} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
+                    + New Gallery
+                </button>
+            </div>
+
+            {showCreate && (
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                    <h4 style={{ marginBottom: '16px' }}>Create Gallery</h4>
+                    {createError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '12px' }}>{createError}</p>}
+                    <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <input
+                            type="text" value={createTitle} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateTitle(e.target.value)}
+                            placeholder="Gallery title (e.g. Smith Wedding 2026)" required maxLength={120}
+                            style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                        />
+                        <input
+                            type="text" value={createDesc} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateDesc(e.target.value)}
+                            placeholder="Description (optional)" maxLength={500}
+                            style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                        />
+                        <input
+                            type="text" value={createPin} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreatePin(e.target.value)}
+                            placeholder="PIN to protect gallery (leave blank = public)" maxLength={20}
+                            style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                        />
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                            <input type="checkbox" checked={createAllowDownload} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateAllowDownload(e.target.checked)} />
+                            Allow clients to download original quality images
+                        </label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="submit" disabled={creating} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
+                                {creating ? 'Creating...' : 'Create Gallery'}
+                            </button>
+                            <button type="button" onClick={() => setShowCreate(false)} className="btn btn-secondary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {galleries.length === 0 ? (
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '48px', textAlign: 'center' }}>
+                    <Images size={40} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>No galleries yet</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Create your first gallery to share photos with clients.</p>
+                </div>
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {galleries.map(gallery => (
+                        <div key={gallery.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px 24px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                                        <h4 style={{ fontSize: '1rem', margin: 0 }}>{gallery.title}</h4>
+                                        {gallery.access_type === 'pin' && (
+                                            <span style={{ fontSize: '0.7rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px', color: 'var(--text-muted)' }}>PIN protected</span>
+                                        )}
+                                        {gallery.access_type === 'public' && (
+                                            <span style={{ fontSize: '0.7rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e' }}>Public</span>
+                                        )}
+                                    </div>
+                                    {gallery.description && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '0 0 8px 0' }}>{gallery.description}</p>}
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>
+                                        Created {new Date(gallery.created_at).toLocaleDateString()}
+                                        {!gallery.allow_download && ' · Downloads disabled'}
+                                    </p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                                    <a href={`/g/${gallery.slug}`} target="_blank" rel="noreferrer"
+                                        style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <ExternalLink size={12} /> Preview
+                                    </a>
+                                    <button onClick={() => copyLink(gallery.slug)}
+                                        style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <Copy size={12} /> Copy link
+                                    </button>
+                                    <button onClick={() => handleDelete(gallery.id)}
+                                        style={{ padding: '8px 12px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer' }}>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 // ─── Main Component ──────────────────────────────────────────────
 export default function DashboardClient({ user, profile, history: initialHistory }: DashboardClientProps): React.JSX.Element {
@@ -72,6 +285,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
         format: '', quality: 80, width: '', height: '',
         rotate: 0, autoEnhance: false,
         stripMetadata: true, maintainAspectRatio: true,
+        exposure: 1.0, saturation: 1.0, filter: '',
     });
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [processed, setProcessed] = useState<number>(0);
@@ -349,7 +563,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                 <div>
                     <h1 style={{ fontSize: '2.5rem', marginBottom: '8px', fontWeight: 800, letterSpacing: '-0.02em' }}>Your Workspace</h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Welcome back, <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{user.email}</span></p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Welcome back, <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{profile?.display_name || user.email}</span></p>
                 </div>
             </div>
 
@@ -783,30 +997,13 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 500 }}>File</th>
                                         <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 500 }}>Action</th>
                                         <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 500 }}>Savings</th>
+                                        <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 500 }}>Link</th>
                                         <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 500 }}>Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {history.map((item) => (
-                                        <tr key={item.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                            <td style={{ padding: '16px 24px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                                        <ImageIcon size={18} color="var(--text-muted)" />
-                                                    </div>
-                                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500, maxWidth: '200px' }}>{item.file_name}</span>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '16px 24px' }}>
-                                                <span style={{ padding: '4px 12px', borderRadius: '100px', background: 'rgba(46,213,115,0.1)', color: '#2ed573', fontSize: '0.85rem', fontWeight: 600, textTransform: 'capitalize' }}>{item.action_type}</span>
-                                            </td>
-                                            <td style={{ padding: '16px 24px' }}>
-                                                {item.action_type === 'compress' ? (
-                                                    <span style={{ color: 'var(--success)', fontWeight: 600 }}>{formatBytes(item.original_size)} → {formatBytes(item.processed_size)}</span>
-                                                ) : <span style={{ color: 'var(--text-muted)' }}>-</span>}
-                                            </td>
-                                            <td style={{ padding: '16px 24px', color: 'var(--text-secondary)' }}>{formatDate(item.created_at)}</td>
-                                        </tr>
+                                        <HistoryRow key={item.id} item={item} />
                                     ))}
                                 </tbody>
                             </table>
@@ -824,6 +1021,11 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         </div>
                     )}
                 </div>
+            )}
+
+            {/* ═══════════ Tab: Galleries ═══════════ */}
+            {activeTab === 'galleries' && (
+                <GalleriesTab />
             )}
 
             {/* ═══════════ Tab: Referrals ═══════════ */}
