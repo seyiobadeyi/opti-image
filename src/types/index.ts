@@ -231,8 +231,12 @@ export interface UserProfile {
   referred_by: string | null;
   display_name: string | null;
   use_case: string | null;
+  username: string | null;
   phone_number: string | null;
   date_of_birth: string | null;  // ISO date YYYY-MM-DD
+  branding_studio_name: string | null;
+  branding_color: string | null;
+  branding_website: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -242,6 +246,10 @@ export interface UpdateProfileData {
   display_name?: string;
   phone_number?: string;
   date_of_birth?: string;
+  branding_studio_name?: string;
+  branding_color?: string;
+  branding_website?: string;
+  username?: string;
 }
 
 /** A single processing history record from the Supabase processing_history table. */
@@ -428,13 +436,17 @@ export interface Gallery {
   title: string;
   description: string | null;
   cover_image_url: string | null;
-  access_type: 'public' | 'pin' | 'email_list';
+  access_type: 'public' | 'pin' | 'email_list' | 'account';
   allow_download: boolean;
   watermark: boolean;
-  status: 'active' | 'archived';
+  status: 'active' | 'archived' | 'draft';
   expires_at: string | null;
+  payment_required: boolean;
+  payment_instructions: string | null;
+  payment_unlocked: boolean;
   created_at: string;
   updated_at: string;
+  item_count?: number;
 }
 
 export interface GalleryItem {
@@ -457,9 +469,23 @@ export interface GalleryPublicMeta {
   title: string;
   description: string | null;
   cover_image_url: string | null;
-  access_type: 'public' | 'pin' | 'email_list';
+  access_type: 'public' | 'pin' | 'email_list' | 'account';
   allow_download: boolean;
+  status: 'active' | 'archived' | 'draft';
+  payment_required: boolean;
+  payment_instructions: string | null;
+  payment_unlocked: boolean;
+  photographer_name: string | null;
+  branding_studio_name: string | null;
+  branding_color: string | null;
+  branding_website: string | null;
+  expires_at: string | null;
   created_at: string;
+}
+
+export interface GalleryActivity {
+  totalViews: number;
+  recentViews: Array<{ viewer_type: string; created_at: string }>;
 }
 
 // ──────────────────────────────────────────────

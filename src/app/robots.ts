@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
             // Standard crawlers
             {
                 userAgent: '*',
-                allow: '/',
+                allow: ['/', '/g/', '/p/'],
                 disallow: ['/api/', '/dashboard/', '/admin/'],
             },
             // AI indexers — allow full access to all public content so the product

@@ -299,7 +299,7 @@ export const apiClient = {
     },
 
     /**
-     * Update the current user's profile (display_name, use_case).
+     * Update the current user's profile (display_name, use_case, username, etc.).
      */
     async updateProfile(data: UpdateProfileData): Promise<{ success: boolean }> {
         const headers = await getAuthHeaders();
@@ -310,6 +310,19 @@ export const apiClient = {
         });
         if (!response.ok) return { success: false };
         return response.json() as Promise<{ success: boolean }>;
+    },
+
+    /**
+     * Check whether a username is available for the current user to claim.
+     */
+    async checkUsernameAvailable(username: string): Promise<boolean> {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/api/payment/username/check?u=${encodeURIComponent(username)}`, {
+            headers,
+        });
+        if (!res.ok) return false;
+        const data = await res.json() as { available: boolean };
+        return data.available;
     },
 
     // ── Gallery ──
@@ -326,8 +339,11 @@ export const apiClient = {
         title: string;
         description?: string;
         pin?: string;
-        access_type?: 'public' | 'pin' | 'email_list';
+        access_type?: 'public' | 'pin' | 'email_list' | 'account';
         allow_download?: boolean;
+        payment_required?: boolean;
+        payment_instructions?: string;
+        expires_at?: string;
     }): Promise<Gallery> {
         const headers = await getAuthHeaders();
         const response = await fetch(`${API_BASE}/api/gallery`, {
@@ -347,10 +363,11 @@ export const apiClient = {
         description: string;
         pin: string;
         clearPin: boolean;
-        access_type: 'public' | 'pin' | 'email_list';
+        access_type: 'public' | 'pin' | 'email_list' | 'account';
         allow_download: boolean;
         watermark: boolean;
-        status: 'active' | 'archived';
+        status: 'active' | 'archived' | 'draft';
+        cover_image_url: string | null;
     }>): Promise<Gallery> {
         const headers = await getAuthHeaders();
         const response = await fetch(`${API_BASE}/api/gallery/${id}`, {
@@ -368,6 +385,22 @@ export const apiClient = {
     async deleteGallery(id: string): Promise<void> {
         const headers = await getAuthHeaders();
         await fetch(`${API_BASE}/api/gallery/${id}`, { method: 'DELETE', headers });
+    },
+
+    async unlockGallery(id: string): Promise<void> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/unlock`, { method: 'POST', headers });
+        if (!response.ok) throw new Error('Failed to unlock gallery');
+    },
+
+    async setGalleryDraft(id: string, draft: boolean): Promise<void> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/draft`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ draft }),
+        });
+        if (!response.ok) throw new Error('Failed to update gallery status');
     },
 
     async uploadGalleryImage(galleryId: string, file: File): Promise<GalleryItem> {
@@ -398,10 +431,12 @@ export const apiClient = {
         return response.json() as Promise<GalleryPublicMeta>;
     },
 
-    async verifyGalleryAccess(slug: string, pin?: string, email?: string): Promise<string> {
+    async verifyGalleryAccess(slug: string, pin?: string, email?: string, supabaseToken?: string): Promise<string> {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (supabaseToken) headers['Authorization'] = `Bearer ${supabaseToken}`;
         const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ pin, email }),
         });
         if (!response.ok) {
@@ -412,13 +447,61 @@ export const apiClient = {
         return data.accessToken;
     },
 
-    async getGalleryItems(slug: string, accessToken: string): Promise<GalleryItem[]> {
-        const response = await fetch(
-            `${API_BASE}/api/gallery/public/${slug}/items?token=${encodeURIComponent(accessToken)}`,
-        );
-        if (!response.ok) throw new Error('Failed to load gallery');
-        const data: { items: GalleryItem[] } = await response.json();
-        return data.items;
+    async getGalleryItems(slug: string, accessToken: string, page = 1, limit = 48): Promise<{ items: GalleryItem[]; total: number; hasMore: boolean }> {
+        const res = await fetch(`${API_BASE}/api/gallery/public/${slug}/items?page=${page}&limit=${limit}`, {
+            headers: { 'x-gallery-token': accessToken },
+        });
+        if (!res.ok) throw new Error('Failed to fetch items');
+        return res.json();
+    },
+
+    /**
+     * Get activity log for a gallery (owner only).
+     */
+    async getGalleryActivity(id: string): Promise<import('@/types').GalleryActivity> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/activity`, { headers });
+        if (!response.ok) return { totalViews: 0, recentViews: [] };
+        return response.json() as Promise<import('@/types').GalleryActivity>;
+    },
+
+    /**
+     * Send gallery invite email to a client.
+     */
+    async sendGalleryToClient(id: string, email: string, message?: string): Promise<void> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/send`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, message }),
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to send email');
+        }
+    },
+
+    /**
+     * Get favourite item IDs for a viewer in a public gallery.
+     */
+    async getGalleryFavorites(slug: string, accessToken: string, viewerIdentifier: string): Promise<string[]> {
+        const params = new URLSearchParams({ token: accessToken, viewer: viewerIdentifier });
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/favorites?${params.toString()}`);
+        if (!response.ok) return [];
+        const data: { itemIds: string[] } = await response.json();
+        return data.itemIds ?? [];
+    },
+
+    /**
+     * Save viewer's favourite selections. Set notifyPhotographer=true to trigger email.
+     */
+    async setGalleryFavorites(slug: string, accessToken: string, itemIds: string[], viewerIdentifier: string, notifyPhotographer = false): Promise<void> {
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/favorites`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: accessToken, itemIds, viewerIdentifier, notifyPhotographer }),
+        });
+        if (!response.ok) throw new Error('Failed to save favourites');
     },
 
     /**

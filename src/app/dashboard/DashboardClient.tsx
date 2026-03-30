@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
-    Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images,
+    Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images, Camera, Send, Eye,
 } from 'lucide-react';
 import Link from 'next/link';
 import SubscriptionPaywall from '@/components/SubscriptionPaywall';
@@ -14,7 +14,7 @@ import type {
     DashboardClientProps, DashboardTab, DashboardFileNames, ImageSettings,
     VideoSettings, VideoResult, ProcessedImage, ProcessingSummary,
     FileWithCustomName, ProcessingHistoryItem, SubscriptionStatus, ReferralStats,
-    Gallery,
+    Gallery, GalleryItem,
 } from '@/types';
 
 // ─── Helper Functions ───────────────────────────────────────────
@@ -114,17 +114,221 @@ function HistoryRow({ item }: { item: import('@/types').ProcessingHistoryItem })
     );
 }
 
+// ─── Username Form ───────────────────────────────────────────────
+function UsernameForm({ profile }: { profile: import('@/types').UserProfile | null }): React.JSX.Element {
+    const [username, setUsername] = useState(profile?.username ?? '');
+    const [checkResult, setCheckResult] = useState<'available' | 'taken' | 'idle' | 'checking'>('idle');
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const usernamePattern = /^[a-z0-9_]{3,30}$/;
+    const currentUsername = profile?.username ?? '';
+
+    // Debounced availability check
+    useEffect(() => {
+        if (!username || username === currentUsername) {
+            setCheckResult('idle');
+            return;
+        }
+        if (!usernamePattern.test(username)) {
+            setCheckResult('idle');
+            return;
+        }
+        setCheckResult('checking');
+        const timer = setTimeout(() => {
+            apiClient.checkUsernameAvailable(username)
+                .then(available => setCheckResult(available ? 'available' : 'taken'))
+                .catch(() => setCheckResult('idle'));
+        }, 500);
+        return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [username]);
+
+    const handleSave = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        if (!usernamePattern.test(username)) {
+            setError('Username must be 3–30 characters: lowercase letters, numbers, underscores only.');
+            return;
+        }
+        if (checkResult === 'taken') {
+            setError('This username is already taken. Please choose another.');
+            return;
+        }
+        setSaving(true);
+        setError(null);
+        try {
+            await apiClient.updateProfile({ username });
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
+        } catch {
+            setError('Failed to save username. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const statusColor = checkResult === 'available' ? '#2ed573' : checkResult === 'taken' ? '#ef4444' : 'var(--text-muted)';
+    const statusText = checkResult === 'available' ? '✓ Available' : checkResult === 'taken' ? '✗ Already taken' : checkResult === 'checking' ? 'Checking…' : '';
+
+    return (
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {currentUsername && (
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
+                    Current username: <strong style={{ color: 'var(--text-primary)' }}>@{currentUsername}</strong>
+                </p>
+            )}
+            <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '4px' }}>New username</label>
+                <div style={{ position: 'relative' }}>
+                    <input
+                        type="text"
+                        value={username}
+                        maxLength={30}
+                        minLength={3}
+                        pattern="^[a-z0-9_]{3,30}$"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
+                            setError(null);
+                            setSaved(false);
+                        }}
+                        placeholder="e.g. jane_smith"
+                        style={{ padding: '10px 14px', borderRadius: '10px', border: `1px solid ${checkResult === 'available' ? '#2ed57366' : checkResult === 'taken' ? '#ef444466' : 'var(--border)'}`, background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
+                    />
+                    {statusText && (
+                        <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.78rem', color: statusColor, whiteSpace: 'nowrap' }}>
+                            {statusText}
+                        </span>
+                    )}
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', margin: '4px 0 0 0' }}>
+                    3–30 characters. Lowercase letters, numbers, and underscores only.
+                </p>
+            </div>
+            {error && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: 0 }}>{error}</p>}
+            <button
+                type="submit"
+                disabled={saving || checkResult === 'taken' || checkResult === 'checking' || username === currentUsername}
+                className="btn btn-primary"
+                style={{ padding: '10px 20px', fontSize: '0.9rem', alignSelf: 'flex-start' }}
+            >
+                {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save username'}
+            </button>
+        </form>
+    );
+}
+
+// ─── Branding Form ───────────────────────────────────────────────
+function BrandingForm({ profile }: { profile: import('@/types').UserProfile | null }): React.JSX.Element {
+    const [studioName, setStudioName] = useState(profile?.branding_studio_name ?? '');
+    const [color, setColor]           = useState(profile?.branding_color ?? '#7c3aed');
+    const [website, setWebsite]       = useState(profile?.branding_website ?? '');
+    const [saving, setSaving]         = useState(false);
+    const [saved, setSaved]           = useState(false);
+
+    const handleSave = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            await apiClient.updateProfile({
+                branding_studio_name: studioName.trim() || undefined,
+                branding_color: color || undefined,
+                branding_website: website.trim() || undefined,
+            });
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
+        } catch {
+            // silent
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Studio / photographer name</label>
+                <input type="text" value={studioName} maxLength={60}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStudioName(e.target.value)}
+                    placeholder="e.g. Davies Gbadebo Photography"
+                    style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
+                />
+            </div>
+            <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Brand colour</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input type="color" value={color}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setColor(e.target.value)}
+                        style={{ width: '44px', height: '44px', border: 'none', borderRadius: '8px', cursor: 'pointer', background: 'none', padding: '2px' }}
+                    />
+                    <input type="text" value={color} maxLength={7}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setColor(e.target.value)}
+                        placeholder="#7c3aed"
+                        style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', width: '120px', outline: 'none' }}
+                    />
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Shown on gallery pages</span>
+                </div>
+            </div>
+            <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Your website (optional)</label>
+                <input type="url" value={website} maxLength={200}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWebsite(e.target.value)}
+                    placeholder="https://yourwebsite.com"
+                    style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
+                />
+            </div>
+            <button type="submit" disabled={saving} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem', alignSelf: 'flex-start' }}>
+                {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save branding'}
+            </button>
+        </form>
+    );
+}
+
 // ─── Galleries Tab ───────────────────────────────────────────────
+const GALLERY_INPUT_STYLE: React.CSSProperties = {
+    padding: '10px 14px', borderRadius: '10px',
+    border: '1px solid var(--border)', background: 'var(--bg-tertiary)',
+    color: 'var(--text-primary)', fontSize: '0.9rem', width: '100%',
+};
+
 function GalleriesTab(): React.JSX.Element {
+    // ── list state
     const [galleries, setGalleries] = useState<Gallery[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+
+    // ── create form state
     const [showCreate, setShowCreate] = useState<boolean>(false);
     const [createTitle, setCreateTitle] = useState<string>('');
     const [createPin, setCreatePin] = useState<string>('');
     const [createDesc, setCreateDesc] = useState<string>('');
+    const [createAccessType, setCreateAccessType] = useState<'public' | 'pin' | 'account'>('public');
     const [createAllowDownload, setCreateAllowDownload] = useState<boolean>(true);
+    const [createPaymentRequired, setCreatePaymentRequired] = useState<boolean>(false);
+    const [createPaymentInstructions, setCreatePaymentInstructions] = useState<string>('');
+    const [createExpiresAt, setCreateExpiresAt] = useState<string>('');
     const [creating, setCreating] = useState<boolean>(false);
     const [createError, setCreateError] = useState<string | null>(null);
+
+    // ── manage view state
+    const [activeGallery, setActiveGallery] = useState<Gallery | null>(null);
+    const [items, setItems] = useState<GalleryItem[]>([]);
+    const [itemsLoading, setItemsLoading] = useState<boolean>(false);
+    const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+
+    // ── Send to client state
+    const [sendingTo, setSendingTo]           = useState<string | null>(null); // gallery ID being sent
+    const [sendEmail, setSendEmail]           = useState('');
+    const [sendMessage, setSendMessage]       = useState('');
+    const [sendLoading, setSendLoading]       = useState(false);
+    const [sendSuccess, setSendSuccess]       = useState(false);
+    const [sendError, setSendError]           = useState<string | null>(null);
+
+    // ── Activity state
+    const [activityGalleryId, setActivityGalleryId] = useState<string | null>(null);
+    const [activity, setActivity]             = useState<import('@/types').GalleryActivity | null>(null);
+    const [activityLoading, setActivityLoading] = useState(false);
 
     useEffect(() => {
         apiClient.listGalleries().then(data => {
@@ -133,6 +337,37 @@ function GalleriesTab(): React.JSX.Element {
         }).catch(() => setLoading(false));
     }, []);
 
+    // ── open manage view and load items
+    const openGallery = async (gallery: Gallery): Promise<void> => {
+        setActiveGallery(gallery);
+        setItems([]);
+        setUploadError(null);
+        setItemsLoading(true);
+        try {
+            // For 'account' type the owner needs to pass their own Supabase token
+            let supabaseToken: string | undefined;
+            if (gallery.access_type === 'account') {
+                const { createClient: mkClient } = await import('@/utils/supabase/client');
+                const { data } = await mkClient().auth.getSession();
+                supabaseToken = data.session?.access_token;
+            }
+            const token = await apiClient.verifyGalleryAccess(gallery.slug, undefined, undefined, supabaseToken);
+            const data = await apiClient.getGalleryItems(gallery.slug, token);
+            setItems(data);
+        } catch {
+            setItems([]);
+        } finally {
+            setItemsLoading(false);
+        }
+    };
+
+    const closeGallery = (): void => {
+        setActiveGallery(null);
+        setItems([]);
+        setUploadError(null);
+    };
+
+    // ── create
     const handleCreate = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         if (!createTitle.trim()) return;
@@ -142,15 +377,19 @@ function GalleriesTab(): React.JSX.Element {
             const gallery = await apiClient.createGallery({
                 title: createTitle.trim(),
                 description: createDesc.trim() || undefined,
-                pin: createPin.trim() || undefined,
-                access_type: createPin.trim() ? 'pin' : 'public',
+                pin: createAccessType === 'pin' ? (createPin.trim() || undefined) : undefined,
+                access_type: createAccessType,
                 allow_download: createAllowDownload,
+                payment_required: createPaymentRequired,
+                payment_instructions: createPaymentRequired ? createPaymentInstructions.trim() : undefined,
+                expires_at: createExpiresAt ? new Date(createExpiresAt).toISOString() : undefined,
             });
             setGalleries(prev => [gallery, ...prev]);
             setShowCreate(false);
-            setCreateTitle('');
-            setCreatePin('');
-            setCreateDesc('');
+            setCreateTitle(''); setCreatePin(''); setCreateDesc('');
+            setCreateAccessType('public'); setCreateAllowDownload(true);
+            setCreatePaymentRequired(false); setCreatePaymentInstructions('');
+            setCreateExpiresAt('');
         } catch (err: unknown) {
             setCreateError(err instanceof Error ? err.message : 'Failed to create gallery');
         } finally {
@@ -158,30 +397,324 @@ function GalleriesTab(): React.JSX.Element {
         }
     };
 
-    const copyLink = (slug: string): void => {
-        const url = `${window.location.origin}/g/${slug}`;
-        navigator.clipboard.writeText(url).catch(() => null);
-    };
-
+    // ── delete gallery
     const handleDelete = async (id: string): Promise<void> => {
-        if (!window.confirm('Delete this gallery? This cannot be undone.')) return;
+        if (!window.confirm('Delete this gallery and all its photos? This cannot be undone.')) return;
         await apiClient.deleteGallery(id).catch(() => null);
         setGalleries(prev => prev.filter(g => g.id !== id));
+        if (activeGallery?.id === id) closeGallery();
     };
 
+    // ── upload photos to active gallery
+    const handleUpload = async (files: FileList | null): Promise<void> => {
+        if (!activeGallery || !files || files.length === 0) return;
+        setUploadError(null);
+
+        const fileArr = Array.from(files).filter(f => f.type.startsWith('image/'));
+        if (fileArr.length === 0) { setUploadError('Only image files are supported.'); return; }
+        if (fileArr.length > 20) { setUploadError('Upload up to 20 images at a time.'); return; }
+
+        for (const file of fileArr) {
+            const tempId = `uploading-${Math.random().toString(36).slice(2)}`;
+            setUploadingIds(prev => new Set(prev).add(tempId));
+            try {
+                const item = await apiClient.uploadGalleryImage(activeGallery.id, file);
+                setItems(prev => [...prev, item]);
+                // update item_count on gallery card
+                setGalleries(prev => prev.map(g =>
+                    g.id === activeGallery.id ? { ...g, item_count: (g.item_count ?? 0) + 1 } : g
+                ));
+            } catch (err: unknown) {
+                setUploadError(`Failed to upload "${file.name}": ${err instanceof Error ? err.message : 'Unknown error'}`);
+            } finally {
+                setUploadingIds(prev => { const s = new Set(prev); s.delete(tempId); return s; });
+            }
+        }
+    };
+
+    // ── remove single photo
+    const handleRemoveItem = async (itemId: string): Promise<void> => {
+        if (!activeGallery) return;
+        if (!window.confirm('Remove this photo from the gallery?')) return;
+        try {
+            await apiClient.deleteGalleryItem(activeGallery.id, itemId);
+            setItems(prev => prev.filter(i => i.id !== itemId));
+            setGalleries(prev => prev.map(g =>
+                g.id === activeGallery.id ? { ...g, item_count: Math.max(0, (g.item_count ?? 1) - 1) } : g
+            ));
+        } catch {
+            // silently ignore
+        }
+    };
+
+    // ── set gallery cover photo
+    const handleSetCover = async (item: GalleryItem): Promise<void> => {
+        if (!activeGallery) return;
+        try {
+            await apiClient.updateGallery(activeGallery.id, { cover_image_url: item.display_url });
+            const updated = { ...activeGallery, cover_image_url: item.display_url };
+            setActiveGallery(updated);
+            setGalleries(prev => prev.map(g => g.id === activeGallery.id ? updated : g));
+        } catch {
+            // silently fail — cover is cosmetic
+        }
+    };
+
+    // ── copy gallery link
+    const copyLink = (slug: string): void => {
+        const url = `${window.location.origin}/g/${slug}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopiedSlug(slug);
+            setTimeout(() => setCopiedSlug(null), 2000);
+        }).catch(() => null);
+    };
+
+    // ── send gallery to client via email
+    const handleSendToClient = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        if (!sendingTo || !sendEmail.trim()) return;
+        setSendLoading(true);
+        setSendError(null);
+        try {
+            await apiClient.sendGalleryToClient(sendingTo, sendEmail.trim(), sendMessage.trim() || undefined);
+            setSendSuccess(true);
+            setTimeout(() => {
+                setSendingTo(null); setSendEmail(''); setSendMessage('');
+                setSendSuccess(false);
+            }, 3000);
+        } catch (err: unknown) {
+            setSendError(err instanceof Error ? err.message : 'Failed to send email');
+        } finally {
+            setSendLoading(false);
+        }
+    };
+
+    // ── load activity for a gallery
+    const loadActivity = async (id: string): Promise<void> => {
+        setActivityGalleryId(id);
+        setActivityLoading(true);
+        const data = await apiClient.getGalleryActivity(id);
+        setActivity(data);
+        setActivityLoading(false);
+    };
+
+    // ── unlock gallery after confirming offline payment received
+    const handleUnlock = async (): Promise<void> => {
+        if (!activeGallery) return;
+        try {
+            await apiClient.unlockGallery(activeGallery.id);
+            const updated = { ...activeGallery, payment_unlocked: true };
+            setActiveGallery(updated);
+            setGalleries(prev => prev.map(g => g.id === activeGallery.id ? updated : g));
+        } catch (err: unknown) {
+            alert(err instanceof Error ? err.message : 'Failed to confirm payment');
+        }
+    };
+
+    // ── toggle draft / live status
+    const handleToggleDraft = async (): Promise<void> => {
+        if (!activeGallery) return;
+        const goingDraft = activeGallery.status !== 'draft';
+        try {
+            await apiClient.setGalleryDraft(activeGallery.id, goingDraft);
+            const updated = { ...activeGallery, status: (goingDraft ? 'draft' : 'active') as Gallery['status'] };
+            setActiveGallery(updated);
+            setGalleries(prev => prev.map(g => g.id === activeGallery.id ? updated : g));
+        } catch (err: unknown) {
+            alert(err instanceof Error ? err.message : 'Failed to update gallery status');
+        }
+    };
+
+    // ─── Loading skeleton
     if (loading) {
-        return <div style={{ padding: '40px', color: 'var(--text-muted)', textAlign: 'center' }}>Loading galleries...</div>;
+        return <div style={{ padding: '40px', color: 'var(--text-muted)', textAlign: 'center' }}>Loading galleries…</div>;
     }
 
+    // ─── Manage view (active gallery open)
+    if (activeGallery) {
+        return (
+            <div style={{ maxWidth: '900px' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                    <button onClick={closeGallery}
+                        style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-secondary)', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        ← Back
+                    </button>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <h3 style={{ fontSize: '1.2rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeGallery.title}</h3>
+                            {activeGallery.status === 'draft' && (
+                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(234,179,8,0.12)', borderRadius: '8px', color: '#fbbf24', fontWeight: 600 }}>🚧 Offline</span>
+                            )}
+                            {activeGallery.payment_required && !activeGallery.payment_unlocked && (
+                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600 }}>⏳ Awaiting payment</span>
+                            )}
+                            {activeGallery.payment_required && activeGallery.payment_unlocked && (
+                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e', fontWeight: 600 }}>✅ Payment confirmed</span>
+                            )}
+                        </div>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '2px 0 0 0' }}>
+                            {items.length} photo{items.length !== 1 ? 's' : ''} · {activeGallery.access_type === 'pin' ? '🔒 PIN' : activeGallery.access_type === 'account' ? '👤 Account' : '🌐 Public'}
+                        </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
+                        {/* Payment unlock button */}
+                        {activeGallery.payment_required && !activeGallery.payment_unlocked && (
+                            <button onClick={() => void handleUnlock()}
+                                style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.4)', background: 'rgba(34,197,94,0.08)', color: '#22c55e', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                                🔓 Confirm payment received
+                            </button>
+                        )}
+                        {/* Draft toggle */}
+                        <button onClick={() => void handleToggleDraft()}
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${activeGallery.status === 'draft' ? 'rgba(34,197,94,0.4)' : 'rgba(234,179,8,0.4)'}`, background: activeGallery.status === 'draft' ? 'rgba(34,197,94,0.08)' : 'rgba(234,179,8,0.08)', color: activeGallery.status === 'draft' ? '#22c55e' : '#fbbf24', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {activeGallery.status === 'draft' ? '✅ Go live' : '🚧 Take offline'}
+                        </button>
+                        {/* Send to client */}
+                        <button onClick={() => { setSendingTo(activeGallery.id); setSendEmail(''); setSendMessage(''); setSendSuccess(false); setSendError(null); }}
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(124,58,237,0.4)', background: 'rgba(124,58,237,0.08)', color: '#c4b5fd', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Send size={13} /> Send to client
+                        </button>
+                        <button onClick={() => copyLink(activeGallery.slug)}
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Copy size={13} /> {copiedSlug === activeGallery.slug ? 'Copied!' : 'Copy link'}
+                        </button>
+                        <a href={`/g/${activeGallery.slug}`} target="_blank" rel="noreferrer"
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <ExternalLink size={13} /> Preview
+                        </a>
+                        <button onClick={() => handleDelete(activeGallery.id)}
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.3)', background: 'transparent', color: '#ef4444', fontSize: '0.82rem', cursor: 'pointer' }}>
+                            Delete gallery
+                        </button>
+                    </div>
+                </div>
+
+                {/* Send to client modal */}
+                {sendingTo === activeGallery.id && (
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: '16px', padding: '24px', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h4 style={{ margin: 0, fontSize: '1rem' }}>Send gallery to client</h4>
+                            <button onClick={() => setSendingTo(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}><X size={16} /></button>
+                        </div>
+                        {sendSuccess ? (
+                            <p style={{ color: '#22c55e', textAlign: 'center', padding: '12px 0' }}>
+                                ✓ Email sent! Your client will receive the gallery link shortly.
+                            </p>
+                        ) : (
+                            <form onSubmit={handleSendToClient} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {sendError && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: 0 }}>{sendError}</p>}
+                                <input
+                                    type="email" required value={sendEmail} placeholder="Client email address"
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSendEmail(e.target.value)}
+                                    style={GALLERY_INPUT_STYLE}
+                                />
+                                <textarea
+                                    value={sendMessage} rows={3} maxLength={500}
+                                    placeholder="Optional personal message to your client…"
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSendMessage(e.target.value)}
+                                    style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
+                                />
+                                <button type="submit" disabled={sendLoading} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', alignSelf: 'flex-start' }}>
+                                    <Send size={15} /> {sendLoading ? 'Sending…' : 'Send email'}
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                )}
+
+                {/* Upload zone */}
+                <label style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: '10px', padding: '32px', borderRadius: '16px',
+                    border: '2px dashed var(--border)', background: 'var(--bg-card)',
+                    cursor: uploadingIds.size > 0 ? 'wait' : 'pointer',
+                    marginBottom: '24px', transition: 'border-color 0.2s',
+                }}
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--accent-primary)'; }}
+                    onDragLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+                    onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.style.borderColor = 'var(--border)';
+                        void handleUpload(e.dataTransfer.files);
+                    }}
+                >
+                    <input
+                        type="file" accept="image/*" multiple hidden
+                        disabled={uploadingIds.size > 0}
+                        onChange={(e) => void handleUpload(e.target.files)}
+                    />
+                    <Upload size={28} color="var(--text-muted)" />
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
+                        {uploadingIds.size > 0
+                            ? `Uploading ${uploadingIds.size} photo${uploadingIds.size !== 1 ? 's' : ''}…`
+                            : 'Drag & drop photos here or click to browse'}
+                    </p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', margin: 0 }}>Up to 20 images per batch · JPEG, PNG, WebP, HEIC</p>
+                </label>
+
+                {uploadError && (
+                    <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {uploadError}
+                        <button onClick={() => setUploadError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px' }}><X size={14} /></button>
+                    </div>
+                )}
+
+                {/* Photo grid */}
+                {itemsLoading ? (
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading photos…</div>
+                ) : items.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                        No photos yet — upload some above.
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                        {items.map(item => (
+                            <div key={item.id} className="gallery-grid-item" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: 'var(--bg-card)', border: '1px solid var(--border)', aspectRatio: '1' }}>
+                                <img
+                                    src={item.display_url}
+                                    alt={item.filename}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.25s' }}
+                                />
+                                {/* Hover overlay */}
+                                <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: 0, transition: 'opacity 0.2s', padding: '12px' }}>
+                                    <p style={{ color: '#fff', fontSize: '0.72rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
+                                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                        <button
+                                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); void handleSetCover(item); }}
+                                            style={{ padding: '5px 8px', borderRadius: '8px', background: activeGallery.cover_image_url === item.display_url ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.12)', color: activeGallery.cover_image_url === item.display_url ? '#c4b5fd' : '#fff', fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                                            title="Set as gallery cover photo"
+                                        >
+                                            <Camera size={10} /> {activeGallery.cover_image_url === item.display_url ? 'Cover ✓' : 'Cover'}
+                                        </button>
+                                        <a href={item.original_url} target="_blank" rel="noreferrer" download
+                                            style={{ padding: '5px 8px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', color: '#fff', fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                            <Download size={10} /> Save
+                                        </a>
+                                        <button onClick={() => void handleRemoveItem(item.id)}
+                                            style={{ padding: '5px 8px', borderRadius: '8px', background: 'rgba(239,68,68,0.25)', color: '#fca5a5', fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                            <X size={10} /> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // ─── Gallery list view
     return (
-        <div style={{ maxWidth: '800px' }}>
+        <div style={{ maxWidth: '860px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                     <h3 style={{ fontSize: '1.4rem', marginBottom: '4px' }}>Client Galleries</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Share PIN-protected photo galleries with clients for download.</p>
                 </div>
-                <button onClick={() => setShowCreate(true)} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
-                    + New Gallery
+                <button onClick={() => setShowCreate(v => !v)} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
+                    {showCreate ? '✕ Cancel' : '+ New Gallery'}
                 </button>
             </div>
 
@@ -190,31 +723,73 @@ function GalleriesTab(): React.JSX.Element {
                     <h4 style={{ marginBottom: '16px' }}>Create Gallery</h4>
                     {createError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '12px' }}>{createError}</p>}
                     <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <input
-                            type="text" value={createTitle} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateTitle(e.target.value)}
+                        <input type="text" value={createTitle}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateTitle(e.target.value)}
                             placeholder="Gallery title (e.g. Smith Wedding 2026)" required maxLength={120}
-                            style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                            style={GALLERY_INPUT_STYLE}
                         />
-                        <input
-                            type="text" value={createDesc} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateDesc(e.target.value)}
-                            placeholder="Description (optional)" maxLength={500}
-                            style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                        <input type="text" value={createDesc}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateDesc(e.target.value)}
+                            placeholder="Short description (optional)" maxLength={500}
+                            style={GALLERY_INPUT_STYLE}
                         />
-                        <input
-                            type="text" value={createPin} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreatePin(e.target.value)}
-                            placeholder="PIN to protect gallery (leave blank = public)" maxLength={20}
-                            style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
-                        />
+                        <select value={createAccessType}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCreateAccessType(e.target.value as 'public' | 'pin' | 'account')}
+                            style={GALLERY_INPUT_STYLE}
+                        >
+                            <option value="public">🌐 Public — anyone with the link</option>
+                            <option value="pin">🔒 PIN protected</option>
+                            <option value="account">👤 Requires Optimage account (free)</option>
+                        </select>
+                        {createAccessType === 'pin' && (
+                            <input type="text" value={createPin}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreatePin(e.target.value)}
+                                placeholder="Enter PIN for this gallery" maxLength={20}
+                                style={GALLERY_INPUT_STYLE}
+                            />
+                        )}
+                        {createAccessType === 'account' && (
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0', padding: '8px 12px', background: 'var(--bg-tertiary)', borderRadius: '8px' }}>
+                                Viewers will need to sign in or create a free Optimage account. No subscription required to view.
+                            </p>
+                        )}
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                            <input type="checkbox" checked={createAllowDownload} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateAllowDownload(e.target.checked)} />
-                            Allow clients to download original quality images
+                            <input type="checkbox" checked={createAllowDownload}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateAllowDownload(e.target.checked)} />
+                            Allow clients to download original-quality images
                         </label>
+
+                        {/* Payment gate */}
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer', paddingTop: '4px', borderTop: '1px solid var(--border)' }}>
+                            <input type="checkbox" checked={createPaymentRequired}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreatePaymentRequired(e.target.checked)} />
+                            Require payment before client can access gallery
+                        </label>
+                        {createPaymentRequired && (
+                            <textarea
+                                value={createPaymentInstructions}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCreatePaymentInstructions(e.target.value)}
+                                placeholder={`Payment instructions shown to your client. For example:\n\nBank transfer: Acme Bank, Account 0123456789\nAccount name: Jane Smith Photography\nAmount: ₦150,000\n\nSend receipt to jane@jsmithphoto.com`}
+                                rows={5} maxLength={1000}
+                                style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}
+                            />
+                        )}
+                        {/* Expiry date */}
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
+                            <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                Gallery expiry (optional) — leave blank for no expiry
+                            </label>
+                            <input
+                                type="date"
+                                value={createExpiresAt}
+                                min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateExpiresAt(e.target.value)}
+                                style={GALLERY_INPUT_STYLE}
+                            />
+                        </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button type="submit" disabled={creating} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
-                                {creating ? 'Creating...' : 'Create Gallery'}
-                            </button>
-                            <button type="button" onClick={() => setShowCreate(false)} className="btn btn-secondary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
-                                Cancel
+                                {creating ? 'Creating…' : 'Create Gallery'}
                             </button>
                         </div>
                     </form>
@@ -222,49 +797,122 @@ function GalleriesTab(): React.JSX.Element {
             )}
 
             {galleries.length === 0 ? (
-                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '48px', textAlign: 'center' }}>
-                    <Images size={40} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>No galleries yet</p>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '56px', textAlign: 'center' }}>
+                    <Images size={44} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
+                    <p style={{ fontWeight: 600, marginBottom: '6px' }}>No galleries yet</p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Create your first gallery to share photos with clients.</p>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {galleries.map(gallery => (
-                        <div key={gallery.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px 24px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                        <div key={gallery.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px 20px', cursor: 'default' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                {/* Left: info */}
+                                <div
+                                    style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                                    onClick={() => void openGallery(gallery)}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
                                         <h4 style={{ fontSize: '1rem', margin: 0 }}>{gallery.title}</h4>
                                         {gallery.access_type === 'pin' && (
-                                            <span style={{ fontSize: '0.7rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px', color: 'var(--text-muted)' }}>PIN protected</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px', color: 'var(--text-muted)' }}>🔒 PIN</span>
                                         )}
                                         {gallery.access_type === 'public' && (
-                                            <span style={{ fontSize: '0.7rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e' }}>Public</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e' }}>🌐 Public</span>
+                                        )}
+                                        {gallery.access_type === 'account' && (
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(124,58,237,0.12)', borderRadius: '8px', color: '#a78bfa' }}>👤 Account</span>
+                                        )}
+                                        {gallery.status === 'draft' && (
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(234,179,8,0.12)', borderRadius: '8px', color: '#fbbf24', fontWeight: 600 }}>🚧 Offline</span>
+                                        )}
+                                        {gallery.payment_required && !gallery.payment_unlocked && (
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600 }}>⏳ Awaiting payment</span>
+                                        )}
+                                        {typeof gallery.item_count === 'number' && (
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px', color: 'var(--text-muted)' }}>
+                                                {gallery.item_count} photo{gallery.item_count !== 1 ? 's' : ''}
+                                            </span>
                                         )}
                                     </div>
-                                    {gallery.description && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '0 0 8px 0' }}>{gallery.description}</p>}
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>
+                                    {gallery.description && <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '0 0 2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gallery.description}</p>}
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', margin: 0 }}>
                                         Created {new Date(gallery.created_at).toLocaleDateString()}
-                                        {!gallery.allow_download && ' · Downloads disabled'}
+                                        {' · '}
+                                        <span
+                                            style={{ color: '#7c3aed', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
+                                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); void loadActivity(gallery.id); }}
+                                        >
+                                            View activity
+                                        </span>
                                     </p>
                                 </div>
-                                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                                    <a href={`/g/${gallery.slug}`} target="_blank" rel="noreferrer"
-                                        style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <ExternalLink size={12} /> Preview
-                                    </a>
-                                    <button onClick={() => copyLink(gallery.slug)}
-                                        style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Copy size={12} /> Copy link
+
+                                {/* Right: actions */}
+                                <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center' }}>
+                                    <button onClick={() => void openGallery(gallery)}
+                                        className="btn btn-primary"
+                                        style={{ padding: '7px 14px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <Upload size={12} /> Manage
                                     </button>
-                                    <button onClick={() => handleDelete(gallery.id)}
-                                        style={{ padding: '8px 12px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer' }}>
+                                    <button onClick={() => copyLink(gallery.slug)}
+                                        style={{ padding: '7px 12px', borderRadius: '8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <Copy size={11} /> {copiedSlug === gallery.slug ? 'Copied!' : 'Link'}
+                                    </button>
+                                    <a href={`/g/${gallery.slug}`} target="_blank" rel="noreferrer"
+                                        style={{ padding: '7px 12px', borderRadius: '8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <ExternalLink size={11} />
+                                    </a>
+                                    <button onClick={() => void handleDelete(gallery.id)}
+                                        style={{ padding: '7px 12px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontSize: '0.78rem', cursor: 'pointer' }}>
                                         Delete
                                     </button>
                                 </div>
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Activity panel */}
+            {activityGalleryId && (
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', marginTop: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <h4 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Eye size={16} color="var(--text-muted)" /> Gallery Activity
+                        </h4>
+                        <button onClick={() => { setActivityGalleryId(null); setActivity(null); }}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={16} /></button>
+                    </div>
+                    {activityLoading ? (
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading activity…</p>
+                    ) : activity ? (
+                        <div>
+                            <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                                <div style={{ padding: '16px 24px', background: 'var(--bg-tertiary)', borderRadius: '12px', textAlign: 'center', minWidth: '100px' }}>
+                                    <p style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: 'var(--accent-primary)' }}>{activity.totalViews}</p>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', margin: 0 }}>total views</p>
+                                </div>
+                            </div>
+                            {activity.recentViews.length > 0 ? (
+                                <div>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent activity</p>
+                                    {activity.recentViews.slice(0, 20).map((v, i) => (
+                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '0.82rem' }}>
+                                            <span style={{ color: 'var(--text-secondary)' }}>
+                                                {v.viewer_type === 'user' ? '👤 Signed-in viewer' : '🌐 Guest visitor'}
+                                            </span>
+                                            <span style={{ color: 'var(--text-muted)' }}>
+                                                {new Date(v.created_at).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No views recorded yet. Share your gallery link to start getting visitors.</p>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
             )}
         </div>
@@ -1301,6 +1949,24 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '16px', lineHeight: 1.6 }}>
                             Need to change your password or manage your account? Head to the <Link href="/" style={{ color: 'var(--accent-primary)' }}>homepage</Link> and click &quot;Forgot Password&quot; in the login modal.
                         </p>
+                    </div>
+
+                    {/* Username */}
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                        <h4 style={{ marginBottom: '4px' }}>Username</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
+                            Your unique username is shown when you share galleries. It can only contain lowercase letters, numbers, and underscores.
+                        </p>
+                        <UsernameForm profile={profile} />
+                    </div>
+
+                    {/* Photographer Branding */}
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                        <h4 style={{ marginBottom: '4px' }}>Gallery Branding</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
+                            Your studio name, colour, and website appear on your gallery pages instead of the Optimage defaults.
+                        </p>
+                        <BrandingForm profile={profile} />
                     </div>
                 </div>
             )}
