@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import JSZip from 'jszip';
-import { Lock, Mail, Download, X, ChevronLeft, ChevronRight, Eye, CheckSquare, Square, Package, UserCircle, Clock, CreditCard, Camera, ArrowRight, AlertTriangle, Heart, Send } from 'lucide-react';
+import { Lock, Mail, Download, X, ChevronLeft, ChevronRight, Eye, CheckSquare, Square, Package, UserCircle, Clock, CreditCard, Camera, ArrowRight, AlertTriangle, Heart, Send, Share2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
+import AuthModal from '@/components/AuthModal';
 import type { GalleryPublicMeta, GalleryItem } from '@/types';
 import type { Session } from '@supabase/supabase-js';
 
@@ -57,10 +58,12 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
     const [favSubmitted, setFavSubmitted]   = useState(false);
     const [showFavMode, setShowFavMode]     = useState(false);
 
-    // ── Guest prompt state (public gallery favourites gate)
-    const [guestPromptOpen, setGuestPromptOpen] = useState(false);
-    const [guestName, setGuestName]             = useState('');
-    const [guestEmail, setGuestEmail]           = useState('');
+    // ── Share state
+    const [shareCopied, setShareCopied]         = useState(false);
+
+    // ── Auth modal (gallery has no Header, so it manages its own)
+    const [authModalOpen, setAuthModalOpen]     = useState(false);
+
 
     // ── Load gallery metadata
     useEffect(() => {
@@ -72,15 +75,28 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
     // ── Track Supabase session (needed for 'account' galleries)
     useEffect(() => {
         const supabase = createClient();
-        supabase.auth.getSession().then(({ data }) => {
-            setSession(data.session);
-            setSessionLoading(false);
-        });
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+
+        const applySession = (s: typeof session) => {
             setSession(s);
             setSessionLoading(false);
-            if (s?.user?.email) setViewerIdentifier(s.user.email);
-            else if (s?.user?.id) setViewerIdentifier(s.user.id);
+            if (!s?.user) return;
+            // Use display_name from profile if available, fall back to email
+            // so the photographer sees "Sarah" not "sarah@gmail.com"
+            void supabase
+                .from('profiles')
+                .select('display_name, username')
+                .eq('id', s.user.id)
+                .maybeSingle()
+                .then(({ data }) => {
+                    const label = data?.display_name ?? data?.username ?? s.user.email ?? s.user.id;
+                    setViewerIdentifier(label);
+                });
+        };
+
+        supabase.auth.getSession().then(({ data }) => applySession(data.session));
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+            applySession(s);
         });
         return () => subscription.unsubscribe();
     }, []);
@@ -259,6 +275,18 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
     const downloadWebP = (item: GalleryItem): void => {
         const webpName = item.filename.replace(/\.[^.]+$/, '.webp');
         triggerDownload(item.display_url, webpName);
+    };
+
+    // ── Auth gate for downloads and favourites
+    // Signed-in users proceed immediately. Everyone else sees the AuthModal.
+    // If session is still resolving, we wait — no false positives.
+    const requireAuth = (fn: () => void): void => {
+        if (sessionLoading) return;
+        if (!session) {
+            setAuthModalOpen(true);
+            return;
+        }
+        fn();
     };
 
     // ── Multi-select helpers
@@ -604,9 +632,10 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
                             fill
                             unoptimized
                             priority
-                            style={{ objectFit: 'cover', objectPosition: 'center', filter: 'brightness(0.45)' }}
+                            style={{ objectFit: 'cover', objectPosition: 'center', filter: 'brightness(0.45)', userSelect: 'none', WebkitUserDrag: 'none' } as React.CSSProperties}
                             onContextMenu={(e) => e.preventDefault()}
                             draggable={false}
+                            onDragStart={(e) => e.preventDefault()}
                         />
                         {/* Gradient overlay for text readability */}
                         <div style={{
@@ -749,15 +778,11 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
                             </button>
                         )}
                         <button
-                            onClick={() => {
-                                if (!showFavMode && !viewerIdentifier && gallery?.access_type === 'public') {
-                                    setGuestPromptOpen(true);
-                                } else {
-                                    setShowFavMode(v => !v);
-                                    setSelectMode(false);
-                                    setSelectedIds(new Set());
-                                }
-                            }}
+                            onClick={() => requireAuth(() => {
+                                setShowFavMode(v => !v);
+                                setSelectMode(false);
+                                setSelectedIds(new Set());
+                            })}
                             style={{
                                 padding: '8px 16px', borderRadius: '10px', border: '1px solid #2a2a2a',
                                 background: showFavMode ? 'rgba(236,72,153,0.2)' : 'transparent',
@@ -795,13 +820,13 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
                     {selectedIds.size > 0 && zipProgress === null && (
                         <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             <button
-                                onClick={() => void downloadSelected(true)}
+                                onClick={() => requireAuth(() => void downloadSelected(true))}
                                 style={{ padding: '8px 16px', borderRadius: '10px', background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.4)', color: '#c4b5fd', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <Package size={14} /> ZIP — WebP <span style={{ opacity: 0.65, fontWeight: 400 }}>(smaller)</span>
                             </button>
                             <button
-                                onClick={() => void downloadSelected(false)}
+                                onClick={() => requireAuth(() => void downloadSelected(false))}
                                 style={{ padding: '8px 16px', borderRadius: '10px', background: '#7c3aed', border: 'none', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <Package size={14} /> ZIP — Originals
@@ -902,10 +927,11 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
                                     src={item.display_url}
                                     alt={item.filename}
                                     fill unoptimized
-                                    style={{ objectFit: 'cover', transition: 'transform 0.3s ease' }}
+                                    style={{ objectFit: 'cover', transition: 'transform 0.3s ease', userSelect: 'none', WebkitUserDrag: 'none' } as React.CSSProperties}
                                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
                                     onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
                                     draggable={false}
+                                    onDragStart={(e: React.DragEvent) => e.preventDefault()}
                                 />
                                 {/* Select mode checkbox */}
                                 {selectMode && (
@@ -946,14 +972,14 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
                                         {gallery.allow_download && (
                                             <div style={{ display: 'flex', gap: '6px' }}>
                                                 <button
-                                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); downloadWebP(item); }}
+                                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); requireAuth(() => downloadWebP(item)); }}
                                                     style={{ ...styles.downloadBtn, fontSize: '0.7rem', padding: '6px 10px', gap: '4px', display: 'flex', alignItems: 'center' }}
                                                     title="Download WebP (optimised)"
                                                 >
                                                     <Download size={13} /> WebP
                                                 </button>
                                                 <button
-                                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); downloadOriginal(item); }}
+                                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); requireAuth(() => downloadOriginal(item)); }}
                                                     style={{ ...styles.downloadBtn, fontSize: '0.7rem', padding: '6px 10px', gap: '4px', display: 'flex', alignItems: 'center' }}
                                                     title="Download original file"
                                                 >
@@ -977,90 +1003,8 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
                 </div>
             )}
 
-            {/* Guest Prompt Modal — shown when an unauthenticated viewer first clicks favourites on a public gallery */}
-            {guestPromptOpen && (
-                <div
-                    style={{
-                        position: 'fixed', inset: 0, zIndex: 9998,
-                        background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: '24px',
-                    }}
-                    onClick={() => setGuestPromptOpen(false)}
-                >
-                    <div
-                        style={{
-                            background: '#111111', border: '1px solid #2a2a2a',
-                            borderRadius: '20px', padding: '40px 36px',
-                            maxWidth: '420px', width: '100%',
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                            <Heart size={40} style={{ color: '#f472b6', marginBottom: '14px' }} fill="#f472b6" />
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff', margin: '0 0 8px' }}>Who&apos;s picking?</h2>
-                            <p style={{ color: '#9ca3af', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
-                                The photographer will see your name next to your selections.
-                            </p>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.82rem', color: '#9ca3af', marginBottom: '4px' }}>Your name *</label>
-                                <input
-                                    type="text"
-                                    value={guestName}
-                                    maxLength={50}
-                                    required
-                                    autoFocus
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGuestName(e.target.value)}
-                                    placeholder="Your name (e.g. Aunty Grace)"
-                                    style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid #2a2a2a', background: '#1a1a1a', color: '#ffffff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.82rem', color: '#9ca3af', marginBottom: '4px' }}>Email <span style={{ color: '#6b7280' }}>(optional, to save your picks)</span></label>
-                                <input
-                                    type="email"
-                                    value={guestEmail}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGuestEmail(e.target.value)}
-                                    placeholder="Email (optional, to save your picks)"
-                                    style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid #2a2a2a', background: '#1a1a1a', color: '#ffffff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const }}
-                                />
-                            </div>
-                            <button
-                                disabled={!guestName.trim()}
-                                onClick={() => {
-                                    if (!guestName.trim()) return;
-                                    const identifier = guestEmail.trim() ? guestEmail.trim() : `guest:${guestName.trim()}`;
-                                    setViewerIdentifier(identifier);
-                                    setGuestPromptOpen(false);
-                                    setShowFavMode(true);
-                                }}
-                                style={{
-                                    marginTop: '4px',
-                                    padding: '13px', borderRadius: '12px',
-                                    background: '#ec4899', border: 'none',
-                                    color: '#fff', fontSize: '0.95rem', fontWeight: 600,
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    opacity: guestName.trim() ? 1 : 0.5,
-                                }}
-                            >
-                                Start picking →
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setViewerIdentifier('guest:anonymous');
-                                    setGuestPromptOpen(false);
-                                    setShowFavMode(true);
-                                }}
-                                style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', textAlign: 'center', textDecoration: 'underline', padding: '4px 0' }}
-                            >
-                                Skip — pick anonymously
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Auth modal — gallery has no site Header, so it owns this itself */}
+            <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
 
             {/* Footer */}
             <footer style={styles.footer}>
@@ -1102,30 +1046,62 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
                                 src={items[lightboxIndex].display_url}
                                 alt={items[lightboxIndex].filename}
                                 fill unoptimized
-                                style={{ objectFit: 'contain' }}
+                                style={{ objectFit: 'contain', userSelect: 'none', WebkitUserDrag: 'none' } as React.CSSProperties}
                                 priority
                                 onContextMenu={(e) => e.preventDefault()}
                                 draggable={false}
+                                onDragStart={(e: React.DragEvent) => e.preventDefault()}
                             />
                         </div>
                     </div>
 
-                    {gallery.allow_download && (
-                        <div style={{ position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px', zIndex: 10 }}>
-                            <button
-                                style={{ ...styles.lbDownload, position: 'static', transform: 'none', background: 'rgba(30,20,60,0.85)', border: '1px solid rgba(124,58,237,0.4)' }}
-                                onClick={(e) => { e.stopPropagation(); downloadWebP(items[lightboxIndex]!); }}
-                            >
-                                <Download size={15} style={{ marginRight: '5px' }} /> WebP
-                            </button>
-                            <button
-                                style={{ ...styles.lbDownload, position: 'static', transform: 'none' }}
-                                onClick={(e) => { e.stopPropagation(); downloadOriginal(items[lightboxIndex]!); }}
-                            >
-                                <Download size={15} style={{ marginRight: '5px' }} /> Original
-                            </button>
-                        </div>
-                    )}
+                    <div style={{ position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px', zIndex: 10 }}>
+                        {gallery.allow_download && (
+                            <>
+                                <button
+                                    style={{ ...styles.lbDownload, position: 'static', transform: 'none', background: 'rgba(30,20,60,0.85)', border: '1px solid rgba(124,58,237,0.4)' }}
+                                    onClick={(e) => { e.stopPropagation(); requireAuth(() => downloadWebP(items[lightboxIndex]!)); }}
+                                >
+                                    <Download size={15} style={{ marginRight: '5px' }} /> WebP
+                                </button>
+                                <button
+                                    style={{ ...styles.lbDownload, position: 'static', transform: 'none' }}
+                                    onClick={(e) => { e.stopPropagation(); requireAuth(() => downloadOriginal(items[lightboxIndex]!)); }}
+                                >
+                                    <Download size={15} style={{ marginRight: '5px' }} /> Original
+                                </button>
+                            </>
+                        )}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const shareUrl = `${window.location.origin}/g/${slug}`;
+                                if (navigator.share) {
+                                    void navigator.share({
+                                        title: gallery?.title ?? 'Gallery',
+                                        text: `Check out this photo gallery: ${gallery?.title ?? ''}`,
+                                        url: shareUrl,
+                                    });
+                                } else {
+                                    void navigator.clipboard.writeText(shareUrl).then(() => {
+                                        setShareCopied(true);
+                                        setTimeout(() => setShareCopied(false), 2000);
+                                    });
+                                }
+                            }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                padding: '8px 16px', borderRadius: '8px',
+                                background: 'rgba(255,255,255,0.1)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                color: '#fff', fontSize: '0.85rem',
+                                cursor: 'pointer', transition: 'background 0.15s',
+                            }}
+                            title="Share gallery"
+                        >
+                            <Share2 size={16} /> {shareCopied ? 'Copied!' : 'Share'}
+                        </button>
+                    </div>
 
                     <div style={styles.lbCounter}>
                         {lightboxIndex + 1} / {items.length}

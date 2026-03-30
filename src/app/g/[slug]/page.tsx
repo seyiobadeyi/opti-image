@@ -21,7 +21,7 @@ async function fetchGalleryMeta(slug: string): Promise<GalleryPublicMeta | null>
 
 export async function generateMetadata({ params }: GalleryPageProps): Promise<Metadata> {
     const { slug } = await params;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://optimage.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://optimage.dreamintrepid.com';
 
     const gallery = await fetchGalleryMeta(slug);
 
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: GalleryPageProps): Promise<Me
 
 export default async function GalleryPage({ params }: GalleryPageProps) {
     const { slug } = await params;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://optimage.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://optimage.dreamintrepid.com';
 
     const gallery = await fetchGalleryMeta(slug);
     const isPublic = gallery?.access_type === 'public';

@@ -353,7 +353,7 @@ function GalleriesTab(): React.JSX.Element {
             }
             const token = await apiClient.verifyGalleryAccess(gallery.slug, undefined, undefined, supabaseToken);
             const data = await apiClient.getGalleryItems(gallery.slug, token);
-            setItems(data);
+            setItems(data.items);
         } catch {
             setItems([]);
         } finally {

@@ -35,7 +35,9 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
     const handleGoogleSignIn = async (): Promise<void> => {
         setLoading(true);
         setError(null);
-        const redirectTo = `${window.location.origin}/auth/callback`;
+        const currentPath = window.location.pathname;
+        const nextPath = currentPath === '/' ? '/dashboard' : currentPath;
+        const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
         const { error: oauthError } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo },
@@ -197,7 +199,10 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
             }
 
             onClose();
-            router.push('/dashboard');
+            if (typeof window !== 'undefined' && window.location.pathname === '/') {
+                router.push('/dashboard');
+            }
+            // On all other pages, just close the modal — user stays where they are
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
@@ -225,7 +230,10 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
             setLoading(false);
         }
         onClose();
-        router.push('/dashboard');
+        if (typeof window !== 'undefined' && window.location.pathname === '/') {
+            router.push('/dashboard');
+        }
+        // On all other pages, just close the modal — user stays where they are
     };
 
     const resetFlow = (): void => {
@@ -431,7 +439,7 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
                             }}>
                                 {loading ? 'Saving...' : <><span>Get Started</span><ArrowRight size={16} /></>}
                             </button>
-                            <button type="button" onClick={() => { onClose(); router.push('/dashboard'); }}
+                            <button type="button" onClick={() => { onClose(); if (typeof window !== 'undefined' && window.location.pathname === '/') { router.push('/dashboard'); } }}
                                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'center' }}>
                                 Skip for now
                             </button>
