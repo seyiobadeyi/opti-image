@@ -557,7 +557,7 @@ function GalleriesTab(): React.JSX.Element {
                             {items.length} photo{items.length !== 1 ? 's' : ''} · {activeGallery.access_type === 'pin' ? '🔒 PIN' : activeGallery.access_type === 'account' ? '👤 Account' : '🌐 Public'}
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0, overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         {/* Payment unlock button */}
                         {activeGallery.payment_required && !activeGallery.payment_unlocked && (
                             <button onClick={() => void handleUnlock()}
