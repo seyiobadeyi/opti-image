@@ -14,7 +14,7 @@ export type ImageRotation = 0 | 90 | 180 | 270;
 export type MediaAction = 'transcribe' | 'translate';
 
 /** Top-level tab selection on the main page. */
-export type ActiveTab = 'image' | 'media';
+export type ActiveTab = 'image' | 'media' | 'galleries';
 
 /** Authentication flow step in the AuthModal. */
 export type AuthStep = 'email' | 'otp' | 'onboarding';

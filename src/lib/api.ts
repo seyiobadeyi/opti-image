@@ -482,6 +482,18 @@ export const apiClient = {
     },
 
     /**
+     * Get an owner preview access token — allows the photographer to preview
+     * their own gallery even when it is in draft mode.
+     */
+    async getOwnerPreviewToken(id: string): Promise<string> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/preview-token`, { headers });
+        if (!response.ok) throw new Error('Preview unavailable');
+        const data: { accessToken: string } = await response.json();
+        return data.accessToken;
+    },
+
+    /**
      * Get favourite item IDs for a viewer in a public gallery.
      */
     async getGalleryFavorites(slug: string, accessToken: string, viewerIdentifier: string): Promise<string[]> {

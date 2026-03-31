@@ -5,6 +5,7 @@ import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
     Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images, Camera, Send, Eye,
+    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock,
 } from 'lucide-react';
 import Link from 'next/link';
 import SubscriptionPaywall from '@/components/SubscriptionPaywall';
@@ -169,7 +170,7 @@ function UsernameForm({ profile }: { profile: import('@/types').UserProfile | nu
     };
 
     const statusColor = checkResult === 'available' ? '#2ed573' : checkResult === 'taken' ? '#ef4444' : 'var(--text-muted)';
-    const statusText = checkResult === 'available' ? '✓ Available' : checkResult === 'taken' ? '✗ Already taken' : checkResult === 'checking' ? 'Checking…' : '';
+    const statusText = checkResult === 'available' ? 'Available' : checkResult === 'taken' ? 'Already taken' : checkResult === 'checking' ? 'Checking…' : '';
 
     return (
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -212,7 +213,7 @@ function UsernameForm({ profile }: { profile: import('@/types').UserProfile | nu
                 className="btn btn-primary"
                 style={{ padding: '10px 20px', fontSize: '0.9rem', alignSelf: 'flex-start' }}
             >
-                {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save username'}
+                {saved ? 'Saved' : saving ? 'Saving…' : 'Save username'}
             </button>
         </form>
     );
@@ -278,7 +279,7 @@ function BrandingForm({ profile }: { profile: import('@/types').UserProfile | nu
                 />
             </div>
             <button type="submit" disabled={saving} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem', alignSelf: 'flex-start' }}>
-                {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save branding'}
+                {saved ? 'Saved' : saving ? 'Saving…' : 'Save branding'}
             </button>
         </form>
     );
@@ -544,31 +545,38 @@ function GalleriesTab(): React.JSX.Element {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <h3 style={{ fontSize: '1.2rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeGallery.title}</h3>
                             {activeGallery.status === 'draft' && (
-                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(234,179,8,0.12)', borderRadius: '8px', color: '#fbbf24', fontWeight: 600 }}>🚧 Offline</span>
+                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(234,179,8,0.12)', borderRadius: '8px', color: '#fbbf24', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={11} /> Offline</span>
                             )}
                             {activeGallery.payment_required && !activeGallery.payment_unlocked && (
-                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600 }}>⏳ Awaiting payment</span>
+                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><ClockIcon size={11} /> Awaiting payment</span>
                             )}
                             {activeGallery.payment_required && activeGallery.payment_unlocked && (
-                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e', fontWeight: 600 }}>✅ Payment confirmed</span>
+                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={11} /> Payment confirmed</span>
                             )}
                         </div>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '2px 0 0 0' }}>
-                            {items.length} photo{items.length !== 1 ? 's' : ''} · {activeGallery.access_type === 'pin' ? '🔒 PIN' : activeGallery.access_type === 'account' ? '👤 Account' : '🌐 Public'}
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '2px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {items.length} photo{items.length !== 1 ? 's' : ''} ·{' '}
+                            {activeGallery.access_type === 'pin'
+                                ? <><Lock size={11} style={{ verticalAlign: 'middle' }} /> PIN</>
+                                : activeGallery.access_type === 'account'
+                                    ? <><UserCircle size={11} style={{ verticalAlign: 'middle' }} /> Account</>
+                                    : <><Globe size={11} style={{ verticalAlign: 'middle' }} /> Public</>}
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0, overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                         {/* Payment unlock button */}
                         {activeGallery.payment_required && !activeGallery.payment_unlocked && (
                             <button onClick={() => void handleUnlock()}
                                 style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.4)', background: 'rgba(34,197,94,0.08)', color: '#22c55e', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                                🔓 Confirm payment received
+                                <Unlock size={13} /> Confirm payment received
                             </button>
                         )}
                         {/* Draft toggle */}
                         <button onClick={() => void handleToggleDraft()}
                             style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${activeGallery.status === 'draft' ? 'rgba(34,197,94,0.4)' : 'rgba(234,179,8,0.4)'}`, background: activeGallery.status === 'draft' ? 'rgba(34,197,94,0.08)' : 'rgba(234,179,8,0.08)', color: activeGallery.status === 'draft' ? '#22c55e' : '#fbbf24', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {activeGallery.status === 'draft' ? '✅ Go live' : '🚧 Take offline'}
+                            {activeGallery.status === 'draft'
+                                ? <><CheckCircle size={13} /> Go live</>
+                                : <><AlertTriangle size={13} /> Take offline</>}
                         </button>
                         {/* Send to client */}
                         <button onClick={() => { setSendingTo(activeGallery.id); setSendEmail(''); setSendMessage(''); setSendSuccess(false); setSendError(null); }}
@@ -579,10 +587,21 @@ function GalleriesTab(): React.JSX.Element {
                             style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Copy size={13} /> {copiedSlug === activeGallery.slug ? 'Copied!' : 'Copy link'}
                         </button>
-                        <a href={`/g/${activeGallery.slug}`} target="_blank" rel="noreferrer"
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <button onClick={() => {
+                            // Draft galleries need an owner access token to bypass the draft gate
+                            if (activeGallery.status === 'draft') {
+                                apiClient.getOwnerPreviewToken(activeGallery.id)
+                                    .then(token => {
+                                        window.open(`/g/${activeGallery.slug}?ownerToken=${encodeURIComponent(token)}`, '_blank');
+                                    })
+                                    .catch(() => window.open(`/g/${activeGallery.slug}`, '_blank'));
+                            } else {
+                                window.open(`/g/${activeGallery.slug}`, '_blank');
+                            }
+                        }}
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <ExternalLink size={13} /> Preview
-                        </a>
+                        </button>
                         <button onClick={() => handleDelete(activeGallery.id)}
                             style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.3)', background: 'transparent', color: '#ef4444', fontSize: '0.82rem', cursor: 'pointer' }}>
                             Delete gallery
@@ -592,14 +611,14 @@ function GalleriesTab(): React.JSX.Element {
 
                 {/* Send to client modal */}
                 {sendingTo === activeGallery.id && (
-                    <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: '16px', padding: '24px', marginBottom: '20px' }}>
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: '16px', padding: '24px', marginBottom: '20px', maxWidth: 'min(480px, calc(100vw - 32px))' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h4 style={{ margin: 0, fontSize: '1rem' }}>Send gallery to client</h4>
                             <button onClick={() => setSendingTo(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}><X size={16} /></button>
                         </div>
                         {sendSuccess ? (
-                            <p style={{ color: '#22c55e', textAlign: 'center', padding: '12px 0' }}>
-                                ✓ Email sent! Your client will receive the gallery link shortly.
+                            <p style={{ color: '#22c55e', textAlign: 'center', padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                <Check size={15} /> Email sent. Your client will receive the gallery link shortly.
                             </p>
                         ) : (
                             <form onSubmit={handleSendToClient} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -685,7 +704,7 @@ function GalleriesTab(): React.JSX.Element {
                                             style={{ padding: '5px 8px', borderRadius: '8px', background: activeGallery.cover_image_url === item.display_url ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.12)', color: activeGallery.cover_image_url === item.display_url ? '#c4b5fd' : '#fff', fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
                                             title="Set as gallery cover photo"
                                         >
-                                            <Camera size={10} /> {activeGallery.cover_image_url === item.display_url ? 'Cover ✓' : 'Cover'}
+                                            <Camera size={10} /> {activeGallery.cover_image_url === item.display_url ? 'Cover (set)' : 'Set cover'}
                                         </button>
                                         <a href={item.original_url} target="_blank" rel="noreferrer" download
                                             style={{ padding: '5px 8px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', color: '#fff', fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
@@ -714,7 +733,7 @@ function GalleriesTab(): React.JSX.Element {
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Share PIN-protected photo galleries with clients for download.</p>
                 </div>
                 <button onClick={() => setShowCreate(v => !v)} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
-                    {showCreate ? '✕ Cancel' : '+ New Gallery'}
+                    {showCreate ? 'Cancel' : '+ New Gallery'}
                 </button>
             </div>
 
@@ -737,9 +756,9 @@ function GalleriesTab(): React.JSX.Element {
                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCreateAccessType(e.target.value as 'public' | 'pin' | 'account')}
                             style={GALLERY_INPUT_STYLE}
                         >
-                            <option value="public">🌐 Public — anyone with the link</option>
-                            <option value="pin">🔒 PIN protected</option>
-                            <option value="account">👤 Requires Optimage account (free)</option>
+                            <option value="public">Public — anyone with the link</option>
+                            <option value="pin">PIN protected</option>
+                            <option value="account">Requires Optimage account (free)</option>
                         </select>
                         {createAccessType === 'pin' && (
                             <input type="text" value={createPin}
@@ -815,19 +834,19 @@ function GalleriesTab(): React.JSX.Element {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
                                         <h4 style={{ fontSize: '1rem', margin: 0 }}>{gallery.title}</h4>
                                         {gallery.access_type === 'pin' && (
-                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px', color: 'var(--text-muted)' }}>🔒 PIN</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Lock size={10} style={{ verticalAlign: 'middle' }} /> PIN</span>
                                         )}
                                         {gallery.access_type === 'public' && (
-                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e' }}>🌐 Public</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Globe size={10} style={{ verticalAlign: 'middle' }} /> Public</span>
                                         )}
                                         {gallery.access_type === 'account' && (
-                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(124,58,237,0.12)', borderRadius: '8px', color: '#a78bfa' }}>👤 Account</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(124,58,237,0.12)', borderRadius: '8px', color: '#a78bfa', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><UserCircle size={10} style={{ verticalAlign: 'middle' }} /> Account</span>
                                         )}
                                         {gallery.status === 'draft' && (
-                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(234,179,8,0.12)', borderRadius: '8px', color: '#fbbf24', fontWeight: 600 }}>🚧 Offline</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(234,179,8,0.12)', borderRadius: '8px', color: '#fbbf24', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><AlertTriangle size={10} style={{ verticalAlign: 'middle' }} /> Offline</span>
                                         )}
                                         {gallery.payment_required && !gallery.payment_unlocked && (
-                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600 }}>⏳ Awaiting payment</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><ClockIcon size={10} style={{ verticalAlign: 'middle' }} /> Awaiting payment</span>
                                         )}
                                         {typeof gallery.item_count === 'number' && (
                                             <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px', color: 'var(--text-muted)' }}>
@@ -849,7 +868,7 @@ function GalleriesTab(): React.JSX.Element {
                                 </div>
 
                                 {/* Right: actions */}
-                                <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center' }}>
+                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                                     <button onClick={() => void openGallery(gallery)}
                                         className="btn btn-primary"
                                         style={{ padding: '7px 14px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -899,8 +918,10 @@ function GalleriesTab(): React.JSX.Element {
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent activity</p>
                                     {activity.recentViews.slice(0, 20).map((v, i) => (
                                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '0.82rem' }}>
-                                            <span style={{ color: 'var(--text-secondary)' }}>
-                                                {v.viewer_type === 'user' ? '👤 Signed-in viewer' : '🌐 Guest visitor'}
+                                            <span style={{ color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                                {v.viewer_type === 'user'
+                                                    ? <><UserCircle size={13} style={{ verticalAlign: 'middle' }} /> Signed-in viewer</>
+                                                    : <><Globe size={13} style={{ verticalAlign: 'middle' }} /> Guest visitor</>}
                                             </span>
                                             <span style={{ color: 'var(--text-muted)' }}>
                                                 {new Date(v.created_at).toLocaleString()}
@@ -1029,7 +1050,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
     const handleShareTwitter = (): void => {
         if (!referralLink) return;
-        const text = encodeURIComponent('Check out Optimage, the fastest way to optimize images, compress videos, and transcribe media! 🚀');
+        const text = encodeURIComponent('Check out Optimage, the fastest way to optimize images, compress videos, and transcribe media!');
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(referralLink)}`, '_blank');
     };
 

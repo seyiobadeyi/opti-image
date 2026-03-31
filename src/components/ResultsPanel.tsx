@@ -499,7 +499,7 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                                 color: isNeg ? '#ef4444' : 'var(--success)',
                                 fontWeight: 700, fontSize: '1rem',
                             }}>
-                                {isNeg ? '⚠ Size Increased' : 'Total Reduction'}
+                                {isNeg ? 'Size Increased' : 'Total Reduction'}
                             </div>
                             {isNeg && (
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>

@@ -2,6 +2,8 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { Camera } from 'lucide-react';
 
 export default function LandingBento(): React.JSX.Element {
     return (
@@ -16,6 +18,57 @@ export default function LandingBento(): React.JSX.Element {
             </div>
 
             <div className="bento-stack" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                {/* 0. Featured — Client Gallery Delivery */}
+                <div className="bento-box bento-card-lg" style={{
+                    background: 'linear-gradient(135deg, rgba(108,92,231,0.12), rgba(162,155,254,0.06))',
+                    borderRadius: '28px',
+                    border: '1px solid var(--border-hover)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                }}>
+                    <div className="bento-showcase-content bento-box-padded" style={{
+                        flex: '1 1 360px',
+                        padding: '56px 44px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                    }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(108,92,231,0.15)', borderRadius: '100px', marginBottom: '24px', width: 'fit-content', border: '1px solid rgba(108,92,231,0.3)' }}>
+                            <Camera size={14} color="var(--accent-secondary)" />
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>New Feature</span>
+                        </div>
+                        <h3 className="bento-title" style={{ fontSize: '2.2rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.15 }}>
+                            Client Gallery Delivery
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '1.05rem', marginBottom: '28px' }}>
+                            Create private galleries for your clients. Draft mode, PIN protection, payment confirmation, client favourites, and auto-expiry reminders — all included.
+                        </p>
+                        <Link href="/galleries" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--accent-secondary)', fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none', width: 'fit-content' }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-primary)'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--accent-secondary)'; }}
+                        >
+                            See gallery features <span aria-hidden="true">→</span>
+                        </Link>
+                    </div>
+                    <div className="bento-showcase-img" style={{ flex: '1 1 360px', position: 'relative', minHeight: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(108,92,231,0.06)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '40px', width: '100%', maxWidth: '340px' }}>
+                            {[
+                                { label: 'PIN Protection', active: true },
+                                { label: 'Payment Gate', active: true },
+                                { label: 'Client Favourites', active: true },
+                                { label: 'Auto-Expiry Reminders', active: false },
+                            ].map(({ label, active }) => (
+                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', background: active ? 'rgba(108,92,231,0.15)' : 'rgba(255,255,255,0.04)', borderRadius: '12px', border: `1px solid ${active ? 'rgba(108,92,231,0.35)' : 'rgba(255,255,255,0.06)'}` }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: active ? 'var(--success)' : 'var(--text-muted)', flexShrink: 0 }}></div>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 500, color: active ? 'var(--text-primary)' : 'var(--text-muted)' }}>{label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
 
                 {/* 1. Large Showcase — Lossless Compression */}
                 <div className="bento-box bento-card-lg" style={{

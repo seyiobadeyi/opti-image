@@ -123,7 +123,7 @@ export default function Footer(): React.JSX.Element {
                             disabled={status === 'loading'}
                         />
                         <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.9rem', borderRadius: '10px', fontWeight: 600, background: status === 'success' ? 'var(--success)' : '' }} disabled={status === 'loading'}>
-                            {status === 'loading' ? 'Processing...' : status === 'success' ? (isAlreadySubscribed ? '✨ Already on the list!' : '✓ Subscribed!') : 'Subscribe Now'}
+                            {status === 'loading' ? 'Processing...' : status === 'success' ? (isAlreadySubscribed ? 'Already on the list!' : 'Subscribed!') : 'Subscribe Now'}
                         </button>
                     </form>
                     {status === 'error' && <p style={{ color: '#ef4444', fontSize: '0.82rem', marginTop: '8px', textAlign: 'center' }}>Something went wrong. Try again.</p>}

@@ -66,7 +66,7 @@ export default function LandingHero({ customHeadline, customSubtext }: LandingHe
                 maxWidth: '650px',
                 margin: '0 auto',
                 lineHeight: 1.6
-            }} dangerouslySetInnerHTML={{ __html: customSubtext || 'Free image optimization for JPEG, PNG, WebP, and AVIF. Originally built for agency workflows, now available to everyone.' }} />
+            }} dangerouslySetInnerHTML={{ __html: customSubtext || 'Compress, convert, and deliver. Bulk image optimisation and professional client gallery delivery — built for photographers and creators who ship quality work.' }} />
 
         </section>
     );

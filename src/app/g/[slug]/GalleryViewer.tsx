@@ -12,12 +12,15 @@ import type { Session } from '@supabase/supabase-js';
 
 interface GalleryViewerProps {
     slug: string;
+    ownerToken?: string;
 }
 
-export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.Element {
+export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps): React.JSX.Element {
     const [gallery, setGallery]       = useState<GalleryPublicMeta | null>(null);
     const [items, setItems]           = useState<GalleryItem[]>([]);
-    const [accessToken, setAccessToken] = useState<string | null>(null);
+    // If the caller passes an ownerToken we bootstrap accessToken immediately
+    // so the draft gate / payment gate is bypassed for owner previews
+    const [accessToken, setAccessToken] = useState<string | null>(ownerToken ?? null);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
     // ── Pagination / infinite scroll state
@@ -434,8 +437,8 @@ export default function GalleryViewer({ slug }: GalleryViewerProps): React.JSX.E
         );
     }
 
-    // ── Draft / maintenance mode ───────────────────────────────────────────────
-    if (gallery.status === 'draft') {
+    // ── Draft / maintenance mode — shown to everyone EXCEPT the owner previewing via token ───
+    if (gallery.status === 'draft' && !ownerToken) {
         return (
             <div style={styles.page}>
                 <div style={styles.gateContainer}>

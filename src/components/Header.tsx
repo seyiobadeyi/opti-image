@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
-import { LogOut, User as UserIcon, Menu, X, LayoutDashboard, ChevronRight } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, X, LayoutDashboard, ChevronRight, Camera } from 'lucide-react';
 import type { User, GuestHistoryItem, AuthStep } from '@/types';
 import { AnimatePresence } from 'framer-motion';
 import AuthModal from '@/components/AuthModal';
@@ -78,16 +78,22 @@ export default function Header(): React.JSX.Element {
         }
     }, [supabase, router]);
 
-    // Detect ?onboarding=1 from Google OAuth callback and open modal at onboarding step
+    // Detect ?onboarding=1 from Google OAuth callback or ?login=true from redirects
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const params = new URLSearchParams(window.location.search);
-        if (params.get('onboarding') === '1') {
-            setAuthModalInitialStep('onboarding');
+        
+        const hasOnboarding = params.get('onboarding') === '1';
+        const hasLogin = params.get('login') === 'true';
+
+        if (hasOnboarding || hasLogin) {
+            setAuthModalInitialStep(hasOnboarding ? 'onboarding' : 'email');
             setIsAuthModalOpen(true);
+            
             // Clean the URL without reloading
             const url = new URL(window.location.href);
             url.searchParams.delete('onboarding');
+            url.searchParams.delete('login');
             window.history.replaceState({}, '', url.toString());
         }
     }, []);
@@ -120,6 +126,9 @@ export default function Header(): React.JSX.Element {
                 <nav className="header-desktop-nav" aria-label="Main navigation">
                     <Link href="/" className="header-nav-link">Home</Link>
                     <Link href="/blog" className="header-nav-link">Blog</Link>
+                    <Link href="/galleries" className="header-nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Camera size={15} /> Galleries
+                    </Link>
                     <Link href="/pricing" className="header-nav-link">Pricing</Link>
                     {isAuthLoading ? (
                         <div style={{ width: '100px', height: '36px', background: 'var(--bg-tertiary)', borderRadius: '100px', opacity: 0.5, marginLeft: '8px' }}></div>
@@ -167,6 +176,9 @@ export default function Header(): React.JSX.Element {
                             </Link>
                             <Link href="/blog" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
                                 Blog <ChevronRight size={18} color="var(--text-muted)" />
+                            </Link>
+                            <Link href="/galleries" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
+                                Galleries <ChevronRight size={18} color="var(--text-muted)" />
                             </Link>
                             <Link href="/pricing" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
                                 Pricing <ChevronRight size={18} color="var(--text-muted)" />

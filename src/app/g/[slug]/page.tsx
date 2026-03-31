@@ -4,6 +4,7 @@ import type { GalleryPublicMeta } from '@/types';
 
 interface GalleryPageProps {
     params: Promise<{ slug: string }>;
+    searchParams: Promise<{ ownerToken?: string }>;
 }
 
 async function fetchGalleryMeta(slug: string): Promise<GalleryPublicMeta | null> {
@@ -63,8 +64,9 @@ export async function generateMetadata({ params }: GalleryPageProps): Promise<Me
     };
 }
 
-export default async function GalleryPage({ params }: GalleryPageProps) {
+export default async function GalleryPage({ params, searchParams }: GalleryPageProps) {
     const { slug } = await params;
+    const { ownerToken } = await searchParams;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://optimage.dreamintrepid.com';
 
     const gallery = await fetchGalleryMeta(slug);
@@ -98,7 +100,7 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
                 />
             )}
-            <GalleryViewer slug={slug} />
+            <GalleryViewer slug={slug} ownerToken={ownerToken} />
         </>
     );
 }

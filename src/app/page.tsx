@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import DropZone from '@/components/DropZone';
 import FileList from '@/components/FileList';
@@ -20,7 +21,7 @@ import SubscriptionPaywall from '@/components/SubscriptionPaywall';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { ImageIcon, Mic, RefreshCw, AlertTriangle, CheckCircle, Clipboard } from 'lucide-react';
+import { ImageIcon, Mic, RefreshCw, AlertTriangle, CheckCircle, Clipboard, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ActiveTab, ImageSettings, MediaSettings, ProcessedImage, ProcessingSummary, TranscriptionResult } from '@/types';
 
@@ -314,21 +315,19 @@ export default function Home(): React.JSX.Element {
           {/* <AdBanner slot="top-banner" format="horizontal" /> */}
 
           {/* Mode Tabs */}
-          <div className="tabs-container">
+          <div className="tabs">
             <button
               className={`tab-btn ${activeTab === 'image' ? 'active' : ''}`}
               onClick={() => handleTabChange('image')}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              <ImageIcon size={18} /> Image Optimization
+              <ImageIcon size={18} /> Images
             </button>
-
             <button
               className={`tab-btn ${activeTab === 'media' ? 'active' : ''}`}
               onClick={() => handleTabChange('media')}
               style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }}
             >
-              <Mic size={18} /> Video & Audio AI
+              <Mic size={18} /> Audio & Video
               <span style={{
                 position: 'absolute',
                 top: '-10px',
@@ -341,6 +340,12 @@ export default function Home(): React.JSX.Element {
                 fontWeight: 700,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
               }}>SOON</span>
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'galleries' ? 'active' : ''}`}
+              onClick={() => handleTabChange('galleries')}
+            >
+              <Camera size={18} /> Galleries
             </button>
           </div>
 
@@ -361,7 +366,7 @@ export default function Home(): React.JSX.Element {
               }}
               formatLabels={['JPEG', 'PNG', 'WebP', 'AVIF', 'TIFF', 'GIF', 'SVG', 'BMP']}
             />
-          ) : (
+          ) : activeTab === 'media' ? (
             <div style={{
               padding: '80px 40px',
               background: 'var(--bg-card)',
@@ -398,6 +403,44 @@ export default function Home(): React.JSX.Element {
               >
                 Go Back to Images
               </button>
+            </div>
+          ) : (
+            <div style={{
+              padding: '80px 40px',
+              background: 'var(--bg-card)',
+              borderRadius: '24px',
+              border: '2px dashed var(--border)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '20px'
+            }}>
+              <div style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: 'rgba(108, 92, 231, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--accent-primary)'
+              }}>
+                <Camera size={40} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '12px' }}>Professional Client Galleries</h3>
+                <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto', lineHeight: 1.6, fontSize: '1.1rem' }}>
+                  Deliver your compressed work beautifully. Create private, PIN-protected galleries with built-in payment gating and client favourites.
+                </p>
+              </div>
+              <Link
+                href="/dashboard?tab=galleries"
+                className="btn btn-primary"
+                style={{ marginTop: '12px', padding: '14px 32px', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                Create a Gallery <Camera size={18} />
+              </Link>
             </div>
           )}
 
