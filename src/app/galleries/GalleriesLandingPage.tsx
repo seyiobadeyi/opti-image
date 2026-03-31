@@ -879,12 +879,13 @@ export default function GalleriesLandingPage() {
                             color: TEXT_PRIMARY,
                             lineHeight: 1.2,
                             marginBottom: 'clamp(32px, 5vw, 56px)',
+                            textAlign: 'center',
                         }}
                     >
                         Questions we get asked.
                     </h2>
 
-                    <div style={{ maxWidth: '760px', borderTop: `1px solid ${BORDER}` }}>
+                    <div style={{ maxWidth: '760px', margin: '0 auto', borderTop: `1px solid ${BORDER}` }}>
                         {faqItems.map((item) => (
                             <FaqItem
                                 key={item.question}
@@ -1003,7 +1004,7 @@ export default function GalleriesLandingPage() {
                             lineHeight: 1.6,
                         }}
                     >
-                        Requires an active Optimage subscription. 14-day trial available.
+                        Requires an active Optimage subscription.
                     </p>
                 </div>
             </section>

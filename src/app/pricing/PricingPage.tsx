@@ -190,7 +190,7 @@ export default function PricingPage(): React.JSX.Element {
                         ))}
                     </ul>
                     <Link
-                        href="/"
+                        href="/dashboard"
                         style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}
                     >
                         Start for free

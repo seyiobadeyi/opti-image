@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import PricingPage from './PricingPage';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
     title: 'Pricing — Optimage',
@@ -12,5 +14,11 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-    return <PricingPage />;
+    return (
+        <>
+            <Header />
+            <PricingPage />
+            <Footer />
+        </>
+    );
 }

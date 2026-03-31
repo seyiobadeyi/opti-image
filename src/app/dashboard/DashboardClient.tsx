@@ -563,7 +563,7 @@ function GalleriesTab(): React.JSX.Element {
                                     : <><Globe size={11} style={{ verticalAlign: 'middle' }} /> Public</>}
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', paddingBottom: '4px', maxWidth: '100%', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
                         {/* Payment unlock button */}
                         {activeGallery.payment_required && !activeGallery.payment_unlocked && (
                             <button onClick={() => void handleUnlock()}
@@ -575,7 +575,7 @@ function GalleriesTab(): React.JSX.Element {
                         <button onClick={() => void handleToggleDraft()}
                             style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${activeGallery.status === 'draft' ? 'rgba(34,197,94,0.4)' : 'rgba(234,179,8,0.4)'}`, background: activeGallery.status === 'draft' ? 'rgba(34,197,94,0.08)' : 'rgba(234,179,8,0.08)', color: activeGallery.status === 'draft' ? '#22c55e' : '#fbbf24', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             {activeGallery.status === 'draft'
-                                ? <><CheckCircle size={13} /> Go live</>
+                                ? <><CheckCircle size={13} /> Take it live</>
                                 : <><AlertTriangle size={13} /> Take offline</>}
                         </button>
                         {/* Send to client */}
