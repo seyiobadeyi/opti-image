@@ -295,6 +295,8 @@ export interface AuthModalProps {
   onClose: () => void;
   /** Override the initial step — used when Google OAuth users need onboarding */
   initialStep?: AuthStep;
+  /** Optional URL to redirect to after successful authentication */
+  redirectAfterAuth?: string;
 }
 
 export interface DropZoneProps {

@@ -417,7 +417,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 <div style={styles.gateContainer}>
                     <div style={styles.gateCard}>
                         <div style={{ textAlign: 'center' }}>
-                            <AlertTriangle size={44} style={{ color: '#f59e0b', marginBottom: '16px' }} />
+                            <AlertTriangle size={44} style={{ color: '#f59e0b', margin: '0 auto 16px' }} />
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
                             <p style={{ color: '#9ca3af', fontSize: '0.95rem', marginTop: '12px', lineHeight: 1.6 }}>
                                 This gallery has expired and is no longer available.
@@ -428,7 +428,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 </p>
                             )}
                         </div>
-                        <p style={{ textAlign: 'center', marginTop: '32px', color: '#4b5563', fontSize: '0.78rem' }}>
+                        <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                                Go Back
+                            </button>
+                        </div>
+                        <p style={{ textAlign: 'center', marginTop: '16px', color: '#4b5563', fontSize: '0.78rem' }}>
                             Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
@@ -467,7 +472,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 <div style={styles.gateContainer}>
                     <div style={styles.gateCard}>
                         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-                            <CreditCard size={44} style={{ color: '#7c3aed', marginBottom: '16px' }} />
+                            <CreditCard size={44} style={{ color: '#7c3aed', margin: '0 auto 16px' }} />
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
                             {gallery.description && <p style={styles.gateSubtitle}>{gallery.description}</p>}
                             <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '10px' }}>
@@ -489,7 +494,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 Once you've made payment, send your receipt to your photographer. They'll unlock your gallery and you'll be able to access it at this link.
                             </p>
                         </div>
-                        <p style={{ textAlign: 'center', marginTop: '24px', color: '#4b5563', fontSize: '0.78rem' }}>
+                        <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                                Cancel / Go Back
+                            </button>
+                        </div>
+                        <p style={{ textAlign: 'center', marginTop: '16px', color: '#4b5563', fontSize: '0.78rem' }}>
                             Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
@@ -510,7 +520,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             return <div style={styles.page}><div style={styles.loading}>Loading gallery…</div></div>;
         }
 
-        // Not signed in (or access was explicitly denied) — show OTP sign-in
+        // Not signed in (or access was explicitly denied) — show sign-in prompt
         return (
             <div style={styles.page}>
                 <div style={styles.gateContainer}>
@@ -525,43 +535,21 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             </p>
                         </div>
 
-                        {(otpError || gateError) && (
-                            <div style={styles.gateError}>{otpError ?? gateError}</div>
+                        {gateError && (
+                            <div style={styles.gateError}>{gateError}</div>
                         )}
 
-                        {otpStep === 'email' ? (
-                            <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <input type="email" value={otpEmail} required autoFocus
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOtpEmail(e.target.value)}
-                                    placeholder="Enter your email address"
-                                    style={styles.gateInput}
-                                />
-                                <button type="submit" disabled={otpLoading} style={styles.gateButton}>
-                                    {otpLoading ? 'Sending…' : 'Send sign-in code'}
-                                </button>
-                            </form>
-                        ) : (
-                            <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <p style={{ color: '#9ca3af', fontSize: '0.85rem', textAlign: 'center', margin: '0 0 4px' }}>
-                                    We sent a 6-digit code to <strong style={{ color: '#e5e7eb' }}>{otpEmail}</strong>
-                                </p>
-                                <input type="text" value={otpCode} required autoFocus maxLength={8}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                                    placeholder="Enter code"
-                                    style={{ ...styles.gateInput, textAlign: 'center', letterSpacing: '0.25em', fontSize: '1.3rem' }}
-                                />
-                                <button type="submit" disabled={otpLoading} style={styles.gateButton}>
-                                    {otpLoading ? 'Verifying…' : 'Sign in & view gallery'}
-                                </button>
-                                <button type="button" onClick={() => { setOtpStep('email'); setOtpCode(''); setOtpError(null); }}
-                                    style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', textAlign: 'center', textDecoration: 'underline' }}>
-                                    Use a different email
-                                </button>
-                            </form>
-                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <button onClick={() => setAuthModalOpen(true)} style={styles.gateButton}>
+                                Sign in & view gallery
+                            </button>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                                Cancel / Go Back
+                            </button>
+                        </div>
 
-                        <p style={{ textAlign: 'center', marginTop: '20px', color: '#4b5563', fontSize: '0.78rem' }}>
-                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a> · <a href="https://dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Dream Intrepid</a>
+                        <p style={{ textAlign: 'center', marginTop: '24px', color: '#4b5563', fontSize: '0.78rem' }}>
+                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
@@ -577,8 +565,8 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     <div style={styles.gateCard}>
                         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                             {gallery.access_type === 'pin'
-                                ? <Lock size={40} style={{ color: '#7c3aed', marginBottom: '16px' }} />
-                                : <Mail size={40} style={{ color: '#7c3aed', marginBottom: '16px' }} />
+                                ? <Lock size={40} style={{ color: '#7c3aed', margin: '0 auto 16px' }} />
+                                : <Mail size={40} style={{ color: '#7c3aed', margin: '0 auto 16px' }} />
                             }
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
                             {gallery.description && <p style={styles.gateSubtitle}>{gallery.description}</p>}
@@ -602,9 +590,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             <button type="submit" disabled={gateLoading} style={styles.gateButton}>
                                 {gateLoading ? 'Verifying...' : 'View Gallery'}
                             </button>
+                            <button type="button" onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                                Cancel / Go Back
+                            </button>
                         </form>
                         <p style={{ textAlign: 'center', marginTop: '20px', color: '#6b7280', fontSize: '0.8rem' }}>
-                            Powered by <a href="/" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a>
+                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
