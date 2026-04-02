@@ -1133,11 +1133,18 @@ body {
 .tabs-container {
   margin: 2rem auto;
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0.75rem 1.5rem;
@@ -1148,6 +1155,15 @@ body {
   transition: all 0.2s ease;
   font-size: 1rem;
   backdrop-filter: blur(10px);
+}
+
+/* Scrollbar hide utility — used by dashboard action pill row */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-btn:hover {

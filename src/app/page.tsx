@@ -315,7 +315,7 @@ export default function Home(): React.JSX.Element {
           {/* <AdBanner slot="top-banner" format="horizontal" /> */}
 
           {/* Mode Tabs */}
-          <div className="tabs">
+          <div className="tabs-container">
             <button
               className={`tab-btn ${activeTab === 'image' ? 'active' : ''}`}
               onClick={() => handleTabChange('image')}

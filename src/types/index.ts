@@ -483,6 +483,7 @@ export interface GalleryPublicMeta {
   branding_website: string | null;
   expires_at: string | null;
   created_at: string;
+  is_owner?: boolean;
 }
 
 export interface GalleryActivity {

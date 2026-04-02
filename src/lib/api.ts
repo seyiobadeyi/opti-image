@@ -426,7 +426,11 @@ export const apiClient = {
     },
 
     async getGalleryPublic(slug: string): Promise<GalleryPublicMeta> {
-        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}`);
+        // Send auth header if available so the server can detect if the viewer is the owner
+        const authHeaders = await getAuthHeaders().catch(() => ({}));
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}`, {
+            headers: authHeaders,
+        });
         if (!response.ok) throw new Error('Gallery not found');
         return response.json() as Promise<GalleryPublicMeta>;
     },
@@ -497,8 +501,10 @@ export const apiClient = {
      * Get favourite item IDs for a viewer in a public gallery.
      */
     async getGalleryFavorites(slug: string, accessToken: string, viewerIdentifier: string): Promise<string[]> {
-        const params = new URLSearchParams({ token: accessToken, viewer: viewerIdentifier });
-        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/favorites?${params.toString()}`);
+        const params = new URLSearchParams({ viewer: viewerIdentifier });
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/favorites?${params.toString()}`, {
+            headers: { 'x-gallery-token': accessToken },
+        });
         if (!response.ok) return [];
         const data: { itemIds: string[] } = await response.json();
         return data.itemIds ?? [];

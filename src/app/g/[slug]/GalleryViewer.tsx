@@ -59,6 +59,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
     const [viewerIdentifier, setViewerIdentifier] = useState<string>('');
     const [favSubmitting, setFavSubmitting] = useState(false);
     const [favSubmitted, setFavSubmitted]   = useState(false);
+    const [favError, setFavError]           = useState<string | null>(null);
     const [showFavMode, setShowFavMode]     = useState(false);
 
     // ── Share state
@@ -386,7 +387,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             setShowFavMode(false);
             setTimeout(() => setFavSubmitted(false), 5000);
         } catch (err: unknown) {
-            setZipError(err instanceof Error ? err.message : 'Failed to save favourites');
+            setFavError(err instanceof Error ? err.message : 'Failed to save favourites');
         } finally {
             setFavSubmitting(false);
         }
@@ -456,7 +457,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 Check back soon — your photographer will let you know when it's ready.
                             </p>
                         </div>
-                        <p style={{ textAlign: 'center', marginTop: '32px', color: '#4b5563', fontSize: '0.78rem' }}>
+                        <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                                Go Back
+                            </button>
+                        </div>
+                        <p style={{ textAlign: 'center', marginTop: '16px', color: '#4b5563', fontSize: '0.78rem' }}>
                             Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
@@ -743,6 +749,27 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
     // ── Main gallery view
     return (
         <div style={styles.page}>
+            {/* Owner management bar — only visible to the gallery owner when signed in */}
+            {gallery.is_owner && (
+                <div style={{
+                    background: 'linear-gradient(90deg, rgba(124,58,237,0.15), rgba(139,92,246,0.08))',
+                    borderBottom: '1px solid rgba(124,58,237,0.25)',
+                    padding: '10px 24px',
+                    display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
+                }}>
+                    <span style={{ fontSize: '0.78rem', color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                        <Camera size={13} /> You are viewing your own gallery
+                    </span>
+                    <a href="/dashboard" style={{
+                        marginLeft: 'auto', padding: '6px 14px', borderRadius: '8px',
+                        background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)',
+                        color: '#c4b5fd', fontSize: '0.78rem', fontWeight: 600,
+                        textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    }}>
+                        Manage gallery
+                    </a>
+                </div>
+            )}
             {/* Header */}
             <header style={styles.header}>
                 <div style={styles.headerInner}>
@@ -859,9 +886,15 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             ? `${favoriteIds.size} photo${favoriteIds.size !== 1 ? 's' : ''} liked — click photos to add more`
                             : 'Tap photos to pick your favourites'}
                     </span>
-                    {favoriteIds.size > 0 && !favSubmitting && (
+                    {favError && (
+                        <span style={{ color: '#ef4444', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
+                            {favError}
+                            <button onClick={() => setFavError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0 }}><X size={12} /></button>
+                        </span>
+                    )}
+                    {favoriteIds.size > 0 && !favSubmitting && !favError && (
                         <button
-                            onClick={() => void submitFavorites()}
+                            onClick={() => { setFavError(null); void submitFavorites(); }}
                             style={{
                                 marginLeft: 'auto',
                                 padding: '8px 20px', borderRadius: '10px',

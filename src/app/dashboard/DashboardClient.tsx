@@ -563,7 +563,10 @@ function GalleriesTab(): React.JSX.Element {
                                     : <><Globe size={11} style={{ verticalAlign: 'middle' }} /> Public</>}
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', paddingBottom: '4px', maxWidth: '100%', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
+                    <div style={{ position: 'relative', maxWidth: '100%' }}>
+                    {/* Fade gradient — indicates more buttons are scrollable on mobile */}
+                    <div style={{ pointerEvents: 'none', position: 'absolute', right: 0, top: 0, bottom: 4, width: '48px', background: 'linear-gradient(to right, transparent, var(--bg-secondary, #0f0f1a))', zIndex: 1, borderRadius: '0 10px 10px 0' }} />
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', paddingBottom: '4px', paddingRight: '40px', maxWidth: '100%', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
                         {/* Payment unlock button */}
                         {activeGallery.payment_required && !activeGallery.payment_unlocked && (
                             <button onClick={() => void handleUnlock()}
@@ -607,6 +610,7 @@ function GalleriesTab(): React.JSX.Element {
                             Delete gallery
                         </button>
                     </div>
+                    </div>{/* end pill scroll wrapper */}
                 </div>
 
                 {/* Send to client modal */}
