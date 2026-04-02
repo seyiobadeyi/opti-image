@@ -20,7 +20,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
                     .eq('id', user.id)
                     .single();
                 if (!profile?.display_name) {
-                    return NextResponse.redirect(`${origin}/?onboarding=1`);
+                    return NextResponse.redirect(`${origin}/?onboarding=1&next=${encodeURIComponent(next)}`);
                 }
             }
             return NextResponse.redirect(`${origin}${next}`);

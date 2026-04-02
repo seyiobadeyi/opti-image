@@ -9,7 +9,7 @@ import { createClient } from '@/utils/supabase/client';
 import type { AuthModalProps, AuthStep, GuestHistoryItem } from '@/types';
 
 
-export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalProps): React.JSX.Element | null {
+export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterAuth }: AuthModalProps): React.JSX.Element | null {
     const supabase = useMemo(() => createClient(), []);
     const router = useRouter();
     const [step, setStep] = useState<AuthStep>(initialStep ?? 'email');
@@ -35,9 +35,15 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
     const handleGoogleSignIn = async (): Promise<void> => {
         setLoading(true);
         setError(null);
-        const currentPath = window.location.pathname;
-        const nextPath = currentPath === '/' ? '/dashboard' : currentPath;
-        const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+        let redirectTo;
+        if (redirectAfterAuth) {
+            redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectAfterAuth)}`;
+        } else {
+            const currentPath = window.location.pathname;
+            const nextPath = currentPath === '/' ? '/dashboard' : currentPath;
+            redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+        }
+
         const { error: oauthError } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo },
@@ -199,7 +205,9 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
             }
 
             onClose();
-            if (typeof window !== 'undefined' && window.location.pathname === '/') {
+            if (redirectAfterAuth) {
+                router.push(redirectAfterAuth);
+            } else if (typeof window !== 'undefined' && window.location.pathname === '/') {
                 router.push('/dashboard');
             }
             // On all other pages, just close the modal — user stays where they are
@@ -230,7 +238,9 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
             setLoading(false);
         }
         onClose();
-        if (typeof window !== 'undefined' && window.location.pathname === '/') {
+        if (redirectAfterAuth) {
+            router.push(redirectAfterAuth);
+        } else if (typeof window !== 'undefined' && window.location.pathname === '/') {
             router.push('/dashboard');
         }
         // On all other pages, just close the modal — user stays where they are
@@ -259,12 +269,18 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
                 display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
             }}
         >
+            {/* 
+              Listen for mousedown on the modal content to prevent synthetic 
+              click events from closing the modal if the user clicks and drags.
+              We use e.stopPropagation() here to stop the overlay click handler.
+            */}
             <motion.div
                 className="auth-modal-card"
                 initial={{ scale: 0.98, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.98, opacity: 0, y: 10 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
                 style={{
                     display: 'flex', maxWidth: '900px', width: '100%', maxHeight: '90vh',
@@ -432,14 +448,21 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" className="btn btn-primary" disabled={loading || !displayName.trim()} style={{
-                                width: '100%', marginTop: '8px', padding: '14px',
-                                borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            }}>
-                                {loading ? 'Saving...' : <><span>Get Started</span><ArrowRight size={16} /></>}
-                            </button>
-                            <button type="button" onClick={() => { onClose(); if (typeof window !== 'undefined' && window.location.pathname === '/') { router.push('/dashboard'); } }}
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button type="button" onClick={onClose} className="btn btn-secondary" style={{
+                                    flex: 1, padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                }}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn btn-primary" disabled={loading || !displayName.trim()} style={{
+                                    flex: 2, padding: '14px',
+                                    borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                }}>
+                                    {loading ? 'Saving...' : <><span>Get Started</span><ArrowRight size={16} /></>}
+                                </button>
+                            </div>
+                            <button type="button" onClick={() => { onClose(); if (redirectAfterAuth) { router.push(redirectAfterAuth); } else if (typeof window !== 'undefined' && window.location.pathname === '/') { router.push('/dashboard'); } }}
                                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'center' }}>
                                 Skip for now
                             </button>
@@ -509,13 +532,20 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
                                 </div>
                             </div>
 
-                            <button type="submit" className="btn btn-primary" disabled={loading} style={{
-                                width: '100%', marginTop: '8px', padding: '14px',
-                                borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            }}>
-                                {loading ? 'Sending Code...' : <><span>Continue to Sign In</span><ArrowRight size={16} /></>}
-                            </button>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button type="button" onClick={onClose} className="btn btn-secondary" style={{
+                                    flex: 1, padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                }}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn btn-primary" disabled={loading} style={{
+                                    flex: 2, padding: '14px',
+                                    borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                }}>
+                                    {loading ? 'Sending Code...' : <><span>Continue</span><ArrowRight size={16} /></>}
+                                </button>
+                            </div>
                             </form>
                         </>
                     ) : (
@@ -550,13 +580,20 @@ export default function AuthModal({ isOpen, onClose, initialStep }: AuthModalPro
                                 </div>
                             </div>
 
-                            <button type="submit" className="btn btn-primary" disabled={loading || otp.join('').length < 8} style={{
-                                width: '100%', padding: '14px',
-                                borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            }}>
-                                {loading ? 'Verifying...' : <><span>Verify Secure Code</span><ArrowRight size={16} /></>}
-                            </button>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button type="button" onClick={onClose} className="btn btn-secondary" style={{
+                                    flex: 1, padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                }}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn btn-primary" disabled={loading || otp.join('').length < 8} style={{
+                                    flex: 2, padding: '14px',
+                                    borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                }}>
+                                    {loading ? 'Verifying...' : <><span>Verify Code</span><ArrowRight size={16} /></>}
+                                </button>
+                            </div>
 
                             <div style={{ textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
                                 <p style={{ marginBottom: '10px' }}>

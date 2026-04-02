@@ -15,6 +15,7 @@ export default function Header(): React.JSX.Element {
     const router = useRouter();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
     const [authModalInitialStep, setAuthModalInitialStep] = useState<AuthStep>('email');
+    const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
@@ -80,23 +81,30 @@ export default function Header(): React.JSX.Element {
 
     // Detect ?onboarding=1 from Google OAuth callback or ?login=true from redirects
     useEffect(() => {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined' || isAuthLoading || user) return;
         const params = new URLSearchParams(window.location.search);
         
         const hasOnboarding = params.get('onboarding') === '1';
         const hasLogin = params.get('login') === 'true';
+        const nextParam = params.get('next');
 
         if (hasOnboarding || hasLogin) {
             setAuthModalInitialStep(hasOnboarding ? 'onboarding' : 'email');
+            if (nextParam) {
+                setRedirectUrl(nextParam);
+            } else {
+                setRedirectUrl(window.location.pathname === '/' ? '/dashboard' : window.location.pathname);
+            }
             setIsAuthModalOpen(true);
             
             // Clean the URL without reloading
             const url = new URL(window.location.href);
             url.searchParams.delete('onboarding');
             url.searchParams.delete('login');
+            url.searchParams.delete('next');
             window.history.replaceState({}, '', url.toString());
         }
-    }, []);
+    }, [isAuthLoading, user]);
 
     useEffect(() => {
         document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';
@@ -224,8 +232,9 @@ export default function Header(): React.JSX.Element {
                 {isAuthModalOpen && (
                     <AuthModal
                         isOpen={isAuthModalOpen}
-                        onClose={() => { setIsAuthModalOpen(false); setAuthModalInitialStep('email'); }}
+                        onClose={() => { setIsAuthModalOpen(false); setAuthModalInitialStep('email'); setRedirectUrl(undefined); }}
                         initialStep={authModalInitialStep}
+                        redirectAfterAuth={redirectUrl}
                     />
                 )}
             </AnimatePresence>

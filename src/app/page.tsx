@@ -329,16 +329,14 @@ export default function Home(): React.JSX.Element {
             >
               <Mic size={18} /> Audio & Video
               <span style={{
-                position: 'absolute',
-                top: '-10px',
-                right: '-10px',
                 background: 'var(--gradient-primary)',
                 fontSize: '0.65rem',
                 padding: '2px 6px',
                 borderRadius: '10px',
                 color: 'white',
                 fontWeight: 700,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                marginLeft: '4px'
               }}>SOON</span>
             </button>
             <button
