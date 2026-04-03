@@ -526,7 +526,45 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             return <div style={styles.page}><div style={styles.loading}>Loading gallery…</div></div>;
         }
 
-        // Not signed in (or access was explicitly denied) — show sign-in prompt
+        // Signed in but backend threw an error (e.g. server issue, RLS) — show retry, NOT sign-in
+        if (session && gateError) {
+            const handleRetry = (): void => {
+                setGateError(null);
+                apiClient.verifyGalleryAccess(slug, undefined, undefined, session.access_token)
+                    .then(token => setAccessToken(token))
+                    .catch(err => setGateError(err instanceof Error ? err.message : 'Access denied'));
+            };
+            return (
+                <div style={styles.page}>
+                    <div style={styles.gateContainer}>
+                        <div style={styles.gateCard}>
+                            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                                <AlertTriangle size={40} style={{ color: '#f59e0b', marginBottom: '14px' }} />
+                                <h1 style={styles.gateTitle}>{gallery.title}</h1>
+                                <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '10px', lineHeight: 1.55 }}>
+                                    We couldn&apos;t verify your access right now.<br />
+                                    You&apos;re signed in — this is likely a temporary server issue.
+                                </p>
+                            </div>
+                            <div style={styles.gateError}>{gateError}</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
+                                <button onClick={handleRetry} style={styles.gateButton}>
+                                    Try again
+                                </button>
+                                <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                                    Go Back
+                                </button>
+                            </div>
+                            <p style={{ textAlign: 'center', marginTop: '24px', color: '#4b5563', fontSize: '0.78rem' }}>
+                                Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#7c3aed', textDecoration: 'none' }}>Optimage</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Not signed in — show sign-in prompt
         return (
             <div style={styles.page}>
                 <div style={styles.gateContainer}>
@@ -540,10 +578,6 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 Sign in or create a <strong style={{ color: '#c4b5fd' }}>free account</strong> to view it — no credit card needed.
                             </p>
                         </div>
-
-                        {gateError && (
-                            <div style={styles.gateError}>{gateError}</div>
-                        )}
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <button onClick={() => setAuthModalOpen(true)} style={styles.gateButton}>
