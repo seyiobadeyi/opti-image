@@ -208,32 +208,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
         }
     };
 
-    // ── Lightbox navigation
-    const openLightbox  = (index: number): void => { if (!selectMode) setLightboxIndex(index); };
-    const closeLightbox = (): void => setLightboxIndex(null);
-
-    const prevImage = useCallback((): void => {
-        if (lightboxIndex === null || items.length === 0) return;
-        setLightboxIndex((lightboxIndex - 1 + items.length) % items.length);
-    }, [lightboxIndex, items]);
-
-    const nextImage = useCallback((): void => {
-        if (lightboxIndex === null || items.length === 0) return;
-        setLightboxIndex((lightboxIndex + 1) % items.length);
-    }, [lightboxIndex, items]);
-
-    useEffect(() => {
-        const handler = (e: KeyboardEvent): void => {
-            if (lightboxIndex === null) return;
-            if (e.key === 'ArrowLeft') prevImage();
-            if (e.key === 'ArrowRight') nextImage();
-            if (e.key === 'Escape') closeLightbox();
-        };
-        window.addEventListener('keydown', handler);
-        return () => window.removeEventListener('keydown', handler);
-    }, [lightboxIndex, prevImage, nextImage]);
-
-    // ── Infinite scroll — load next page
+    // ── Infinite scroll — load next page (declared first so lightbox nav can reference it)
     const loadMoreItems = useCallback(async () => {
         if (!accessToken || itemsLoading || !hasMoreItems) return;
         setItemsLoading(true);
@@ -249,6 +224,51 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             setItemsLoading(false);
         }
     }, [accessToken, itemsLoading, hasMoreItems, itemsPage, slug]);
+
+    // ── Lightbox navigation
+    const openLightbox  = (index: number): void => { if (!selectMode) setLightboxIndex(index); };
+    const closeLightbox = (): void => setLightboxIndex(null);
+
+    const prevImage = useCallback((): void => {
+        if (lightboxIndex === null || items.length === 0) return;
+        setLightboxIndex((lightboxIndex - 1 + items.length) % items.length);
+    }, [lightboxIndex, items]);
+
+    const nextImage = useCallback((): void => {
+        if (lightboxIndex === null || items.length === 0) return;
+        const next = (lightboxIndex + 1) % items.length;
+        setLightboxIndex(next);
+        // Pre-load more items when approaching the end of the loaded set
+        if (next >= items.length - 5 && hasMoreItems && !itemsLoading) {
+            void loadMoreItems();
+        }
+    }, [lightboxIndex, items, hasMoreItems, itemsLoading, loadMoreItems]);
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent): void => {
+            if (lightboxIndex === null) return;
+            if (e.key === 'ArrowLeft') prevImage();
+            if (e.key === 'ArrowRight') nextImage();
+            if (e.key === 'Escape') closeLightbox();
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [lightboxIndex, prevImage, nextImage]);
+
+    // ── Touch swipe for lightbox
+    const touchStartX = useRef<number | null>(null);
+    const handleLightboxTouchStart = (e: React.TouchEvent): void => {
+        touchStartX.current = e.touches[0]?.clientX ?? null;
+    };
+    const handleLightboxTouchEnd = (e: React.TouchEvent): void => {
+        if (touchStartX.current === null) return;
+        const dx = (e.changedTouches[0]?.clientX ?? touchStartX.current) - touchStartX.current;
+        if (Math.abs(dx) > 50) {
+            if (dx < 0) nextImage();
+            else prevImage();
+        }
+        touchStartX.current = null;
+    };
 
     // ── IntersectionObserver sentinel
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -1048,6 +1068,32 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                                 </button>
                                             </div>
                                         )}
+                                        {/* Owner-only: delete photo button */}
+                                        {gallery.is_owner && (
+                                            <button
+                                                onClick={(e: React.MouseEvent) => {
+                                                    e.stopPropagation();
+                                                    if (confirm('Delete this photo from the gallery?')) {
+                                                        apiClient.deleteGalleryItem(gallery.id, item.id)
+                                                            .then(() => setItems(prev => prev.filter(i => i.id !== item.id)))
+                                                            .catch(() => alert('Failed to delete photo. Please try again.'));
+                                                    }
+                                                }}
+                                                style={{
+                                                    position: 'absolute', top: '10px', left: '10px',
+                                                    background: 'rgba(239,68,68,0.9)',
+                                                    border: 'none', borderRadius: '6px',
+                                                    color: '#fff', cursor: 'pointer',
+                                                    padding: '5px 9px', fontSize: '0.72rem', fontWeight: 600,
+                                                    display: 'flex', alignItems: 'center', gap: '4px',
+                                                    zIndex: 10,
+                                                    backdropFilter: 'blur(4px)',
+                                                }}
+                                                title="Delete this photo"
+                                            >
+                                                <X size={12} /> Delete
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1062,6 +1108,48 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 <div style={{ textAlign: 'center', padding: '32px', color: '#9ca3af', fontSize: '0.85rem' }}>
                     Loading more photos…
                 </div>
+            )}
+
+            {/* Owner: floating "Add photos" button + hidden file input */}
+            {gallery.is_owner && (
+                <>
+                    <input
+                        type="file"
+                        id="owner-add-photos-input"
+                        multiple
+                        accept="image/jpeg,image/png,image/webp,image/tiff,image/heic,image/heif,image/avif"
+                        style={{ display: 'none' }}
+                        onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                            const newFiles = Array.from(e.target.files ?? []);
+                            if (newFiles.length === 0) return;
+                            for (const file of newFiles) {
+                                try {
+                                    const uploaded = await apiClient.uploadGalleryImage(gallery.id, file);
+                                    setItems(prev => [...prev, uploaded]);
+                                } catch {
+                                    alert(`Failed to upload ${file.name}. Please try again.`);
+                                }
+                            }
+                            e.target.value = '';
+                        }}
+                    />
+                    <button
+                        onClick={() => document.getElementById('owner-add-photos-input')?.click()}
+                        style={{
+                            position: 'fixed', bottom: '32px', right: '32px', zIndex: 200,
+                            background: '#7c3aed', border: 'none', borderRadius: '50px',
+                            color: '#fff', cursor: 'pointer',
+                            padding: '14px 22px', fontSize: '0.9rem', fontWeight: 700,
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            boxShadow: '0 4px 24px rgba(124,58,237,0.5)',
+                            transition: 'transform 0.15s, box-shadow 0.15s',
+                        }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.05)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 32px rgba(124,58,237,0.7)'; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(124,58,237,0.5)'; }}
+                    >
+                        + Add photos
+                    </button>
+                </>
             )}
 
             {/* Auth modal — gallery has no site Header, so it owns this itself */}
@@ -1091,7 +1179,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
 
             {/* Lightbox */}
             {lightboxIndex !== null && items[lightboxIndex] && (
-                <div style={styles.lightboxOverlay} onClick={closeLightbox}>
+                <div
+                    style={styles.lightboxOverlay}
+                    onClick={closeLightbox}
+                    onTouchStart={handleLightboxTouchStart}
+                    onTouchEnd={handleLightboxTouchEnd}
+                >
                     <button style={styles.lbClose} onClick={closeLightbox}><X size={24} /></button>
                     <button style={{ ...styles.lbNav, left: '16px' }} onClick={(e) => { e.stopPropagation(); prevImage(); }}>
                         <ChevronLeft size={32} />

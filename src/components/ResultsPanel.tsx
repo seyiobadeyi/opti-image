@@ -200,8 +200,8 @@ function UseImageMenu({
 }
 
 function FileResultCard({
-    result, savingsNum, onDownload, setEditedName,
-}: FileResultRowProps & { serverUrl: string; setEditedName: (name: string) => void }) {
+    result, savingsNum, onDownload, setEditedName, localPreview,
+}: FileResultRowProps & { serverUrl: string; setEditedName: (name: string) => void; localPreview?: string }) {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [open, setOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -251,13 +251,25 @@ function FileResultCard({
                 onMouseLeave={() => setIsHovered(false)}
                 onClick={() => hostedUrl && setOpen(v => !v)}
             >
-                {hostedUrl ? (
+                {hostedUrl ?? localPreview ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={hostedUrl}
-                        alt={altText}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                        <img
+                            src={hostedUrl ?? localPreview}
+                            alt={altText}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                        {!hostedUrl && localPreview && (
+                            <div style={{
+                                position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)',
+                                background: 'rgba(0,0,0,0.6)', color: '#fff',
+                                fontSize: '0.65rem', fontWeight: 600, padding: '2px 7px',
+                                borderRadius: '10px', whiteSpace: 'nowrap', pointerEvents: 'none',
+                            }}>
+                                local preview
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <div style={{
                         width: '100%', height: '100%',
@@ -368,7 +380,7 @@ function FileResultCard({
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ResultsPanel({ results, summary, serverUrl }: ResultsPanelProps): React.JSX.Element | null {
+export default function ResultsPanel({ results, summary, serverUrl, localPreviews, onReconvert }: ResultsPanelProps): React.JSX.Element | null {
     const [showShareMenu, setShowShareMenu] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
     const [newsletterEmail, setNewsletterEmail] = useState<string>('');
@@ -426,8 +438,9 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
         }
 
         const fileNames = results.map((r) => r.processedName);
+        const displayNames = results.map((r) => editedNames[r.id] ?? r.processedName);
         try {
-            await apiClient.downloadBulkImages(fileNames);
+            await apiClient.downloadBulkImages(fileNames, displayNames);
         } catch (err: unknown) {
             console.error('Bulk download failed:', err instanceof Error ? err.message : 'An unknown error occurred');
             alert('Failed to download ZIP. Please try individual downloads.');
@@ -685,6 +698,7 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                             onDownload={() => handleDownload(result.processedName, editedNames[result.id] ?? result.originalName)}
                             serverUrl={serverUrl}
                             setEditedName={(name) => setEditedNames(prev => ({ ...prev, [result.id]: name }))}
+                            localPreview={localPreviews?.[String(results.indexOf(result))]}
                         />
                     );
                 })}
@@ -738,6 +752,33 @@ export default function ResultsPanel({ results, summary, serverUrl }: ResultsPan
                     Drop this anywhere on your site. It helps others find the tool and keeps it free.
                 </p>
             </div>
+
+            {/* Re-convert the same batch in a different format */}
+            {onReconvert && (
+                <div style={{ textAlign: 'center', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '12px' }}>
+                        Want to try a different format or quality? Re-convert the same images without re-uploading.
+                    </p>
+                    <button
+                        onClick={onReconvert}
+                        style={{
+                            padding: '10px 24px',
+                            borderRadius: '10px',
+                            background: 'transparent',
+                            border: '1px solid var(--border)',
+                            color: 'var(--text-secondary)',
+                            fontSize: '0.9rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                        }}
+                    >
+                        Re-convert in different format
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

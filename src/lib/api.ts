@@ -82,6 +82,10 @@ export const apiClient = {
             formData.append('filter', options.filter);
         if (options.notifyOnComplete)
             formData.append('notifyOnComplete', 'true');
+        if (options.flipHorizontal)
+            formData.append('flipHorizontal', 'true');
+        if (options.flipVertical)
+            formData.append('flipVertical', 'true');
 
         const response = await fetch(`${API_BASE}/api/images/convert`, {
             method: 'POST',
@@ -145,14 +149,14 @@ export const apiClient = {
     /**
      * Download multiple processed images as a zip file.
      */
-    async downloadBulkImages(fileNames: string[]): Promise<void> {
+    async downloadBulkImages(fileNames: string[], displayNames?: string[]): Promise<void> {
         if (!fileNames || fileNames.length === 0) return;
 
         const authHeaders = await getAuthHeaders();
 
         const response = await fetch(`${API_BASE}/api/images/download-bulk`, {
             method: 'POST',
-            body: JSON.stringify({ fileNames }),
+            body: JSON.stringify({ fileNames, displayNames }),
             headers: {
                 'Content-Type': 'application/json',
                 ...authHeaders,

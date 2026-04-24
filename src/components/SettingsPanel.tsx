@@ -55,6 +55,52 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
                     </select>
                 </div>
 
+                {/* Flip */}
+                <div className="setting-group">
+                    <label style={{ display: 'flex', alignItems: 'center' }}>
+                        Flip Image
+                        <InfoTooltip content="Mirror the image horizontally (left-right) or vertically (top-bottom)." />
+                    </label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                            type="button"
+                            onClick={() => handleChange('flipHorizontal', !settings.flipHorizontal)}
+                            style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: `1px solid ${settings.flipHorizontal ? 'var(--accent-primary)' : 'var(--border)'}`,
+                                background: settings.flipHorizontal ? 'var(--accent-primary)' : 'var(--bg-card)',
+                                color: settings.flipHorizontal ? '#ffffff' : 'var(--text-primary)',
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'background 0.15s, border-color 0.15s, color 0.15s',
+                            }}
+                        >
+                            ↔ Horizontal
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleChange('flipVertical', !settings.flipVertical)}
+                            style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: `1px solid ${settings.flipVertical ? 'var(--accent-primary)' : 'var(--border)'}`,
+                                background: settings.flipVertical ? 'var(--accent-primary)' : 'var(--bg-card)',
+                                color: settings.flipVertical ? '#ffffff' : 'var(--text-primary)',
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'background 0.15s, border-color 0.15s, color 0.15s',
+                            }}
+                        >
+                            ↕ Vertical
+                        </button>
+                    </div>
+                </div>
+
                 {/* Quality Slider */}
                 <div className="setting-group">
                     <div className="quality-slider-container">

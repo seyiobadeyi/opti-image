@@ -11,6 +11,7 @@ import Link from 'next/link';
 import SubscriptionPaywall from '@/components/SubscriptionPaywall';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
+import { loadPrefs, savePrefs } from '@/lib/preferences';
 import type {
     DashboardClientProps, DashboardTab, DashboardFileNames, ImageSettings,
     VideoSettings, VideoResult, ProcessedImage, ProcessingSummary,
@@ -954,12 +955,13 @@ export default function DashboardClient({ user, profile, history: initialHistory
     const [fileNames, setFileNames] = useState<DashboardFileNames>({});
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editValue, setEditValue] = useState<string>('');
-    const [imageSettings, setImageSettings] = useState<ImageSettings>({
+    const [imageSettings, setImageSettings] = useState<ImageSettings>(() => loadPrefs({
         format: '', quality: 80, width: '', height: '',
         rotate: 0, autoEnhance: false,
         stripMetadata: true, maintainAspectRatio: true,
         exposure: 1.0, saturation: 1.0, filter: '',
-    });
+        flipHorizontal: false, flipVertical: false,
+    }));
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [processed, setProcessed] = useState<number>(0);
     const [results, setResults] = useState<ProcessedImage[] | null>(null);
@@ -1017,6 +1019,11 @@ export default function DashboardClient({ user, profile, history: initialHistory
             }));
         } catch { /* localStorage not available */ }
     }, []);
+
+    // Persist image settings whenever they change
+    useEffect(() => {
+        savePrefs(imageSettings);
+    }, [imageSettings]);
 
     const handlePrefsAutoWebPChange = (val: boolean): void => {
         setPrefsAutoWebP(val);

@@ -24,6 +24,7 @@ import type { User } from '@supabase/supabase-js';
 import { ImageIcon, Mic, RefreshCw, AlertTriangle, CheckCircle, Clipboard, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ActiveTab, ImageSettings, MediaSettings, ProcessedImage, ProcessingSummary, TranscriptionResult } from '@/types';
+import { loadPrefs, savePrefs } from '@/lib/preferences';
 
 const DEFAULT_IMAGE_SETTINGS: ImageSettings = {
   format: '',
@@ -37,6 +38,8 @@ const DEFAULT_IMAGE_SETTINGS: ImageSettings = {
   exposure: 1.0,
   saturation: 1.0,
   filter: '',
+  flipHorizontal: false,
+  flipVertical: false,
 };
 
 const DEFAULT_MEDIA_SETTINGS: MediaSettings = {
@@ -48,6 +51,8 @@ export default function Home(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<ActiveTab>('image');
   const [files, setFiles] = useState<File[]>([]);
   const [imageSettings, setImageSettings] = useState<ImageSettings>(DEFAULT_IMAGE_SETTINGS);
+  const [originalFiles, setOriginalFiles] = useState<File[]>([]);
+  const [localPreviews, setLocalPreviews] = useState<Record<string, string>>({});
   const [mediaSettings, setMediaSettings] = useState<MediaSettings>(DEFAULT_MEDIA_SETTINGS);
 
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -72,6 +77,11 @@ export default function Home(): React.JSX.Element {
     return () => subscription.unsubscribe();
   }, [supabase]);
 
+  // Load saved image settings from localStorage on first mount
+  useEffect(() => {
+    setImageSettings(loadPrefs(DEFAULT_IMAGE_SETTINGS));
+  }, []);
+
   // Capture referral code from URL (?ref=XXXX)
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -88,6 +98,11 @@ export default function Home(): React.JSX.Element {
       window.history.replaceState({}, '', url.toString());
     }
   }, []);
+
+  // Persist settings changes to localStorage
+  useEffect(() => {
+    savePrefs(imageSettings);
+  }, [imageSettings]);
 
   useEffect(() => {
     // Request notification permission on mount
@@ -109,6 +124,16 @@ export default function Home(): React.JSX.Element {
     }
   };
 
+  // Re-convert the same files with (potentially different) current settings
+  const handleReconvert = useCallback((): void => {
+    if (originalFiles.length === 0) return;
+    setFiles(originalFiles);
+    setResults(null);
+    setSummary(null);
+    setError(null);
+    setProcessed(0);
+  }, [originalFiles]);
+
   const handleTabChange = (tab: ActiveTab): void => {
     setActiveTab(tab);
     handleClearAll(); // Clear files when switching modes to prevent confusion
@@ -124,6 +149,22 @@ export default function Home(): React.JSX.Element {
       const combined = [...prev, ...newFiles];
       return combined.slice(0, 50); // Max 50 files for images
     });
+    // Keep original files so the user can re-convert without re-uploading
+    setOriginalFiles((prev) => {
+      if (activeTab === 'media') return newFiles.slice(0, 1);
+      return [...prev, ...newFiles].slice(0, 50);
+    });
+    // Create local previews immediately for instant thumbnail feedback
+    setLocalPreviews((prev) => {
+      const next = { ...prev };
+      newFiles.forEach((file, i) => {
+        if (file.type.startsWith('image/')) {
+          const existingCount = Object.keys(prev).length;
+          next[String(existingCount + i)] = URL.createObjectURL(file);
+        }
+      });
+      return next;
+    });
     setResults(null);
     setSummary(null);
     setError(null);
@@ -136,11 +177,16 @@ export default function Home(): React.JSX.Element {
 
   const handleClearAll = useCallback(() => {
     setFiles([]);
+    setOriginalFiles([]);
     setResults(null);
     setSummary(null);
     setError(null);
     setTranscriptionResult(null);
     setProcessed(0);
+    setLocalPreviews((prev) => {
+      Object.values(prev).forEach((url) => URL.revokeObjectURL(url));
+      return {};
+    });
   }, []);
 
   /** Checks auth + subscription. Returns true if OK to proceed. */
@@ -510,6 +556,8 @@ export default function Home(): React.JSX.Element {
                 results={results}
                 summary={summary!}
                 serverUrl={apiClient.getServerUrl()}
+                localPreviews={localPreviews}
+                onReconvert={originalFiles.length > 0 ? handleReconvert : undefined}
               />
               <div className="action-bar">
                 <button className="btn btn-primary btn-large" onClick={handleClearAll} style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>

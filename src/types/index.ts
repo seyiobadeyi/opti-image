@@ -57,6 +57,8 @@ export interface ImageSettings {
   exposure: number;         // 0.25–4.0, default 1.0
   saturation: number;       // 0–3.0, default 1.0
   filter: FilterPreset;     // preset override
+  flipHorizontal: boolean;
+  flipVertical: boolean;
 }
 
 /** Media processing settings controlled by the MediaPanel. */
@@ -194,6 +196,8 @@ export interface ConvertImageOptions {
   maintainAspectRatio?: boolean;
   rotate?: ImageRotation;
   autoEnhance?: boolean;
+  flipHorizontal?: boolean;
+  flipVertical?: boolean;
 }
 
 /** Options passed to apiClient.processMedia(). */
@@ -330,6 +334,8 @@ export interface ResultsPanelProps {
   results: ProcessedImage[];
   summary: ProcessingSummary;
   serverUrl: string;
+  localPreviews?: Record<string, string>;
+  onReconvert?: () => void;
 }
 
 export interface LandingHeroProps {
