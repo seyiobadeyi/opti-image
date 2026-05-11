@@ -1,9 +1,24 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-    // update user's auth session
-    return await updateSession(request)
+    const { pathname, searchParams } = request.nextUrl;
+
+    // If Supabase redirects to any page other than /auth/callback with an OAuth
+    // code (happens when the Supabase dashboard Site URL is set to "/" instead
+    // of "/auth/callback"), forward it so the code gets properly exchanged.
+    const code = searchParams.get('code');
+    if (code && !pathname.startsWith('/auth/callback')) {
+        const callbackUrl = new URL('/auth/callback', request.url);
+        callbackUrl.searchParams.set('code', code);
+        // Preserve where the user originally landed as the post-auth destination,
+        // but fall back to dashboard for root-level redirects.
+        const next = pathname === '/' ? '/dashboard' : pathname;
+        callbackUrl.searchParams.set('next', next);
+        return NextResponse.redirect(callbackUrl);
+    }
+
+    return await updateSession(request);
 }
 
 export const config = {

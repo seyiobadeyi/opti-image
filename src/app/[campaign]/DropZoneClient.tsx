@@ -25,6 +25,8 @@ const DEFAULT_IMAGE_SETTINGS: ImageSettings = {
     exposure: 1.0,
     saturation: 1.0,
     filter: '',
+    flipHorizontal: false,
+    flipVertical: false,
 };
 
 const DEFAULT_MEDIA_SETTINGS: MediaSettings = {

@@ -1,264 +1,741 @@
-import type { Metadata } from 'next';
+'use client';
+
+/**
+ * /compress — Standalone white-theme compress tool page
+ *
+ * Completely self-contained. Uses inline styles only (no dark CSS variables).
+ * Features:
+ *  - Drag & drop (react-dropzone, no interfering ::before overlay)
+ *  - Instant local preview thumbnails before processing
+ *  - Dropbox import (Dropbox Chooser SDK)
+ *  - Google Drive import (Google Picker API)
+ *  - Quality slider + format selector
+ *  - Per-file results with savings percentage
+ *  - Download all as ZIP (with user-defined filenames)
+ *  - Save to Dropbox
+ *  - Re-compress same batch with different settings
+ */
+
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import {
-    Zap, ArrowRight, CheckCircle, Image as ImageIcon,
-    Shield, Globe, Settings, Clock, Download, Star,
-} from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { useDropzone } from 'react-dropzone';
+import { apiClient } from '@/lib/api';
+import { createClient } from '@/utils/supabase/client';
+import AuthModal from '@/components/AuthModal';
+import type { ProcessedImage, ProcessingSummary } from '@/types';
 
-export const metadata: Metadata = {
-    title: 'Image Compression & Optimisation | Optimage',
-    description: 'Compress, convert, and optimise images online. JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG — one tool for every format. Up to 90% file size reduction without visible quality loss.',
-    keywords: 'image compression, compress images online, WebP converter, PNG to JPEG, AVIF conversion, image optimisation tool, bulk image compressor, reduce image file size',
-    alternates: { canonical: 'https://optimage.dreamintrepid.com/compress' },
-    openGraph: {
-        title: 'Image Compression & Optimisation | Optimage',
-        description: 'Reduce image file sizes by up to 90% without quality loss. Batch process dozens of formats. Strip metadata, convert, resize — all in one place.',
-        type: 'website',
-        url: 'https://optimage.dreamintrepid.com/compress',
-    },
-    twitter: {
-        card: 'summary_large_image',
-        title: 'Image Compression & Optimisation | Optimage',
-        description: 'Reduce image file sizes by up to 90% without quality loss.',
-    },
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function fmtBytes(bytes: number): string {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function stripExt(name: string): string {
+    return name.replace(/\.[^.]+$/, '');
+}
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface FileEntry {
+    file: File;
+    localUrl: string;
+    name: string;
+}
+
+interface ResultEntry extends ProcessedImage {
+    displayName: string;
+    localUrl?: string;
+}
+
+// ─── Cloud SDK loaders ───────────────────────────────────────────────────────
+
+function loadScript(id: string, src: string, attrs?: Record<string, string>): Promise<void> {
+    return new Promise((resolve, reject) => {
+        if (document.getElementById(id)) { resolve(); return; }
+        const s = document.createElement('script');
+        s.id = id;
+        s.src = src;
+        if (attrs) Object.entries(attrs).forEach(([k, v]) => s.setAttribute(k, v));
+        s.onload = () => resolve();
+        s.onerror = () => reject();
+        document.head.appendChild(s);
+    });
+}
+
+declare global {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    interface Window { Dropbox: any; gapi: any; google: any; }
+}
+
+// ─── Styles (all light / white) ───────────────────────────────────────────────
+
+const clr = {
+    blue:       '#2563eb',
+    blueDark:   '#1d4ed8',
+    blueLight:  '#eff6ff',
+    green:      '#16a34a',
+    greenLight: '#f0fdf4',
+    greenBorder:'#bbf7d0',
+    red:        '#dc2626',
+    redLight:   '#fef2f2',
+    gray50:     '#f9fafb',
+    gray100:    '#f3f4f6',
+    gray200:    '#e5e7eb',
+    gray400:    '#9ca3af',
+    gray600:    '#4b5563',
+    gray700:    '#374151',
+    gray900:    '#111827',
 };
 
-const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Optimage Image Compressor',
-    applicationCategory: 'MultimediaApplication',
-    operatingSystem: 'Web',
-    description: 'Compress, resize, convert and enhance images — JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, BMP — with up to 90% size reduction.',
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    provider: { '@type': 'Organization', name: 'Dream Intrepid Ltd', url: 'https://optimage.dreamintrepid.com' },
-    featureList: [
-        'Batch image compression (up to 50 files)',
-        'JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, BMP',
-        'Custom quality level (1-100)',
-        'Resize and rotate',
-        'Metadata stripping',
-        'Format conversion',
-        'Auto enhance',
-        'Aspect ratio lock',
-    ],
+const S: Record<string, React.CSSProperties> = {
+    page:         { minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: clr.gray900 },
+    header:       { borderBottom: `1px solid ${clr.gray200}`, background: '#fff', position: 'sticky', top: 0, zIndex: 100 },
+    headerInner:  { maxWidth: '1100px', margin: '0 auto', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    logo:         { display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: clr.gray900, fontWeight: 700, fontSize: '1rem' },
+    hero:         { textAlign: 'center', padding: '44px 24px 28px' },
+    h1:           { fontSize: 'clamp(1.8rem, 5vw, 2.6rem)', fontWeight: 800, color: clr.gray900, marginBottom: '10px', letterSpacing: '-0.02em', lineHeight: 1.2 },
+    subtext:      { color: clr.gray400, fontSize: '0.97rem', maxWidth: '520px', margin: '0 auto', lineHeight: 1.65 },
+    tool:         { maxWidth: '760px', margin: '0 auto', padding: '0 20px 80px' },
+    dropZone:     { border: `2px dashed ${clr.gray200}`, borderRadius: '16px', background: clr.gray50, padding: '52px 24px', textAlign: 'center', cursor: 'pointer', outline: 'none', transition: 'border-color 0.2s, background 0.2s' },
+    dropZoneActive:{ borderColor: clr.blue, background: clr.blueLight },
+    selectBtn:    { background: clr.blue, color: '#fff', border: 'none', borderRadius: '10px', padding: '13px 30px', fontSize: '0.97rem', fontWeight: 700, cursor: 'pointer', display: 'inline-block', transition: 'background 0.15s', marginBottom: '12px' },
+    dropHint:     { color: clr.gray400, fontSize: '0.88rem', marginTop: '10px' },
+    cloudRow:     { display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '18px', flexWrap: 'wrap' },
+    cloudBtn:     { display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 16px', border: `1.5px solid ${clr.gray200}`, borderRadius: '8px', background: '#fff', fontSize: '0.83rem', fontWeight: 600, color: clr.gray700, cursor: 'pointer', transition: 'border-color 0.15s' },
+    fileList:     { marginTop: '20px', borderRadius: '12px', border: `1px solid ${clr.gray200}`, overflow: 'hidden' },
+    fileRow:      { display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderBottom: `1px solid ${clr.gray100}` },
+    fileThumb:    { width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover', background: clr.gray100, flexShrink: 0 },
+    fileName:     { flex: 1, fontSize: '0.86rem', color: clr.gray700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+    fileSize:     { fontSize: '0.78rem', color: clr.gray400, whiteSpace: 'nowrap' },
+    rmBtn:        { background: 'none', border: 'none', color: clr.gray200, cursor: 'pointer', padding: '4px', fontSize: '1rem', lineHeight: 1, display: 'flex', alignItems: 'center', transition: 'color 0.15s' },
+    addMoreBtn:   { display: 'block', width: '100%', textAlign: 'center', marginTop: '10px', padding: '11px', border: `1.5px dashed ${clr.gray200}`, borderRadius: '10px', color: clr.gray400, fontSize: '0.88rem', cursor: 'pointer', background: 'none', transition: 'border-color 0.15s, color 0.15s' },
+    settingsBox:  { marginTop: '20px', padding: '18px 20px', background: clr.gray50, borderRadius: '12px', border: `1px solid ${clr.gray200}` },
+    settingRow:   { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' },
+    settingLabel: { fontSize: '0.88rem', fontWeight: 600, color: clr.gray700 },
+    settingNote:  { fontSize: '0.75rem', color: clr.gray400, marginTop: '2px' },
+    slider:       { width: '180px', accentColor: clr.blue, cursor: 'pointer' },
+    sliderVal:    { fontSize: '0.88rem', fontWeight: 700, color: clr.blue, minWidth: '38px', textAlign: 'right' },
+    divider:      { borderTop: `1px solid ${clr.gray200}`, margin: '14px 0' },
+    compressBtn:  { display: 'block', width: '100%', padding: '15px', marginTop: '24px', background: clr.blue, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'background 0.15s', textAlign: 'center' },
+    progressBar:  { height: '5px', borderRadius: '999px', background: clr.gray100, overflow: 'hidden', marginTop: '20px' },
+    progressFill: { height: '100%', background: clr.blue, borderRadius: '999px', transition: 'width 0.3s ease' },
+    progressLabel:{ textAlign: 'center', fontSize: '0.85rem', color: clr.gray400, marginTop: '8px' },
+    errorBox:     { marginTop: '14px', padding: '12px 16px', background: clr.redLight, border: `1px solid #fecaca`, borderRadius: '10px', color: clr.red, fontSize: '0.88rem' },
+    resultBanner: { marginTop: '28px', background: clr.greenLight, border: `1.5px solid ${clr.greenBorder}`, borderRadius: '16px', padding: '24px 20px', textAlign: 'center' },
+    resultPct:    { fontSize: '3rem', fontWeight: 900, color: clr.green, letterSpacing: '-0.04em', lineHeight: 1 },
+    resultLbl:    { fontSize: '0.95rem', color: '#166534', fontWeight: 600, marginTop: '4px' },
+    resultSizes:  { fontSize: '0.86rem', color: clr.gray600, marginTop: '4px' },
+    dlAllBtn:     { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '14px', marginTop: '18px', background: clr.blue, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '0.97rem', fontWeight: 700, cursor: 'pointer', transition: 'background 0.15s' },
+    cloudShareRow:{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' },
+    cloudShareBtn:{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '10px', border: `1.5px solid ${clr.gray200}`, borderRadius: '10px', background: '#fff', fontSize: '0.83rem', fontWeight: 600, color: clr.gray700, cursor: 'pointer', transition: 'border-color 0.15s', minWidth: '120px' },
+    resultList:   { marginTop: '16px', border: `1px solid ${clr.gray200}`, borderRadius: '12px', overflow: 'hidden' },
+    resultRow:    { display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderBottom: `1px solid ${clr.gray100}` },
+    savingsPill:  { fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#dcfce7', color: clr.green, whiteSpace: 'nowrap' },
+    dlBtn:        { background: 'none', border: `1.5px solid ${clr.gray200}`, borderRadius: '8px', color: clr.gray700, fontSize: '0.8rem', fontWeight: 600, padding: '4px 11px', cursor: 'pointer', transition: 'border-color 0.15s', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' },
+    resetBtn:     { display: 'block', width: '100%', textAlign: 'center', marginTop: '20px', color: clr.gray400, fontSize: '0.88rem', cursor: 'pointer', background: 'none', border: 'none', padding: '8px', textDecoration: 'underline', textUnderlineOffset: '2px' },
+    footer:       { borderTop: `1px solid ${clr.gray200}`, padding: '20px 24px', textAlign: 'center', color: clr.gray400, fontSize: '0.8rem' },
+    footerLink:   { color: clr.gray400, textDecoration: 'none', marginInline: '8px' },
 };
+
+// ─── Icons ───────────────────────────────────────────────────────────────────
+
+const DriveIcon = (): React.JSX.Element => (
+    <svg width="15" height="15" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+        <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+        <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
+        <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
+        <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+        <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+        <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+    </svg>
+);
+
+const DropboxIcon = (): React.JSX.Element => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="#0061ff">
+        <path d="M6 2L0 6l6 4 6-4-6-4zM18 2l-6 4 6 4 6-4-6-4zM0 14l6 4 6-4-6-4-6 4zM18 10l-6 4 6 4 6-4-6-4zM6 19.5L12 23l6-3.5-6-4-6 4z"/>
+    </svg>
+);
+
+// ─── Main ────────────────────────────────────────────────────────────────────
 
 export default function CompressPage(): React.JSX.Element {
+    const [entries, setEntries] = useState<FileEntry[]>([]);
+    const [quality, setQuality] = useState(80);
+    const [format, setFormat] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [processed, setProcessed] = useState(0);
+    const [results, setResults] = useState<ResultEntry[] | null>(null);
+    const [summary, setSummary] = useState<ProcessingSummary | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [editingIdx, setEditingIdx] = useState<number | null>(null);
+    const [editVal, setEditVal] = useState('');
+    const [authed, setAuthed] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+    const supabase = useMemo(() => createClient(), []);
+    const addMoreInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => setAuthed(!!session));
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setAuthed(!!s));
+        // Listen for auth modal events dispatched by compression gating
+        const handleOpenModal = () => setIsAuthModalOpen(true);
+        window.addEventListener('open-auth-modal', handleOpenModal);
+        return () => {
+            subscription.unsubscribe();
+            window.removeEventListener('open-auth-modal', handleOpenModal);
+        };
+    }, [supabase]);
+
+    // ── File management
+    const addFiles = useCallback((newFiles: File[]) => {
+        const imgs = newFiles.filter(f => f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name));
+        const added = imgs.map(f => ({
+            file: f,
+            localUrl: URL.createObjectURL(f),
+            name: stripExt(f.name),
+        }));
+        setEntries(prev => [...prev, ...added].slice(0, 50));
+        setResults(null);
+        setError(null);
+        setProcessed(0);
+    }, []);
+
+    const removeEntry = useCallback((idx: number) => {
+        setEntries(prev => {
+            const next = [...prev];
+            URL.revokeObjectURL(next[idx]!.localUrl);
+            next.splice(idx, 1);
+            return next;
+        });
+    }, []);
+
+    const reset = useCallback(() => {
+        entries.forEach(e => URL.revokeObjectURL(e.localUrl));
+        setEntries([]);
+        setResults(null);
+        setSummary(null);
+        setError(null);
+        setProcessed(0);
+    }, [entries]);
+
+    // ── Dropzone (clean — no ::before overlay, no interfering styles)
+    const { getRootProps, getInputProps, isDragActive, open: openFilePicker } = useDropzone({
+        onDrop: addFiles,
+        accept: {
+            'image/jpeg': ['.jpg', '.jpeg'],
+            'image/png': ['.png'],
+            'image/webp': ['.webp'],
+            'image/avif': ['.avif'],
+            'image/tiff': ['.tif', '.tiff'],
+            'image/gif': ['.gif'],
+            'image/bmp': ['.bmp'],
+            'image/heic': ['.heic'],
+            'image/heif': ['.heif'],
+        },
+        maxFiles: 50,
+        maxSize: 100 * 1024 * 1024,
+        disabled: processing,
+    });
+
+    // ── Dropbox import
+    const openDropbox = useCallback(async () => {
+        try {
+            await loadScript(
+                'dropbox-sdk',
+                'https://www.dropbox.com/static/api/2/dropins.js',
+                { 'data-app-key': process.env.NEXT_PUBLIC_DROPBOX_APP_KEY ?? '' }
+            );
+            if (!window.Dropbox) return;
+            window.Dropbox.choose({
+                success: async (files: Array<{ name: string; link: string }>) => {
+                    const fetched: File[] = [];
+                    for (const f of files) {
+                        try {
+                            const res = await fetch(f.link.replace('?dl=0', '?dl=1'));
+                            const blob = await res.blob();
+                            fetched.push(new File([blob], f.name, { type: blob.type }));
+                        } catch { /* skip */ }
+                    }
+                    if (fetched.length) addFiles(fetched);
+                },
+                cancel: () => {},
+                linkType: 'direct',
+                multiselect: true,
+                extensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.tiff', '.bmp'],
+            });
+        } catch { alert('Dropbox is unavailable right now. Please upload files directly.'); }
+    }, [addFiles]);
+
+    // ── Google Drive import
+    const openGoogleDrive = useCallback(async () => {
+        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+        const apiKey   = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+        if (!clientId || !apiKey) {
+            alert('Google Drive integration is not configured yet.');
+            return;
+        }
+        try {
+            await loadScript('gapi-js', 'https://apis.google.com/js/api.js');
+            await loadScript('gsi-js', 'https://accounts.google.com/gsi/client');
+            window.gapi.load('picker', {
+                callback: () => {
+                    const tokenClient = window.google.accounts.oauth2.initTokenClient({
+                        client_id: clientId,
+                        scope: 'https://www.googleapis.com/auth/drive.readonly',
+                        callback: async (token: { access_token: string }) => {
+                            const picker = new window.google.picker.PickerBuilder()
+                                .setOAuthToken(token.access_token)
+                                .setDeveloperKey(apiKey)
+                                .addView(window.google.picker.ViewId.DOCS_IMAGES)
+                                .enableFeature(window.google.picker.Feature.MULTISELECT_ENABLED)
+                                .setCallback(async (data: { action: string; docs: Array<{ id: string; name: string; mimeType: string }> }) => {
+                                    if (data.action !== 'picked') return;
+                                    const fetched: File[] = [];
+                                    for (const doc of data.docs) {
+                                        try {
+                                            const res = await fetch(
+                                                `https://www.googleapis.com/drive/v3/files/${doc.id}?alt=media`,
+                                                { headers: { Authorization: `Bearer ${token.access_token}` } }
+                                            );
+                                            const blob = await res.blob();
+                                            fetched.push(new File([blob], doc.name, { type: doc.mimeType }));
+                                        } catch { /* skip */ }
+                                    }
+                                    if (fetched.length) addFiles(fetched);
+                                }).build();
+                            picker.setVisible(true);
+                        },
+                    });
+                    tokenClient.requestAccessToken({ prompt: '' });
+                },
+            });
+        } catch { alert('Google Drive is unavailable right now. Please upload files directly.'); }
+    }, [addFiles]);
+
+    // ── Compression
+    const handleCompress = useCallback(async () => {
+        if (!entries.length || processing) return;
+
+        if (!authed) {
+            window.dispatchEvent(new Event('open-auth-modal'));
+            return;
+        }
+
+        setProcessing(true);
+        setError(null);
+        setResults(null);
+        setSummary(null);
+        setProcessed(0);
+
+        const allResults: ResultEntry[] = [];
+        let totalOrig = 0;
+        let totalProc = 0;
+
+        try {
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i]!;
+                // Attach customName to the File object so the server uses it
+                const namedFile = new File([entry.file], entry.file.name, { type: entry.file.type });
+                const resp = await apiClient.convertImages(
+                    [Object.assign(namedFile, { customName: entry.name })],
+                    {
+                        quality,
+                        format: format as '' | 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'gif',
+                        stripMetadata: true,
+                    }
+                );
+                if (resp.success && resp.results[0]) {
+                    const r = resp.results[0];
+                    const ext = format || r.format;
+                    allResults.push({ ...r, displayName: `${entry.name}.${ext}`, localUrl: entry.localUrl });
+                    totalOrig += r.originalSize;
+                    totalProc += r.processedSize;
+                }
+                setProcessed(i + 1);
+            }
+
+            const savings = totalOrig - totalProc;
+            setResults(allResults);
+            setSummary({
+                filesProcessed: allResults.length,
+                totalOriginalSize: totalOrig,
+                totalProcessedSize: totalProc,
+                totalSavings: savings,
+                totalSavingsPercent: totalOrig > 0 ? ((savings / totalOrig) * 100).toFixed(1) : '0.0',
+            });
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Something went wrong.';
+            if (msg.toLowerCase().includes('subscri')) {
+                setError('You need a subscription to compress images. Sign up free to continue — no credit card needed.');
+            } else {
+                setError(msg);
+            }
+        } finally {
+            setProcessing(false);
+        }
+    }, [entries, processing, authed, quality, format]);
+
+    // ── Downloads
+    const downloadOne = useCallback(async (result: ResultEntry) => {
+        try {
+            const res = await fetch(`${apiClient.getServerUrl()}/api/images/${result.processedName}/download`);
+            if (!res.ok) throw new Error('Download failed');
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = result.displayName; a.click();
+            URL.revokeObjectURL(url);
+        } catch { alert('Download failed. Please try again.'); }
+    }, []);
+
+    const downloadAll = useCallback(async () => {
+        if (!results) return;
+        await apiClient.downloadBulkImages(
+            results.map(r => r.processedName),
+            results.map(r => r.displayName),
+        );
+    }, [results]);
+
+    const saveToDropbox = useCallback(() => {
+        if (!results?.length) return;
+        if (results.length === 1 && results[0]) {
+            const url = `${apiClient.getServerUrl()}/api/images/${results[0].processedName}/download`;
+            window.open(
+                `https://www.dropbox.com/save?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(results[0].displayName)}`,
+                '_blank'
+            );
+        } else {
+            void downloadAll();
+        }
+    }, [results, downloadAll]);
+
+    // ── Derived
+    const compressionLabel =
+        quality >= 85 ? 'Gentle — closest to original' :
+        quality >= 70 ? 'Balanced — recommended' :
+        quality >= 50 ? 'Strong — great for web' :
+                        'Maximum — smallest file';
+
+    const hasSavings = summary && parseFloat(summary.totalSavingsPercent ?? '0') > 0;
+    // Show the big dropzone only when no files have been added yet (and no results shown)
+    const showDrop   = entries.length === 0 && !results;
+
+    // ─── Render ───────────────────────────────────────────────────────────────
     return (
-        <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-            <Header />
-            <main style={{ background: 'var(--bg-primary)', overflowX: 'hidden' }}>
+        <div style={S.page}>
 
-                {/* ── Hero ── */}
-                <section style={{
-                    minHeight: '82vh', display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', justifyContent: 'center',
-                    padding: 'clamp(80px, 12vw, 140px) 24px clamp(60px, 8vw, 100px)',
-                    textAlign: 'center', position: 'relative', overflow: 'hidden',
-                }}>
-                    <div style={{
-                        position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
-                        width: '600px', height: '350px',
-                        background: 'radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 70%)',
-                        pointerEvents: 'none',
-                    }} />
+            {/* ── Header ──────────────────────────────────────────────────── */}
+            <header style={S.header}>
+                <div style={S.headerInner}>
+                    <Link href="/" style={S.logo}>
+                        <img src="/logo.png" alt="Optimage" style={{ height: '26px', width: 'auto' }} />
+                        <span>Optimage</span>
+                    </Link>
+                    <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                        <Link href="/compress" style={{ color: clr.blue, textDecoration: 'none', fontWeight: 600, fontSize: '0.88rem', padding: '6px 12px', borderRadius: '8px', background: clr.blueLight }}>Compress</Link>
+                        <Link href="/dashboard?tab=galleries" style={{ color: clr.gray700, textDecoration: 'none', fontWeight: 500, fontSize: '0.88rem', padding: '6px 12px', borderRadius: '8px' }}>Galleries</Link>
+                        <Link href="/pricing" style={{ color: clr.gray700, textDecoration: 'none', fontWeight: 500, fontSize: '0.88rem', padding: '6px 12px', borderRadius: '8px' }}>Pricing</Link>
+                        {authed ? (
+                            <Link href="/dashboard" style={{ background: clr.blue, color: '#fff', textDecoration: 'none', borderRadius: '8px', padding: '7px 16px', fontSize: '0.88rem', fontWeight: 600, marginLeft: '6px' }}>
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <button type="button" onClick={() => setIsAuthModalOpen(true)} style={{ background: clr.blue, color: '#fff', border: 'none', borderRadius: '8px', padding: '7px 16px', fontSize: '0.88rem', fontWeight: 600, marginLeft: '6px', cursor: 'pointer' }}>
+                                Sign up free
+                            </button>
+                        )}
+                    </nav>
+                </div>
+            </header>
 
-                    <div style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '8px',
-                        padding: '6px 16px', borderRadius: '100px',
-                        background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)',
-                        color: '#93c5fd', fontSize: '0.8rem', fontWeight: 600,
-                        marginBottom: '32px', letterSpacing: '0.05em',
-                    }}>
-                        <Zap size={13} />
-                        IMAGE OPTIMISATION
-                    </div>
+            {/* ── Hero ────────────────────────────────────────────────────── */}
+            <div style={S.hero}>
+                <h1 style={S.h1}>Compress your images</h1>
+                <p style={S.subtext}>
+                    Make JPG, PNG, WebP and more up to 90% smaller — with no visible difference.<br />
+                    Free for up to 5 files. No account needed to start.
+                </p>
+            </div>
 
-                    <h1 style={{
-                        fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 900,
-                        lineHeight: 1.06, letterSpacing: '-0.03em',
-                        marginBottom: '28px', maxWidth: '860px', color: 'var(--text-primary)',
-                    }}>
-                        Smaller files.{' '}
-                        <span style={{ background: 'linear-gradient(135deg, #3b82f6, #60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Same quality.
-                        </span>{' '}
-                        Faster everywhere.
-                    </h1>
+            {/* ── Tool ────────────────────────────────────────────────────── */}
+            <div style={S.tool}>
 
-                    <p style={{
-                        fontSize: 'clamp(1.05rem, 2.2vw, 1.3rem)', color: 'var(--text-secondary)',
-                        maxWidth: '620px', lineHeight: 1.7, marginBottom: '48px',
-                    }}>
-                        Compress images up to 90% smaller without visible quality loss. Batch process 50 files at once. Convert between 8 formats. All in your browser — no upload limits, no subscriptions for basic use.
-                    </p>
+                {/* ── Drop zone (always visible until results appear) ── */}
+                {showDrop && (
+                    <>
+                        <div
+                            {...getRootProps()}
+                            style={{
+                                ...S.dropZone,
+                                ...(isDragActive ? S.dropZoneActive : {}),
+                            }}
+                        >
+                            <input {...getInputProps()} />
 
-                    <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        <Link href="/#dropzone-area" style={{
-                            padding: '16px 36px', borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #3b82f6, #60a5fa)',
-                            color: '#fff', fontWeight: 700, fontSize: '1rem',
-                            textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px',
-                            boxShadow: '0 8px 32px rgba(59,130,246,0.3)',
-                        }}>
-                            Start Compressing Free <ArrowRight size={17} />
-                        </Link>
-                    </div>
+                            {isDragActive ? (
+                                <p style={{ color: clr.blue, fontWeight: 700, fontSize: '1.05rem' }}>
+                                    Release to add your images
+                                </p>
+                            ) : (
+                                <>
+                                    <div style={{ fontSize: '2.6rem', marginBottom: '12px', userSelect: 'none' }}>🖼</div>
+                                    <button
+                                        type="button"
+                                        style={S.selectBtn}
+                                        onClick={e => { e.stopPropagation(); openFilePicker(); }}
+                                        onMouseEnter={e => (e.currentTarget.style.background = clr.blueDark)}
+                                        onMouseLeave={e => (e.currentTarget.style.background = clr.blue)}
+                                    >
+                                        Select images
+                                    </button>
+                                    <p style={S.dropHint}>or drag and drop your images here</p>
+                                    <p style={{ ...S.dropHint, marginTop: '4px', fontSize: '0.78rem' }}>
+                                        JPG · PNG · WebP · AVIF · GIF · TIFF · BMP · HEIC &nbsp;|&nbsp; Max 50 files · 100 MB each
+                                    </p>
+                                </>
+                            )}
+                        </div>
 
-                    <div style={{
-                        marginTop: '52px', display: 'flex', gap: '32px',
-                        flexWrap: 'wrap', justifyContent: 'center',
-                        color: 'var(--text-muted)', fontSize: '0.82rem',
-                    }}>
-                        {['No account required for free use', 'Processed server-side, deleted within 30 min', 'Up to 50 files at once'].map(item => (
-                            <span key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <CheckCircle size={13} style={{ color: '#22c55e' }} /> {item}
-                            </span>
-                        ))}
-                    </div>
-                </section>
+                        {/* Cloud import */}
+                        <div style={S.cloudRow}>
+                            <button type="button" style={S.cloudBtn} onClick={openGoogleDrive}
+                                onMouseEnter={e => (e.currentTarget.style.borderColor = '#4285F4')}
+                                onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
+                                <DriveIcon /> Import from Google Drive
+                            </button>
+                            <button type="button" style={S.cloudBtn} onClick={openDropbox}
+                                onMouseEnter={e => (e.currentTarget.style.borderColor = '#0061ff')}
+                                onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
+                                <DropboxIcon /> Import from Dropbox
+                            </button>
+                        </div>
+                    </>
+                )}
 
-                {/* ── Why it matters ── */}
-                <section style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(40px, 6vw, 80px) 24px' }}>
-                    <div style={{
-                        background: 'var(--bg-card)', border: '1px solid var(--border)',
-                        borderRadius: '24px', padding: 'clamp(32px, 5vw, 60px)',
-                    }}>
-                        <p style={{ fontSize: '0.8rem', fontWeight: 700, color: '#93c5fd', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '20px' }}>Why file size matters</p>
-                        <h2 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.4rem)', fontWeight: 800, lineHeight: 1.2, marginBottom: '40px', letterSpacing: '-0.02em' }}>
-                            Your images are the biggest drag on your page speed.
-                        </h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
-                            {[
-                                { stat: '4.9s', label: 'Average mobile load time with unoptimised images', note: 'Google Core Web Vitals threshold: 2.5s' },
-                                { stat: '90%', label: 'File size reduction achievable converting PNG to WebP at quality 80', note: 'Without perceptible visual difference' },
-                                { stat: '53%', label: 'Of mobile users abandon pages that take over 3 seconds', note: 'Source: Google/SOASTA Research' },
-                            ].map(({ stat, label, note }) => (
-                                <div key={stat} style={{ background: 'var(--bg-secondary)', borderRadius: '16px', padding: '24px', border: '1px solid var(--border)' }}>
-                                    <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#3b82f6', lineHeight: 1, marginBottom: '10px' }}>{stat}</p>
-                                    <p style={{ fontWeight: 600, marginBottom: '6px', fontSize: '0.95rem' }}>{label}</p>
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{note}</p>
+                {/* ── File list + settings ── */}
+                {entries.length > 0 && !results && (
+                    <>
+                        {/* File rows */}
+                        <div style={S.fileList}>
+                            {entries.map((entry, i) => (
+                                <div key={i} style={{ ...S.fileRow, background: i % 2 === 0 ? '#fff' : clr.gray50 }}>
+                                    <img src={entry.localUrl} alt={entry.name} style={S.fileThumb as React.CSSProperties} />
+
+                                    {editingIdx === i ? (
+                                        <input
+                                            autoFocus
+                                            value={editVal}
+                                            onChange={e => setEditVal(e.target.value)}
+                                            onBlur={() => {
+                                                setEntries(prev => prev.map((ent, j) =>
+                                                    j === i ? { ...ent, name: editVal.trim() || ent.name } : ent
+                                                ));
+                                                setEditingIdx(null);
+                                            }}
+                                            onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
+                                            style={{ flex: 1, border: `1.5px solid ${clr.blue}`, borderRadius: '6px', padding: '3px 8px', fontSize: '0.86rem', outline: 'none' }}
+                                        />
+                                    ) : (
+                                        <span
+                                            style={{ ...S.fileName, cursor: 'text' }}
+                                            title="Click to rename"
+                                            onClick={() => { setEditingIdx(i); setEditVal(entry.name); }}
+                                        >
+                                            {entry.name}
+                                        </span>
+                                    )}
+
+                                    <span style={S.fileSize}>{fmtBytes(entry.file.size)}</span>
+                                    <button type="button" style={S.rmBtn}
+                                        onClick={() => removeEntry(i)}
+                                        onMouseEnter={e => (e.currentTarget.style.color = clr.red)}
+                                        onMouseLeave={e => (e.currentTarget.style.color = clr.gray200)}>
+                                        ✕
+                                    </button>
                                 </div>
                             ))}
                         </div>
-                    </div>
-                </section>
 
-                {/* ── Formats ── */}
-                <section style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(20px, 4vw, 60px) 24px' }}>
-                    <p style={{ fontSize: '0.8rem', fontWeight: 700, color: '#93c5fd', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '14px', textAlign: 'center' }}>Supported formats</p>
-                    <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 800, textAlign: 'center', letterSpacing: '-0.02em', marginBottom: '40px' }}>
-                        Every format you actually use
-                    </h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
-                        {[
-                            { fmt: 'JPEG', note: 'Best for photos' },
-                            { fmt: 'PNG', note: 'Lossless, transparency' },
-                            { fmt: 'WebP', note: 'Modern standard' },
-                            { fmt: 'AVIF', note: 'Smallest modern format' },
-                            { fmt: 'TIFF', note: 'High fidelity print' },
-                            { fmt: 'GIF', note: 'Animated images' },
-                            { fmt: 'SVG', note: 'Vector graphics' },
-                            { fmt: 'BMP', note: 'Uncompressed bitmap' },
-                        ].map(({ fmt, note }) => (
-                            <div key={fmt} style={{
-                                background: 'var(--bg-card)', border: '1px solid var(--border)',
-                                borderRadius: '12px', padding: '16px', textAlign: 'center',
-                            }}>
-                                <p style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '4px', color: 'var(--text-primary)' }}>{fmt}</p>
-                                <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{note}</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
+                        {/* Hidden file input for "Add more" */}
+                        <input
+                            ref={addMoreInputRef}
+                            type="file"
+                            multiple
+                            accept="image/*,.heic,.heif"
+                            style={{ display: 'none' }}
+                            onChange={e => { if (e.target.files) { addFiles(Array.from(e.target.files)); e.target.value = ''; } }}
+                        />
+                        <button
+                            type="button"
+                            style={S.addMoreBtn}
+                            onClick={() => addMoreInputRef.current?.click()}
+                            onMouseEnter={e => { (e.currentTarget.style.borderColor = clr.blue); (e.currentTarget.style.color = clr.blue); }}
+                            onMouseLeave={e => { (e.currentTarget.style.borderColor = clr.gray200); (e.currentTarget.style.color = clr.gray400); }}
+                        >
+                            + Add more images
+                        </button>
 
-                {/* ── Features ── */}
-                <section style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(40px, 6vw, 80px) 24px' }}>
-                    <p style={{ fontSize: '0.8rem', fontWeight: 700, color: '#93c5fd', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '14px', textAlign: 'center' }}>Features</p>
-                    <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 800, textAlign: 'center', letterSpacing: '-0.02em', marginBottom: '52px' }}>
-                        More than just compression
-                    </h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                        {[
-                            { icon: <Settings size={22} />, color: '#3b82f6', title: 'Precise quality control', desc: 'Set quality from 1 to 100. See exactly what you get before downloading. Pick the crossover point between size and fidelity that your use case demands.' },
-                            { icon: <ImageIcon size={22} />, color: '#8b5cf6', title: 'Format conversion', desc: 'Convert from any to any supported format. Drop in a PNG, export a WebP. Drop in a TIFF, export a JPEG. No desktop software needed.' },
-                            { icon: <Globe size={22} />, color: '#22c55e', title: 'Resize and rotate', desc: 'Set pixel dimensions, lock aspect ratio, rotate in 90° increments. Standard operations that normally require Photoshop, done in seconds.' },
-                            { icon: <Shield size={22} />, color: '#f59e0b', title: 'Metadata stripping', desc: 'EXIF data contains GPS location, camera model, date and time. Strip all of it on export with one toggle — important for privacy.' },
-                            { icon: <Star size={22} />, color: '#f472b6', title: 'Auto enhance', desc: 'Optimage can intelligently adjust exposure, contrast, and saturation during processing — a one-click improvement before you download.' },
-                            { icon: <Download size={22} />, color: '#38bdf8', title: 'Batch download', desc: 'Process up to 50 images at once. Download individual files or grab the entire batch as a ZIP. Average processing time: under 3 seconds per image.' },
-                        ].map(feat => (
-                            <div key={feat.title} style={{
-                                background: 'var(--bg-card)', border: '1px solid var(--border)',
-                                borderRadius: '20px', padding: '28px',
-                            }}>
-                                <div style={{
-                                    width: '48px', height: '48px', borderRadius: '12px',
-                                    background: `${feat.color}18`, display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center',
-                                    color: feat.color, marginBottom: '18px',
-                                }}>
-                                    {feat.icon}
+                        {/* Settings */}
+                        <div style={S.settingsBox}>
+                            {/* Quality */}
+                            <div style={S.settingRow}>
+                                <div>
+                                    <div style={S.settingLabel}>Compression level</div>
+                                    <div style={S.settingNote}>{compressionLabel}</div>
                                 </div>
-                                <h3 style={{ fontWeight: 700, marginBottom: '10px', fontSize: '1.05rem' }}>{feat.title}</h3>
-                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.9rem' }}>{feat.desc}</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <input
+                                        type="range"
+                                        min={30}
+                                        max={95}
+                                        step={5}
+                                        value={quality}
+                                        onChange={e => setQuality(Number(e.target.value))}
+                                        style={S.slider}
+                                    />
+                                    <span style={S.sliderVal}>{quality}%</span>
+                                </div>
                             </div>
-                        ))}
-                    </div>
-                </section>
 
-                {/* ── FAQ ── */}
-                <section style={{ maxWidth: '720px', margin: '0 auto', padding: 'clamp(40px, 6vw, 80px) 24px' }}>
-                    <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 800, textAlign: 'center', letterSpacing: '-0.02em', marginBottom: '40px' }}>
-                        Common questions
-                    </h2>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                        {[
-                            { q: 'What happens to my files on the server?', a: 'Images are uploaded to our processing server, compressed, and the output is stored temporarily (under 30 minutes) for you to download. We do not retain your images, use them for any other purpose, or share them with third parties.' },
-                            { q: 'Is there a file size limit?', a: 'Free use supports files up to 20MB per image. Subscribers get higher limits and batch sizes. Most camera photos (even RAW-derived JPEGs) are well within the free limit.' },
-                            { q: 'What quality setting should I use?', a: 'For web use: 75–82 is the sweet spot for JPEG. For WebP, 75–85. For print-quality JPEG: 90+. The visual difference between 82 and 100 is nearly imperceptible, but the file size difference is significant.' },
-                            { q: 'Will compression affect my resolution?', a: 'No — unless you explicitly set a width or height in the settings. Compression only affects file size and quality encoding. Pixel dimensions are unchanged by default.' },
-                            { q: 'Can I compress images without an account?', a: 'Yes. Basic compression is available without creating an account. Batch processing beyond 5 files, processing history, and gallery features require a free account and optionally a subscription.' },
-                        ].map(({ q, a }) => (
-                            <div key={q} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '22px 24px' }}>
-                                <p style={{ fontWeight: 700, marginBottom: '10px', fontSize: '0.98rem' }}>{q}</p>
-                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.9rem', margin: 0 }}>{a}</p>
+                            {/* Format */}
+                            <div style={S.divider} />
+                            <div style={S.settingRow}>
+                                <div>
+                                    <div style={S.settingLabel}>Save as</div>
+                                    <div style={S.settingNote}>WebP is the best for websites and apps</div>
+                                </div>
+                                <select
+                                    value={format}
+                                    onChange={e => setFormat(e.target.value)}
+                                    style={{ border: `1.5px solid ${clr.gray200}`, borderRadius: '8px', padding: '7px 10px', fontSize: '0.88rem', background: '#fff', color: clr.gray700, cursor: 'pointer', outline: 'none' }}
+                                >
+                                    <option value="">Same as original</option>
+                                    <option value="webp">WebP — smallest size ✨</option>
+                                    <option value="jpeg">JPEG</option>
+                                    <option value="png">PNG</option>
+                                    <option value="avif">AVIF</option>
+                                </select>
                             </div>
-                        ))}
-                    </div>
-                </section>
+                        </div>
 
-                {/* ── CTA ── */}
-                <section style={{ maxWidth: '1100px', margin: '0 auto 80px', padding: '0 24px' }}>
-                    <div style={{
-                        background: 'linear-gradient(135deg, #0a1628 0%, #1a2744 100%)',
-                        borderRadius: '28px', padding: 'clamp(40px, 7vw, 80px) 32px',
-                        textAlign: 'center', border: '1px solid rgba(59,130,246,0.3)',
-                    }}>
-                        <Zap size={40} style={{ color: '#60a5fa', marginBottom: '20px' }} />
-                        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, color: '#fff', marginBottom: '16px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-                            Your images are too big.<br />Fix that now — free.
-                        </h2>
-                        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '1rem', marginBottom: '40px', maxWidth: '480px', margin: '0 auto 40px', lineHeight: 1.7 }}>
-                            No signup required for your first images. Import, compress, download in under 60 seconds.
-                        </p>
-                        <Link href="/#dropzone-area" style={{
-                            padding: '16px 36px', borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #3b82f6, #60a5fa)',
-                            color: '#fff', fontWeight: 700, fontSize: '1rem',
-                            textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px',
-                            boxShadow: '0 8px 32px rgba(59,130,246,0.3)',
-                        }}>
-                            Compress Images Free <ArrowRight size={17} />
-                        </Link>
-                    </div>
-                </section>
+                        {error && <div style={S.errorBox}>{error}</div>}
 
-            </main>
-            <Footer />
-        </>
+                        {/* Compress button */}
+                        <button
+                            type="button"
+                            disabled={processing}
+                            onClick={handleCompress}
+                            style={{ ...S.compressBtn, ...(processing ? { background: '#93c5fd', cursor: 'not-allowed' } : {}) }}
+                            onMouseEnter={e => { if (!processing) (e.currentTarget as HTMLButtonElement).style.background = clr.blueDark; }}
+                            onMouseLeave={e => { if (!processing) (e.currentTarget as HTMLButtonElement).style.background = clr.blue; }}
+                        >
+                            {processing ? `Compressing… ${processed} / ${entries.length}` : `Compress ${entries.length} image${entries.length !== 1 ? 's' : ''}`}
+                        </button>
+
+                        {processing && (
+                            <>
+                                <div style={S.progressBar}>
+                                    <div style={{ ...S.progressFill, width: `${(processed / entries.length) * 100}%` }} />
+                                </div>
+                                <p style={S.progressLabel}>{processed} of {entries.length} done</p>
+                            </>
+                        )}
+                    </>
+                )}
+
+                {/* ── Results ── */}
+                {results && summary && (
+                    <>
+                        {/* Summary */}
+                        <div style={S.resultBanner}>
+                            <div style={S.resultPct}>{hasSavings ? `${summary.totalSavingsPercent}%` : '✓'}</div>
+                            <div style={S.resultLbl}>{hasSavings ? 'smaller' : 'images compressed'}</div>
+                            <div style={S.resultSizes}>
+                                {fmtBytes(summary.totalOriginalSize)} → {fmtBytes(summary.totalProcessedSize ?? 0)}
+                                &nbsp;·&nbsp; {results.length} {results.length === 1 ? 'file' : 'files'}
+                            </div>
+                        </div>
+
+                        {/* Download all */}
+                        <button
+                            type="button"
+                            style={S.dlAllBtn}
+                            onClick={downloadAll}
+                            onMouseEnter={e => (e.currentTarget.style.background = clr.blueDark)}
+                            onMouseLeave={e => (e.currentTarget.style.background = clr.blue)}
+                        >
+                            ↓ Download {results.length > 1 ? `all ${results.length} as ZIP` : 'compressed file'}
+                        </button>
+
+                        {/* Cloud export row */}
+                        <div style={S.cloudShareRow}>
+                            <button type="button" style={S.cloudShareBtn} onClick={saveToDropbox}
+                                onMouseEnter={e => (e.currentTarget.style.borderColor = '#0061ff')}
+                                onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
+                                <DropboxIcon /> Save to Dropbox
+                            </button>
+                            <button type="button" style={{ ...S.cloudShareBtn, opacity: 0.45, cursor: 'default' }} title="Google Drive export coming soon">
+                                <DriveIcon /> Save to Drive
+                            </button>
+                        </div>
+
+                        {/* Per-file rows */}
+                        <div style={S.resultList}>
+                            {results.map((r, i) => {
+                                const pct = parseFloat(r.savingsPercent ?? '0');
+                                return (
+                                    <div key={r.id} style={{ ...S.resultRow, background: i % 2 === 0 ? '#fff' : clr.gray50 }}>
+                                        {r.localUrl ? (
+                                            <img src={r.localUrl} alt={r.displayName} style={S.fileThumb as React.CSSProperties} />
+                                        ) : (
+                                            <div style={{ ...S.fileThumb, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>🖼</div>
+                                        )}
+                                        <span style={S.fileName}>{r.displayName}</span>
+                                        {pct > 0 && <span style={S.savingsPill}>−{r.savingsPercent}%</span>}
+                                        <span style={S.fileSize}>{fmtBytes(r.processedSize)}</span>
+                                        <button type="button" style={S.dlBtn} onClick={() => downloadOne(r)}
+                                            onMouseEnter={e => (e.currentTarget.style.borderColor = clr.blue)}
+                                            onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
+                                            ↓ Save
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Compress more / reset */}
+                        <button type="button" style={S.resetBtn} onClick={reset}>
+                            ← Compress more images
+                        </button>
+                    </>
+                )}
+            </div>
+
+            {/* ── Auth modal (for unauthenticated compress attempts) ─── */}
+            <AnimatePresence>
+                {isAuthModalOpen && (
+                    <AuthModal
+                        isOpen={isAuthModalOpen}
+                        onClose={() => setIsAuthModalOpen(false)}
+                        initialStep="email"
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* ── Footer ────────────────────────────────────────────────── */}
+            <footer style={S.footer}>
+                <Link href="/" style={S.footerLink}>Optimage</Link>
+                <Link href="/pricing" style={S.footerLink}>Pricing</Link>
+                <Link href="/dashboard?tab=galleries" style={S.footerLink}>Photo Galleries</Link>
+                <Link href="/terms" style={S.footerLink}>Terms</Link>
+                <span style={{ marginLeft: '8px' }}>© {new Date().getFullYear()}</span>
+            </footer>
+        </div>
     );
 }

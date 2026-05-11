@@ -18,11 +18,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintr
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Optimage: Bulk Image & Media Optimizer | WebP, AVIF, Video Compression',
+    default: 'Optimage — Free Image Tools: Compress, Convert, Resize & Deliver',
     template: '%s | Optimage',
   },
   description:
-    'Compress, convert, and optimize images and videos in bulk. JPEG, PNG, WebP, AVIF, GIF support. Strip EXIF, transcribe audio, process 50 files at once. Fast, free, no quality loss.',
+    'Every image tool you need, right here. Compress, convert, resize, flip and deliver your images — free, fast, and built for real work. No installs. Supports JPG, PNG, WebP, AVIF, GIF and HEIC.',
   keywords: [
     'image optimizer', 'image compressor', 'bulk image converter', 'webp converter',
     'avif converter', 'png compressor', 'jpeg optimizer', 'image compression tool',

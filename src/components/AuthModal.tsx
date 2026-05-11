@@ -8,10 +8,23 @@ import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import type { AuthModalProps, AuthStep, GuestHistoryItem } from '@/types';
 
+// Light-theme token shortcuts
+const T = {
+    bg:        '#ffffff',
+    bgSub:     '#f9fafb',
+    border:    '#e5e7eb',
+    text:      '#111827',
+    textSub:   '#6b7280',
+    textMuted: '#9ca3af',
+    accent:    '#2563eb',
+    accentHov: '#1d4ed8',
+};
 
 export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterAuth }: AuthModalProps): React.JSX.Element | null {
     const supabase = useMemo(() => createClient(), []);
     const router = useRouter();
+
+    // All hooks must be declared before any conditional return
     const [step, setStep] = useState<AuthStep>(initialStep ?? 'email');
     const [email, setEmail] = useState<string>('');
     const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '', '', '']);
@@ -27,23 +40,32 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
     const [dobMonth, setDobMonth] = useState<string>('');
     const [dobYear, setDobYear] = useState<string>('');
 
-    // Notify the newsletter popup so it doesn't conflict with this modal
     useEffect(() => {
         window.dispatchEvent(new CustomEvent(isOpen ? 'optimage:overlay:open' : 'optimage:overlay:close'));
     }, [isOpen]);
 
+    // Reset step when modal opens
+    useEffect(() => {
+        if (isOpen) setStep(initialStep ?? 'email');
+    }, [isOpen, initialStep]);
+
+    useEffect(() => {
+        if (step !== 'otp') return;
+        if (resendCooldownMs <= 0) return;
+        const t = window.setInterval(() => {
+            setResendCooldownMs((ms) => Math.max(0, ms - 1000));
+        }, 1000);
+        return () => window.clearInterval(t);
+    }, [step, resendCooldownMs]);
+
+    if (!isOpen) return null;
+
     const handleGoogleSignIn = async (): Promise<void> => {
         setLoading(true);
         setError(null);
-        let redirectTo;
-        if (redirectAfterAuth) {
-            redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectAfterAuth)}`;
-        } else {
-            const currentPath = window.location.pathname;
-            const nextPath = currentPath === '/' ? '/dashboard' : currentPath;
-            redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
-        }
-
+        const dest = redirectAfterAuth
+            ?? (window.location.pathname !== '/' ? window.location.pathname : '/dashboard');
+        const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(dest)}`;
         const { error: oauthError } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo },
@@ -52,7 +74,6 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
             setError(oauthError.message);
             setLoading(false);
         }
-        // If no error, browser will redirect — loading stays true
     };
 
     const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>): void => {
@@ -63,8 +84,7 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         const newOtp = [...otp];
         digits.forEach((d, i) => { newOtp[i] = d; });
         setOtp(newOtp);
-        const focusIdx = Math.min(digits.length, 7);
-        otpRefs.current[focusIdx]?.focus();
+        otpRefs.current[Math.min(digits.length, 7)]?.focus();
     };
 
     const handleSyncGuestHistory = async (): Promise<void> => {
@@ -75,24 +95,16 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                 localStorage.removeItem('guest_processing_history');
             }
         } catch (err: unknown) {
-            console.error('Failed to sync guest history', err instanceof Error ? err.message : 'An unknown error occurred');
+            console.error('Failed to sync guest history', err instanceof Error ? err.message : 'unknown');
         }
     };
 
-    // Listen for cross-device authentication is now handled in Header.jsx
-
-
     const handleOtpChange = (index: number, value: string): void => {
         if (!/^[0-9]*$/.test(value)) return;
-
         const newOtp = [...otp];
         newOtp[index] = value;
         setOtp(newOtp);
-
-        // Auto focus next input
-        if (value && index < 7) {
-            otpRefs.current[index + 1]?.focus();
-        }
+        if (value && index < 7) otpRefs.current[index + 1]?.focus();
     };
 
     const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -106,7 +118,6 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         setLoading(true);
         setError(null);
         setMessage(null);
-
         try {
             const { error: otpError } = await supabase.auth.signInWithOtp({
                 email,
@@ -124,7 +135,6 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
     };
 
     const parseRetryAfterSeconds = (msg: string): number | null => {
-        // Supabase commonly returns: "For security purposes, you can only request this after 23 seconds."
         const match = msg.match(/after\s+(\d+)\s+seconds?/i);
         if (!match) return null;
         const secs = Number(match[1]);
@@ -132,8 +142,7 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
     };
 
     const handleResendCode = async (): Promise<void> => {
-        if (!email) return;
-        if (resendCooldownMs > 0) return;
+        if (!email || resendCooldownMs > 0) return;
         setLoading(true);
         setError(null);
         setMessage(null);
@@ -145,51 +154,29 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
             if (otpError) throw new Error(otpError.message);
             setOtp(['', '', '', '', '', '', '', '']);
             otpRefs.current[0]?.focus();
-            setMessage('New code sent. Enter it on this device to sign in here.');
+            setMessage('New code sent.');
             setResendCooldownMs(60_000);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Failed to resend code';
             const retryAfter = parseRetryAfterSeconds(msg);
-            if (retryAfter) {
-                setResendCooldownMs(retryAfter * 1000);
-            }
+            if (retryAfter) setResendCooldownMs(retryAfter * 1000);
             setError(msg);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        if (step !== 'otp') return;
-        if (resendCooldownMs <= 0) return;
-        const t = window.setInterval(() => {
-            setResendCooldownMs((ms) => Math.max(0, ms - 1000));
-        }, 1000);
-        return () => window.clearInterval(t);
-    }, [step, resendCooldownMs]);
-
     const handleOtpSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         const token = otp.join('');
-        if (token.length !== 8) {
-            setError('Please enter all 8 digits.');
-            return;
-        }
-
+        if (token.length !== 8) { setError('Please enter all 8 digits.'); return; }
         setLoading(true);
         setError(null);
         setMessage(null);
-
         try {
-            const { error: verifyError } = await supabase.auth.verifyOtp({
-                email,
-                token,
-                type: 'email',
-            });
+            const { error: verifyError } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
             if (verifyError) throw new Error(verifyError.message);
             await handleSyncGuestHistory();
-
-            // Check if this user has a display_name — if not, show onboarding
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user?.id) {
                 const { data: profile } = await supabase
@@ -203,14 +190,12 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                     return;
                 }
             }
-
             onClose();
             if (redirectAfterAuth) {
                 router.push(redirectAfterAuth);
             } else if (typeof window !== 'undefined' && window.location.pathname === '/') {
                 router.push('/dashboard');
             }
-            // On all other pages, just close the modal — user stays where they are
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
@@ -227,23 +212,14 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
             : undefined;
         const fullPhone = phone.trim() ? `${phoneCode}${phone.trim().replace(/^0+/, '')}` : undefined;
         try {
-            await apiClient.updateProfile({
-                display_name: displayName.trim(),
-                phone_number: fullPhone,
-                date_of_birth: dobString,
-            });
-        } catch {
-            // Non-blocking — proceed even if update fails
-        } finally {
-            setLoading(false);
-        }
+            await apiClient.updateProfile({ display_name: displayName.trim(), phone_number: fullPhone, date_of_birth: dobString });
+        } catch { /* non-blocking */ } finally { setLoading(false); }
         onClose();
         if (redirectAfterAuth) {
             router.push(redirectAfterAuth);
         } else if (typeof window !== 'undefined' && window.location.pathname === '/') {
             router.push('/dashboard');
         }
-        // On all other pages, just close the modal — user stays where they are
     };
 
     const resetFlow = (): void => {
@@ -254,148 +230,158 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         setResendCooldownMs(0);
     };
 
+    const inputStyle: React.CSSProperties = {
+        width: '100%', padding: '13px 14px',
+        borderRadius: '10px', border: `1px solid ${T.border}`,
+        background: T.bgSub, color: T.text,
+        outline: 'none', fontSize: '0.95rem',
+        transition: 'border-color 0.2s',
+        boxSizing: 'border-box',
+    };
+
+    const btnPrimary: React.CSSProperties = {
+        flex: 2, padding: '14px', borderRadius: '10px',
+        fontSize: '1rem', fontWeight: 600,
+        background: T.accent, color: '#fff', border: 'none',
+        cursor: 'pointer', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', gap: '8px', transition: 'background 0.2s',
+    };
+
+    const btnSecondary: React.CSSProperties = {
+        flex: 1, padding: '14px', borderRadius: '10px',
+        fontSize: '1rem', fontWeight: 600,
+        background: T.bg, color: T.text,
+        border: `1px solid ${T.border}`,
+        cursor: 'pointer', transition: 'background 0.2s',
+    };
+
+    const selectStyle: React.CSSProperties = {
+        padding: '13px 10px', borderRadius: '10px',
+        border: `1px solid ${T.border}`, background: T.bgSub,
+        color: T.text, outline: 'none', fontSize: '0.9rem', cursor: 'pointer',
+    };
 
     return (
         <motion.div
-            className="modal-overlay auth-modal-container"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
             style={{
                 position: 'fixed', inset: 0, zIndex: 10000,
-                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
             }}
         >
-            {/* 
-              Listen for mousedown on the modal content to prevent synthetic 
-              click events from closing the modal if the user clicks and drags.
-              We use e.stopPropagation() here to stop the overlay click handler.
-            */}
             <motion.div
-                className="auth-modal-card"
-                initial={{ scale: 0.98, opacity: 0, y: 10 }}
+                initial={{ scale: 0.97, opacity: 0, y: 12 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.98, opacity: 0, y: 10 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                exit={{ scale: 0.97, opacity: 0, y: 12 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
                 onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
                 style={{
-                    display: 'flex', maxWidth: '900px', width: '100%', maxHeight: '90vh',
-                    borderRadius: '24px', overflow: 'hidden',
-                    background: 'var(--bg-card)', border: '1px solid var(--border)',
-                    boxShadow: '0 32px 64px rgba(0,0,0,0.5), 0 0 80px rgba(108,92,231,0.1)',
+                    display: 'flex', maxWidth: '860px', width: '100%', maxHeight: '92vh',
+                    borderRadius: '20px', overflow: 'hidden',
+                    background: T.bg, border: `1px solid ${T.border}`,
+                    boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
                 }}
             >
-                {/* Left: Visual Side (hidden on mobile) */}
-                <div className="auth-modal-visual" style={{
-                    flex: '0 0 380px', position: 'relative', overflow: 'hidden',
+                {/* Left: Visual Side — dark background with image */}
+                <div style={{
+                    flex: '0 0 360px', position: 'relative', overflow: 'hidden',
                     background: 'linear-gradient(135deg, #0a0a1a, #1a1040)',
                     display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                }}>
+                }} className="auth-modal-visual">
                     <Image unoptimized src="/image-5.png" alt="Creative workspace" fill style={{ objectFit: 'cover', opacity: 0.35 }} />
-                    {/* Gradient overlay */}
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,26,0.95) 0%, rgba(10,10,26,0.4) 50%, transparent 100%)' }} />
-
-                    <div style={{ position: 'relative', zIndex: 2, padding: '40px' }}>
-                        <div className="logo" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <img src="/logo.png" alt="Optimage Logo" style={{ height: '2.4rem', width: 'auto', objectFit: 'contain' }} />
-                            <div className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                                <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white' }}>Optimage</span>
-                                <a href="https://dreamintrepid.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.6em', color: 'rgba(255,255,255,0.7)', fontWeight: 'normal', textDecoration: 'none' }}>by Dream Intrepid Ltd</a>
+                    <div style={{ position: 'relative', zIndex: 2, padding: '36px' }}>
+                        <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <img src="/logo.png" alt="Optimage" style={{ height: '2.2rem', width: 'auto', objectFit: 'contain' }} />
+                            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                                <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'white' }}>Optimage</span>
+                                <a href="https://dreamintrepid.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.6em', color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>by Dream Intrepid Ltd</a>
                             </div>
                         </div>
-                        <div>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'white', marginBottom: '12px' }}>Professional Media Suite</h2>
-                            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                                Sign in to access high-performance image compression, format conversion, and video optimization tools.
-                            </p>
-                        </div>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '10px' }}>Free Image Tools</h2>
+                        <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                            Compress, convert, resize and deliver your images — all in one place, right in your browser.
+                        </p>
                     </div>
                 </div>
 
-                {/* Right: Form Side */}
-                <div className="auth-modal-form" style={{ flex: 1, padding: '40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: '300px' }}>
-                    {/* Close Button */}
+                {/* Right: Form Side — white */}
+                <div style={{
+                    flex: 1, padding: '40px', overflowY: 'auto',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                    minWidth: '300px', background: T.bg, position: 'relative',
+                }}>
+                    {/* Close button */}
                     <button onClick={onClose} style={{
                         position: 'absolute', top: '16px', right: '16px',
-                        background: 'var(--bg-tertiary)', border: 'none',
-                        color: 'var(--text-muted)', cursor: 'pointer',
-                        padding: '8px', borderRadius: '50%', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', zIndex: 10,
+                        background: T.bgSub, border: `1px solid ${T.border}`,
+                        color: T.textMuted, cursor: 'pointer',
+                        padding: '7px', borderRadius: '50%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        lineHeight: 0,
                     }}>
-                        <X size={18} />
+                        <X size={16} />
                     </button>
 
-                    <div style={{ marginBottom: '32px' }}>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.01em' }}>
-                            {step === 'email' ? 'Sign in to Optimage' : step === 'otp' ? 'Enter Secure Code' : 'One last thing'}
+                    <div style={{ marginBottom: '28px' }}>
+                        <h2 style={{ fontSize: '1.7rem', fontWeight: 800, marginBottom: '8px', color: T.text, letterSpacing: '-0.01em' }}>
+                            {step === 'email' ? 'Sign in to Optimage' : step === 'otp' ? 'Check your email' : 'Almost done'}
                         </h2>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                        <p style={{ color: T.textSub, fontSize: '0.95rem', lineHeight: 1.5 }}>
                             {step === 'email'
-                                ? 'Enter your email to sign in or create a new account.'
+                                ? 'Enter your email to sign in or create a free account.'
                                 : step === 'otp'
-                                    ? `We sent an 8-digit code to ${email}. This code signs you in on the device where you enter it.`
-                                    : 'Tell us a bit about yourself so we can personalise your experience.'}
+                                    ? `We sent an 8-digit code to ${email}. Enter it below to sign in.`
+                                    : 'Tell us your name so we can personalise your experience.'}
                         </p>
                     </div>
 
                     {error && (
                         <div style={{
-                            padding: '12px 16px', background: 'rgba(239,68,68,0.1)',
-                            border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px',
-                            color: '#ef4444', fontSize: '0.9rem', marginBottom: '20px',
+                            padding: '11px 14px', background: '#fef2f2',
+                            border: '1px solid #fecaca', borderRadius: '10px',
+                            color: '#dc2626', fontSize: '0.88rem', marginBottom: '18px',
                         }}>
                             {error}
                         </div>
                     )}
                     {message && (
                         <div style={{
-                            padding: '12px 16px', background: 'rgba(46,213,115,0.1)',
-                            border: '1px solid rgba(46,213,115,0.2)', borderRadius: '12px',
-                            color: '#2ed573', fontSize: '0.9rem', marginBottom: '20px',
+                            padding: '11px 14px', background: '#f0fdf4',
+                            border: '1px solid #bbf7d0', borderRadius: '10px',
+                            color: '#16a34a', fontSize: '0.88rem', marginBottom: '18px',
                         }}>
                             {message}
                         </div>
                     )}
 
                     {step === 'onboarding' ? (
-                        <form onSubmit={handleOnboardingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <form onSubmit={handleOnboardingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
                                     What should we call you?
                                 </label>
                                 <input
-                                    type="text"
-                                    value={displayName}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)}
-                                    placeholder="Your name"
-                                    maxLength={80}
-                                    required
-                                    autoFocus
-                                    style={{
-                                        width: '100%', padding: '13px 14px',
-                                        borderRadius: '12px', border: '1px solid var(--border)',
-                                        background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
-                                        outline: 'none', fontSize: '0.95rem',
-                                    }}
-                                    onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--accent-primary)'}
-                                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--border)'}
+                                    type="text" value={displayName}
+                                    onChange={(e) => setDisplayName(e.target.value)}
+                                    placeholder="Your name" maxLength={80} required autoFocus
+                                    style={inputStyle}
+                                    onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
+                                    onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
                                 />
                             </div>
-                            {/* Phone number */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                                    Phone number <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
+                                    Phone number <span style={{ color: T.textMuted, fontWeight: 400 }}>(optional)</span>
                                 </label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                    <select
-                                        value={phoneCode}
-                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPhoneCode(e.target.value)}
-                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0 }}
-                                    >
+                                    <select value={phoneCode} onChange={(e) => setPhoneCode(e.target.value)} style={selectStyle}>
                                         <option value="+1">🇺🇸 +1</option>
                                         <option value="+44">🇬🇧 +44</option>
                                         <option value="+234">🇳🇬 +234</option>
@@ -413,84 +399,59 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                         <option value="+65">🇸🇬 +65</option>
                                     </select>
                                     <input
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value.replace(/[^\d\s\-().]/g, ''))}
-                                        placeholder="800 000 0000"
-                                        maxLength={15}
-                                        style={{ flex: 1, padding: '13px 14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.95rem' }}
-                                        onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--accent-primary)'}
-                                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--border)'}
+                                        type="tel" value={phone}
+                                        onChange={(e) => setPhone(e.target.value.replace(/[^\d\s\-().]/g, ''))}
+                                        placeholder="800 000 0000" maxLength={15}
+                                        style={{ ...inputStyle, flex: 1, padding: '13px 14px' }}
+                                        onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
+                                        onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
                                     />
                                 </div>
                             </div>
-
-                            {/* Date of birth */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                                    Date of birth <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
+                                    Date of birth <span style={{ color: T.textMuted, fontWeight: 400 }}>(optional)</span>
                                 </label>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                                    <select value={dobDay} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDobDay(e.target.value)}
-                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: dobDay ? 'var(--text-primary)' : 'var(--text-muted)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}>
-                                        <option value="">Day</option>
-                                        {Array.from({ length: 31 }, (_, i) => i + 1).map(d => <option key={d} value={String(d)}>{d}</option>)}
-                                    </select>
-                                    <select value={dobMonth} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDobMonth(e.target.value)}
-                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: dobMonth ? 'var(--text-primary)' : 'var(--text-muted)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}>
-                                        <option value="">Month</option>
-                                        {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m, i) => <option key={i} value={String(i + 1)}>{m}</option>)}
-                                    </select>
-                                    <select value={dobYear} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDobYear(e.target.value)}
-                                        style={{ padding: '13px 10px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: dobYear ? 'var(--text-primary)' : 'var(--text-muted)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}>
-                                        <option value="">Year</option>
-                                        {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - 18 - i).map(y => <option key={y} value={String(y)}>{y}</option>)}
-                                    </select>
+                                    {[
+                                        { value: dobDay, setter: setDobDay, placeholder: 'Day', options: Array.from({ length: 31 }, (_, i) => ({ v: String(i+1), l: String(i+1) })) },
+                                        { value: dobMonth, setter: setDobMonth, placeholder: 'Month', options: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m,i) => ({ v: String(i+1), l: m })) },
+                                        { value: dobYear, setter: setDobYear, placeholder: 'Year', options: Array.from({ length: 80 }, (_, i) => { const y = new Date().getFullYear() - 18 - i; return { v: String(y), l: String(y) }; }) },
+                                    ].map(({ value, setter, placeholder, options }) => (
+                                        <select key={placeholder} value={value}
+                                            onChange={(e) => setter(e.target.value)}
+                                            style={{ ...selectStyle, color: value ? T.text : T.textMuted }}>
+                                            <option value="">{placeholder}</option>
+                                            {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+                                        </select>
+                                    ))}
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                <button type="button" onClick={onClose} className="btn btn-secondary" style={{
-                                    flex: 1, padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                }}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" disabled={loading || !displayName.trim()} style={{
-                                    flex: 2, padding: '14px',
-                                    borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                }}>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+                                <button type="button" onClick={onClose} style={btnSecondary}>Cancel</button>
+                                <button type="submit" disabled={loading || !displayName.trim()} style={{ ...btnPrimary, opacity: loading || !displayName.trim() ? 0.6 : 1 }}>
                                     {loading ? 'Saving...' : <><span>Get Started</span><ArrowRight size={16} /></>}
                                 </button>
                             </div>
-                            <button type="button" onClick={() => { onClose(); if (redirectAfterAuth) { router.push(redirectAfterAuth); } else if (typeof window !== 'undefined' && window.location.pathname === '/') { router.push('/dashboard'); } }}
-                                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'center' }}>
+                            <button type="button"
+                                onClick={() => { onClose(); if (redirectAfterAuth) { router.push(redirectAfterAuth); } else if (window.location.pathname === '/') { router.push('/dashboard'); } }}
+                                style={{ background: 'none', border: 'none', color: T.textMuted, fontSize: '0.85rem', cursor: 'pointer', textAlign: 'center' }}>
                                 Skip for now
                             </button>
                         </form>
                     ) : step === 'email' ? (
                         <>
                             {/* Google OAuth */}
-                            <button
-                                type="button"
-                                className="google-btn"
-                                onClick={handleGoogleSignIn}
-                                disabled={loading}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '10px',
-                                    background: 'var(--bg-card)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '15px',
-                                    color: 'var(--text-primary)',
-                                    marginBottom: '20px',
-                                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-                                }}
+                            <button type="button" onClick={handleGoogleSignIn} disabled={loading} style={{
+                                width: '100%', padding: '13px 16px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                                background: T.bg, border: `1px solid ${T.border}`,
+                                borderRadius: '10px', cursor: 'pointer', fontSize: '15px', fontWeight: 500,
+                                color: T.text, marginBottom: '18px', transition: 'box-shadow 0.2s, border-color 0.2s',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                            }}
+                                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#93c5fd'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 8px rgba(37,99,235,0.1)'; }}
+                                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = T.border; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; }}
                             >
                                 <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
@@ -501,123 +462,93 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                 Continue with Google
                             </button>
 
-                            {/* Divider */}
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                marginBottom: '20px',
-                                color: 'var(--text-muted)',
-                                fontSize: '13px',
-                            }}>
-                                <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px', color: T.textMuted, fontSize: '13px' }}>
+                                <div style={{ flex: 1, height: '1px', background: T.border }} />
                                 or continue with email
-                                <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+                                <div style={{ flex: 1, height: '1px', background: T.border }} />
                             </div>
 
-                            <form onSubmit={handleEmailSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <form onSubmit={handleEmailSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '6px', color: 'var(--text-primary)' }}>Email Address</label>
-                                <div style={{ position: 'relative' }}>
-                                    <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                                    <input type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} required placeholder="you@company.com" style={{
-                                        width: '100%', padding: '13px 14px 13px 42px',
-                                        borderRadius: '12px', border: '1px solid var(--border)',
-                                        background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
-                                        outline: 'none', fontSize: '0.95rem', transition: 'border-color 0.2s',
-                                    }}
-                                        onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--accent-primary)'}
-                                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--border)'}
-                                    />
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
+                                        Email address
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <Mail size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: T.textMuted }} />
+                                        <input type="email" value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required placeholder="you@example.com"
+                                            style={{ ...inputStyle, paddingLeft: '42px' }}
+                                            onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
+                                            onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                <button type="button" onClick={onClose} className="btn btn-secondary" style={{
-                                    flex: 1, padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                }}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" disabled={loading} style={{
-                                    flex: 2, padding: '14px',
-                                    borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                }}>
-                                    {loading ? 'Sending Code...' : <><span>Continue</span><ArrowRight size={16} /></>}
-                                </button>
-                            </div>
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+                                    <button type="button" onClick={onClose} style={btnSecondary}>Cancel</button>
+                                    <button type="submit" disabled={loading} style={{ ...btnPrimary, opacity: loading ? 0.7 : 1 }}>
+                                        {loading ? 'Sending...' : <><span>Continue</span><ArrowRight size={16} /></>}
+                                    </button>
+                                </div>
                             </form>
                         </>
                     ) : (
-                        <form onSubmit={handleOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        /* OTP step */
+                        <form onSubmit={handleOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
                             <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, marginBottom: '12px', color: 'var(--text-primary)' }}>
-                                    <Key size={14} /> Security Code
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, marginBottom: '12px', color: T.text }}>
+                                    <Key size={14} /> 8-digit security code
                                 </label>
                                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'space-between' }}>
                                     {otp.map((digit, index) => (
                                         <input
                                             key={index}
-                                            ref={(el: HTMLInputElement | null) => { if (el) otpRefs.current[index] = el; }}
-                                            type="text"
-                                            inputMode="numeric"
-                                            maxLength={1}
-                                            value={digit}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOtpChange(index, e.target.value)}
-                                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleOtpKeyDown(index, e)}
+                                            ref={(el) => { if (el) otpRefs.current[index] = el; }}
+                                            type="text" inputMode="numeric" maxLength={1} value={digit}
+                                            onChange={(e) => handleOtpChange(index, e.target.value)}
+                                            onKeyDown={(e) => handleOtpKeyDown(index, e)}
                                             {...(index === 0 ? { onPaste: handleOtpPaste } : {})}
                                             style={{
                                                 width: '38px', height: '50px', textAlign: 'center',
-                                                borderRadius: '10px', border: '1px solid var(--border)',
-                                                background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
-                                                outline: 'none', fontSize: '1.1rem', fontWeight: 600, transition: 'border-color 0.2s',
+                                                borderRadius: '10px', border: `1px solid ${T.border}`,
+                                                background: T.bgSub, color: T.text,
+                                                outline: 'none', fontSize: '1.1rem', fontWeight: 600,
+                                                transition: 'border-color 0.2s',
                                             }}
-                                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--accent-primary)'}
-                                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => e.target.style.borderColor = 'var(--border)'}
+                                            onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
+                                            onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
                                             required
                                         />
                                     ))}
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <button type="button" onClick={onClose} className="btn btn-secondary" style={{
-                                    flex: 1, padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                }}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" disabled={loading || otp.join('').length < 8} style={{
-                                    flex: 2, padding: '14px',
-                                    borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button type="button" onClick={onClose} style={btnSecondary}>Cancel</button>
+                                <button type="submit" disabled={loading || otp.join('').length < 8}
+                                    style={{ ...btnPrimary, opacity: loading || otp.join('').length < 8 ? 0.6 : 1 }}>
                                     {loading ? 'Verifying...' : <><span>Verify Code</span><ArrowRight size={16} /></>}
                                 </button>
                             </div>
 
-                            <div style={{ textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                                <p style={{ marginBottom: '10px' }}>
-                                    Didn’t get a code?{' '}
-                                    <button
-                                        type="button"
-                                        onClick={handleResendCode}
+                            <div style={{ textAlign: 'center', fontSize: '0.88rem', color: T.textSub }}>
+                                <p style={{ marginBottom: '8px' }}>
+                                    Didn&apos;t get a code?{' '}
+                                    <button type="button" onClick={handleResendCode}
                                         disabled={loading || resendCooldownMs > 0}
                                         style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            color: resendCooldownMs > 0 ? 'var(--text-muted)' : 'var(--accent-primary)',
+                                            background: 'none', border: 'none', padding: 0,
+                                            color: resendCooldownMs > 0 ? T.textMuted : T.accent,
                                             cursor: resendCooldownMs > 0 ? 'not-allowed' : 'pointer',
-                                            fontWeight: 700,
-                                            fontSize: 'inherit',
-                                            padding: 0,
-                                        }}
-                                    >
+                                            fontWeight: 700, fontSize: 'inherit',
+                                        }}>
                                         {resendCooldownMs > 0 ? `Resend in ${Math.ceil(resendCooldownMs / 1000)}s` : 'Resend code'}
                                     </button>
                                 </p>
                                 <p>
-                                    Entered the wrong email?{' '}
-                                    <button type="button" onClick={resetFlow} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, fontSize: 'inherit' }}>
+                                    Wrong email?{' '}
+                                    <button type="button" onClick={resetFlow}
+                                        style={{ background: 'none', border: 'none', color: T.accent, cursor: 'pointer', fontWeight: 600, fontSize: 'inherit', padding: 0 }}>
                                         Go back
                                     </button>
                                 </p>
