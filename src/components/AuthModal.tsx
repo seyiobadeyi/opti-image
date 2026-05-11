@@ -16,11 +16,11 @@ const T = {
     text:      '#111827',
     textSub:   '#6b7280',
     textMuted: '#9ca3af',
-    accent:    '#2563eb',
-    accentHov: '#1d4ed8',
+    accent:    '#db5a42',
+    accentHov: '#c44d32',
 };
 
-export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterAuth }: AuthModalProps): React.JSX.Element | null {
+export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterAuth, leftTitle, leftSubtitle }: AuthModalProps & { leftTitle?: string; leftSubtitle?: string }): React.JSX.Element | null {
     const supabase = useMemo(() => createClient(), []);
     const router = useRouter();
 
@@ -304,9 +304,9 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                 <a href="https://dreamintrepid.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.6em', color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>by Dream Intrepid Ltd</a>
                             </div>
                         </div>
-                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '10px' }}>Free Image Tools</h2>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', marginBottom: '10px' }}>{leftTitle ?? 'Free Image Tools'}</h2>
                         <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                            Compress, convert, resize and deliver your images — all in one place, right in your browser.
+                            {leftSubtitle ?? 'Compress, convert, resize and deliver your images. Free to sign up, no credit card needed.'}
                         </p>
                     </div>
                 </div>

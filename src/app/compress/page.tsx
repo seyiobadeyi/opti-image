@@ -75,9 +75,9 @@ declare global {
 // ─── Styles (all light / white) ───────────────────────────────────────────────
 
 const clr = {
-    blue:       '#2563eb',
-    blueDark:   '#1d4ed8',
-    blueLight:  '#eff6ff',
+    blue:       '#db5a42',
+    blueDark:   '#c44d32',
+    blueLight:  '#fdf3f1',
     green:      '#16a34a',
     greenLight: '#f0fdf4',
     greenBorder:'#bbf7d0',

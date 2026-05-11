@@ -603,8 +603,8 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '14px',
                     padding: '16px 20px', marginBottom: '20px',
-                    background: 'linear-gradient(135deg, rgba(108,92,231,0.12), rgba(162,155,254,0.08))',
-                    border: '1px solid rgba(108,92,231,0.25)',
+                    background: 'linear-gradient(135deg, rgba(219,90,66,0.12), rgba(232,134,111,0.08))',
+                    border: '1px solid rgba(219,90,66,0.25)',
                     borderRadius: 'var(--radius-lg)',
                     cursor: 'pointer', transition: 'border-color 0.2s',
                 }}>

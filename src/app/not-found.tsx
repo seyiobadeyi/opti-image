@@ -14,7 +14,7 @@ export default function NotFound(): React.JSX.Element {
         }}>
             {/* Decorative blobs */}
             <div style={{ position: 'absolute', top: '-200px', left: '-200px', width: '500px', height: '500px', background: 'var(--accent-glow)', filter: 'blur(120px)', borderRadius: '50%', opacity: 0.15, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: '-200px', right: '-200px', width: '400px', height: '400px', background: 'rgba(108, 92, 231, 0.15)', filter: 'blur(100px)', borderRadius: '50%', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '-200px', right: '-200px', width: '400px', height: '400px', background: 'rgba(219, 90, 66, 0.15)', filter: 'blur(100px)', borderRadius: '50%', pointerEvents: 'none' }} />
 
             <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, maxWidth: '600px' }}>
                 {/* Giant 404 */}

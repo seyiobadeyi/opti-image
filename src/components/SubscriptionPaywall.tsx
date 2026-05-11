@@ -221,12 +221,12 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
             <div style={{
                 background: 'var(--bg-card)',
                 borderRadius: '24px',
-                border: '1px solid rgba(108,92,231,0.3)',
+                border: '1px solid rgba(219,90,66,0.3)',
                 maxWidth: '460px',
                 width: '100%',
                 overflow: 'hidden',
                 position: 'relative',
-                boxShadow: '0 32px 64px rgba(0,0,0,0.4), 0 0 80px rgba(108,92,231,0.1)',
+                boxShadow: '0 32px 64px rgba(0,0,0,0.4), 0 0 80px rgba(219,90,66,0.1)',
                 maxHeight: '90vh',
                 display: 'flex',
                 flexDirection: 'column',
@@ -254,8 +254,8 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                     position: 'relative',
                     overflow: 'hidden',
                 }}>
-                    <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(108,92,231,0.35) 0%, transparent 70%)', pointerEvents: 'none' }} />
-                    <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '140px', height: '140px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(162,155,254,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                    <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(219,90,66,0.35) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                    <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '140px', height: '140px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,134,111,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', position: 'relative' }}>
                         <img src="/logo.png" alt="Optimage" style={{ height: '2rem', width: 'auto', objectFit: 'contain' }} />
@@ -337,7 +337,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                             ? '2px solid var(--accent-primary)'
                                                             : '2px solid var(--border)',
                                                         background: isSelected
-                                                            ? 'rgba(108,92,231,0.12)'
+                                                            ? 'rgba(219,90,66,0.12)'
                                                             : 'var(--bg-tertiary)',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.15s ease',
@@ -554,7 +554,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                             ? '2px solid var(--accent-primary)'
                                                             : '2px solid var(--border)',
                                                         background: isSelected
-                                                            ? 'rgba(108,92,231,0.12)'
+                                                            ? 'rgba(219,90,66,0.12)'
                                                             : 'var(--bg-tertiary)',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.15s ease',

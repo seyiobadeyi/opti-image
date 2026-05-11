@@ -4,7 +4,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintr
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
-    title: 'Compress Images Online — Free Image Compressor | Optimage',
+    title: 'Compress Images Online: Free Image Compressor | Optimage',
     description:
         'Compress JPEG, PNG, WebP, AVIF, GIF and HEIC images online for free. Reduce file size by up to 90% with no visible quality loss. No signup needed to start. Drag and drop up to 50 images.',
     keywords: [
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
         },
     },
     openGraph: {
-        title: 'Compress Images Online — Free & Fast | Optimage',
+        title: 'Compress Images Online: Free & Fast | Optimage',
         description: 'Reduce image file sizes by up to 90% instantly. Supports JPEG, PNG, WebP, AVIF, GIF, HEIC. Free for up to 5 files — no account needed.',
         url: `${SITE_URL}/compress`,
         siteName: 'Optimage',

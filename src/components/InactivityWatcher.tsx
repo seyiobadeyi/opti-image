@@ -149,8 +149,8 @@ export default function InactivityWatcher(): React.JSX.Element | null {
                 {/* Countdown ring */}
                 <div style={{
                     width: '80px', height: '80px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(108,92,231,0.2), rgba(162,155,254,0.1))',
-                    border: '2px solid rgba(108,92,231,0.4)',
+                    background: 'linear-gradient(135deg, rgba(219,90,66,0.2), rgba(232,134,111,0.1))',
+                    border: '2px solid rgba(219,90,66,0.4)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 24px',
                     fontSize: '1.6rem', fontWeight: 800,

@@ -61,21 +61,21 @@ function ErrorCard({ onReset }: { onReset?: () => void }): React.JSX.Element {
             <div style={{
                 position: 'absolute', top: '-150px', left: '-150px',
                 width: '400px', height: '400px',
-                background: 'rgba(108, 92, 231, 0.15)',
+                background: 'rgba(219, 90, 66, 0.15)',
                 filter: 'blur(100px)', borderRadius: '50%',
                 pointerEvents: 'none',
             }} />
             <div style={{
                 position: 'absolute', bottom: '-150px', right: '-150px',
                 width: '350px', height: '350px',
-                background: 'rgba(108, 92, 231, 0.1)',
+                background: 'rgba(219, 90, 66, 0.1)',
                 filter: 'blur(80px)', borderRadius: '50%',
                 pointerEvents: 'none',
             }} />
 
             <div style={{
                 background: '#161625',
-                border: '1px solid rgba(108, 92, 231, 0.2)',
+                border: '1px solid rgba(219, 90, 66, 0.2)',
                 borderRadius: '24px',
                 padding: '48px 40px',
                 maxWidth: '480px',
@@ -134,14 +134,14 @@ function ErrorCard({ onReset }: { onReset?: () => void }): React.JSX.Element {
                         style={{
                             padding: '12px 28px',
                             borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                            background: 'linear-gradient(135deg, #db5a42, #e8866f)',
                             color: 'white',
                             border: 'none',
                             fontFamily: 'inherit',
                             fontSize: '0.95rem',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            boxShadow: '0 0 20px rgba(108, 92, 231, 0.3)',
+                            boxShadow: '0 0 20px rgba(219, 90, 66, 0.3)',
                         }}
                     >
                         Reload page
@@ -154,7 +154,7 @@ function ErrorCard({ onReset }: { onReset?: () => void }): React.JSX.Element {
                             borderRadius: '12px',
                             background: 'rgba(255,255,255,0.05)',
                             color: '#f0f0f5',
-                            border: '1px solid rgba(108, 92, 231, 0.2)',
+                            border: '1px solid rgba(219, 90, 66, 0.2)',
                             fontFamily: 'inherit',
                             fontSize: '0.95rem',
                             fontWeight: 600,

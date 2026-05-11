@@ -313,7 +313,7 @@ export default function DropZoneClient(): React.JSX.Element {
                         width: '70px',
                         height: '70px',
                         borderRadius: '50%',
-                        background: 'rgba(108, 92, 231, 0.1)',
+                        background: 'rgba(219, 90, 66, 0.1)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

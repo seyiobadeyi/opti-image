@@ -141,7 +141,7 @@ export default function SupportWidget() {
 
   const getInputStyle = (field: string): React.CSSProperties => ({
     ...inputStyle,
-    borderColor: focusedField === field ? '#a855f7' : 'rgba(255,255,255,0.1)',
+    borderColor: focusedField === field ? '#db5a42' : 'rgba(255,255,255,0.1)',
   });
 
   return (
@@ -158,13 +158,13 @@ export default function SupportWidget() {
           width: 48,
           height: 48,
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+          background: 'linear-gradient(135deg, #db5a42 0%, #db5a42 100%)',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
+          boxShadow: '0 4px 20px rgba(219,90,66,0.4)',
           transform: open ? 'scale(0.95)' : 'scale(1)',
           transition: 'transform 0.2s, box-shadow 0.2s',
         }}
@@ -236,7 +236,7 @@ export default function SupportWidget() {
                     width: 32,
                     height: 32,
                     borderRadius: 8,
-                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                    background: 'linear-gradient(135deg, #db5a42, #db5a42)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -312,7 +312,7 @@ export default function SupportWidget() {
                       width: 64,
                       height: 64,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                      background: 'linear-gradient(135deg, #db5a42, #db5a42)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -356,7 +356,7 @@ export default function SupportWidget() {
                   <button
                     onClick={handleClose}
                     style={{
-                      background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                      background: 'linear-gradient(135deg, #db5a42, #db5a42)',
                       border: 'none',
                       borderRadius: 100,
                       color: '#fff',
@@ -505,8 +505,8 @@ export default function SupportWidget() {
                     style={{
                       width: '100%',
                       background: loading
-                        ? 'rgba(99,102,241,0.5)'
-                        : 'linear-gradient(135deg, #6366f1, #a855f7)',
+                        ? 'rgba(219,90,66,0.5)'
+                        : 'linear-gradient(135deg, #db5a42, #db5a42)',
                       border: 'none',
                       borderRadius: 100,
                       color: '#fff',

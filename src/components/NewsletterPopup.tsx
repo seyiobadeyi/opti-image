@@ -135,7 +135,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                 borderRadius: '24px',
                 padding: '24px',
                 width: 'min(360px, calc(100vw - 32px))',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,92,231,0.15)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(219,90,66,0.15)',
                 overflow: 'hidden',
                 animation: 'newsletterSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
             }}

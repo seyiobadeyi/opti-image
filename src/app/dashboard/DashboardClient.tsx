@@ -223,7 +223,7 @@ function UsernameForm({ profile }: { profile: import('@/types').UserProfile | nu
 // ─── Branding Form ───────────────────────────────────────────────
 function BrandingForm({ profile }: { profile: import('@/types').UserProfile | null }): React.JSX.Element {
     const [studioName, setStudioName] = useState(profile?.branding_studio_name ?? '');
-    const [color, setColor]           = useState(profile?.branding_color ?? '#7c3aed');
+    const [color, setColor]           = useState(profile?.branding_color ?? '#db5a42');
     const [website, setWebsite]       = useState(profile?.branding_website ?? '');
     const [saving, setSaving]         = useState(false);
     const [saved, setSaved]           = useState(false);
@@ -265,7 +265,7 @@ function BrandingForm({ profile }: { profile: import('@/types').UserProfile | nu
                     />
                     <input type="text" value={color} maxLength={7}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setColor(e.target.value)}
-                        placeholder="#7c3aed"
+                        placeholder="#db5a42"
                         style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.9rem', width: '120px', outline: 'none' }}
                     />
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Shown on gallery pages</span>
@@ -864,7 +864,7 @@ function GalleriesTab(): React.JSX.Element {
                                         Created {new Date(gallery.created_at).toLocaleDateString()}
                                         {' · '}
                                         <span
-                                            style={{ color: '#7c3aed', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
+                                            style={{ color: '#db5a42', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
                                             onClick={(e: React.MouseEvent) => { e.stopPropagation(); void loadActivity(gallery.id); }}
                                         >
                                             View activity
@@ -1455,7 +1455,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                                                 <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={file.name}>
                                                                     {getDisplayName(index)}
                                                                 </span>
-                                                                {fileNames[index] && <span style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', background: 'rgba(108,92,231,0.1)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>renamed</span>}
+                                                                {fileNames[index] && <span style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', background: 'rgba(219,90,66,0.1)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>renamed</span>}
                                                                 <button onClick={() => startRename(index)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px', flexShrink: 0 }} title="Rename output file"><Pencil size={14} /></button>
                                                             </div>
                                                         )}
@@ -2193,7 +2193,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 </div>
                             </div>
 
-                            <div style={{ padding: '16px', background: 'rgba(108,92,231,0.08)', borderRadius: '12px', marginTop: '16px' }}>
+                            <div style={{ padding: '16px', background: 'rgba(219,90,66,0.08)', borderRadius: '12px', marginTop: '16px' }}>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                                     <strong>CRF 18–23:</strong> Near-lossless, large output<br />
                                     <strong>CRF 24–28:</strong> Good balance (recommended)<br />
@@ -2222,7 +2222,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                             position: 'absolute',
                                             top: '14px',
                                             right: '14px',
-                                            background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                                            background: 'linear-gradient(135deg, #db5a42, #e8866f)',
                                             color: 'white',
                                             fontSize: '0.7rem',
                                             fontWeight: 700,

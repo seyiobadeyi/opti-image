@@ -21,7 +21,7 @@ export default function LandingBento(): React.JSX.Element {
 
                 {/* 0. Featured — Client Gallery Delivery */}
                 <div className="bento-box bento-card-lg" style={{
-                    background: 'linear-gradient(135deg, rgba(108,92,231,0.12), rgba(162,155,254,0.06))',
+                    background: 'linear-gradient(135deg, rgba(219,90,66,0.12), rgba(232,134,111,0.06))',
                     borderRadius: '28px',
                     border: '1px solid var(--border-hover)',
                     overflow: 'hidden',
@@ -36,7 +36,7 @@ export default function LandingBento(): React.JSX.Element {
                         flexDirection: 'column',
                         justifyContent: 'center',
                     }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(108,92,231,0.15)', borderRadius: '100px', marginBottom: '24px', width: 'fit-content', border: '1px solid rgba(108,92,231,0.3)' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(219,90,66,0.15)', borderRadius: '100px', marginBottom: '24px', width: 'fit-content', border: '1px solid rgba(219,90,66,0.3)' }}>
                             <Camera size={14} color="var(--accent-secondary)" />
                             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>New Feature</span>
                         </div>
@@ -53,7 +53,7 @@ export default function LandingBento(): React.JSX.Element {
                             See gallery features <span aria-hidden="true">→</span>
                         </Link>
                     </div>
-                    <div className="bento-showcase-img" style={{ flex: '1 1 360px', position: 'relative', minHeight: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(108,92,231,0.06)' }}>
+                    <div className="bento-showcase-img" style={{ flex: '1 1 360px', position: 'relative', minHeight: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(219,90,66,0.06)' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '40px', width: '100%', maxWidth: '340px' }}>
                             {[
                                 { label: 'PIN Protection', active: true },
@@ -61,7 +61,7 @@ export default function LandingBento(): React.JSX.Element {
                                 { label: 'Client Favourites', active: true },
                                 { label: 'Auto-Expiry Reminders', active: false },
                             ].map(({ label, active }) => (
-                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', background: active ? 'rgba(108,92,231,0.15)' : 'rgba(255,255,255,0.04)', borderRadius: '12px', border: `1px solid ${active ? 'rgba(108,92,231,0.35)' : 'rgba(255,255,255,0.06)'}` }}>
+                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', background: active ? 'rgba(219,90,66,0.15)' : 'rgba(255,255,255,0.04)', borderRadius: '12px', border: `1px solid ${active ? 'rgba(219,90,66,0.35)' : 'rgba(255,255,255,0.06)'}` }}>
                                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: active ? 'var(--success)' : 'var(--text-muted)', flexShrink: 0 }}></div>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 500, color: active ? 'var(--text-primary)' : 'var(--text-muted)' }}>{label}</span>
                                 </div>
@@ -241,7 +241,7 @@ export default function LandingBento(): React.JSX.Element {
                     gap: '24px',
                 }}>
                     <div className="bento-box bento-card bento-box-padded" style={{
-                        background: 'linear-gradient(135deg, rgba(108,92,231,0.1), transparent)',
+                        background: 'linear-gradient(135deg, rgba(219,90,66,0.1), transparent)',
                         borderRadius: '20px',
                         border: '1px solid var(--border)',
                         overflow: 'hidden',

@@ -142,7 +142,7 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                 <div className="blog-content" dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
 
                 {/* In-article CTA */}
-                <footer style={{ marginTop: '64px', padding: '28px', background: 'linear-gradient(135deg, rgba(108,92,231,0.1), rgba(162,155,254,0.06))', borderRadius: '16px', border: '1px solid rgba(108,92,231,0.2)', textAlign: 'center' }}>
+                <footer style={{ marginTop: '64px', padding: '28px', background: 'linear-gradient(135deg, rgba(219,90,66,0.1), rgba(232,134,111,0.06))', borderRadius: '16px', border: '1px solid rgba(219,90,66,0.2)', textAlign: 'center' }}>
                     <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '8px' }}>Try Optimage Free</p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>Compress, convert, and optimize your images in seconds. No sign-up needed to start.</p>
                     <Link href="/" className="btn btn-primary" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600 }}>

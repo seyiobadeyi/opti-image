@@ -139,7 +139,7 @@ function FeatureBlock({
                     width: '48px',
                     height: '48px',
                     borderRadius: 'var(--radius-md)',
-                    background: 'rgba(108, 92, 231, 0.12)',
+                    background: 'rgba(219, 90, 66, 0.12)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -354,7 +354,7 @@ export default function GalleriesLandingPage() {
                         transform: 'translateX(-50%)',
                         width: '800px',
                         height: '400px',
-                        background: 'radial-gradient(ellipse, rgba(108, 92, 231, 0.14) 0%, transparent 70%)',
+                        background: 'radial-gradient(ellipse, rgba(219, 90, 66, 0.14) 0%, transparent 70%)',
                         pointerEvents: 'none',
                     }}
                 />
@@ -368,7 +368,7 @@ export default function GalleriesLandingPage() {
                             padding: '6px 14px',
                             borderRadius: '100px',
                             border: `1px solid ${BORDER}`,
-                            background: 'rgba(108, 92, 231, 0.08)',
+                            background: 'rgba(219, 90, 66, 0.08)',
                             marginBottom: '32px',
                             fontSize: '0.82rem',
                             fontWeight: 500,
@@ -442,7 +442,7 @@ export default function GalleriesLandingPage() {
                                 fontWeight: 700,
                                 fontSize: '1rem',
                                 textDecoration: 'none',
-                                boxShadow: '0 0 24px rgba(108, 92, 231, 0.35)',
+                                boxShadow: '0 0 24px rgba(219, 90, 66, 0.35)',
                             }}
                         >
                             Start delivering
@@ -971,7 +971,7 @@ export default function GalleriesLandingPage() {
                                 fontWeight: 700,
                                 fontSize: '1rem',
                                 textDecoration: 'none',
-                                boxShadow: '0 0 32px rgba(108, 92, 231, 0.4)',
+                                boxShadow: '0 0 32px rgba(219, 90, 66, 0.4)',
                             }}
                         >
                             Create a gallery

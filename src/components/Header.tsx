@@ -16,6 +16,8 @@ export default function Header(): React.JSX.Element {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
     const [authModalInitialStep, setAuthModalInitialStep] = useState<AuthStep>('email');
     const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
+    const [authModalLeftTitle, setAuthModalLeftTitle] = useState<string | undefined>(undefined);
+    const [authModalLeftSubtitle, setAuthModalLeftSubtitle] = useState<string | undefined>(undefined);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
@@ -134,9 +136,21 @@ export default function Header(): React.JSX.Element {
                 <nav className="header-desktop-nav" aria-label="Main navigation">
                     <Link href="/" className="header-nav-link">Home</Link>
                     <Link href="/blog" className="header-nav-link">Blog</Link>
-                    <Link href="/galleries" className="header-nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                        className="header-nav-link"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', cursor: 'pointer' }}
+                        onClick={() => {
+                            if (user) { router.push('/galleries'); }
+                            else {
+                                setAuthModalLeftTitle('Client Galleries');
+                                setAuthModalLeftSubtitle('Share your work in private, PIN-protected galleries with download controls. Free to sign up.');
+                                setRedirectUrl('/galleries');
+                                setIsAuthModalOpen(true);
+                            }
+                        }}
+                    >
                         <Camera size={15} /> Galleries
-                    </Link>
+                    </button>
                     <Link href="/pricing" className="header-nav-link">Pricing</Link>
                     {isAuthLoading ? (
                         <div style={{ width: '100px', height: '36px', background: 'var(--bg-tertiary)', borderRadius: '100px', opacity: 0.5, marginLeft: '8px' }}></div>
@@ -185,9 +199,22 @@ export default function Header(): React.JSX.Element {
                             <Link href="/blog" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
                                 Blog <ChevronRight size={18} color="var(--text-muted)" />
                             </Link>
-                            <Link href="/galleries" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
+                                    <button
+                                className="header-mobile-link"
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                                onClick={() => {
+                                    setIsMobileMenuOpen(false);
+                                    if (user) { router.push('/galleries'); }
+                                    else {
+                                        setAuthModalLeftTitle('Client Galleries');
+                                        setAuthModalLeftSubtitle('Share your work in private, PIN-protected galleries with download controls. Free to sign up.');
+                                        setRedirectUrl('/galleries');
+                                        setIsAuthModalOpen(true);
+                                    }
+                                }}
+                            >
                                 Galleries <ChevronRight size={18} color="var(--text-muted)" />
-                            </Link>
+                            </button>
                             <Link href="/pricing" className="header-mobile-link" onClick={() => setIsMobileMenuOpen(false)}>
                                 Pricing <ChevronRight size={18} color="var(--text-muted)" />
                             </Link>
@@ -232,9 +259,11 @@ export default function Header(): React.JSX.Element {
                 {isAuthModalOpen && (
                     <AuthModal
                         isOpen={isAuthModalOpen}
-                        onClose={() => { setIsAuthModalOpen(false); setAuthModalInitialStep('email'); setRedirectUrl(undefined); }}
+                        onClose={() => { setIsAuthModalOpen(false); setAuthModalInitialStep('email'); setRedirectUrl(undefined); setAuthModalLeftTitle(undefined); setAuthModalLeftSubtitle(undefined); }}
                         initialStep={authModalInitialStep}
                         redirectAfterAuth={redirectUrl}
+                        leftTitle={authModalLeftTitle}
+                        leftSubtitle={authModalLeftSubtitle}
                     />
                 )}
             </AnimatePresence>

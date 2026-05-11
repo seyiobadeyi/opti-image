@@ -76,9 +76,9 @@ function StatCard({ label, value, sub, accent }: StatCardProps) {
         <div
             style={{
                 background: accent
-                    ? 'linear-gradient(135deg, rgba(108,92,231,0.18), rgba(162,155,254,0.08))'
+                    ? 'linear-gradient(135deg, rgba(219,90,66,0.18), rgba(232,134,111,0.08))'
                     : 'rgba(255,255,255,0.03)',
-                border: accent ? '1px solid rgba(108,92,231,0.35)' : '1px solid rgba(255,255,255,0.08)',
+                border: accent ? '1px solid rgba(219,90,66,0.35)' : '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '20px',
                 padding: '36px 28px',
                 display: 'flex',
@@ -93,7 +93,7 @@ function StatCard({ label, value, sub, accent }: StatCardProps) {
                     fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
                     fontWeight: 800,
                     lineHeight: 1.1,
-                    color: accent ? '#a29bfe' : '#ffffff',
+                    color: accent ? '#e8866f' : '#ffffff',
                     letterSpacing: '-0.02em',
                 }}
             >
@@ -134,7 +134,7 @@ function NewsletterSignup({ totalFiles }: { totalFiles: number }) {
                 textAlign: 'center',
             }}
         >
-            <p style={{ fontSize: '0.85rem', color: '#6c5ce7', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
+            <p style={{ fontSize: '0.85rem', color: '#db5a42', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
                 Join the community
             </p>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '12px', letterSpacing: '-0.02em' }}>
@@ -170,7 +170,7 @@ function NewsletterSignup({ totalFiles }: { totalFiles: number }) {
                     style={{
                         padding: '12px 24px',
                         borderRadius: '12px',
-                        background: '#6c5ce7',
+                        background: '#db5a42',
                         color: '#ffffff',
                         fontWeight: 700,
                         fontSize: '0.95rem',
@@ -242,7 +242,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                             fontWeight: 700,
                             letterSpacing: '0.1em',
                             textTransform: 'uppercase',
-                            color: '#6c5ce7',
+                            color: '#db5a42',
                             marginBottom: '16px',
                         }}
                     >
@@ -258,7 +258,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                         }}
                     >
                         Optimage Impact:{' '}
-                        <span style={{ color: '#a29bfe' }}>By the Numbers</span>
+                        <span style={{ color: '#e8866f' }}>By the Numbers</span>
                     </h1>
                     <p
                         style={{
@@ -402,8 +402,8 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                                         style={{
                                             fontSize: '0.75rem',
                                             fontWeight: 800,
-                                            color: '#6c5ce7',
-                                            border: '1px solid rgba(108,92,231,0.4)',
+                                            color: '#db5a42',
+                                            border: '1px solid rgba(219,90,66,0.4)',
                                             borderRadius: '8px',
                                             padding: '4px 10px',
                                             flexShrink: 0,
@@ -434,8 +434,8 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                 >
                     <div
                         style={{
-                            background: 'linear-gradient(135deg, rgba(108,92,231,0.12), rgba(162,155,254,0.05))',
-                            border: '1px solid rgba(108,92,231,0.25)',
+                            background: 'linear-gradient(135deg, rgba(219,90,66,0.12), rgba(232,134,111,0.05))',
+                            border: '1px solid rgba(219,90,66,0.25)',
                             borderRadius: '20px',
                             padding: '48px 40px',
                         }}
@@ -506,7 +506,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                             display: 'inline-block',
                             padding: '14px 32px',
                             borderRadius: '14px',
-                            background: '#6c5ce7',
+                            background: '#db5a42',
                             color: '#ffffff',
                             fontWeight: 700,
                             fontSize: '1rem',
