@@ -21,10 +21,10 @@ export default function ContactPage(): React.JSX.Element {
         if (!name || !email || !message) return;
         setStatus('loading');
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/contact`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/support/ticket`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, message }),
+                body: JSON.stringify({ name, email, message, category: 'Other' }),
             });
             if (!res.ok) throw new Error('Failed');
             setStatus('success');

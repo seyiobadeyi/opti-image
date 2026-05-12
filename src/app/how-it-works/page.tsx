@@ -24,7 +24,7 @@ const steps = [
     {
         num: '03',
         title: 'We process on our servers',
-        body: 'Your images are securely uploaded, processed by our pipeline using battle-tested libraries (Sharp, libvips), and made ready for download. Processing typically takes seconds.',
+        body: 'Your images are securely uploaded and processed by our pipeline using professional-grade tools. Most jobs are done in seconds.',
     },
     {
         num: '04',
@@ -35,7 +35,7 @@ const steps = [
 
 const features: { icon: React.ReactNode; title: string; body: string }[] = [
     { icon: <Lock size={20} color="#db5a42" />, title: 'Private by design', body: 'Files are processed and deleted promptly. We never use your images for training or analysis.' },
-    { icon: <Zap size={20} color="#db5a42" />, title: 'Fast processing', body: 'Powered by Sharp and libvips — the fastest image processing libraries available. Batch jobs finish in seconds.' },
+    { icon: <Zap size={20} color="#db5a42" />, title: 'Fast processing', body: 'Powered by professional-grade tools built for speed. Even large batch jobs finish in seconds.' },
     { icon: <Globe size={20} color="#db5a42" />, title: 'Works in any browser', body: 'No app to install. Open any tool in your browser and start processing — desktop, tablet or mobile.' },
     { icon: <Star size={20} color="#db5a42" />, title: 'Free for everyone', body: 'Core tools are free with no account required. Sign up for higher limits and client gallery features.' },
 ];

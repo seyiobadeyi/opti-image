@@ -454,19 +454,25 @@ export default function CompressPage(): React.JSX.Element {
                             )}
                         </div>
 
-                        {/* Cloud import */}
-                        <div style={S.cloudRow}>
-                            <button type="button" style={S.cloudBtn} onClick={openGoogleDrive}
-                                onMouseEnter={e => (e.currentTarget.style.borderColor = '#4285F4')}
-                                onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
-                                <DriveIcon /> Import from Google Drive
-                            </button>
-                            <button type="button" style={S.cloudBtn} onClick={openDropbox}
-                                onMouseEnter={e => (e.currentTarget.style.borderColor = '#0061ff')}
-                                onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
-                                <DropboxIcon /> Import from Dropbox
-                            </button>
-                        </div>
+                        {/* Cloud import — only shown when API keys are configured */}
+                        {(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_DROPBOX_APP_KEY) && (
+                            <div style={S.cloudRow}>
+                                {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+                                    <button type="button" style={S.cloudBtn} onClick={openGoogleDrive}
+                                        onMouseEnter={e => (e.currentTarget.style.borderColor = '#4285F4')}
+                                        onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
+                                        <DriveIcon /> Import from Google Drive
+                                    </button>
+                                )}
+                                {process.env.NEXT_PUBLIC_DROPBOX_APP_KEY && (
+                                    <button type="button" style={S.cloudBtn} onClick={openDropbox}
+                                        onMouseEnter={e => (e.currentTarget.style.borderColor = '#0061ff')}
+                                        onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
+                                        <DropboxIcon /> Import from Dropbox
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </>
                 )}
 
