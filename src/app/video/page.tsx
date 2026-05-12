@@ -27,9 +27,9 @@ export const metadata: Metadata = {
 
 export default function VideoPage(): React.JSX.Element {
     return (
-        <>
+        <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
             <Header />
-            <main style={{ background: 'var(--bg-primary)', overflowX: 'hidden' }}>
+            <main style={{ background: '#fff', overflowX: 'hidden' }}>
 
                 {/* ── Hero ── */}
                 <section style={{
@@ -59,7 +59,7 @@ export default function VideoPage(): React.JSX.Element {
                     <h1 style={{
                         fontSize: 'clamp(2.5rem, 6vw, 5rem)', fontWeight: 900,
                         lineHeight: 1.06, letterSpacing: '-0.03em',
-                        marginBottom: '28px', maxWidth: '900px', color: 'var(--text-primary)',
+                        marginBottom: '28px', maxWidth: '900px', color: '#111827',
                     }}>
                         Words from your video.{' '}
                         <span style={{ background: 'linear-gradient(135deg, #ec4899, #f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -68,7 +68,7 @@ export default function VideoPage(): React.JSX.Element {
                     </h1>
 
                     <p style={{
-                        fontSize: 'clamp(1.05rem, 2.2vw, 1.3rem)', color: 'var(--text-secondary)',
+                        fontSize: 'clamp(1.05rem, 2.2vw, 1.3rem)', color: '#374151',
                         maxWidth: '640px', lineHeight: 1.7, marginBottom: '48px',
                     }}>
                         Upload a video or audio file. Get back a text transcript, translation, or extracted audio track — powered by OpenAI Whisper, the most accurate speech model available. Our engineering team is currently optimising the high-performance pipeline. Join the waitlist for early access.
@@ -87,8 +87,8 @@ export default function VideoPage(): React.JSX.Element {
                         </Link>
                         <Link href="/compress" style={{
                             padding: '16px 36px', borderRadius: '12px',
-                            border: '1px solid var(--border)', background: 'var(--bg-card)',
-                            color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem',
+                            border: '1px solid #e5e7eb', background: '#fff',
+                            color: '#111827', fontWeight: 600, fontSize: '1rem',
                             textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px',
                         }}>
                             Use image tools now
@@ -98,7 +98,7 @@ export default function VideoPage(): React.JSX.Element {
                     <div style={{
                         marginTop: '52px', display: 'flex', gap: '32px',
                         flexWrap: 'wrap', justifyContent: 'center',
-                        color: 'var(--text-muted)', fontSize: '0.82rem',
+                        color: '#9ca3af', fontSize: '0.82rem',
                     }}>
                         {['Powered by OpenAI Whisper', 'Transcription in 99+ languages', 'Translation included'].map(item => (
                             <span key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -133,7 +133,7 @@ export default function VideoPage(): React.JSX.Element {
                             },
                         ].map(feat => (
                             <div key={feat.title} style={{
-                                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                                background: '#fff', border: '1px solid #e5e7eb',
                                 borderRadius: '20px', padding: '32px',
                             }}>
                                 <div style={{
@@ -145,7 +145,7 @@ export default function VideoPage(): React.JSX.Element {
                                     {feat.icon}
                                 </div>
                                 <h3 style={{ fontWeight: 700, marginBottom: '12px', fontSize: '1.1rem' }}>{feat.title}</h3>
-                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.75, fontSize: '0.92rem' }}>{feat.desc}</p>
+                                <p style={{ color: '#374151', lineHeight: 1.75, fontSize: '0.92rem' }}>{feat.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -167,11 +167,11 @@ export default function VideoPage(): React.JSX.Element {
                             { who: 'Developers', use: 'Prototype voice features using a reliable transcription backend without building your own Whisper integration.' },
                         ].map(({ who, use }) => (
                             <div key={who} style={{
-                                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                                background: '#fff', border: '1px solid #e5e7eb',
                                 borderRadius: '14px', padding: '22px',
                             }}>
                                 <p style={{ fontWeight: 700, marginBottom: '8px', fontSize: '0.95rem', color: '#f9a8d4' }}>{who}</p>
-                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, fontSize: '0.88rem' }}>{use}</p>
+                                <p style={{ color: '#374151', lineHeight: 1.65, fontSize: '0.88rem' }}>{use}</p>
                             </div>
                         ))}
                     </div>
@@ -180,14 +180,14 @@ export default function VideoPage(): React.JSX.Element {
                 {/* ── Why Whisper ── */}
                 <section style={{ maxWidth: '800px', margin: '0 auto', padding: 'clamp(40px, 6vw, 80px) 24px' }}>
                     <div style={{
-                        background: 'var(--bg-card)', border: '1px solid var(--border)',
+                        background: '#fff', border: '1px solid #e5e7eb',
                         borderRadius: '24px', padding: 'clamp(32px, 5vw, 56px)',
                     }}>
                         <Mic size={36} style={{ color: '#ec4899', marginBottom: '20px' }} />
                         <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '20px' }}>
                             Why OpenAI Whisper?
                         </h2>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '20px' }}>
+                        <p style={{ color: '#374151', lineHeight: 1.8, marginBottom: '20px' }}>
                             Whisper is a large-scale speech recognition model trained on 680,000 hours of multilingual audio. It significantly outperforms legacy ASR tools on accented speech, overlapping speakers, and noisy environments. It&rsquo;s the same model powering transcription features in major enterprise tools — accessed here at a fraction of the cost.
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -199,7 +199,7 @@ export default function VideoPage(): React.JSX.Element {
                             ].map(point => (
                                 <div key={point} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                                     <CheckCircle size={16} style={{ color: '#22c55e', flexShrink: 0, marginTop: '2px' }} />
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>{point}</p>
+                                    <p style={{ color: '#374151', fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>{point}</p>
                                 </div>
                             ))}
                         </div>
@@ -235,7 +235,7 @@ export default function VideoPage(): React.JSX.Element {
                             </Link>
                             <Link href="/compress" style={{
                                 padding: '16px 36px', borderRadius: '12px',
-                                border: '1px solid rgba(255,255,255,0.15)', background: 'transparent',
+                                border: '1px solid #e5e7eb', background: 'transparent',
                                 color: 'rgba(255,255,255,0.8)', fontWeight: 600, fontSize: '1rem',
                                 textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px',
                             }}>
@@ -247,6 +247,6 @@ export default function VideoPage(): React.JSX.Element {
 
             </main>
             <Footer />
-        </>
+        </div>
     );
 }

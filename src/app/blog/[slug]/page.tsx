@@ -109,32 +109,32 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
     };
 
     return (
-        <>
+        <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
             <article style={{ maxWidth: '800px', margin: '0 auto', padding: '120px 24px 80px' }}>
                 {/* Visible breadcrumb trail */}
-                <nav aria-label="Breadcrumb" style={{ marginBottom: '32px', fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Home</Link>
+                <nav aria-label="Breadcrumb" style={{ marginBottom: '32px', fontSize: '0.82rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <Link href="/" style={{ color: '#9ca3af', textDecoration: 'none' }}>Home</Link>
                     <span>/</span>
-                    <Link href="/blog" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>The Optimage Journal</Link>
+                    <Link href="/blog" style={{ color: '#9ca3af', textDecoration: 'none' }}>The Optimage Journal</Link>
                     <span>/</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{postData.title}</span>
+                    <span style={{ color: '#374151' }}>{postData.title}</span>
                 </nav>
 
-                <header style={{ marginBottom: '48px', borderBottom: '1px solid var(--border)', paddingBottom: '32px' }}>
+                <header style={{ marginBottom: '48px', borderBottom: '1px solid #e5e7eb', paddingBottom: '32px' }}>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '16px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
                         {postData.title}
                     </h1>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-muted)', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: '1rem', color: '#9ca3af', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <time dateTime={postData.date}>
                             {new Date(postData.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                         </time>
-                        <span style={{ width: '4px', height: '4px', background: 'var(--text-muted)', borderRadius: '50%' }} aria-hidden="true" />
+                        <span style={{ width: '4px', height: '4px', background: '#9ca3af', borderRadius: '50%' }} aria-hidden="true" />
                         <span>By Optimage</span>
                     </div>
-                    <p style={{ marginTop: '16px', fontSize: '1.05rem', color: 'var(--text-secondary)', lineHeight: 1.7, fontStyle: 'italic' }}>
+                    <p style={{ marginTop: '16px', fontSize: '1.05rem', color: '#374151', lineHeight: 1.7, fontStyle: 'italic' }}>
                         {postData.excerpt}
                     </p>
                 </header>
@@ -144,19 +144,19 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                 {/* In-article CTA */}
                 <footer style={{ marginTop: '64px', padding: '28px', background: 'linear-gradient(135deg, rgba(219,90,66,0.1), rgba(232,134,111,0.06))', borderRadius: '16px', border: '1px solid rgba(219,90,66,0.2)', textAlign: 'center' }}>
                     <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '8px' }}>Try Optimage Free</p>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>Compress, convert, and optimize your images in seconds. No sign-up needed to start.</p>
+                    <p style={{ color: '#374151', fontSize: '0.9rem', marginBottom: '16px' }}>Compress, convert, and optimize your images in seconds. No sign-up needed to start.</p>
                     <Link href="/" className="btn btn-primary" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600 }}>
                         Start Optimizing Free
                     </Link>
                 </footer>
 
                 <div style={{ marginTop: '32px', textAlign: 'center' }}>
-                    <Link href="/blog" style={{ color: 'var(--text-muted)', fontSize: '0.88rem', textDecoration: 'none' }}>
+                    <Link href="/blog" style={{ color: '#9ca3af', fontSize: '0.88rem', textDecoration: 'none' }}>
                         Back to The Optimage Journal
                     </Link>
                 </div>
             </article>
-        </>
+        </div>
     );
 }
 

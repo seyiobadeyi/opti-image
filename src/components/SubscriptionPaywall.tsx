@@ -219,7 +219,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
             onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
         >
             <div style={{
-                background: 'var(--bg-card)',
+                background: '#fff',
                 borderRadius: '24px',
                 border: '1px solid rgba(219,90,66,0.3)',
                 maxWidth: '460px',
@@ -237,7 +237,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                         onClick={onClose}
                         style={{
                             position: 'absolute', top: '14px', right: '14px', zIndex: 10,
-                            background: 'rgba(255,255,255,0.1)', border: 'none',
+                            background: '#f3f4f6', border: 'none',
                             cursor: 'pointer', color: 'white', padding: '6px',
                             borderRadius: '50%', display: 'flex', alignItems: 'center',
                         }}
@@ -319,7 +319,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                             {/* USD Plan Selector */}
                             {usdPlans.length > 0 ? (
                                 <div style={{ marginBottom: '20px' }}>
-                                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '10px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#9ca3af', marginBottom: '10px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                                         Select Plan
                                     </div>
                                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -334,11 +334,11 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                         padding: '10px 14px',
                                                         borderRadius: '12px',
                                                         border: isSelected
-                                                            ? '2px solid var(--accent-primary)'
-                                                            : '2px solid var(--border)',
+                                                            ? '2px solid #db5a42'
+                                                            : '2px solid #e5e7eb',
                                                         background: isSelected
                                                             ? 'rgba(219,90,66,0.12)'
-                                                            : 'var(--bg-tertiary)',
+                                                            : '#f3f4f6',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.15s ease',
                                                         flex: '1 1 auto',
@@ -350,7 +350,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                         <div style={{
                                                             position: 'absolute', top: '-10px', left: '50%',
                                                             transform: 'translateX(-50%)',
-                                                            background: 'var(--gradient-primary)',
+                                                            background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                                                             color: '#fff', fontSize: '0.6rem', fontWeight: 700,
                                                             padding: '2px 8px', borderRadius: '100px',
                                                             whiteSpace: 'nowrap', letterSpacing: '0.04em',
@@ -358,10 +358,10 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                             BEST VALUE
                                                         </div>
                                                     )}
-                                                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)', marginBottom: '2px' }}>
+                                                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isSelected ? '#db5a42' : '#111827', marginBottom: '2px' }}>
                                                         {plan.label}
                                                     </div>
-                                                    <div style={{ fontSize: '0.75rem', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: 600 }}>
+                                                    <div style={{ fontSize: '0.75rem', color: isSelected ? '#db5a42' : '#9ca3af', fontWeight: 600 }}>
                                                         {formatUsdPrice(plan.priceUsd)}
                                                     </div>
                                                 </button>
@@ -370,7 +370,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                     </div>
                                 </div>
                             ) : (
-                                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '20px', textAlign: 'center' }}>
+                                <p style={{ fontSize: '0.82rem', color: '#9ca3af', marginBottom: '20px', textAlign: 'center' }}>
                                     USD plans are not yet configured. Please use NGN payment or check back later.
                                 </p>
                             )}
@@ -384,10 +384,10 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                         <div key={label} style={{
                                             display: 'flex', alignItems: 'center', gap: '8px',
                                             padding: '9px 11px', borderRadius: '10px',
-                                            background: 'var(--bg-tertiary)',
-                                            fontSize: '0.8rem', color: 'var(--text-secondary)',
+                                            background: '#f3f4f6',
+                                            fontSize: '0.8rem', color: '#374151',
                                         }}>
-                                            <Icon size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                                            <Icon size={13} style={{ color: '#db5a42', flexShrink: 0 }} />
                                             {label === 'Full access period' ? `${usdDuration} access` : label}
                                         </div>
                                     );
@@ -402,7 +402,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                             onClick={() => setShowPromo(true)}
                                             style={{
                                                 background: 'none', border: 'none', cursor: 'pointer',
-                                                color: 'var(--text-muted)', fontSize: '0.8rem',
+                                                color: '#9ca3af', fontSize: '0.8rem',
                                                 display: 'flex', alignItems: 'center', gap: '5px', padding: 0,
                                             }}
                                         >
@@ -413,7 +413,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                             <div style={{ flex: 1, position: 'relative' }}>
                                                 <Tag size={13} style={{
                                                     position: 'absolute', left: '11px', top: '50%',
-                                                    transform: 'translateY(-50%)', color: 'var(--text-muted)',
+                                                    transform: 'translateY(-50%)', color: '#9ca3af',
                                                 }} />
                                                 <input
                                                     type="text"
@@ -426,8 +426,8 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                     autoFocus
                                                     style={{
                                                         width: '100%', padding: '9px 11px 9px 32px',
-                                                        borderRadius: '10px', border: '1px solid var(--border)',
-                                                        background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                                        borderRadius: '10px', border: '1px solid #e5e7eb',
+                                                        background: '#f3f4f6', color: '#111827',
                                                         fontSize: '0.85rem', outline: 'none',
                                                     }}
                                                     disabled={promoStatus === 'loading'}
@@ -490,7 +490,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                             <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'rgba(251,191,36,0.9)', margin: 0, marginBottom: '3px' }}>
                                                 International payments coming soon
                                             </p>
-                                            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+                                            <p style={{ fontSize: '0.76rem', color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
                                                 USD card payments are being activated. Have a promo code? Enter it above for free access. Otherwise, switch to NGN to pay now.
                                             </p>
                                         </div>
@@ -524,7 +524,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                 </button>
                             )}
 
-                            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '10px' }}>
+                            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#9ca3af', marginTop: '10px' }}>
                                 {usdPaymentsLive
                                     ? 'Secure checkout via Lemon Squeezy · Prices in USD · Works with any international card'
                                     : 'Secure NGN checkout via Paystack · Instant activation · Cancel anytime'}
@@ -535,7 +535,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                             {/* Plan Selector */}
                             {plans.length > 1 && !pricing?.promoApplied && (
                                 <div style={{ marginBottom: '20px' }}>
-                                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '10px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#9ca3af', marginBottom: '10px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                                         Select Plan
                                     </div>
                                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -551,11 +551,11 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                         padding: '10px 14px',
                                                         borderRadius: '12px',
                                                         border: isSelected
-                                                            ? '2px solid var(--accent-primary)'
-                                                            : '2px solid var(--border)',
+                                                            ? '2px solid #db5a42'
+                                                            : '2px solid #e5e7eb',
                                                         background: isSelected
                                                             ? 'rgba(219,90,66,0.12)'
-                                                            : 'var(--bg-tertiary)',
+                                                            : '#f3f4f6',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.15s ease',
                                                         flex: '1 1 auto',
@@ -567,7 +567,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                         <div style={{
                                                             position: 'absolute', top: '-10px', left: '50%',
                                                             transform: 'translateX(-50%)',
-                                                            background: 'var(--gradient-primary)',
+                                                            background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                                                             color: '#fff', fontSize: '0.6rem', fontWeight: 700,
                                                             padding: '2px 8px', borderRadius: '100px',
                                                             whiteSpace: 'nowrap', letterSpacing: '0.04em',
@@ -575,10 +575,10 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                             BEST VALUE
                                                         </div>
                                                     )}
-                                                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)', marginBottom: '2px' }}>
+                                                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isSelected ? '#db5a42' : '#111827', marginBottom: '2px' }}>
                                                         {plan.label}
                                                     </div>
-                                                    <div style={{ fontSize: '0.75rem', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)', fontWeight: 600 }}>
+                                                    <div style={{ fontSize: '0.75rem', color: isSelected ? '#db5a42' : '#9ca3af', fontWeight: 600 }}>
                                                         {formatNgnPrice(plan.price)}
                                                     </div>
                                                 </button>
@@ -594,10 +594,10 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                     <div key={label} style={{
                                         display: 'flex', alignItems: 'center', gap: '8px',
                                         padding: '9px 11px', borderRadius: '10px',
-                                        background: 'var(--bg-tertiary)',
-                                        fontSize: '0.8rem', color: 'var(--text-secondary)',
+                                        background: '#f3f4f6',
+                                        fontSize: '0.8rem', color: '#374151',
                                     }}>
-                                        <Icon size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                                        <Icon size={13} style={{ color: '#db5a42', flexShrink: 0 }} />
                                         {label === 'Full access period'
                                             ? `${effectiveDuration} access`
                                             : label}
@@ -613,7 +613,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                             onClick={() => setShowPromo(true)}
                                             style={{
                                                 background: 'none', border: 'none', cursor: 'pointer',
-                                                color: 'var(--text-muted)', fontSize: '0.8rem',
+                                                color: '#9ca3af', fontSize: '0.8rem',
                                                 display: 'flex', alignItems: 'center', gap: '5px', padding: 0,
                                             }}
                                         >
@@ -624,7 +624,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                             <div style={{ flex: 1, position: 'relative' }}>
                                                 <Tag size={13} style={{
                                                     position: 'absolute', left: '11px', top: '50%',
-                                                    transform: 'translateY(-50%)', color: 'var(--text-muted)',
+                                                    transform: 'translateY(-50%)', color: '#9ca3af',
                                                 }} />
                                                 <input
                                                     type="text"
@@ -637,8 +637,8 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                                     autoFocus
                                                     style={{
                                                         width: '100%', padding: '9px 11px 9px 32px',
-                                                        borderRadius: '10px', border: '1px solid var(--border)',
-                                                        background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                                        borderRadius: '10px', border: '1px solid #e5e7eb',
+                                                        background: '#f3f4f6', color: '#111827',
                                                         fontSize: '0.85rem', outline: 'none',
                                                     }}
                                                     disabled={promoStatus === 'loading'}
@@ -679,7 +679,7 @@ export default function SubscriptionPaywall({ onSubscribed, onClose }: Subscript
                                 }
                             </button>
 
-                            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '10px' }}>
+                            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#9ca3af', marginTop: '10px' }}>
                                 Secure checkout via Paystack · Instant activation · Cancel anytime
                             </p>
                         </>

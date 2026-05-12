@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -53,7 +53,7 @@ export default function DropZone({ onFilesAdded, disabled = false, acceptTypes =
                 className={`dropzone ${isDragActive ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
             >
                 <input {...getInputProps()} />
-                <div className="dropzone-icon" style={{ marginBottom: '1rem', color: 'var(--primary)' }}>
+                <div className="dropzone-icon" style={{ marginBottom: '1rem', color: '#db5a42' }}>
                     <UploadCloud size={48} />
                 </div>
                 <div className="dropzone-text">

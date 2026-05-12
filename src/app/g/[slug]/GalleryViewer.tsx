@@ -756,7 +756,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             borderRadius: '2px',
                         }}
                         onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)';
+                            (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6';
                         }}
                         onMouseLeave={(e) => {
                             (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
@@ -910,7 +910,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     )}
                     {zipProgress !== null && (
                         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '140px', height: '4px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+                            <div style={{ width: '140px', height: '4px', borderRadius: '4px', background: '#f3f4f6', overflow: 'hidden' }}>
                                 <div style={{ height: '100%', width: `${zipProgress}%`, background: '#db5a42', borderRadius: '4px', transition: 'width 0.2s' }} />
                             </div>
                             <span style={{ color: '#9ca3af', fontSize: '0.82rem' }}>Building ZIP… {zipProgress}%</span>
@@ -1246,7 +1246,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
                                 padding: '8px 16px', borderRadius: '8px',
-                                background: 'rgba(255,255,255,0.1)',
+                                background: '#f3f4f6',
                                 border: '1px solid rgba(255,255,255,0.2)',
                                 color: '#fff', fontSize: '0.85rem',
                                 cursor: 'pointer', transition: 'background 0.15s',
@@ -1289,12 +1289,12 @@ const styles: Record<string, React.CSSProperties> = {
     grid:        { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px', padding: '4px', maxWidth: '1400px', margin: '0 auto' },
     gridItem:    { position: 'relative', aspectRatio: '1', overflow: 'hidden', cursor: 'pointer', background: '#111', userSelect: 'none' as const, WebkitUserSelect: 'none' as const },
     gridOverlay: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', opacity: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: '12px', transition: 'opacity 0.2s' },
-    downloadBtn: { background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#ffffff', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    downloadBtn: { background: '#e5e7eb', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#ffffff', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
     footer:      { textAlign: 'center', padding: '32px', color: '#4b5563', fontSize: '0.85rem', borderTop: '1px solid #1a1a1a', marginTop: '32px' },
     lightboxOverlay: { position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
     lightboxContent: { position: 'relative', width: 'calc(100vw - 160px)', height: 'calc(100vh - 120px)', maxWidth: '1200px' },
-    lbClose:     { position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '50%', width: '44px', height: '44px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
-    lbNav:       { position: 'absolute', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '50%', width: '52px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    lbClose:     { position: 'absolute', top: '16px', right: '16px', background: '#f3f4f6', border: 'none', color: '#fff', borderRadius: '50%', width: '44px', height: '44px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    lbNav:       { position: 'absolute', top: '50%', transform: 'translateY(-50%)', background: '#f3f4f6', border: 'none', color: '#fff', borderRadius: '50%', width: '52px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
     lbDownload:  { position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(124,58,237,0.85)', border: '1px solid rgba(124,58,237,0.5)', backdropFilter: 'blur(8px)', color: '#fff', borderRadius: '10px', padding: '10px 20px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', zIndex: 10 },
     lbCounter:   { position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', color: '#9ca3af', fontSize: '0.85rem', zIndex: 10, whiteSpace: 'nowrap' },
 };

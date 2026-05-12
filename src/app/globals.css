@@ -1,51 +1,93 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette â€” Dark Mode */
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-tertiary: #1a1a2e;
-  --bg-card: #16162a;
-  --bg-card-hover: #1e1e3a;
-  --bg-glass: rgba(22, 22, 42, 0.7);
+  /* ── Optimage design tokens ─────────────────────────────────────────────
+     Keep in sync with src/lib/colors.ts  (that file is the TS source of truth).
+     Use var(--c-*) in any .css class; import { c } from '@/lib/colors' in .tsx.
+  ── ───────────────────────────────────────────────────────────────────── */
 
-  --text-primary: #f0f0f5;
-  --text-secondary: #a0a0b5;
-  --text-muted: #6b6b80;
+  /* Brand */
+  --c-accent:        #db5a42;
+  --c-accent-dark:   #c44d32;
+  --c-accent-light:  #fdf3f1;
+  --c-accent-glow:   rgba(219, 90, 66, 0.15);
+  --c-gradient:      linear-gradient(135deg, #db5a42 0%, #c44d32 100%);
 
+  /* Gray scale */
+  --c-white:    #ffffff;
+  --c-gray-50:  #f9fafb;
+  --c-gray-100: #f3f4f6;
+  --c-gray-200: #e5e7eb;
+  --c-gray-300: #d1d5db;
+  --c-gray-400: #9ca3af;
+  --c-gray-500: #6b7280;
+  --c-gray-600: #4b5563;
+  --c-gray-700: #374151;
+  --c-gray-800: #1f2937;
+  --c-gray-900: #111827;
+
+  /* Semantic aliases */
+  --c-bg:             #ffffff;
+  --c-bg-subtle:      #f9fafb;
+  --c-bg-muted:       #f3f4f6;
+  --c-border:         #e5e7eb;
+  --c-border-focus:   #d1d5db;
+  --c-text:           #111827;
+  --c-text-secondary: #374151;
+  --c-text-muted:     #9ca3af;
+
+  /* Status */
+  --c-success: #16a34a;
+  --c-error:   #dc2626;
+  --c-warning: #d97706;
+
+  /* Radius */
+  --c-radius-sm: 8px;
+  --c-radius-md: 12px;
+  --c-radius-lg: 16px;
+  --c-radius-xl: 24px;
+
+  /* Shadows */
+  --c-shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.06);
+  --c-shadow-md:   0 4px 16px rgba(0, 0, 0, 0.08);
+  --c-shadow-lg:   0 8px 32px rgba(0, 0, 0, 0.10);
+  --c-shadow-glow: 0 4px 20px rgba(219, 90, 66, 0.20);
+
+  /* Transitions */
+  --c-transition-fast:    0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --c-transition-base:    0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --c-transition-slow:    0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --c-transition-glossy:  0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Legacy aliases (kept for any CSS rules not yet migrated) ── */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-card: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #9ca3af;
   --accent-primary: #db5a42;
   --accent-secondary: #e8866f;
-  --accent-glow: rgba(219, 90, 66, 0.3);
-
+  --accent-glow: rgba(219, 90, 66, 0.15);
   --success: #16a34a;
-  --success-bg: rgba(22, 163, 74, 0.1);
+  --success-bg: rgba(22, 163, 74, 0.06);
   --warning: #d97706;
-  --warning-bg: rgba(217, 119, 6, 0.1);
   --error: #dc2626;
-  --error-bg: rgba(220, 38, 38, 0.1);
-
-  --gradient-primary: linear-gradient(135deg, #db5a42, #c44d32);
-  --gradient-accent: linear-gradient(135deg, #db5a42, #e8866f);
-  --gradient-bg: linear-gradient(180deg, #0a0a0f 0%, #12121a 50%, #0a0a0f 100%);
-  --gradient-card: linear-gradient(145deg, rgba(219, 90, 66, 0.05), rgba(232, 134, 111, 0.02));
-
-  --border: rgba(0, 0, 0, 0.12);
-  --border-hover: rgba(0, 0, 0, 0.22);
-
+  --gradient-primary: linear-gradient(135deg, #db5a42 0%, #c44d32 100%);
+  --border: #e5e7eb;
+  --border-hover: #d1d5db;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 30px rgba(219, 90, 66, 0.18);
-
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 4px 20px rgba(219, 90, 66, 0.20);
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-glossy: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --primary: #db5a42;
 }
 
 *,
@@ -1024,16 +1066,19 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 60px 24px;
+  background: #fff;
+  color: #111827;
 }
 
 .legal-page h1 {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 8px;
+  color: #111827;
 }
 
 .legal-page .last-updated {
-  color: var(--text-muted);
+  color: #9ca3af;
   font-size: 0.85rem;
   margin-bottom: 32px;
 }
@@ -1043,12 +1088,12 @@ body {
   font-weight: 600;
   margin-top: 32px;
   margin-bottom: 12px;
-  color: var(--accent-secondary);
+  color: #db5a42;
 }
 
 .legal-page p,
 .legal-page li {
-  color: var(--text-secondary);
+  color: #374151;
   font-size: 0.95rem;
   line-height: 1.7;
   margin-bottom: 12px;

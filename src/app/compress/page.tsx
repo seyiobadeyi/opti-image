@@ -16,13 +16,13 @@
  *  - Re-compress same batch with different settings
  */
 
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import Link from 'next/link';
-import { AnimatePresence } from 'framer-motion';
+import React, { useState, useCallback, useRef } from 'react';
+import { Image as ImageIcon, X, CheckCircle, Download } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { apiClient } from '@/lib/api';
-import { createClient } from '@/utils/supabase/client';
-import AuthModal from '@/components/AuthModal';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { c } from '@/lib/colors';
 import type { ProcessedImage, ProcessingSummary } from '@/types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -75,28 +75,25 @@ declare global {
 // ─── Styles (all light / white) ───────────────────────────────────────────────
 
 const clr = {
-    blue:       '#db5a42',
-    blueDark:   '#c44d32',
-    blueLight:  '#fdf3f1',
-    green:      '#16a34a',
+    blue:       c.accent,
+    blueDark:   c.accentDark,
+    blueLight:  c.accentLight,
+    green:      c.success,
     greenLight: '#f0fdf4',
     greenBorder:'#bbf7d0',
-    red:        '#dc2626',
+    red:        c.error,
     redLight:   '#fef2f2',
-    gray50:     '#f9fafb',
-    gray100:    '#f3f4f6',
-    gray200:    '#e5e7eb',
-    gray400:    '#9ca3af',
-    gray600:    '#4b5563',
-    gray700:    '#374151',
-    gray900:    '#111827',
+    gray50:     c.gray50,
+    gray100:    c.gray100,
+    gray200:    c.border,
+    gray400:    c.textMuted,
+    gray600:    c.gray600,
+    gray700:    c.textSecondary,
+    gray900:    c.text,
 };
 
 const S: Record<string, React.CSSProperties> = {
     page:         { minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: clr.gray900 },
-    header:       { borderBottom: `1px solid ${clr.gray200}`, background: '#fff', position: 'sticky', top: 0, zIndex: 100 },
-    headerInner:  { maxWidth: '1100px', margin: '0 auto', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    logo:         { display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: clr.gray900, fontWeight: 700, fontSize: '1rem' },
     hero:         { textAlign: 'center', padding: '44px 24px 28px' },
     h1:           { fontSize: 'clamp(1.8rem, 5vw, 2.6rem)', fontWeight: 800, color: clr.gray900, marginBottom: '10px', letterSpacing: '-0.02em', lineHeight: 1.2 },
     subtext:      { color: clr.gray400, fontSize: '0.97rem', maxWidth: '520px', margin: '0 auto', lineHeight: 1.65 },
@@ -138,8 +135,6 @@ const S: Record<string, React.CSSProperties> = {
     savingsPill:  { fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: '#dcfce7', color: clr.green, whiteSpace: 'nowrap' },
     dlBtn:        { background: 'none', border: `1.5px solid ${clr.gray200}`, borderRadius: '8px', color: clr.gray700, fontSize: '0.8rem', fontWeight: 600, padding: '4px 11px', cursor: 'pointer', transition: 'border-color 0.15s', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' },
     resetBtn:     { display: 'block', width: '100%', textAlign: 'center', marginTop: '20px', color: clr.gray400, fontSize: '0.88rem', cursor: 'pointer', background: 'none', border: 'none', padding: '8px', textDecoration: 'underline', textUnderlineOffset: '2px' },
-    footer:       { borderTop: `1px solid ${clr.gray200}`, padding: '20px 24px', textAlign: 'center', color: clr.gray400, fontSize: '0.8rem' },
-    footerLink:   { color: clr.gray400, textDecoration: 'none', marginInline: '8px' },
 };
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -174,23 +169,7 @@ export default function CompressPage(): React.JSX.Element {
     const [error, setError] = useState<string | null>(null);
     const [editingIdx, setEditingIdx] = useState<number | null>(null);
     const [editVal, setEditVal] = useState('');
-    const [authed, setAuthed] = useState(false);
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-    const supabase = useMemo(() => createClient(), []);
     const addMoreInputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => setAuthed(!!session));
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setAuthed(!!s));
-        // Listen for auth modal events dispatched by compression gating
-        const handleOpenModal = () => setIsAuthModalOpen(true);
-        window.addEventListener('open-auth-modal', handleOpenModal);
-        return () => {
-            subscription.unsubscribe();
-            window.removeEventListener('open-auth-modal', handleOpenModal);
-        };
-    }, [supabase]);
 
     // ── File management
     const addFiles = useCallback((newFiles: File[]) => {
@@ -322,11 +301,6 @@ export default function CompressPage(): React.JSX.Element {
     const handleCompress = useCallback(async () => {
         if (!entries.length || processing) return;
 
-        if (!authed) {
-            window.dispatchEvent(new Event('open-auth-modal'));
-            return;
-        }
-
         setProcessing(true);
         setError(null);
         setResults(null);
@@ -371,15 +345,15 @@ export default function CompressPage(): React.JSX.Element {
             });
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Something went wrong.';
-            if (msg.toLowerCase().includes('subscri')) {
-                setError('You need a subscription to compress images. Sign up free to continue — no credit card needed.');
+            if (msg.toLowerCase().includes('subscri') || msg.toLowerCase().includes('unauthorized') || msg.toLowerCase().includes('401')) {
+                window.dispatchEvent(new Event('open-auth-modal'));
             } else {
                 setError(msg);
             }
         } finally {
             setProcessing(false);
         }
-    }, [entries, processing, authed, quality, format]);
+    }, [entries, processing, quality, format]);
 
     // ── Downloads
     const downloadOne = useCallback(async (result: ResultEntry) => {
@@ -430,29 +404,7 @@ export default function CompressPage(): React.JSX.Element {
     return (
         <div style={S.page}>
 
-            {/* ── Header ──────────────────────────────────────────────────── */}
-            <header style={S.header}>
-                <div style={S.headerInner}>
-                    <Link href="/" style={S.logo}>
-                        <img src="/logo.png" alt="Optimage" style={{ height: '26px', width: 'auto' }} />
-                        <span>Optimage</span>
-                    </Link>
-                    <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                        <Link href="/compress" style={{ color: clr.blue, textDecoration: 'none', fontWeight: 600, fontSize: '0.88rem', padding: '6px 12px', borderRadius: '8px', background: clr.blueLight }}>Compress</Link>
-                        <Link href="/dashboard?tab=galleries" style={{ color: clr.gray700, textDecoration: 'none', fontWeight: 500, fontSize: '0.88rem', padding: '6px 12px', borderRadius: '8px' }}>Galleries</Link>
-                        <Link href="/pricing" style={{ color: clr.gray700, textDecoration: 'none', fontWeight: 500, fontSize: '0.88rem', padding: '6px 12px', borderRadius: '8px' }}>Pricing</Link>
-                        {authed ? (
-                            <Link href="/dashboard" style={{ background: clr.blue, color: '#fff', textDecoration: 'none', borderRadius: '8px', padding: '7px 16px', fontSize: '0.88rem', fontWeight: 600, marginLeft: '6px' }}>
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <button type="button" onClick={() => setIsAuthModalOpen(true)} style={{ background: clr.blue, color: '#fff', border: 'none', borderRadius: '8px', padding: '7px 16px', fontSize: '0.88rem', fontWeight: 600, marginLeft: '6px', cursor: 'pointer' }}>
-                                Sign up free
-                            </button>
-                        )}
-                    </nav>
-                </div>
-            </header>
+            <Header />
 
             {/* ── Hero ────────────────────────────────────────────────────── */}
             <div style={S.hero}>
@@ -484,7 +436,7 @@ export default function CompressPage(): React.JSX.Element {
                                 </p>
                             ) : (
                                 <>
-                                    <div style={{ fontSize: '2.6rem', marginBottom: '12px', userSelect: 'none' }}>🖼</div>
+                                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><ImageIcon size={40} color={clr.gray400} /></div>
                                     <button
                                         type="button"
                                         style={S.selectBtn}
@@ -556,7 +508,7 @@ export default function CompressPage(): React.JSX.Element {
                                         onClick={() => removeEntry(i)}
                                         onMouseEnter={e => (e.currentTarget.style.color = clr.red)}
                                         onMouseLeave={e => (e.currentTarget.style.color = clr.gray200)}>
-                                        ✕
+                                        <X size={12} />
                                     </button>
                                 </div>
                             ))}
@@ -616,7 +568,7 @@ export default function CompressPage(): React.JSX.Element {
                                     style={{ border: `1.5px solid ${clr.gray200}`, borderRadius: '8px', padding: '7px 10px', fontSize: '0.88rem', background: '#fff', color: clr.gray700, cursor: 'pointer', outline: 'none' }}
                                 >
                                     <option value="">Same as original</option>
-                                    <option value="webp">WebP — smallest size ✨</option>
+                                    <option value="webp">WebP — smallest size</option>
                                     <option value="jpeg">JPEG</option>
                                     <option value="png">PNG</option>
                                     <option value="avif">AVIF</option>
@@ -654,7 +606,10 @@ export default function CompressPage(): React.JSX.Element {
                     <>
                         {/* Summary */}
                         <div style={S.resultBanner}>
-                            <div style={S.resultPct}>{hasSavings ? `${summary.totalSavingsPercent}%` : '✓'}</div>
+                            {hasSavings
+                                ? <div style={S.resultPct}>{summary.totalSavingsPercent}%</div>
+                                : <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }}><CheckCircle size={44} color={clr.green} /></div>
+                            }
                             <div style={S.resultLbl}>{hasSavings ? 'smaller' : 'images compressed'}</div>
                             <div style={S.resultSizes}>
                                 {fmtBytes(summary.totalOriginalSize)} → {fmtBytes(summary.totalProcessedSize ?? 0)}
@@ -670,7 +625,7 @@ export default function CompressPage(): React.JSX.Element {
                             onMouseEnter={e => (e.currentTarget.style.background = clr.blueDark)}
                             onMouseLeave={e => (e.currentTarget.style.background = clr.blue)}
                         >
-                            ↓ Download {results.length > 1 ? `all ${results.length} as ZIP` : 'compressed file'}
+                            <Download size={16} /> Download {results.length > 1 ? `all ${results.length} as ZIP` : 'compressed file'}
                         </button>
 
                         {/* Cloud export row */}
@@ -694,7 +649,7 @@ export default function CompressPage(): React.JSX.Element {
                                         {r.localUrl ? (
                                             <img src={r.localUrl} alt={r.displayName} style={S.fileThumb as React.CSSProperties} />
                                         ) : (
-                                            <div style={{ ...S.fileThumb, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>🖼</div>
+                                            <div style={{ ...S.fileThumb, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ImageIcon size={18} color={clr.gray400} /></div>
                                         )}
                                         <span style={S.fileName}>{r.displayName}</span>
                                         {pct > 0 && <span style={S.savingsPill}>−{r.savingsPercent}%</span>}
@@ -702,7 +657,7 @@ export default function CompressPage(): React.JSX.Element {
                                         <button type="button" style={S.dlBtn} onClick={() => downloadOne(r)}
                                             onMouseEnter={e => (e.currentTarget.style.borderColor = clr.blue)}
                                             onMouseLeave={e => (e.currentTarget.style.borderColor = clr.gray200)}>
-                                            ↓ Save
+                                            <Download size={13} /> Save
                                         </button>
                                     </div>
                                 );
@@ -717,25 +672,7 @@ export default function CompressPage(): React.JSX.Element {
                 )}
             </div>
 
-            {/* ── Auth modal (for unauthenticated compress attempts) ─── */}
-            <AnimatePresence>
-                {isAuthModalOpen && (
-                    <AuthModal
-                        isOpen={isAuthModalOpen}
-                        onClose={() => setIsAuthModalOpen(false)}
-                        initialStep="email"
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* ── Footer ────────────────────────────────────────────────── */}
-            <footer style={S.footer}>
-                <Link href="/" style={S.footerLink}>Optimage</Link>
-                <Link href="/pricing" style={S.footerLink}>Pricing</Link>
-                <Link href="/dashboard?tab=galleries" style={S.footerLink}>Photo Galleries</Link>
-                <Link href="/terms" style={S.footerLink}>Terms</Link>
-                <span style={{ marginLeft: '8px' }}>© {new Date().getFullYear()}</span>
-            </footer>
+            <Footer />
         </div>
     );
 }

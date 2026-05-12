@@ -1,35 +1,17 @@
-'use client';
+﻿'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { AnimatePresence } from 'framer-motion';
 import {
     Minimize2, RefreshCw, Crop, RotateCcw, Sparkles, ShieldOff,
-    Camera, Layers, ChevronRight, ImagePlus, Droplets, Type,
-    Maximize2, Scissors, Image, ZoomIn, Menu, X, ArrowRight,
+    Camera, Layers, ChevronRight, ImagePlus, Type,
+    Maximize2, Scissors, Image, ZoomIn, ArrowRight,
     CheckCircle, Zap, Globe,
 } from 'lucide-react';
-import { createClient } from '@/utils/supabase/client';
-import AuthModal from '@/components/AuthModal';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import CookieConsent from '@/components/CookieConsent';
-
-// ── Palette ───────────────────────────────────────────────────────────────
-
-const c = {
-    blue:    '#db5a42',
-    blueDk:  '#c44d32',
-    blueLt:  '#fdf3f1',
-    gray50:  '#f9fafb',
-    gray100: '#f3f4f6',
-    gray200: '#e5e7eb',
-    gray300: '#d1d5db',
-    gray400: '#9ca3af',
-    gray500: '#6b7280',
-    gray600: '#4b5563',
-    gray700: '#374151',
-    gray800: '#1f2937',
-    gray900: '#111827',
-};
+import { c } from '@/lib/colors';
 
 // ── Tool definitions ──────────────────────────────────────────────────────
 
@@ -47,7 +29,7 @@ interface Tool {
     soon?: boolean;
 }
 
-const IC = { bg: '#fdf3f1', color: '#db5a42' };
+const IC = { bg: c.accentLight, color: c.accent };
 
 const TOOLS: Tool[] = [
     {
@@ -62,7 +44,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Resize Images',
         desc: 'Set exact pixel dimensions or scale images up and down while keeping them sharp.',
-        href: '/compress',
+        href: '/resize',
         Icon: Crop,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
@@ -70,7 +52,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Convert Format',
         desc: 'Turn any image into WebP, AVIF, JPEG or PNG. The format your project actually needs.',
-        href: '/compress',
+        href: '/convert',
         Icon: RefreshCw,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
@@ -78,7 +60,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Flip & Rotate',
         desc: 'Mirror images horizontally or vertically, rotate to any angle in one click.',
-        href: '/compress',
+        href: '/rotate',
         Icon: RotateCcw,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
@@ -86,7 +68,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Auto Enhance',
         desc: 'Automatically correct colours, contrast and brightness so photos look their best.',
-        href: '/compress',
+        href: '/enhance',
         Icon: Sparkles,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'optimize'],
@@ -94,7 +76,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Remove Metadata',
         desc: 'Strip hidden camera data like GPS location and device info before you share.',
-        href: '/compress',
+        href: '/metadata',
         Icon: ShieldOff,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'optimize'],
@@ -119,7 +101,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Crop Image',
         desc: 'Trim your images to a specific area or aspect ratio. Portrait, landscape or square.',
-        href: '/compress',
+        href: '/crop',
         Icon: Scissors,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
@@ -128,7 +110,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Upscale Image',
         desc: 'Increase image resolution without blurring. Great for low-res photos and icons.',
-        href: '/compress',
+        href: '/upscale',
         Icon: ZoomIn,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'optimize'],
@@ -137,7 +119,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Remove Background',
         desc: 'Instantly cut out backgrounds from product photos, portraits and logos.',
-        href: '/compress',
+        href: '/remove-bg',
         Icon: ImagePlus,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
@@ -146,7 +128,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Add Watermark',
         desc: 'Protect your images with a custom text or logo watermark before sharing.',
-        href: '/compress',
+        href: '/watermark',
         Icon: Type,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
@@ -155,15 +137,16 @@ const TOOLS: Tool[] = [
     {
         name: 'Photo Editor',
         desc: 'Fine-tune brightness, contrast, saturation and apply filters to any image.',
-        href: '/compress',
+        href: '/editor',
         Icon: Image,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
+        soon: true,
     },
     {
         name: 'Increase Size',
         desc: 'Export images at a larger canvas size or higher DPI for print-ready output.',
-        href: '/compress',
+        href: '/increase-size',
         Icon: Maximize2,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
@@ -178,15 +161,6 @@ const CATEGORIES: { id: Category; label: string }[] = [
     { id: 'deliver',  label: 'Deliver' },
 ];
 
-const NAV_LINKS = [
-    { href: '/compress',                label: 'Compress' },
-    { href: '/compress',                label: 'Convert' },
-    { href: '/compress',                label: 'Resize' },
-    { href: '/dashboard?tab=galleries', label: 'Galleries' },
-    { href: '/pricing',                 label: 'Pricing' },
-    { href: '/blog',                    label: 'Blog' },
-];
-
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const S: Record<string, React.CSSProperties> = {
@@ -195,43 +169,6 @@ const S: Record<string, React.CSSProperties> = {
         background: '#fff',
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         color: c.gray900,
-    },
-    header: {
-        borderBottom: `1px solid ${c.gray200}`,
-        background: '#fff',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-    },
-    headerInner: {
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '0 24px',
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '16px',
-    },
-    logo: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        textDecoration: 'none',
-        color: c.gray900,
-        fontWeight: 800,
-        fontSize: '1.1rem',
-        flexShrink: 0,
-    },
-    navLink: {
-        color: c.gray600,
-        textDecoration: 'none',
-        fontWeight: 500,
-        fontSize: '0.9rem',
-        padding: '6px 12px',
-        borderRadius: '8px',
-        whiteSpace: 'nowrap',
-        transition: 'background 0.1s, color 0.1s',
     },
     hero: {
         textAlign: 'center',
@@ -297,7 +234,7 @@ const S: Record<string, React.CSSProperties> = {
     arrow: {
         marginTop: 'auto',
         paddingTop: '10px',
-        color: c.blue,
+        color: c.accent,
         fontSize: '0.82rem',
         display: 'flex',
         alignItems: 'center',
@@ -308,7 +245,7 @@ const S: Record<string, React.CSSProperties> = {
         position: 'absolute',
         top: '14px',
         right: '14px',
-        background: c.blue,
+        background: c.accent,
         color: '#fff',
         fontSize: '0.6rem',
         fontWeight: 700,
@@ -382,7 +319,7 @@ const S: Record<string, React.CSSProperties> = {
     },
     featureName:  { fontWeight: 700, fontSize: '1rem', color: c.gray900 },
     featureDesc:  { color: c.gray500, fontSize: '0.88rem', lineHeight: 1.6 },
-    featureLink:  { display: 'flex', alignItems: 'center', gap: '4px', color: c.blue, fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', marginTop: 'auto' },
+    featureLink:  { display: 'flex', alignItems: 'center', gap: '4px', color: c.accent, fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', marginTop: 'auto' },
     // ── Premium CTA ──────────────────────────────────────────────────────
     premiumSection: {
         padding: '72px 24px',
@@ -391,7 +328,7 @@ const S: Record<string, React.CSSProperties> = {
     premiumInner: {
         maxWidth: '1100px',
         margin: '0 auto',
-        background: `linear-gradient(135deg, ${c.blue} 0%, ${c.blueDk} 100%)`,
+        background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accentDark} 100%)`,
         borderRadius: '24px',
         padding: '56px 48px',
         display: 'flex',
@@ -403,7 +340,7 @@ const S: Record<string, React.CSSProperties> = {
     premiumH2:   { fontSize: 'clamp(1.6rem, 3vw, 2rem)', fontWeight: 800, color: '#fff', marginBottom: '14px', letterSpacing: '-0.02em' },
     premiumSub:  { color: 'rgba(255,255,255,0.82)', fontSize: '1rem', lineHeight: 1.65, marginBottom: '28px' },
     premiumList: { listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '10px' },
-    premiumBtn:  { display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fff', color: c.blue, border: 'none', borderRadius: '10px', padding: '13px 28px', fontSize: '0.97rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', transition: 'opacity 0.15s' },
+    premiumBtn:  { display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fff', color: c.accent, border: 'none', borderRadius: '10px', padding: '13px 28px', fontSize: '0.97rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', transition: 'opacity 0.15s' },
     // ── Trust strip ──────────────────────────────────────────────────────
     trustStrip: {
         borderTop: `1px solid ${c.gray200}`,
@@ -423,58 +360,6 @@ const S: Record<string, React.CSSProperties> = {
     },
     trustNum: { fontSize: '1.6rem', fontWeight: 800, color: c.gray900, letterSpacing: '-0.02em' },
     trustLbl: { fontSize: '0.82rem', color: c.gray500 },
-    // ── Footer ───────────────────────────────────────────────────────────
-    footer: {
-        background: c.gray900,
-        color: 'rgba(255,255,255,0.6)',
-        padding: '56px 24px 32px',
-    },
-    footerInner: {
-        maxWidth: '1100px',
-        margin: '0 auto',
-    },
-    footerGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-        gap: '32px',
-        marginBottom: '48px',
-    },
-    footerColTitle: {
-        color: '#fff',
-        fontWeight: 700,
-        fontSize: '0.875rem',
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
-        marginBottom: '16px',
-    },
-    footerLink: {
-        color: 'rgba(255,255,255,0.55)',
-        textDecoration: 'none',
-        fontSize: '0.875rem',
-        display: 'block',
-        marginBottom: '10px',
-        transition: 'color 0.12s',
-    },
-    footerBottom: {
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        paddingTop: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '12px',
-        fontSize: '0.82rem',
-        color: 'rgba(255,255,255,0.4)',
-    },
-    mobileOverlay: {
-        position: 'fixed',
-        inset: 0,
-        background: '#fff',
-        zIndex: 200,
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '0 24px 32px',
-    },
 };
 
 const TRUST = [
@@ -523,161 +408,16 @@ const FEATURES = [
     },
 ];
 
-const FOOTER_COLS = [
-    {
-        title: 'Product',
-        links: [
-            { label: 'Compress Images',  href: '/compress' },
-            { label: 'Convert Format',   href: '/compress' },
-            { label: 'Resize Images',    href: '/compress' },
-            { label: 'Client Galleries', href: '/dashboard?tab=galleries' },
-            { label: 'Pricing',          href: '/pricing' },
-        ],
-    },
-    {
-        title: 'Resources',
-        links: [
-            { label: 'Blog',         href: '/blog' },
-            { label: 'Galleries',    href: '/galleries' },
-            { label: 'How it works', href: '/compress' },
-        ],
-    },
-    {
-        title: 'Company',
-        links: [
-            { label: 'About',   href: 'https://dreamintrepid.com' },
-            { label: 'Contact', href: 'mailto:hello@dreamintrepid.com' },
-        ],
-    },
-    {
-        title: 'Legal',
-        links: [
-            { label: 'Privacy Policy', href: '/privacy' },
-            { label: 'Terms of Use',   href: '/terms' },
-        ],
-    },
-];
-
 // ── Component ─────────────────────────────────────────────────────────────
 
 export default function Home(): React.JSX.Element {
-    const [category,   setCategory]   = useState<Category>('all');
-    const [authed,     setAuthed]     = useState(false);
-    const [authOpen,   setAuthOpen]   = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
-
-    const supabase = useMemo(() => createClient(), []);
-
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => setAuthed(!!session));
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setAuthed(!!s));
-        const handleOpen = (): void => setAuthOpen(true);
-        window.addEventListener('open-auth-modal', handleOpen);
-        return () => {
-            subscription.unsubscribe();
-            window.removeEventListener('open-auth-modal', handleOpen);
-        };
-    }, [supabase]);
-
-    useEffect(() => {
-        document.body.style.overflow = mobileOpen ? 'hidden' : '';
-        return () => { document.body.style.overflow = ''; };
-    }, [mobileOpen]);
+    const [category, setCategory] = useState<Category>('all');
 
     const visibleTools = TOOLS.filter(t => t.category.includes(category));
 
     return (
         <div style={S.page}>
-
-            {/* ── Mobile nav ──────────────────────────────────────────── */}
-            {mobileOpen && (
-                <div style={S.mobileOverlay}>
-                    <div style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${c.gray200}` }}>
-                        <Link href="/" style={S.logo} onClick={() => setMobileOpen(false)}>
-                            <img src="/logo.png" alt="Optimage" style={{ height: '28px', width: 'auto' }} />
-                            Optimage
-                        </Link>
-                        <button type="button" onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.gray600, display: 'flex', padding: '4px' }}>
-                            <X size={22} />
-                        </button>
-                    </div>
-                    <nav style={{ display: 'flex', flexDirection: 'column', paddingTop: '16px', gap: '4px' }}>
-                        {NAV_LINKS.map(nav => (
-                            <Link key={nav.label} href={nav.href} onClick={() => setMobileOpen(false)}
-                                style={{ color: c.gray700, textDecoration: 'none', fontWeight: 600, fontSize: '1.1rem', padding: '14px 0', borderBottom: `1px solid ${c.gray100}` }}>
-                                {nav.label}
-                            </Link>
-                        ))}
-                    </nav>
-                    <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {authed ? (
-                            <Link href="/dashboard" onClick={() => setMobileOpen(false)}
-                                style={{ background: c.blue, color: '#fff', textDecoration: 'none', borderRadius: '12px', padding: '14px', fontSize: '1rem', fontWeight: 700, textAlign: 'center' }}>
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <>
-                                <button type="button" onClick={() => { setMobileOpen(false); setAuthOpen(true); }}
-                                    style={{ background: c.blue, color: '#fff', border: 'none', borderRadius: '12px', padding: '14px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}>
-                                    Get started free
-                                </button>
-                                <button type="button" onClick={() => { setMobileOpen(false); setAuthOpen(true); }}
-                                    style={{ background: 'none', border: `1.5px solid ${c.gray200}`, borderRadius: '12px', padding: '14px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', color: c.gray700 }}>
-                                    Sign in
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* ── Header ──────────────────────────────────────────────── */}
-            <header style={S.header}>
-                <div style={S.headerInner}>
-                    <Link href="/" style={S.logo}>
-                        <img src="/logo.png" alt="Optimage" style={{ height: '28px', width: 'auto' }} />
-                        Optimage
-                    </Link>
-
-                    <nav style={{ display: 'flex', alignItems: 'center', gap: '2px', flex: 1, justifyContent: 'center' }} className="hide-mobile">
-                        {NAV_LINKS.map(nav => (
-                            <Link key={nav.label} href={nav.href} style={S.navLink}
-                                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = c.gray100; (e.currentTarget as HTMLAnchorElement).style.color = c.gray900; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'; (e.currentTarget as HTMLAnchorElement).style.color = c.gray600; }}>
-                                {nav.label}
-                            </Link>
-                        ))}
-                    </nav>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }} className="hide-mobile">
-                        {authed ? (
-                            <Link href="/dashboard" style={{ background: c.blue, color: '#fff', textDecoration: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.9rem', fontWeight: 600 }}>
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <>
-                                <button type="button" onClick={() => setAuthOpen(true)}
-                                    style={{ background: 'none', border: 'none', color: c.gray600, fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer', padding: '8px 12px', borderRadius: '8px' }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = c.gray100; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}>
-                                    Sign in
-                                </button>
-                                <button type="button" onClick={() => setAuthOpen(true)}
-                                    style={{ background: c.blue, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = c.blueDk; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = c.blue; }}>
-                                    Get started free
-                                </button>
-                            </>
-                        )}
-                    </div>
-
-                    <button type="button" onClick={() => setMobileOpen(true)} className="show-mobile"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.gray700, display: 'none', padding: '4px', alignItems: 'center' }}>
-                        <Menu size={22} />
-                    </button>
-                </div>
-            </header>
+            <Header />
 
             {/* ── Hero ────────────────────────────────────────────────── */}
             <div style={S.hero}>
@@ -695,15 +435,15 @@ export default function Home(): React.JSX.Element {
                         style={{
                             padding: '8px 20px',
                             borderRadius: '100px',
-                            border: `1.5px solid ${category === cat.id ? c.blue : c.gray200}`,
-                            background: category === cat.id ? c.blue : '#fff',
+                            border: `1.5px solid ${category === cat.id ? c.accent : c.gray200}`,
+                            background: category === cat.id ? c.accent : '#fff',
                             color: category === cat.id ? '#fff' : c.gray600,
                             fontSize: '0.875rem',
                             fontWeight: 600,
                             cursor: 'pointer',
                             transition: 'all 0.15s',
                         }}
-                        onMouseEnter={e => { if (category !== cat.id) { (e.currentTarget as HTMLButtonElement).style.borderColor = c.blue; (e.currentTarget as HTMLButtonElement).style.color = c.blue; } }}
+                        onMouseEnter={e => { if (category !== cat.id) { (e.currentTarget as HTMLButtonElement).style.borderColor = c.accent; (e.currentTarget as HTMLButtonElement).style.color = c.accent; } }}
                         onMouseLeave={e => { if (category !== cat.id) { (e.currentTarget as HTMLButtonElement).style.borderColor = c.gray200; (e.currentTarget as HTMLButtonElement).style.color = c.gray600; } }}
                     >
                         {cat.label}
@@ -715,7 +455,7 @@ export default function Home(): React.JSX.Element {
             <div style={S.grid}>
                 {visibleTools.map(tool => (
                     <Link key={tool.name} href={tool.href} style={S.card}
-                        onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = c.blue; el.style.boxShadow = '0 4px 20px rgba(37,99,235,0.1)'; el.style.transform = 'translateY(-2px)'; }}
+                        onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = c.accent; el.style.boxShadow = '0 4px 20px rgba(37,99,235,0.1)'; el.style.transform = 'translateY(-2px)'; }}
                         onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = c.gray200; el.style.boxShadow = 'none'; el.style.transform = 'translateY(0)'; }}
                     >
                         {tool.badge && <span style={S.popBadge}>{tool.badge}</span>}
@@ -745,15 +485,15 @@ export default function Home(): React.JSX.Element {
                         {FEATURES.map(f => (
                             <div key={f.name} style={S.featureCard}>
                                 <div style={S.featureIcon}>
-                                    <f.Icon size={20} color={c.blue} strokeWidth={2} />
+                                    <f.Icon size={20} color={c.accent} strokeWidth={2} />
                                 </div>
                                 <div>
                                     <div style={S.featureName}>{f.name}</div>
                                 </div>
                                 <div style={S.featureDesc}>{f.desc}</div>
                                 <Link href={f.href} style={S.featureLink}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = c.blueDk; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = c.blue; }}>
+                                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = c.accentDark; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = c.accent; }}>
                                     Learn more <ArrowRight size={13} strokeWidth={2.5} />
                                 </Link>
                             </div>
@@ -803,60 +543,8 @@ export default function Home(): React.JSX.Element {
                 </div>
             </section>
 
-            {/* ── Footer ──────────────────────────────────────────────── */}
-            <footer style={S.footer}>
-                <div style={S.footerInner}>
-                    {/* Logo row */}
-                    <div style={{ marginBottom: '40px' }}>
-                        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: '#fff', fontWeight: 800, fontSize: '1rem', width: 'fit-content' }}>
-                            <img src="/logo.png" alt="Optimage" style={{ height: '26px', width: 'auto', filter: 'brightness(0) invert(1)' }} />
-                            Optimage
-                        </Link>
-                        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.83rem', marginTop: '8px', maxWidth: '320px', lineHeight: 1.6 }}>
-                            Free image tools for creators, developers and photographers. Built by Dream Intrepid Ltd.
-                        </p>
-                    </div>
-
-                    {/* Link columns */}
-                    <div style={S.footerGrid}>
-                        {FOOTER_COLS.map(col => (
-                            <div key={col.title}>
-                                <div style={S.footerColTitle}>{col.title}</div>
-                                {col.links.map(link => (
-                                    <Link key={link.label} href={link.href} style={S.footerLink}
-                                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#fff'; }}
-                                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.55)'; }}>
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Bottom bar */}
-                    <div style={S.footerBottom}>
-                        <span>© {new Date().getFullYear()} Dream Intrepid Ltd. All rights reserved.</span>
-                        <span>Made with care for the web.</span>
-                    </div>
-                </div>
-            </footer>
-
-            <AnimatePresence>
-                {authOpen && (
-                    <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} initialStep="email" />
-                )}
-            </AnimatePresence>
+            <Footer />
             <CookieConsent />
-
-            <style>{`
-                @media (max-width: 768px) {
-                    .hide-mobile { display: none !important; }
-                    .show-mobile { display: flex !important; }
-                }
-                @media (min-width: 769px) {
-                    .show-mobile { display: none !important; }
-                }
-            `}</style>
         </div>
     );
 }

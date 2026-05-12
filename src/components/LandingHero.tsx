@@ -31,9 +31,9 @@ export default function LandingHero({ customHeadline, customSubtext }: LandingHe
                 <Image unoptimized src="/image-2.png" alt="Server tech" width={350} height={350} style={{ borderRadius: '24px', filter: 'blur(1px)' }} />
             </div>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'var(--bg-tertiary)', borderRadius: '100px', marginBottom: '32px', border: '1px solid var(--border)' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }}></span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Unlimited Free Image Processing</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: '#f3f4f6', borderRadius: '100px', marginBottom: '32px', border: '1px solid #e5e7eb' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a', display: 'inline-block' }}></span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#374151' }}>Unlimited Free Image Processing</span>
             </div>
 
             {customHeadline ? (
@@ -43,7 +43,7 @@ export default function LandingHero({ customHeadline, customSubtext }: LandingHe
                     fontWeight: 800,
                     letterSpacing: '-0.02em',
                     marginBottom: '24px',
-                    color: 'var(--text-primary)'
+                    color: '#111827'
                 }} dangerouslySetInnerHTML={{ __html: customHeadline }} />
             ) : (
                 <h1 style={{
@@ -52,9 +52,9 @@ export default function LandingHero({ customHeadline, customSubtext }: LandingHe
                     fontWeight: 800,
                     letterSpacing: '-0.02em',
                     marginBottom: '24px',
-                    color: 'var(--text-primary)'
+                    color: '#111827'
                 }}>
-                    Optimize Images in <span style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', color: 'transparent' }}>Seconds.</span>
+                    Optimize Images in <span style={{ background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', WebkitBackgroundClip: 'text', color: 'transparent' }}>Seconds.</span>
                     <br />
                     Smaller Files. Faster Websites.
                 </h1>
@@ -62,7 +62,7 @@ export default function LandingHero({ customHeadline, customSubtext }: LandingHe
 
             <p style={{
                 fontSize: '1.2rem',
-                color: 'var(--text-secondary)',
+                color: '#374151',
                 maxWidth: '650px',
                 margin: '0 auto',
                 lineHeight: 1.6

@@ -21,8 +21,8 @@ interface FormState {
 }
 
 const inputStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: '#f9fafb',
+  border: '1px solid #f3f4f6',
   borderRadius: 8,
   color: '#fff',
   padding: '12px 14px',
@@ -141,7 +141,7 @@ export default function SupportWidget() {
 
   const getInputStyle = (field: string): React.CSSProperties => ({
     ...inputStyle,
-    borderColor: focusedField === field ? '#db5a42' : 'rgba(255,255,255,0.1)',
+    borderColor: focusedField === field ? '#db5a42' : '#f3f4f6',
   });
 
   return (
@@ -210,8 +210,8 @@ export default function SupportWidget() {
             ref={modalRef}
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: '#161625',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: '#f9fafb',
+              border: '1px solid #e5e7eb',
               borderRadius: 16,
               width: '100%',
               maxWidth: 480,
@@ -227,7 +227,7 @@ export default function SupportWidget() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '24px 28px 20px',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                borderBottom: '1px solid #e5e7eb',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -271,7 +271,7 @@ export default function SupportWidget() {
                 onClick={handleClose}
                 aria-label="Close support modal"
                 style={{
-                  background: 'rgba(255,255,255,0.06)',
+                  background: '#e5e7eb',
                   border: 'none',
                   borderRadius: 8,
                   color: '#9ca3af',
@@ -285,11 +285,11 @@ export default function SupportWidget() {
                   transition: 'background 0.15s, color 0.15s',
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)';
+                  (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6';
                   (e.currentTarget as HTMLButtonElement).style.color = '#fff';
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
+                  (e.currentTarget as HTMLButtonElement).style.background = '#e5e7eb';
                   (e.currentTarget as HTMLButtonElement).style.color = '#9ca3af';
                 }}
               >

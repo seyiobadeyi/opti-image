@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Image from 'next/image';
@@ -12,7 +12,7 @@ export default function LandingBento(): React.JSX.Element {
                 <h2 className="bento-heading" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '24px', letterSpacing: '-0.02em' }}>
                     Crafted for Performance
                 </h2>
-                <p className="bento-intro-text" style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', maxWidth: '650px', margin: '0 auto', lineHeight: 1.6 }}>
+                <p className="bento-intro-text" style={{ color: '#374151', fontSize: '1.2rem', maxWidth: '650px', margin: '0 auto', lineHeight: 1.6 }}>
                     We stripped away the clutter to focus on what actually matters — passing the strictest Web Vitals checks while preserving the soul of your photography.
                 </p>
             </div>
@@ -23,7 +23,7 @@ export default function LandingBento(): React.JSX.Element {
                 <div className="bento-box bento-card-lg" style={{
                     background: 'linear-gradient(135deg, rgba(219,90,66,0.12), rgba(232,134,111,0.06))',
                     borderRadius: '28px',
-                    border: '1px solid var(--border-hover)',
+                    border: '1px solid #d1d5db',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'row',
@@ -37,18 +37,18 @@ export default function LandingBento(): React.JSX.Element {
                         justifyContent: 'center',
                     }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(219,90,66,0.15)', borderRadius: '100px', marginBottom: '24px', width: 'fit-content', border: '1px solid rgba(219,90,66,0.3)' }}>
-                            <Camera size={14} color="var(--accent-secondary)" />
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>New Feature</span>
+                            <Camera size={14} color="#e8866f" />
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e8866f', letterSpacing: '0.04em', textTransform: 'uppercase' }}>New Feature</span>
                         </div>
                         <h3 className="bento-title" style={{ fontSize: '2.2rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.15 }}>
                             Client Gallery Delivery
                         </h3>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '1.05rem', marginBottom: '28px' }}>
+                        <p style={{ color: '#374151', lineHeight: 1.7, fontSize: '1.05rem', marginBottom: '28px' }}>
                             Create private galleries for your clients. Draft mode, PIN protection, payment confirmation, client favourites, and auto-expiry reminders — all included.
                         </p>
-                        <Link href="/galleries" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--accent-secondary)', fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none', width: 'fit-content' }}
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-primary)'; }}
-                            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--accent-secondary)'; }}
+                        <Link href="/galleries" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#e8866f', fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none', width: 'fit-content' }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#111827'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#e8866f'; }}
                         >
                             See gallery features <span aria-hidden="true">→</span>
                         </Link>
@@ -61,9 +61,9 @@ export default function LandingBento(): React.JSX.Element {
                                 { label: 'Client Favourites', active: true },
                                 { label: 'Auto-Expiry Reminders', active: false },
                             ].map(({ label, active }) => (
-                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', background: active ? 'rgba(219,90,66,0.15)' : 'rgba(255,255,255,0.04)', borderRadius: '12px', border: `1px solid ${active ? 'rgba(219,90,66,0.35)' : 'rgba(255,255,255,0.06)'}` }}>
-                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: active ? 'var(--success)' : 'var(--text-muted)', flexShrink: 0 }}></div>
-                                    <span style={{ fontSize: '0.9rem', fontWeight: 500, color: active ? 'var(--text-primary)' : 'var(--text-muted)' }}>{label}</span>
+                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', background: active ? 'rgba(219,90,66,0.15)' : '#f3f4f6', borderRadius: '12px', border: `1px solid ${active ? 'rgba(219,90,66,0.35)' : '#e5e7eb'}` }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: active ? '#16a34a' : '#9ca3af', flexShrink: 0 }}></div>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 500, color: active ? '#111827' : '#9ca3af' }}>{label}</span>
                                 </div>
                             ))}
                         </div>
@@ -72,9 +72,9 @@ export default function LandingBento(): React.JSX.Element {
 
                 {/* 1. Large Showcase — Lossless Compression */}
                 <div className="bento-box bento-card-lg" style={{
-                    background: 'var(--bg-card)',
+                    background: '#fff',
                     borderRadius: '28px',
-                    border: '1px solid var(--border)',
+                    border: '1px solid #e5e7eb',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'row',
@@ -90,7 +90,7 @@ export default function LandingBento(): React.JSX.Element {
                         <h3 className="bento-title" style={{ fontSize: '2.2rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.15 }}>
                             Lossless compression isn&apos;t a buzzword.
                         </h3>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '1.05rem' }}>
+                        <p style={{ color: '#374151', lineHeight: 1.7, fontSize: '1.05rem' }}>
                             We leverage modern codecs like AVIF and WebP under the hood. When you upload a heavy TIFF file, our engine strips the bloat while calculating the exact mathematical threshold needed to retain human-perceptible perfection. The result? 90% size reductions that your eyes simply cannot detect.
                         </p>
                     </div>
@@ -106,9 +106,9 @@ export default function LandingBento(): React.JSX.Element {
                     gap: '24px',
                 }}>
                     <div className="bento-box bento-card bento-box-padded" style={{
-                        background: 'var(--bg-card)',
+                        background: '#fff',
                         borderRadius: '20px',
-                        border: '1px solid var(--border)',
+                        border: '1px solid #e5e7eb',
                         overflow: 'hidden',
                         padding: '32px',
                         display: 'flex',
@@ -118,15 +118,15 @@ export default function LandingBento(): React.JSX.Element {
                             <Image unoptimized src="/image-2.png" alt="Edge Infrastructure" fill style={{ objectFit: 'cover' }} />
                         </div>
                         <h3 className="bento-subtitle" style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Edge Infrastructure</h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.65 }}>
+                        <p style={{ color: '#374151', fontSize: '1rem', lineHeight: 1.65 }}>
                             Milliseconds matter. We bypass slow legacy queues by routing your uploads through high-throughput edge nodes, executing the transformation exactly where you are.
                         </p>
                     </div>
 
                     <div className="bento-box bento-card bento-box-padded" style={{
-                        background: 'var(--bg-card)',
+                        background: '#fff',
                         borderRadius: '20px',
-                        border: '1px solid var(--border)',
+                        border: '1px solid #e5e7eb',
                         overflow: 'hidden',
                         padding: '32px',
                         display: 'flex',
@@ -136,7 +136,7 @@ export default function LandingBento(): React.JSX.Element {
                             <Image unoptimized src="/image-11.png" alt="Privacy architecture" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                         </div>
                         <h3 className="bento-subtitle" style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Your Data, Your Control</h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.65 }}>
+                        <p style={{ color: '#374151', fontSize: '1rem', lineHeight: 1.65 }}>
                             Processed files are cleared from our servers within 30 minutes. Subscribers can also save work to a personal cloud gallery for download anytime. We never use your images for model training.
                         </p>
                     </div>
@@ -151,7 +151,7 @@ export default function LandingBento(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: '1px solid var(--border)',
+                    border: '1px solid #e5e7eb',
                 }}>
                     <Image unoptimized src="/image-4.png" alt="Native Web Vitals" fill style={{ objectFit: 'cover', filter: 'brightness(0.38)' }} />
                     <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: '780px', padding: '0 32px' }}>
@@ -188,28 +188,28 @@ export default function LandingBento(): React.JSX.Element {
                             desc: 'Keep your optimised files organised with our dynamic visual dashboards and processing history views.',
                         },
                     ] as { img: string; alt: string; title: string; badge?: string; desc: string }[]).map(({ img, alt, title, badge, desc }) => (
-                        <div key={title} className="bento-box bento-card bento-box-padded" style={{ background: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border)', padding: '28px' }}>
+                        <div key={title} className="bento-box bento-card bento-box-padded" style={{ background: '#fff', borderRadius: '20px', border: '1px solid #e5e7eb', padding: '28px' }}>
                             <div className="bento-sm-img" style={{ position: 'relative', height: '150px', width: '100%', marginBottom: '22px', borderRadius: '10px', overflow: 'hidden' }}>
                                 <Image unoptimized src={img} alt={alt} fill style={{ objectFit: 'cover' }} />
                             </div>
                             <h4 style={{ fontSize: '1.2rem', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 {title}
                                 {badge && (
-                                    <span style={{ fontSize: '0.68rem', padding: '3px 8px', background: 'var(--bg-tertiary)', borderRadius: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                    <span style={{ fontSize: '0.68rem', padding: '3px 8px', background: '#f3f4f6', borderRadius: '10px', color: '#9ca3af', fontWeight: 600 }}>
                                         {badge}
                                     </span>
                                 )}
                             </h4>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.65 }}>{desc}</p>
+                            <p style={{ color: '#374151', fontSize: '0.95rem', lineHeight: 1.65 }}>{desc}</p>
                         </div>
                     ))}
                 </div>
 
                 {/* 8. Reversed Showcase — Built from real work */}
                 <div className="bento-box bento-card-lg" style={{
-                    background: 'var(--bg-card)',
+                    background: '#fff',
                     borderRadius: '28px',
-                    border: '1px solid var(--border)',
+                    border: '1px solid #e5e7eb',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'row-reverse',
@@ -225,7 +225,7 @@ export default function LandingBento(): React.JSX.Element {
                         <h3 className="bento-title" style={{ fontSize: '2.2rem', marginBottom: '16px', letterSpacing: '-0.01em', lineHeight: 1.15 }}>
                             Built from real work.
                         </h3>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '1.05rem' }}>
+                        <p style={{ color: '#374151', lineHeight: 1.7, fontSize: '1.05rem' }}>
                             Optimage wasn&apos;t built in a lab. It started as an internal tool used daily across Shopify builds, WordPress sites, CRO experiments, and marketing campaigns. Every project had the same challenge: images were the heaviest part of the page. So we built a system to fix it automatically. Now it&apos;s open for everyone.
                         </p>
                     </div>
@@ -243,7 +243,7 @@ export default function LandingBento(): React.JSX.Element {
                     <div className="bento-box bento-card bento-box-padded" style={{
                         background: 'linear-gradient(135deg, rgba(219,90,66,0.1), transparent)',
                         borderRadius: '20px',
-                        border: '1px solid var(--border)',
+                        border: '1px solid #e5e7eb',
                         overflow: 'hidden',
                         padding: '32px',
                         display: 'flex',
@@ -252,13 +252,13 @@ export default function LandingBento(): React.JSX.Element {
                         <div className="bento-card-img" style={{ position: 'relative', height: '190px', width: '100%', marginBottom: '28px', borderRadius: '12px', overflow: 'hidden' }}>
                             <Image unoptimized src="/image-9.png" alt="Enterprise SLAs" fill style={{ objectFit: 'cover' }} />
                         </div>
-                        <h3 className="bento-subtitle" style={{ fontSize: '1.4rem', marginBottom: '10px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <h3 className="bento-subtitle" style={{ fontSize: '1.4rem', marginBottom: '10px', color: '#111827', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             Enterprise SLAs
-                            <span style={{ fontSize: '0.75rem', padding: '3px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', color: 'var(--text-secondary)' }}>
+                            <span style={{ fontSize: '0.75rem', padding: '3px 8px', background: '#f3f4f6', borderRadius: '10px', color: '#374151' }}>
                                 Coming Soon
                             </span>
                         </h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.65 }}>
+                        <p style={{ color: '#374151', fontSize: '1rem', lineHeight: 1.65 }}>
                             Custom agreements and dedicated processing clusters for high-volume enterprise pipelines. Run massive marketing catalogs through our premium tier.
                         </p>
                     </div>
@@ -266,7 +266,7 @@ export default function LandingBento(): React.JSX.Element {
                     <div className="bento-box bento-card bento-box-padded" style={{
                         background: '#0a0a0f',
                         borderRadius: '20px',
-                        border: '1px solid var(--border)',
+                        border: '1px solid #e5e7eb',
                         overflow: 'hidden',
                         padding: '32px',
                         display: 'flex',
@@ -286,20 +286,20 @@ export default function LandingBento(): React.JSX.Element {
             </div>
 
             {/* Dream Intrepid attribution */}
-            <div style={{ textAlign: 'center', marginTop: '56px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+            <div style={{ textAlign: 'center', marginTop: '56px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
+                <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '12px' }}>
                     Optimage is one of several professional tools built by
                 </p>
                 <a
                     href="https://dreamintrepid.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '12px 24px', borderRadius: '100px', border: '1px solid var(--border)', background: 'var(--bg-card)', textDecoration: 'none', transition: 'all 0.2s' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg-card)'; }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '12px 24px', borderRadius: '100px', border: '1px solid #e5e7eb', background: '#fff', textDecoration: 'none', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#db5a42'; e.currentTarget.style.background = '#f3f4f6'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.background = '#fff'; }}
                 >
-                    <span style={{ fontSize: '0.95rem', fontWeight: 700, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Dream Intrepid</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>— digital products &amp; creative tools →</span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 700, background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Dream Intrepid</span>
+                    <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>— digital products &amp; creative tools →</span>
                 </a>
             </div>
         </section>

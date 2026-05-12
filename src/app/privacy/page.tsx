@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage(): React.JSX.Element {
     return (
-        <>
+        <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
             <Header />
             <div className="legal-page">
                 <h1>Privacy Policy</h1>
@@ -64,10 +64,10 @@ export default function PrivacyPage(): React.JSX.Element {
                 <h2>7. Contact Us</h2>
                 <p>
                     For privacy inquiries or to exercise your rights, please contact our Data Protection Officer at{' '}
-                    <a href="mailto:privacy@dreamintrepid.com" style={{ color: 'var(--primary)', fontWeight: 600 }}>privacy@dreamintrepid.com</a>.
+                    <a href="mailto:privacy@dreamintrepid.com" style={{ color: '#db5a42', fontWeight: 600 }}>privacy@dreamintrepid.com</a>.
                 </p>
             </div>
             <Footer />
-        </>
+        </div>
     );
 }

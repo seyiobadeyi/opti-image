@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -100,7 +100,7 @@ function UseImageMenu({
     return (
         <div style={{
             position: 'absolute', top: 'calc(100% + 6px)', right: 0,
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            background: '#fff', border: '1px solid #e5e7eb',
             borderRadius: '12px', padding: '6px',
             zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
             minWidth: '260px',
@@ -113,24 +113,24 @@ function UseImageMenu({
                 style={{
                     display: 'flex', alignItems: 'flex-start', gap: '10px',
                     padding: '10px 12px', borderRadius: '8px',
-                    color: 'var(--text-primary)', textDecoration: 'none',
+                    color: '#111827', textDecoration: 'none',
                     transition: 'background 0.15s',
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-                <span style={{ marginTop: '1px', flexShrink: 0, color: 'var(--accent-primary)' }}>
+                <span style={{ marginTop: '1px', flexShrink: 0, color: '#db5a42' }}>
                     <ExternalLink size={15} />
                 </span>
                 <div>
                     <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Preview in browser</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '2px' }}>
                         Open the hosted image in a new tab
                     </div>
                 </div>
             </a>
 
-            <div style={{ height: '1px', background: 'var(--border)', margin: '4px 6px' }} />
+            <div style={{ height: '1px', background: '#e5e7eb', margin: '4px 6px' }} />
 
             {/* Native share on mobile */}
             {typeof navigator !== 'undefined' && 'share' in navigator && (
@@ -144,23 +144,23 @@ function UseImageMenu({
                             display: 'flex', alignItems: 'flex-start', gap: '10px',
                             padding: '10px 12px', width: '100%', borderRadius: '8px',
                             background: 'transparent', border: 'none',
-                            color: 'var(--text-primary)', cursor: 'pointer', textAlign: 'left',
+                            color: '#111827', cursor: 'pointer', textAlign: 'left',
                             transition: 'background 0.15s',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
-                        <span style={{ marginTop: '1px', flexShrink: 0, color: 'var(--accent-primary)' }}>
+                        <span style={{ marginTop: '1px', flexShrink: 0, color: '#db5a42' }}>
                             <Share2 size={15} />
                         </span>
                         <div>
                             <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Share</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '2px' }}>
                                 WhatsApp, Messages, email, and more
                             </div>
                         </div>
                     </button>
-                    <div style={{ height: '1px', background: 'var(--border)', margin: '4px 6px' }} />
+                    <div style={{ height: '1px', background: '#e5e7eb', margin: '4px 6px' }} />
                 </>
             )}
 
@@ -173,15 +173,15 @@ function UseImageMenu({
                         display: 'flex', alignItems: 'flex-start', gap: '10px',
                         padding: '10px 12px', width: '100%', borderRadius: '8px',
                         background: copiedKey === item.key ? 'rgba(46,213,115,0.08)' : 'transparent',
-                        border: 'none', color: 'var(--text-primary)',
+                        border: 'none', color: '#111827',
                         cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s',
                     }}
-                    onMouseEnter={e => { if (copiedKey !== item.key) e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                    onMouseEnter={e => { if (copiedKey !== item.key) e.currentTarget.style.background = '#f3f4f6'; }}
                     onMouseLeave={e => { if (copiedKey !== item.key) e.currentTarget.style.background = 'transparent'; }}
                 >
                     <span style={{
                         marginTop: '1px', flexShrink: 0,
-                        color: copiedKey === item.key ? 'var(--success)' : 'var(--accent-primary)',
+                        color: copiedKey === item.key ? '#16a34a' : '#db5a42',
                     }}>
                         {copiedKey === item.key ? <Check size={15} /> : item.icon}
                     </span>
@@ -189,7 +189,7 @@ function UseImageMenu({
                         <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
                             {copiedKey === item.key ? 'Copied!' : item.label}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '2px' }}>
                             {item.description}
                         </div>
                     </div>
@@ -243,8 +243,8 @@ function FileResultCard({
             <div
                 style={{
                     width: '180px', height: '180px', borderRadius: '12px', overflow: 'hidden',
-                    position: 'relative', background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border)', flexShrink: 0,
+                    position: 'relative', background: '#f3f4f6',
+                    border: '1px solid #e5e7eb', flexShrink: 0,
                     cursor: 'pointer',
                 }}
                 onMouseEnter={() => setIsHovered(true)}
@@ -274,7 +274,7 @@ function FileResultCard({
                     <div style={{
                         width: '100%', height: '100%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: 'var(--text-muted)',
+                        color: '#9ca3af',
                     }}>
                         <FileImage size={48} />
                     </div>
@@ -294,11 +294,11 @@ function FileResultCard({
                         style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             width: '38px', height: '38px', borderRadius: '8px',
-                            background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                            background: '#e5e7eb', border: '1px solid rgba(255,255,255,0.25)',
                             color: '#fff', cursor: 'pointer', transition: 'background 0.15s',
                         }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#e5e7eb'}
                     >
                         <Download size={16} />
                     </button>
@@ -309,11 +309,11 @@ function FileResultCard({
                             style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 width: '38px', height: '38px', borderRadius: '8px',
-                                background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                                background: '#e5e7eb', border: '1px solid rgba(255,255,255,0.25)',
                                 color: '#fff', cursor: 'pointer', transition: 'background 0.15s',
                             }}
                             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = '#e5e7eb'}
                         >
                             <Link2 size={16} />
                         </button>
@@ -347,8 +347,8 @@ function FileResultCard({
                         onKeyDown={handleNameKeyDown}
                         style={{
                             fontSize: '0.78rem', fontWeight: 600, width: '180px',
-                            background: 'var(--bg-tertiary)', border: '1px solid var(--accent-primary)',
-                            borderRadius: '4px', color: 'var(--text-primary)',
+                            background: '#f3f4f6', border: '1px solid #db5a42',
+                            borderRadius: '4px', color: '#111827',
                             padding: '2px 4px', outline: 'none',
                         }}
                     />
@@ -360,7 +360,7 @@ function FileResultCard({
                             fontSize: '0.78rem', fontWeight: 600,
                             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                             maxWidth: '180px', cursor: 'text',
-                            color: 'var(--text-primary)',
+                            color: '#111827',
                         }}
                     >
                         {editedName}
@@ -369,8 +369,8 @@ function FileResultCard({
             </div>
 
             {/* Sizes line */}
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '3px' }}>
-                {formatBytes(result.processedSize)} · <span style={{ color: savingsNum >= 0 ? 'var(--success)' : '#ef4444' }}>
+            <div style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: '3px' }}>
+                {formatBytes(result.processedSize)} · <span style={{ color: savingsNum >= 0 ? '#16a34a' : '#ef4444' }}>
                     −{Math.abs(savingsNum)}%
                 </span>
             </div>
@@ -476,7 +476,7 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
     return (
         <div className="results-panel">
             <h3 className="settings-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 color="var(--success)" size={24} /> Optimization Complete
+                <CheckCircle2 color="#16a34a" size={24} /> Optimization Complete
             </h3>
 
             {/* Summary Stats */}
@@ -499,8 +499,8 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                     return (
                         <div className="stat-card" style={{
                             padding: '24px',
-                            border: `2px solid ${isNeg ? 'rgba(239,68,68,0.4)' : 'var(--success)'}`,
-                            background: isNeg ? 'rgba(239,68,68,0.06)' : 'var(--success-bg)',
+                            border: `2px solid ${isNeg ? 'rgba(239,68,68,0.4)' : '#16a34a'}`,
+                            background: isNeg ? 'rgba(239,68,68,0.06)' : 'rgba(22,163,74,0.06)',
                         }}>
                             <div className={`stat-value ${isNeg ? '' : 'success'}`} style={{
                                 fontSize: '3rem', fontWeight: 900,
@@ -509,13 +509,13 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                                 {isNeg ? '+' : ''}{Math.abs(savPct)}%
                             </div>
                             <div className="stat-label" style={{
-                                color: isNeg ? '#ef4444' : 'var(--success)',
+                                color: isNeg ? '#ef4444' : '#16a34a',
                                 fontWeight: 700, fontSize: '1rem',
                             }}>
                                 {isNeg ? 'Size Increased' : 'Total Reduction'}
                             </div>
                             {isNeg && (
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>
+                                <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '4px', lineHeight: 1.4 }}>
                                     Lower quality setting or switch to WebP/AVIF to reduce file size.
                                 </div>
                             )}
@@ -527,20 +527,20 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
             {/* SEO Impact Banner */}
             {Number(estimatedSecondsSaved) > 0 && (
                 <div style={{
-                    background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-lg)',
+                    background: '#f3f4f6',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '16px',
                     padding: '16px 24px',
                     marginBottom: '32px',
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '12px',
-                    color: 'var(--text-primary)'
+                    color: '#111827'
                 }}>
                     <img src="/logo.png" alt="Impact" style={{ height: '1.2rem', width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
                     <div>
                         <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '4px' }}>SEO & Performance Impact</div>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                        <div style={{ color: '#374151', fontSize: '0.95rem' }}>
                             You just shaved an estimated <strong>~{estimatedSecondsSaved} seconds</strong> off your page load time (on 3G) and improved your Core Web Vitals.
                         </div>
                     </div>
@@ -567,30 +567,30 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                     {showShareMenu && (
                         <div style={{
                             position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                            background: 'var(--bg-card)', border: '1px solid var(--border)',
+                            background: '#fff', border: '1px solid #e5e7eb',
                             borderRadius: '12px', padding: '8px', zIndex: 50,
                             boxShadow: '0 10px 25px rgba(0,0,0,0.5)', minWidth: '200px',
                             display: 'flex', flexDirection: 'column', gap: '4px'
                         }}>
                             <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
                                 target="_blank" rel="noopener noreferrer"
-                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: '#111827', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                                 <Twitter size={18} color="#1DA1F2" /> Twitter
                             </a>
                             <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
                                 target="_blank" rel="noopener noreferrer"
-                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: '#111827', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                                 <Linkedin size={18} color="#0A66C2" /> LinkedIn
                             </a>
                             <button onClick={copyToClipboard}
-                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: 'var(--text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '8px', transition: 'background 0.2s', width: '100%', textAlign: 'left', fontSize: '0.95rem' }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', color: '#111827', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '8px', transition: 'background 0.2s', width: '100%', textAlign: 'left', fontSize: '0.95rem' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
-                                {copied ? <Check size={18} color="var(--success)" /> : <Copy size={18} />}
+                                {copied ? <Check size={18} color="#16a34a" /> : <Copy size={18} />}
                                 {copied ? 'Copied!' : 'Copy Link'}
                             </button>
                         </div>
@@ -605,21 +605,21 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                     padding: '16px 20px', marginBottom: '20px',
                     background: 'linear-gradient(135deg, rgba(219,90,66,0.12), rgba(232,134,111,0.08))',
                     border: '1px solid rgba(219,90,66,0.25)',
-                    borderRadius: 'var(--radius-lg)',
+                    borderRadius: '16px',
                     cursor: 'pointer', transition: 'border-color 0.2s',
                 }}>
                     <div style={{
                         width: '38px', height: '38px', borderRadius: '10px', flexShrink: 0,
-                        background: 'var(--gradient-primary)',
+                        background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                         <Sparkles size={18} color="#fff" />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#111827' }}>
                             Want more power? Head to your Dashboard →
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.8rem', color: '#374151', marginTop: '2px' }}>
                             Rotation, auto-enhance, custom file names, processing history &amp; video compression. All in one place.
                         </div>
                     </div>
@@ -631,14 +631,14 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '12px',
                     padding: '14px 18px', marginBottom: '20px',
-                    background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-lg)',
+                    background: '#f3f4f6',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '16px',
                     flexWrap: 'wrap',
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                        <Mail size={15} color="var(--accent-primary)" />
-                        <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                        <Mail size={15} color="#db5a42" />
+                        <span style={{ fontSize: '0.82rem', color: '#374151', whiteSpace: 'nowrap' }}>
                             Get weekly performance tips:
                         </span>
                     </div>
@@ -652,8 +652,8 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                             required
                             style={{
                                 flex: 1, padding: '7px 11px', borderRadius: '8px',
-                                border: '1px solid var(--border)', background: 'var(--bg-card)',
-                                color: 'var(--text-primary)', fontSize: '0.82rem', outline: 'none',
+                                border: '1px solid #e5e7eb', background: '#fff',
+                                color: '#111827', fontSize: '0.82rem', outline: 'none',
                                 minWidth: 0,
                             }}
                         />
@@ -675,8 +675,8 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                 <div style={{
                     padding: '12px 18px', marginBottom: '20px',
                     background: 'rgba(46,213,115,0.08)', border: '1px solid rgba(46,213,115,0.25)',
-                    borderRadius: 'var(--radius-lg)', fontSize: '0.85rem',
-                    color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '8px',
+                    borderRadius: '16px', fontSize: '0.85rem',
+                    color: '#16a34a', display: 'flex', alignItems: 'center', gap: '8px',
                 }}>
                     <Check size={15} /> You are subscribed! Tips landing in your inbox soon.
                 </div>
@@ -686,7 +686,7 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
             <div style={{
                 display: 'flex', gap: '16px', overflowX: 'auto', overflowY: 'visible',
                 paddingBottom: '12px', paddingTop: '4px',
-                scrollbarWidth: 'thin', scrollbarColor: 'var(--border) transparent',
+                scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent',
             }}>
                 {results.map((result) => {
                     const savingsNum = parseFloat(result.savingsPercent);
@@ -708,12 +708,12 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
             <div style={{
                 marginTop: '28px',
                 padding: '20px',
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-lg)',
+                background: '#f3f4f6',
+                border: '1px solid #e5e7eb',
+                borderRadius: '16px',
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151' }}>
                         Share the love on your site
                     </span>
                     <button
@@ -729,9 +729,9 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                         style={{
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '6px 12px', borderRadius: '8px',
-                            background: badgeCopied ? 'rgba(46,213,115,0.12)' : 'var(--bg-card)',
-                            border: `1px solid ${badgeCopied ? 'rgba(46,213,115,0.4)' : 'var(--border)'}`,
-                            color: badgeCopied ? 'var(--success)' : 'var(--text-secondary)',
+                            background: badgeCopied ? 'rgba(46,213,115,0.12)' : '#fff',
+                            border: `1px solid ${badgeCopied ? 'rgba(46,213,115,0.4)' : '#e5e7eb'}`,
+                            color: badgeCopied ? '#16a34a' : '#374151',
                             fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
                             transition: 'all 0.2s',
                         }}
@@ -741,22 +741,22 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                     </button>
                 </div>
                 <code style={{
-                    display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)',
-                    background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px',
-                    border: '1px solid var(--border)', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+                    display: 'block', fontSize: '0.75rem', color: '#9ca3af',
+                    background: '#fff', padding: '10px 14px', borderRadius: '8px',
+                    border: '1px solid #e5e7eb', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
                     lineHeight: 1.6,
                 }}>
                     {`<a href="https://optimage.dreamintrepid.com?utm_source=badge&utm_medium=website_badge&utm_campaign=powered_by" title="Images optimized with Optimage" target="_blank" rel="noopener">Images optimized with Optimage</a>`}
                 </code>
-                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                <p style={{ fontSize: '0.72rem', color: '#9ca3af', marginTop: '8px' }}>
                     Drop this anywhere on your site. It helps others find the tool and keeps it free.
                 </p>
             </div>
 
             {/* Re-convert the same batch in a different format */}
             {onReconvert && (
-                <div style={{ textAlign: 'center', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '12px' }}>
+                <div style={{ textAlign: 'center', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+                    <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '12px' }}>
                         Want to try a different format or quality? Re-convert the same images without re-uploading.
                     </p>
                     <button
@@ -765,8 +765,8 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                             padding: '10px 24px',
                             borderRadius: '10px',
                             background: 'transparent',
-                            border: '1px solid var(--border)',
-                            color: 'var(--text-secondary)',
+                            border: '1px solid #e5e7eb',
+                            color: '#374151',
                             fontSize: '0.9rem',
                             fontWeight: 500,
                             cursor: 'pointer',

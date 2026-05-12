@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -44,7 +44,7 @@ export default function FAQAccordion(): React.JSX.Element {
 
     return (
         <section style={{ maxWidth: '800px', margin: '80px auto', padding: '0 24px' }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, textAlign: 'center', marginBottom: '40px', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, textAlign: 'center', marginBottom: '40px', letterSpacing: '-0.02em', color: '#111827' }}>
                 Frequently Asked Questions
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -52,8 +52,8 @@ export default function FAQAccordion(): React.JSX.Element {
                     const isOpen = openIndex === index;
                     return (
                         <div key={index} style={{
-                            background: 'var(--bg-card)',
-                            border: '1px solid var(--border)',
+                            background: '#fff',
+                            border: '1px solid #e5e7eb',
                             borderRadius: '16px',
                             overflow: 'hidden',
                             transition: 'all 0.2s ease'
@@ -68,7 +68,7 @@ export default function FAQAccordion(): React.JSX.Element {
                                     padding: '24px',
                                     background: 'transparent',
                                     border: 'none',
-                                    color: 'var(--text-primary)',
+                                    color: '#111827',
                                     fontSize: '1.1rem',
                                     fontWeight: 600,
                                     cursor: 'pointer',
@@ -77,8 +77,8 @@ export default function FAQAccordion(): React.JSX.Element {
                             >
                                 <span>{item.question}</span>
                                 <div style={{
-                                    background: isOpen ? 'var(--primary)' : 'var(--bg-tertiary)',
-                                    color: isOpen ? '#fff' : 'var(--text-secondary)',
+                                    background: isOpen ? '#db5a42' : '#f3f4f6',
+                                    color: isOpen ? '#fff' : '#374151',
                                     borderRadius: '50%',
                                     padding: '4px',
                                     display: 'flex',
@@ -96,11 +96,11 @@ export default function FAQAccordion(): React.JSX.Element {
                                 overflow: 'hidden',
                                 transition: 'all 0.3s ease-in-out',
                                 padding: isOpen ? '0 24px 24px 24px' : '0 24px',
-                                color: 'var(--text-secondary)',
+                                color: '#374151',
                                 lineHeight: 1.6,
                                 fontSize: '1.05rem'
                             }}>
-                                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                                <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
                                     {item.answer}
                                 </div>
                             </div>

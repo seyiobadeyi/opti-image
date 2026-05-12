@@ -77,8 +77,8 @@ function StatCard({ label, value, sub, accent }: StatCardProps) {
             style={{
                 background: accent
                     ? 'linear-gradient(135deg, rgba(219,90,66,0.18), rgba(232,134,111,0.08))'
-                    : 'rgba(255,255,255,0.03)',
-                border: accent ? '1px solid rgba(219,90,66,0.35)' : '1px solid rgba(255,255,255,0.08)',
+                    : '#f9fafb',
+                border: accent ? '1px solid rgba(219,90,66,0.35)' : '1px solid #e5e7eb',
                 borderRadius: '20px',
                 padding: '36px 28px',
                 display: 'flex',
@@ -128,8 +128,8 @@ function NewsletterSignup({ totalFiles }: { totalFiles: number }) {
                 maxWidth: '560px',
                 margin: '0 auto',
                 padding: '48px 28px',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: '#f9fafb',
+                border: '1px solid #e5e7eb',
                 borderRadius: '24px',
                 textAlign: 'center',
             }}
@@ -157,8 +157,8 @@ function NewsletterSignup({ totalFiles }: { totalFiles: number }) {
                         flex: '1 1 200px',
                         padding: '12px 18px',
                         borderRadius: '12px',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid #e5e7eb',
+                        background: '#e5e7eb',
                         color: '#ffffff',
                         fontSize: '0.95rem',
                         outline: 'none',
@@ -330,8 +330,8 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                             maxWidth: '600px',
                             margin: '0 auto 64px',
                             padding: '48px 28px',
-                            background: 'rgba(255,255,255,0.03)',
-                            border: '1px solid rgba(255,255,255,0.08)',
+                            background: '#f9fafb',
+                            border: '1px solid #e5e7eb',
                             borderRadius: '20px',
                             textAlign: 'center',
                         }}
@@ -352,8 +352,8 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
                 >
                     <div
                         style={{
-                            background: 'rgba(255,255,255,0.03)',
-                            border: '1px solid rgba(255,255,255,0.08)',
+                            background: '#f9fafb',
+                            border: '1px solid #e5e7eb',
                             borderRadius: '20px',
                             padding: '48px 40px',
                         }}

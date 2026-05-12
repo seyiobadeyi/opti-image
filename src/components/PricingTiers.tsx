@@ -97,7 +97,7 @@ export default function PricingTiers(): React.JSX.Element {
         <section id="pricing" className="pricing-section" style={{ margin: '80px 0' }}>
             <div style={{ textAlign: 'center', marginBottom: '48px' }}>
                 <h2 style={{ fontSize: '2.5rem', marginBottom: '16px' }}>Simple, Transparent Pricing</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
+                <p style={{ color: '#9ca3af', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
                     One plan. Everything included. No limits on processing.
                 </p>
             </div>
@@ -115,7 +115,7 @@ export default function PricingTiers(): React.JSX.Element {
                                 <>
                                     <span style={{
                                         fontSize: '1.2rem',
-                                        color: 'var(--text-muted)',
+                                        color: '#9ca3af',
                                         textDecoration: 'line-through',
                                         marginRight: '8px',
                                     }}>
@@ -132,7 +132,7 @@ export default function PricingTiers(): React.JSX.Element {
                         </div>
                         {pricing?.promoApplied && (
                             <p style={{
-                                color: 'var(--success)',
+                                color: '#16a34a',
                                 fontSize: '0.85rem',
                                 marginTop: '4px',
                                 display: 'flex',
@@ -167,7 +167,7 @@ export default function PricingTiers(): React.JSX.Element {
                                     left: '12px',
                                     top: '50%',
                                     transform: 'translateY(-50%)',
-                                    color: 'var(--text-muted)',
+                                    color: '#9ca3af',
                                 }} />
                                 <input
                                     type="text"
@@ -181,9 +181,9 @@ export default function PricingTiers(): React.JSX.Element {
                                         width: '100%',
                                         padding: '10px 12px 10px 34px',
                                         borderRadius: '10px',
-                                        border: '1px solid var(--border)',
-                                        background: 'var(--bg-tertiary)',
-                                        color: 'var(--text-primary)',
+                                        border: '1px solid #e5e7eb',
+                                        background: '#f3f4f6',
+                                        color: '#111827',
                                         fontSize: '0.85rem',
                                         outline: 'none',
                                     }}

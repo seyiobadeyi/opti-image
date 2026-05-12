@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Mic, Info } from 'lucide-react';
@@ -63,7 +63,7 @@ export default function MediaPanel({ settings, onSettingsChange }: MediaPanelPro
             </div>
 
             <div className="info-box" style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <Info size={18} style={{ flexShrink: 0, marginTop: '2px', color: 'var(--primary)' }} />
+                <Info size={18} style={{ flexShrink: 0, marginTop: '2px', color: '#db5a42' }} />
                 {!settings.extractAudioOnly ? (
                     <p>
                         AI Transcription requires standard OpenAI API credits. Audio longer than OpenAI limitations will fail. Results will be displayed onscreen.

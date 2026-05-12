@@ -269,7 +269,7 @@ export default function DropZoneClient(): React.JSX.Element {
                         position: 'absolute',
                         top: '-10px',
                         right: '-10px',
-                        background: 'var(--gradient-primary)',
+                        background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                         fontSize: '0.65rem',
                         padding: '2px 6px',
                         borderRadius: '10px',
@@ -299,9 +299,9 @@ export default function DropZoneClient(): React.JSX.Element {
             ) : (
                 <div style={{
                     padding: '60px 40px',
-                    background: 'var(--bg-card)',
+                    background: '#fff',
                     borderRadius: '24px',
-                    border: '2px dashed var(--border)',
+                    border: '2px dashed #e5e7eb',
                     textAlign: 'center',
                     display: 'flex',
                     flexDirection: 'column',
@@ -317,13 +317,13 @@ export default function DropZoneClient(): React.JSX.Element {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: 'var(--accent-primary)'
+                        color: '#db5a42'
                     }}>
                         <Mic size={32} />
                     </div>
                     <div>
                         <h3 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '12px' }}>AI Media Processing Coming Soon</h3>
-                        <p style={{ color: 'var(--text-secondary)', maxWidth: '450px', margin: '0 auto', lineHeight: 1.6, fontSize: '1rem' }}>
+                        <p style={{ color: '#374151', maxWidth: '450px', margin: '0 auto', lineHeight: 1.6, fontSize: '1rem' }}>
                             Our engineering team is currently optimizing the high-performance video pipeline. We'll notify all members once this feature is live!
                         </p>
                     </div>
@@ -400,7 +400,7 @@ export default function DropZoneClient(): React.JSX.Element {
             {transcriptionResult && (
                 <div className="transcription-panel">
                     <h3 className="settings-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CheckCircle size={20} color="var(--success)" />
+                        <CheckCircle size={20} color="#16a34a" />
                         {transcriptionResult.mode === 'translate' ? 'Translation' : 'Transcription'} Complete
                     </h3>
                     <div className="transcription-box">{transcriptionResult.text}</div>

@@ -136,8 +136,8 @@ export default function InactivityWatcher(): React.JSX.Element | null {
                     position: 'fixed', top: '50%', left: '50%',
                     transform: 'translate(-50%, -50%)',
                     zIndex: 99999,
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
+                    background: '#fff',
+                    border: '1px solid #e5e7eb',
                     borderRadius: '20px',
                     padding: '40px 36px',
                     maxWidth: '420px',
@@ -154,7 +154,7 @@ export default function InactivityWatcher(): React.JSX.Element | null {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 24px',
                     fontSize: '1.6rem', fontWeight: 800,
-                    color: countdown <= 60 ? '#ef4444' : 'var(--accent-primary)',
+                    color: countdown <= 60 ? '#ef4444' : '#db5a42',
                     transition: 'color 0.3s',
                 }}>
                     {formatTime(countdown)}
@@ -163,7 +163,7 @@ export default function InactivityWatcher(): React.JSX.Element | null {
                 <h2 id="inactivity-title" style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '12px', letterSpacing: '-0.01em' }}>
                     Still there?
                 </h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '28px' }}>
+                <p style={{ color: '#374151', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '28px' }}>
                     You have been inactive for a while. For your security, you will be signed out automatically.
                 </p>
 
@@ -172,7 +172,7 @@ export default function InactivityWatcher(): React.JSX.Element | null {
                         onClick={handleStaySignedIn}
                         style={{
                             padding: '13px 24px', borderRadius: '12px',
-                            background: 'var(--gradient-primary)',
+                            background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                             border: 'none', color: '#fff',
                             fontWeight: 700, fontSize: '0.95rem',
                             cursor: 'pointer', width: '100%',
@@ -185,8 +185,8 @@ export default function InactivityWatcher(): React.JSX.Element | null {
                         style={{
                             padding: '13px 24px', borderRadius: '12px',
                             background: 'transparent',
-                            border: '1px solid var(--border)',
-                            color: 'var(--text-secondary)',
+                            border: '1px solid #e5e7eb',
+                            color: '#374151',
                             fontWeight: 600, fontSize: '0.95rem',
                             cursor: 'pointer', width: '100%',
                         }}

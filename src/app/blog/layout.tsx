@@ -3,12 +3,12 @@ import Footer from '@/components/Footer';
 
 export default function BlogLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
     return (
-        <>
+        <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
             <Header />
-            <main style={{ minHeight: '100vh' }}>
+            <main>
                 {children}
             </main>
             <Footer />
-        </>
+        </div>
     );
 }

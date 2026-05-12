@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { CheckCircle2, MailX } from 'lucide-react';
 
@@ -28,29 +28,29 @@ export default function UnsubscribeClient({ email: initialEmail }: { email: stri
         <div style={{
             minHeight: '100vh', display: 'flex', alignItems: 'center',
             justifyContent: 'center', padding: '24px',
-            background: 'var(--bg-primary)',
+            background: '#fff',
         }}>
             <div style={{
                 maxWidth: '440px', width: '100%',
-                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                background: '#fff', border: '1px solid #e5e7eb',
                 borderRadius: '20px', padding: '40px 36px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
                 textAlign: 'center',
             }}>
                 {status === 'done' ? (
                     <>
-                        <CheckCircle2 size={48} color="var(--success)" style={{ marginBottom: '16px' }} />
+                        <CheckCircle2 size={48} color="#16a34a" style={{ marginBottom: '16px' }} />
                         <h1 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '12px' }}>
                             You&apos;re unsubscribed
                         </h1>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '24px' }}>
+                        <p style={{ color: '#374151', lineHeight: 1.6, marginBottom: '24px' }}>
                             No more emails to <strong>{email}</strong>. No hard feelings.
                         </p>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        <p style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
                             Changed your mind?{' '}
                             <button
                                 onClick={() => setStatus('idle')}
-                                style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '0.85rem', padding: 0, textDecoration: 'underline' }}
+                                style={{ background: 'none', border: 'none', color: '#db5a42', cursor: 'pointer', fontSize: '0.85rem', padding: 0, textDecoration: 'underline' }}
                             >
                                 Re-subscribe
                             </button>
@@ -58,11 +58,11 @@ export default function UnsubscribeClient({ email: initialEmail }: { email: stri
                     </>
                 ) : (
                     <>
-                        <MailX size={48} color="var(--text-muted)" style={{ marginBottom: '16px' }} />
+                        <MailX size={48} color="#9ca3af" style={{ marginBottom: '16px' }} />
                         <h1 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '8px' }}>
                             Unsubscribe
                         </h1>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '28px', fontSize: '0.95rem' }}>
+                        <p style={{ color: '#374151', lineHeight: 1.6, marginBottom: '28px', fontSize: '0.95rem' }}>
                             We&apos;ll remove this address from all Optimage marketing emails immediately.
                         </p>
 
@@ -74,8 +74,8 @@ export default function UnsubscribeClient({ email: initialEmail }: { email: stri
                                 onChange={e => setEmail(e.target.value)}
                                 style={{
                                     width: '100%', padding: '11px 14px',
-                                    borderRadius: '10px', border: '1px solid var(--border)',
-                                    background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                    borderRadius: '10px', border: '1px solid #e5e7eb',
+                                    background: '#f3f4f6', color: '#111827',
                                     fontSize: '0.9rem', marginBottom: '16px',
                                     boxSizing: 'border-box', outline: 'none',
                                 }}
@@ -84,10 +84,10 @@ export default function UnsubscribeClient({ email: initialEmail }: { email: stri
 
                         {initialEmail && (
                             <div style={{
-                                background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+                                background: '#f3f4f6', border: '1px solid #e5e7eb',
                                 borderRadius: '10px', padding: '12px 16px',
                                 marginBottom: '20px', fontSize: '0.9rem',
-                                color: 'var(--text-primary)', fontWeight: 500,
+                                color: '#111827', fontWeight: 500,
                             }}>
                                 {email}
                             </div>
@@ -104,8 +104,8 @@ export default function UnsubscribeClient({ email: initialEmail }: { email: stri
                             disabled={status === 'loading' || !email.trim()}
                             style={{
                                 width: '100%', padding: '12px',
-                                background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
-                                borderRadius: '10px', color: 'var(--text-primary)',
+                                background: '#f3f4f6', border: '1px solid #e5e7eb',
+                                borderRadius: '10px', color: '#111827',
                                 fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer',
                                 transition: 'background 0.15s',
                             }}
@@ -113,7 +113,7 @@ export default function UnsubscribeClient({ email: initialEmail }: { email: stri
                             {status === 'loading' ? 'Unsubscribing\u2026' : 'Confirm unsubscribe'}
                         </button>
 
-                        <p style={{ marginTop: '20px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        <p style={{ marginTop: '20px', fontSize: '0.78rem', color: '#9ca3af' }}>
                             Transactional emails (password resets, purchase receipts) are not affected.
                         </p>
                     </>

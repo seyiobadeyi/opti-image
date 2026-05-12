@@ -22,7 +22,7 @@ export default function Error({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#0d0d1a',
+            background: '#fff',
             padding: '24px',
             position: 'relative',
             overflow: 'hidden',
@@ -45,7 +45,7 @@ export default function Error({
             }} />
 
             <div style={{
-                background: '#161625',
+                background: '#f9fafb',
                 border: '1px solid rgba(219, 90, 66, 0.2)',
                 borderRadius: '24px',
                 padding: '48px 40px',
@@ -54,7 +54,7 @@ export default function Error({
                 textAlign: 'center',
                 position: 'relative',
                 zIndex: 1,
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
             }}>
                 {/* Logo */}
                 <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
@@ -83,7 +83,7 @@ export default function Error({
                 <h1 style={{
                     fontSize: '1.6rem',
                     fontWeight: 700,
-                    color: '#f0f0f5',
+                    color: '#111827',
                     marginBottom: '12px',
                     lineHeight: 1.3,
                 }}>
@@ -91,7 +91,7 @@ export default function Error({
                 </h1>
 
                 <p style={{
-                    color: '#a0a0b5',
+                    color: '#374151',
                     fontSize: '0.95rem',
                     lineHeight: 1.7,
                     marginBottom: '32px',
@@ -123,9 +123,9 @@ export default function Error({
                         style={{
                             padding: '12px 28px',
                             borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.05)',
-                            color: '#f0f0f5',
-                            border: '1px solid rgba(219, 90, 66, 0.2)',
+                            background: '#f9fafb',
+                            color: '#374151',
+                            border: '1px solid #e5e7eb',
                             fontFamily: 'inherit',
                             fontSize: '0.95rem',
                             fontWeight: 600,

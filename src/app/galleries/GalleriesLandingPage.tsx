@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -22,16 +22,16 @@ import {
 } from 'lucide-react';
 
 // ─── Reusable style tokens ────────────────────────────────────────────────────
-const ACCENT = 'var(--accent-primary)';
-const ACCENT_SECONDARY = 'var(--accent-secondary)';
-const BG_PRIMARY = 'var(--bg-primary)';
-const BG_SECONDARY = 'var(--bg-secondary)';
-const BG_CARD = 'var(--bg-card)';
-const TEXT_PRIMARY = 'var(--text-primary)';
-const TEXT_SECONDARY = 'var(--text-secondary)';
-const TEXT_MUTED = 'var(--text-muted)';
-const BORDER = 'var(--border)';
-const SUCCESS = 'var(--success)';
+const ACCENT = '#db5a42';
+const ACCENT_SECONDARY = '#e8866f';
+const BG_PRIMARY = '#ffffff';
+const BG_SECONDARY = '#f9fafb';
+const BG_CARD = '#ffffff';
+const TEXT_PRIMARY = '#111827';
+const TEXT_SECONDARY = '#374151';
+const TEXT_MUTED = '#9ca3af';
+const BORDER = '#e5e7eb';
+const SUCCESS = '#16a34a';
 
 const sectionPadding: React.CSSProperties = {
     paddingTop: 'clamp(64px, 10vw, 120px)',
@@ -118,7 +118,7 @@ function FeatureBlock({
             style={{
                 background: BG_CARD,
                 border: `1px solid ${BORDER}`,
-                borderRadius: 'var(--radius-xl)',
+                borderRadius: '20px',
                 padding: 'clamp(24px, 3vw, 36px)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -126,8 +126,8 @@ function FeatureBlock({
                 transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
             }}
             onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border-hover)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-glow)';
+                e.currentTarget.style.borderColor = '#d1d5db';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(219, 90, 66, 0.2)';
             }}
             onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = BORDER;
@@ -138,7 +138,7 @@ function FeatureBlock({
                 style={{
                     width: '48px',
                     height: '48px',
-                    borderRadius: 'var(--radius-md)',
+                    borderRadius: '12px',
                     background: 'rgba(219, 90, 66, 0.12)',
                     display: 'flex',
                     alignItems: 'center',
@@ -182,7 +182,7 @@ function StepCard({
                     width: '44px',
                     height: '44px',
                     borderRadius: '50%',
-                    background: 'var(--gradient-primary)',
+                    background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -337,7 +337,7 @@ export default function GalleriesLandingPage() {
             {/* ── SECTION 1: HERO ──────────────────────────────────────────── */}
             <section
                 style={{
-                    background: 'linear-gradient(180deg, #07070d 0%, #0a0a0f 60%, #12121a 100%)',
+                    background: BG_PRIMARY,
                     paddingTop: 'clamp(80px, 14vw, 140px)',
                     paddingBottom: 'clamp(64px, 10vw, 120px)',
                     position: 'relative',
@@ -354,7 +354,7 @@ export default function GalleriesLandingPage() {
                         transform: 'translateX(-50%)',
                         width: '800px',
                         height: '400px',
-                        background: 'radial-gradient(ellipse, rgba(219, 90, 66, 0.14) 0%, transparent 70%)',
+                        background: 'radial-gradient(ellipse, rgba(219, 90, 66, 0.08) 0%, transparent 70%)',
                         pointerEvents: 'none',
                     }}
                 />
@@ -395,7 +395,7 @@ export default function GalleriesLandingPage() {
                         <br />
                         <span
                             style={{
-                                background: 'var(--gradient-primary)',
+                                background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text',
@@ -437,7 +437,7 @@ export default function GalleriesLandingPage() {
                                 gap: '8px',
                                 padding: '14px 28px',
                                 borderRadius: '100px',
-                                background: 'var(--gradient-primary)',
+                                background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                                 color: 'white',
                                 fontWeight: 700,
                                 fontSize: '1rem',
@@ -550,7 +550,7 @@ export default function GalleriesLandingPage() {
                                 style={{
                                     background: BG_CARD,
                                     border: `1px solid ${BORDER}`,
-                                    borderRadius: 'var(--radius-xl)',
+                                    borderRadius: '20px',
                                     padding: 'clamp(24px, 3vw, 32px)',
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -561,7 +561,7 @@ export default function GalleriesLandingPage() {
                                     style={{
                                         width: '40px',
                                         height: '40px',
-                                        borderRadius: 'var(--radius-md)',
+                                        borderRadius: '12px',
                                         background: 'rgba(255,255,255,0.04)',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -606,7 +606,7 @@ export default function GalleriesLandingPage() {
                         <br />
                         <span
                             style={{
-                                background: 'var(--gradient-accent)',
+                                background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text',
@@ -732,7 +732,7 @@ export default function GalleriesLandingPage() {
                         style={{
                             background: BG_CARD,
                             border: `1px solid ${BORDER}`,
-                            borderRadius: 'var(--radius-xl)',
+                            borderRadius: '20px',
                             padding: 'clamp(28px, 4vw, 48px)',
                             marginBottom: '32px',
                             display: 'flex',
@@ -759,7 +759,7 @@ export default function GalleriesLandingPage() {
                                     gap: '8px',
                                     padding: '12px 24px',
                                     borderRadius: '100px',
-                                    background: 'var(--gradient-primary)',
+                                    background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                                     color: 'white',
                                     fontWeight: 600,
                                     fontSize: '0.95rem',
@@ -773,7 +773,7 @@ export default function GalleriesLandingPage() {
                     </div>
 
                     {/* Comparison table */}
-                    <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-xl)', border: `1px solid ${BORDER}` }}>
+                    <div style={{ overflowX: 'auto', borderRadius: '20px', border: `1px solid ${BORDER}` }}>
                         <table
                             className="comparison-table"
                             style={{
@@ -901,7 +901,7 @@ export default function GalleriesLandingPage() {
             <section
                 style={{
                     ...sectionPadding,
-                    background: 'linear-gradient(180deg, #0a0a0f 0%, #07070d 100%)',
+                    background: '#fdf3f1',
                     borderTop: `1px solid ${BORDER}`,
                     textAlign: 'center',
                 }}
@@ -966,7 +966,7 @@ export default function GalleriesLandingPage() {
                                 gap: '8px',
                                 padding: '14px 28px',
                                 borderRadius: '100px',
-                                background: 'var(--gradient-primary)',
+                                background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)',
                                 color: 'white',
                                 fontWeight: 700,
                                 fontSize: '1rem',

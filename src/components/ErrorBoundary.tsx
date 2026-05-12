@@ -51,7 +51,7 @@ function ErrorCard({ onReset }: { onReset?: () => void }): React.JSX.Element {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#0d0d1a',
+            background: '#fff',
             padding: '24px',
             position: 'relative',
             overflow: 'hidden',
@@ -74,7 +74,7 @@ function ErrorCard({ onReset }: { onReset?: () => void }): React.JSX.Element {
             }} />
 
             <div style={{
-                background: '#161625',
+                background: '#f9fafb',
                 border: '1px solid rgba(219, 90, 66, 0.2)',
                 borderRadius: '24px',
                 padding: '48px 40px',
@@ -152,7 +152,7 @@ function ErrorCard({ onReset }: { onReset?: () => void }): React.JSX.Element {
                         style={{
                             padding: '12px 28px',
                             borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.05)',
+                            background: '#f9fafb',
                             color: '#f0f0f5',
                             border: '1px solid rgba(219, 90, 66, 0.2)',
                             fontFamily: 'inherit',

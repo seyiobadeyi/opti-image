@@ -69,9 +69,9 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
                                 flex: 1,
                                 padding: '8px 12px',
                                 borderRadius: '8px',
-                                border: `1px solid ${settings.flipHorizontal ? 'var(--accent-primary)' : 'var(--border)'}`,
-                                background: settings.flipHorizontal ? 'var(--accent-primary)' : 'var(--bg-card)',
-                                color: settings.flipHorizontal ? '#ffffff' : 'var(--text-primary)',
+                                border: `1px solid ${settings.flipHorizontal ? '#db5a42' : '#e5e7eb'}`,
+                                background: settings.flipHorizontal ? '#db5a42' : '#fff',
+                                color: settings.flipHorizontal ? '#ffffff' : '#111827',
                                 fontSize: '13px',
                                 fontWeight: 500,
                                 cursor: 'pointer',
@@ -87,9 +87,9 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
                                 flex: 1,
                                 padding: '8px 12px',
                                 borderRadius: '8px',
-                                border: `1px solid ${settings.flipVertical ? 'var(--accent-primary)' : 'var(--border)'}`,
-                                background: settings.flipVertical ? 'var(--accent-primary)' : 'var(--bg-card)',
-                                color: settings.flipVertical ? '#ffffff' : 'var(--text-primary)',
+                                border: `1px solid ${settings.flipVertical ? '#db5a42' : '#e5e7eb'}`,
+                                background: settings.flipVertical ? '#db5a42' : '#fff',
+                                color: settings.flipVertical ? '#ffffff' : '#111827',
                                 fontSize: '13px',
                                 fontWeight: 500,
                                 cursor: 'pointer',
@@ -200,7 +200,7 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
 
             {/* Filter Presets */}
             <div style={{ marginTop: 24 }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
                     Filter Presets
                 </label>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -212,9 +212,9 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
                             style={{
                                 padding: '6px 14px',
                                 borderRadius: '8px',
-                                border: `1px solid ${settings.filter === preset ? 'var(--accent-primary)' : 'var(--border)'}`,
-                                background: settings.filter === preset ? 'var(--accent-primary)' : 'var(--bg-card)',
-                                color: settings.filter === preset ? '#ffffff' : 'var(--text-primary)',
+                                border: `1px solid ${settings.filter === preset ? '#db5a42' : '#e5e7eb'}`,
+                                background: settings.filter === preset ? '#db5a42' : '#fff',
+                                color: settings.filter === preset ? '#ffffff' : '#111827',
                                 fontSize: '13px',
                                 fontWeight: 500,
                                 cursor: 'pointer',
@@ -231,11 +231,11 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center' }}>
                             Exposure
                             <InfoTooltip content="Brighten or darken the image. 1.0 is unchanged; 2.0 is twice as bright." />
                         </label>
-                        <span style={{ fontSize: '13px', color: 'var(--text-muted)', minWidth: '36px', textAlign: 'right' }}>{(settings.exposure ?? 1.0).toFixed(2)}x</span>
+                        <span style={{ fontSize: '13px', color: '#9ca3af', minWidth: '36px', textAlign: 'right' }}>{(settings.exposure ?? 1.0).toFixed(2)}x</span>
                     </div>
                     <input
                         type="range"
@@ -249,11 +249,11 @@ export default function SettingsPanel({ settings, onSettingsChange }: SettingsPa
                 </div>
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center' }}>
                             Saturation
                             <InfoTooltip content="Boost or reduce color intensity. 0 is grayscale; 1.0 is unchanged; 3.0 is highly saturated." />
                         </label>
-                        <span style={{ fontSize: '13px', color: 'var(--text-muted)', minWidth: '36px', textAlign: 'right' }}>{(settings.saturation ?? 1.0).toFixed(2)}x</span>
+                        <span style={{ fontSize: '13px', color: '#9ca3af', minWidth: '36px', textAlign: 'right' }}>{(settings.saturation ?? 1.0).toFixed(2)}x</span>
                     </div>
                     <input
                         type="range"

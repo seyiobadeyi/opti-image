@@ -15,10 +15,10 @@ export const metadata: Metadata = {
 
 export default function Page() {
     return (
-        <>
+        <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
             <Header />
             <PricingPage />
             <Footer />
-        </>
+        </div>
     );
 }

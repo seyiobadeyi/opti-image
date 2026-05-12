@@ -30,12 +30,12 @@ export default async function DashboardPage(): Promise<React.JSX.Element> {
         .order('created_at', { ascending: false });
 
     return (
-        <>
+        <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
             <Header />
             <main className="main-content" style={{ minHeight: '80vh', padding: '40px 24px', maxWidth: '1200px', margin: '0 auto' }}>
                 <DashboardClient user={{ email: user.email ?? '' }} profile={(profile as UserProfile) ?? null} history={(history as ProcessingHistoryItem[]) ?? []} />
             </main>
             <Footer />
-        </>
+        </div>
     );
 }

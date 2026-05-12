@@ -50,9 +50,9 @@ export default function FileList({ files, onRemove }: FileListProps): React.JSX.
                         alignItems: 'center',
                         gap: '12px',
                         padding: '12px',
-                        background: 'var(--bg-tertiary)',
+                        background: '#f3f4f6',
                         borderRadius: '12px',
-                        border: '1px solid var(--border)',
+                        border: '1px solid #e5e7eb',
                         position: 'relative',
                         overflow: 'hidden'
                     }}>
@@ -75,7 +75,7 @@ export default function FileList({ files, onRemove }: FileListProps): React.JSX.
                                 style={{
                                     background: 'transparent',
                                     border: 'none',
-                                    color: 'var(--text-primary)',
+                                    color: '#111827',
                                     fontSize: '0.95rem',
                                     fontWeight: 600,
                                     width: '100%',
@@ -86,7 +86,7 @@ export default function FileList({ files, onRemove }: FileListProps): React.JSX.
                                     textOverflow: 'ellipsis'
                                 }}
                             />
-                            <div className="file-meta" style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                            <div className="file-meta" style={{ color: '#374151', fontSize: '0.8rem' }}>
                                 {formatBytes(file.size)} • {file.type.split('/')[1]?.toUpperCase() || 'IMAGE'}
                             </div>
                         </div>

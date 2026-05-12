@@ -130,8 +130,8 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                 bottom: '24px',
                 right: '24px',
                 zIndex: 9999,
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
+                background: '#fff',
+                border: '1px solid #e5e7eb',
                 borderRadius: '24px',
                 padding: '24px',
                 width: 'min(360px, calc(100vw - 32px))',
@@ -144,7 +144,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
             <div style={{
                 position: 'absolute', top: '-50px', right: '-50px',
                 width: '150px', height: '150px',
-                background: 'var(--accent-glow)', filter: 'blur(50px)',
+                background: 'rgba(219, 90, 66, 0.15)', filter: 'blur(50px)',
                 borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
             }} />
 
@@ -154,8 +154,8 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                 aria-label="Close newsletter popup"
                 style={{
                     position: 'absolute', top: '14px', right: '14px',
-                    background: 'var(--bg-tertiary)', border: 'none',
-                    color: 'var(--text-muted)', cursor: 'pointer',
+                    background: '#f3f4f6', border: 'none',
+                    color: '#9ca3af', cursor: 'pointer',
                     padding: '6px', borderRadius: '50%', zIndex: 10,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
@@ -166,7 +166,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
             <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                     <div style={{
-                        background: 'var(--gradient-primary)', width: '34px', height: '34px',
+                        background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', width: '34px', height: '34px',
                         borderRadius: '10px', display: 'flex', alignItems: 'center',
                         justifyContent: 'center', color: 'white', flexShrink: 0,
                     }}>
@@ -175,13 +175,13 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                     <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Join 10k+ Creators</h3>
                 </div>
 
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.55, marginBottom: '16px' }}>
+                <p style={{ color: '#374151', fontSize: '0.85rem', lineHeight: 1.55, marginBottom: '16px' }}>
                     Weekly insights on image optimization, performance, and web speed. No spam, ever.
                 </p>
 
                 <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ position: 'relative' }}>
-                        <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                        <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
                         <input
                             type="email"
                             placeholder="your@email.com"
@@ -189,13 +189,13 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                             style={{
                                 width: '100%', padding: '10px 13px 10px 36px',
-                                borderRadius: '10px', border: '1px solid var(--border)',
-                                background: 'var(--bg-tertiary)', color: 'var(--text-primary)',
+                                borderRadius: '10px', border: '1px solid #e5e7eb',
+                                background: '#f3f4f6', color: '#111827',
                                 outline: 'none', fontSize: '0.88rem',
                                 boxSizing: 'border-box',
                             }}
-                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = 'var(--accent-primary)'; }}
-                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = 'var(--border)'; }}
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = '#db5a42'; }}
+                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = '#e5e7eb'; }}
                             required
                             disabled={status === 'loading'}
                         />
@@ -207,7 +207,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                         style={{
                             width: '100%', padding: '10px', fontSize: '0.88rem',
                             borderRadius: '10px', fontWeight: 600,
-                            background: status === 'success' ? 'var(--success)' : '',
+                            background: status === 'success' ? '#16a34a' : '',
                         }}
                         disabled={status === 'loading'}
                     >
@@ -226,7 +226,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                     )}
                 </form>
 
-                <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '10px', marginBottom: 0 }}>
+                <p style={{ textAlign: 'center', fontSize: '0.7rem', color: '#9ca3af', marginTop: '10px', marginBottom: 0 }}>
                     No spam. Unsubscribe any time.
                 </p>
             </div>
