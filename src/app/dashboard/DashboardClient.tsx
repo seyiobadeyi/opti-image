@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useDropzone } from 'react-dropzone';
 import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
@@ -407,7 +408,7 @@ function GalleriesTab(): React.JSX.Element {
     };
 
     // ── upload photos to active gallery
-    const handleUpload = async (files: FileList | null): Promise<void> => {
+    const handleUpload = async (files: File[] | FileList | null): Promise<void> => {
         if (!activeGallery || !files || files.length === 0) return;
         setUploadError(null);
 
@@ -525,6 +526,15 @@ function GalleriesTab(): React.JSX.Element {
             alert(err instanceof Error ? err.message : 'Failed to update gallery status');
         }
     };
+
+    // ── Gallery photo upload — react-dropzone (must be declared before any early returns)
+    const { getRootProps: getGalleryDropProps, getInputProps: getGalleryInputProps, isDragActive: isGalleryDragActive } = useDropzone({
+        onDrop: (acceptedFiles: File[]) => { if (acceptedFiles.length > 0) void handleUpload(acceptedFiles); },
+        accept: { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'], 'image/tiff': ['.tif', '.tiff'], 'image/heic': ['.heic'], 'image/heif': ['.heif'] },
+        maxFiles: 20,
+        maxSize: 100 * 1024 * 1024,
+        disabled: uploadingIds.size > 0,
+    });
 
     // ─── Loading skeleton
     if (loading) {
@@ -647,34 +657,23 @@ function GalleriesTab(): React.JSX.Element {
                 )}
 
                 {/* Upload zone */}
-                <label style={{
+                <div {...getGalleryDropProps()} style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     gap: '10px', padding: '32px', borderRadius: '16px',
-                    border: '2px dashed #e5e7eb', background: '#fff',
+                    border: `2px dashed ${isGalleryDragActive ? '#db5a42' : '#e5e7eb'}`,
+                    background: isGalleryDragActive ? '#fdf3f1' : '#fff',
                     cursor: uploadingIds.size > 0 ? 'wait' : 'pointer',
-                    marginBottom: '24px', transition: 'border-color 0.2s',
-                }}
-                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#db5a42'; }}
-                    onDragLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        e.currentTarget.style.borderColor = '#e5e7eb';
-                        void handleUpload(e.dataTransfer.files);
-                    }}
-                >
-                    <input
-                        type="file" accept="image/*" multiple hidden
-                        disabled={uploadingIds.size > 0}
-                        onChange={(e) => void handleUpload(e.target.files)}
-                    />
-                    <Upload size={28} color="#9ca3af" />
+                    marginBottom: '24px', transition: 'border-color 0.2s, background 0.2s',
+                }}>
+                    <input {...getGalleryInputProps()} />
+                    <Upload size={28} color={isGalleryDragActive ? '#db5a42' : '#9ca3af'} />
                     <p style={{ color: '#374151', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
                         {uploadingIds.size > 0
                             ? `Uploading ${uploadingIds.size} photo${uploadingIds.size !== 1 ? 's' : ''}…`
-                            : 'Drag & drop photos here or click to browse'}
+                            : isGalleryDragActive ? 'Release to upload photos' : 'Drag & drop photos here or click to browse'}
                     </p>
                     <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: 0 }}>Up to 20 images per batch · JPEG, PNG, WebP, HEIC</p>
-                </label>
+                </div>
 
                 {uploadError && (
                     <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1092,6 +1091,40 @@ export default function DashboardClient({ user, profile, history: initialHistory
         setError(null);
     }, []);
 
+    // ── react-dropzone for the Images/Optimize tab
+    const { getRootProps: getImagesDropProps, getInputProps: getImagesInputProps, isDragActive: isImagesDragActive } = useDropzone({
+        onDrop: (acceptedFiles: File[]) => {
+            const incomingFiles = acceptedFiles as FileWithCustomName[];
+            setFiles(prev => [...prev, ...incomingFiles].slice(0, 50));
+            setResults(null);
+            setSummary(null);
+            setError(null);
+        },
+        accept: { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'], 'image/avif': ['.avif'], 'image/tiff': ['.tif', '.tiff'], 'image/gif': ['.gif'], 'image/bmp': ['.bmp'], 'image/heic': ['.heic'], 'image/heif': ['.heif'] },
+        maxFiles: 50,
+        maxSize: 100 * 1024 * 1024,
+        disabled: isProcessing,
+    });
+
+    // ── react-dropzone for the Video tab
+    const { getRootProps: getVideoDropProps, getInputProps: getVideoInputProps, isDragActive: isVideoDragActive } = useDropzone({
+        onDrop: (acceptedFiles: File[]) => {
+            const f = acceptedFiles[0];
+            if (!f) return;
+            const maxVideoSizeMb = parseInt(process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50', 10);
+            if (f.size > maxVideoSizeMb * 1024 * 1024) {
+                setVideoError(`Video exceeds the ${maxVideoSizeMb}MB maximum limit for this environment.`);
+                setVideoFile(null);
+            } else {
+                setVideoFile(f); setVideoResult(null); setVideoError(null);
+            }
+        },
+        accept: { 'video/mp4': ['.mp4'], 'video/webm': ['.webm'], 'video/quicktime': ['.mov'], 'video/x-msvideo': ['.avi'] },
+        maxFiles: 1,
+        maxSize: parseInt(process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50', 10) * 1024 * 1024,
+        disabled: videoProcessing,
+    });
+
     const handleRemoveFile = useCallback((index: number): void => {
         setFiles(prev => prev.filter((_, i) => i !== index));
         setFileNames(prev => {
@@ -1275,29 +1308,22 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             <>
                                 {/* Drop Zone */}
                                 <div
-                                    onDrop={handleDrop}
-                                    onDragOver={(e) => e.preventDefault()}
+                                    {...getImagesDropProps()}
                                     style={{
-                                        border: '2px dashed #e5e7eb', borderRadius: '24px',
+                                        border: `2px dashed ${isImagesDragActive ? '#db5a42' : '#e5e7eb'}`,
+                                        borderRadius: '24px',
                                         padding: '48px 24px', textAlign: 'center', cursor: 'pointer',
-                                        background: '#fff', marginBottom: '24px',
-                                        transition: 'border-color 0.2s',
+                                        background: isImagesDragActive ? '#fdf3f1' : '#fff',
+                                        marginBottom: '24px',
+                                        transition: 'border-color 0.2s, background 0.2s',
                                     }}
-                                    onDragEnter={(e) => { e.currentTarget.style.borderColor = '#db5a42'; }}
-                                    onDragLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
-                                    onClick={() => document.getElementById('dashboard-file-input')?.click()}
                                 >
-                                    <Upload size={40} color="#9ca3af" style={{ marginBottom: '16px' }} />
-                                    <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>Drop images here or click to browse</p>
+                                    <input {...getImagesInputProps()} />
+                                    <Upload size={40} color={isImagesDragActive ? '#db5a42' : '#9ca3af'} style={{ marginBottom: '16px' }} />
+                                    <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>
+                                        {isImagesDragActive ? 'Release to add images' : 'Drop images here or click to browse'}
+                                    </p>
                                     <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, BMP • Up to 50 files</p>
-                                    <input
-                                        id="dashboard-file-input"
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        onChange={handleFilesAdded}
-                                        style={{ display: 'none' }}
-                                    />
                                 </div>
 
                                 {/* File Cards with Rename */}
@@ -1856,40 +1882,20 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         {!videoResult ? (
                             <>
                                 <div
-                                    onDrop={(e) => {
-                                        e.preventDefault();
-                                        const f = e.dataTransfer.files[0];
-                                        if (f && f.type.startsWith('video/')) {
-                                            const maxVideoSizeMb = parseInt(process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50', 10);
-                                            const MAX_SIZE = maxVideoSizeMb * 1024 * 1024;
-                                            if (f.size > MAX_SIZE) {
-                                                setVideoError(`Video exceeds the ${maxVideoSizeMb}MB maximum limit for this environment.`);
-                                                setVideoFile(null);
-                                            } else {
-                                                setVideoFile(f); setVideoResult(null); setVideoError(null);
-                                            }
-                                        }
+                                    {...getVideoDropProps()}
+                                    style={{
+                                        border: `2px dashed ${isVideoDragActive ? '#db5a42' : '#e5e7eb'}`,
+                                        borderRadius: '24px', padding: '48px 24px', textAlign: 'center', cursor: 'pointer',
+                                        background: isVideoDragActive ? '#fdf3f1' : '#fff',
+                                        marginBottom: '24px', transition: 'border-color 0.2s, background 0.2s',
                                     }}
-                                    onDragOver={(e) => e.preventDefault()}
-                                    style={{ border: '2px dashed #e5e7eb', borderRadius: '24px', padding: '48px 24px', textAlign: 'center', cursor: 'pointer', background: '#fff', marginBottom: '24px' }}
-                                    onClick={() => document.getElementById('dashboard-video-input')?.click()}
                                 >
-                                    <Film size={40} color="#9ca3af" style={{ marginBottom: '16px' }} />
-                                    <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>Drop a video file here or click to browse</p>
+                                    <input {...getVideoInputProps()} />
+                                    <Film size={40} color={isVideoDragActive ? '#db5a42' : '#9ca3af'} style={{ marginBottom: '16px' }} />
+                                    <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>
+                                        {isVideoDragActive ? 'Release to add video' : 'Drop a video file here or click to browse'}
+                                    </p>
                                     <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max {process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50'}MB • Requires login</p>
-                                    <input id="dashboard-video-input" type="file" accept="video/*" onChange={(e) => {
-                                        const f = e.target.files?.[0];
-                                        if (f) {
-                                            const maxVideoSizeMb = parseInt(process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50', 10);
-                                            const MAX_SIZE = maxVideoSizeMb * 1024 * 1024;
-                                            if (f.size > MAX_SIZE) {
-                                                setVideoError(`Video exceeds the ${maxVideoSizeMb}MB maximum limit for this environment.`);
-                                                setVideoFile(null);
-                                            } else {
-                                                setVideoFile(f); setVideoResult(null); setVideoError(null);
-                                            }
-                                        }
-                                    }} style={{ display: 'none' }} />
                                 </div>
 
                                 {videoFile && (
