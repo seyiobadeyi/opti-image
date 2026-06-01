@@ -415,7 +415,7 @@ export default function GalleriesLandingPage() {
                         }}
                     >
                         Professional photo delivery with client proofing, payment confirmation,
-                        and access control — all under one subscription. No commissions. No extra fees.
+                        and access control — all free with your Optimage account. No commissions. No extra fees.
                     </p>
 
                     <div
@@ -724,10 +724,10 @@ export default function GalleriesLandingPage() {
                             marginBottom: '32px',
                         }}
                     >
-                        Everything in one subscription. No surprises.
+                        Free to use. No commissions. No per-gallery fees.
                     </h2>
 
-                    {/* Pricing card */}
+                    {/* Free account card */}
                     <div
                         style={{
                             background: BG_CARD,
@@ -748,11 +748,11 @@ export default function GalleriesLandingPage() {
                                 maxWidth: '780px',
                             }}
                         >
-                            Gallery delivery is included in every Optimage subscription — the same subscription that handles your image compression, format conversion, and video transcription. You're not paying per gallery, per client, or per photo delivered. One flat rate. Everything included.
+                            Gallery delivery is included with every free Optimage account — the same account that gives you compression history, format conversion, and full image tool access. You're not paying per gallery, per client, or per photo delivered. Sign up once. Everything included.
                         </p>
                         <div>
                             <Link
-                                href="/pricing"
+                                href="/dashboard"
                                 style={{
                                     display: 'inline-flex',
                                     alignItems: 'center',
@@ -766,7 +766,7 @@ export default function GalleriesLandingPage() {
                                     textDecoration: 'none',
                                 }}
                             >
-                                See pricing
+                                Create a free account
                                 <ArrowRight size={15} />
                             </Link>
                         </div>
@@ -978,7 +978,7 @@ export default function GalleriesLandingPage() {
                             <ArrowRight size={16} />
                         </Link>
                         <Link
-                            href="/pricing"
+                            href="/compress"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -993,7 +993,7 @@ export default function GalleriesLandingPage() {
                                 textDecoration: 'none',
                             }}
                         >
-                            View pricing
+                            Try the image tools
                         </Link>
                     </div>
 
@@ -1004,7 +1004,7 @@ export default function GalleriesLandingPage() {
                             lineHeight: 1.6,
                         }}
                     >
-                        Requires an active Optimage subscription.
+                        Free account required. Sign up takes 30 seconds — no credit card.
                     </p>
                 </div>
             </section>

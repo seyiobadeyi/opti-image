@@ -14,7 +14,6 @@ const COLS = [
             { label: 'Convert Format',   href: '/convert' },
             { label: 'Resize Images',    href: '/resize' },
             { label: 'Client Galleries', href: '/dashboard?tab=galleries' },
-            { label: 'Pricing',          href: '/pricing' },
         ],
     },
     {

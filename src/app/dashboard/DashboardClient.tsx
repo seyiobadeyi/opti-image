@@ -8,14 +8,13 @@ import {
     Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock,
 } from 'lucide-react';
 import Link from 'next/link';
-import SubscriptionPaywall from '@/components/SubscriptionPaywall';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import { loadPrefs, savePrefs } from '@/lib/preferences';
 import type {
     DashboardClientProps, DashboardTab, DashboardFileNames, ImageSettings,
     VideoSettings, VideoResult, ProcessedImage, ProcessingSummary,
-    FileWithCustomName, ProcessingHistoryItem, SubscriptionStatus, ReferralStats,
+    FileWithCustomName, ProcessingHistoryItem, ReferralStats,
     Gallery, GalleryItem,
 } from '@/types';
 
@@ -979,23 +978,12 @@ export default function DashboardClient({ user, profile, history: initialHistory
     const [videoResult, setVideoResult] = useState<VideoResult | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
 
-    // ── Subscription & Referral state ────────────────────
-    const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
-    const [subscriptionLoading, setSubscriptionLoading] = useState<boolean>(true);
+    // ── Referral state ────────────────────
     const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
     const [referralLoading, setReferralLoading] = useState<boolean>(true);
     const [copied, setCopied] = useState<boolean>(false);
-    const [showPaywall, setShowPaywall] = useState<boolean>(false);
 
     useEffect(() => {
-        // Load subscription status
-        apiClient.getSubscriptionStatus()
-            .then(setSubscriptionStatus)
-            .catch(() => {
-                setSubscriptionStatus({ active: false, expiresAt: null });
-            })
-            .finally(() => setSubscriptionLoading(false));
-
         // Load referral stats
         apiClient.getReferralStats()
             .then(setReferralStats)
@@ -1078,17 +1066,6 @@ export default function DashboardClient({ user, profile, history: initialHistory
         window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
     };
 
-    const formatSubscriptionDate = (dateStr: string): string => {
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric',
-        });
-    };
-
-    const getSubscriptionDaysLeft = (expiresAt: string): number => {
-        const now = new Date();
-        const expires = new Date(expiresAt);
-        return Math.max(0, Math.ceil((expires.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-    };
 
     // ── Stats ──────────────────────────────────────────
     const totalProcessed = history?.length || 0;
@@ -1264,96 +1241,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#374151', fontSize: '0.9rem', marginBottom: '8px' }}><BarChart3 size={16} /> Avg Compression</div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed > 0 && totalSaved > 0 ? `${((totalSaved / (totalSaved + (history?.reduce((a, c) => a + (c.processed_size || 0), 0) || 1))) * 100).toFixed(0)}%` : 'N/A'}</div>
                 </div>
-                {/* Subscription stat skeleton */}
-                {subscriptionLoading && (
-                    <div style={{ padding: '20px', background: '#fff', borderRadius: '20px', border: '1px solid #e5e7eb' }}>
-                        <SkeletonBox height="14px" width="70%" style={{ marginBottom: '12px' }} />
-                        <SkeletonBox height="28px" width="50%" />
-                    </div>
-                )}
             </div>
-
-            {/* Subscription Status Card */}
-            {subscriptionLoading ? (
-                <div style={{ padding: '20px 24px', borderRadius: '20px', marginBottom: '24px', background: '#fff', border: '1px solid #e5e7eb' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <SkeletonBox width="20px" height="20px" style={{ borderRadius: '50%', flexShrink: 0 }} />
-                        <div style={{ flex: 1 }}>
-                            <SkeletonBox height="14px" width="160px" style={{ marginBottom: '8px' }} />
-                            <SkeletonBox height="12px" width="240px" />
-                        </div>
-                        <SkeletonBox width="110px" height="36px" style={{ borderRadius: '100px', flexShrink: 0 }} />
-                    </div>
-                </div>
-            ) : subscriptionStatus && (
-                <div style={{
-                    borderRadius: '20px', marginBottom: '24px',
-                    background: subscriptionStatus.active ? 'rgba(46,213,115,0.06)' : 'rgba(239,68,68,0.06)',
-                    border: `1px solid ${subscriptionStatus.active ? 'rgba(46,213,115,0.2)' : 'rgba(239,68,68,0.2)'}`,
-                    overflow: 'hidden',
-                }}>
-                    <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '20px 24px', flexWrap: 'wrap', gap: '12px',
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <Crown size={22} style={{ color: subscriptionStatus.active ? '#2ed573' : '#ef4444', flexShrink: 0 }} />
-                            <div>
-                                <div style={{ fontWeight: 700, fontSize: '1rem', color: '#111827' }}>
-                                    {subscriptionStatus.active ? 'Active Subscription' : 'No Active Subscription'}
-                                </div>
-                                {subscriptionStatus.active && subscriptionStatus.expiresAt ? (() => {
-                                    const daysLeft = getSubscriptionDaysLeft(subscriptionStatus.expiresAt);
-                                    const daysColor = daysLeft > 7 ? '#2ed573' : daysLeft >= 3 ? '#fdcb6e' : '#ef4444';
-                                    return (
-                                        <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <Calendar size={13} style={{ verticalAlign: 'middle' }} />
-                                                Expires {formatSubscriptionDate(subscriptionStatus.expiresAt)}
-                                            </span>
-                                            <span style={{
-                                                padding: '2px 10px', borderRadius: '100px', fontSize: '0.78rem',
-                                                fontWeight: 700, color: daysColor,
-                                                background: daysLeft > 7 ? 'rgba(46,213,115,0.1)' : daysLeft >= 3 ? 'rgba(253,203,110,0.1)' : 'rgba(239,68,68,0.1)',
-                                            }}>
-                                                {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
-                                            </span>
-                                        </div>
-                                    );
-                                })() : subscriptionStatus.active ? (
-                                    <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '4px' }}>VIP - Permanent access</div>
-                                ) : (
-                                    <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '4px' }}>Subscribe to process images, compress videos, and more</div>
-                                )}
-                            </div>
-                        </div>
-                        {!subscriptionStatus.active && (
-                            <button
-                                onClick={() => setShowPaywall(true)}
-                                className="btn btn-primary"
-                                style={{ padding: '10px 24px', fontSize: '0.9rem', borderRadius: '100px', whiteSpace: 'nowrap', border: 'none', cursor: 'pointer' }}
-                            >
-                                Upgrade
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Cancellation info */}
-                    {subscriptionStatus.active && (
-                        <div style={{
-                            padding: '12px 24px',
-                            borderTop: `1px solid ${subscriptionStatus.active ? 'rgba(46,213,115,0.15)' : 'rgba(239,68,68,0.15)'}`,
-                            fontSize: '0.8rem', color: '#9ca3af', lineHeight: 1.6,
-                        }}>
-                            To cancel your subscription, contact us at{' '}
-                            <a href="mailto:optimage@dreamintrepid.com" style={{ color: '#e8866f', textDecoration: 'none' }}>
-                                optimage@dreamintrepid.com
-                            </a>{' '}
-                            or manage it directly via your payment provider.
-                        </div>
-                    )}
-                </div>
-            )}
 
             {/* Tab Navigation */}
             <div className="dashboard-tabs">
@@ -1934,49 +1822,6 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         <h3 style={{ fontSize: '1.3rem', marginBottom: '8px' }}>Account</h3>
                         <p style={{ color: '#9ca3af', fontSize: '0.9rem', lineHeight: 1.6 }}>Signed in as <strong style={{ color: '#111827' }}>{user.email}</strong></p>
 
-                        {/* Subscription Info */}
-                        {subscriptionLoading ? (
-                            <div style={{ marginTop: '16px', padding: '16px', borderRadius: '12px', background: '#f3f4f6' }}>
-                                <SkeletonBox height="14px" width="50%" style={{ marginBottom: '10px' }} />
-                                <SkeletonBox height="12px" width="75%" />
-                            </div>
-                        ) : subscriptionStatus && (
-                            <div style={{
-                                marginTop: '16px', padding: '16px', borderRadius: '12px',
-                                background: '#f3f4f6',
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                    <Crown size={16} style={{ color: subscriptionStatus.active ? '#2ed573' : '#9ca3af' }} />
-                                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                                        {subscriptionStatus.active ? 'Active Subscription' : 'No Subscription'}
-                                    </span>
-                                </div>
-                                {subscriptionStatus.active && subscriptionStatus.expiresAt ? (() => {
-                                    const daysLeft = getSubscriptionDaysLeft(subscriptionStatus.expiresAt);
-                                    const daysColor = daysLeft > 7 ? '#2ed573' : daysLeft >= 3 ? '#fdcb6e' : '#ef4444';
-                                    return (
-                                        <>
-                                            <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: '0 0 6px' }}>
-                                                Expires {formatSubscriptionDate(subscriptionStatus.expiresAt)}
-                                            </p>
-                                            <span style={{
-                                                fontSize: '0.8rem', fontWeight: 700, color: daysColor,
-                                            }}>
-                                                {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
-                                            </span>
-                                        </>
-                                    );
-                                })() : subscriptionStatus.active ? (
-                                    <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0 }}>
-                                        VIP - Lifetime access
-                                    </p>
-                                ) : (
-                                    <button onClick={() => setShowPaywall(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#db5a42', fontSize: '0.85rem', padding: 0, textAlign: 'left' }}>
-                                        Subscribe to unlock all features
-                                    </button>
-                                )}
-                            </div>
-                        )}
 
                         <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginTop: '16px', lineHeight: 1.6 }}>
                             Need to change your password or manage your account? Head to the <Link href="/" style={{ color: '#db5a42' }}>homepage</Link> and click &quot;Forgot Password&quot; in the login modal.
@@ -2001,17 +1846,6 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         <BrandingForm profile={profile} />
                     </div>
                 </div>
-            )}
-
-            {/* ═══════════ Subscription Paywall Modal ═══════════ */}
-            {showPaywall && (
-                <SubscriptionPaywall
-                    onSubscribed={() => {
-                        setShowPaywall(false);
-                        apiClient.getSubscriptionStatus().then(setSubscriptionStatus).catch(() => {});
-                    }}
-                    onClose={() => setShowPaywall(false)}
-                />
             )}
 
             {/* ═══════════ Tab: Video ═══════════ */}

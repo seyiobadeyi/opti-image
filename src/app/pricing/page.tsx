@@ -4,11 +4,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-    title: 'Pricing | Optimage',
-    description: 'One simple plan. Every image format, bulk processing, video compression, AI transcription, and more.',
+    title: 'Free Image Tools | Optimage',
+    description: 'Optimage is 100% free. Compress, convert, resize, and enhance images with no limits, no paywalls, and no account required.',
     openGraph: {
-        title: 'Optimage Pricing: Simple, Transparent',
-        description: 'No seat limits, no per-file fees. Everything included in one plan.',
+        title: 'Optimage: Free Image Tools, No Paywalls',
+        description: 'Every tool is free for everyone. No account required to start.',
         url: 'https://optimage.dreamintrepid.com/pricing',
     },
 };

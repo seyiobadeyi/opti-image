@@ -165,24 +165,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   offers: [
                     {
                       '@type': 'Offer',
-                      name: 'Free Tier',
+                      name: 'Free',
                       price: '0',
-                      priceCurrency: 'NGN',
-                      description: 'Basic image compression. Free, no account required.',
-                    },
-                    {
-                      '@type': 'Offer',
-                      name: 'Monthly Plan',
-                      price: '800',
-                      priceCurrency: 'NGN',
-                      description: '1 month full access to all features',
-                    },
-                    {
-                      '@type': 'Offer',
-                      name: 'Annual Plan',
-                      price: '6000',
-                      priceCurrency: 'NGN',
-                      description: '1 year full access to all features',
+                      priceCurrency: 'USD',
+                      description: 'All tools free, no account required. Sign up for history and client galleries.',
                     },
                   ],
                   publisher: { '@id': `${SITE_URL}/#organization` },

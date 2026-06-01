@@ -722,6 +722,21 @@ export default function ResizePage(): React.JSX.Element {
                         ))}
                     </div>
 
+                    {/* Sign-up nudge */}
+                    <div style={{ marginTop: '16px', padding: '14px 16px', background: '#fdf3f1', border: '1px solid #fce4dc', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                        <div>
+                            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: c.text }}>Save your resize history</div>
+                            <div style={{ fontSize: '0.78rem', color: c.textMuted, marginTop: '2px' }}>Free account — track every file you&apos;ve processed.</div>
+                        </div>
+                        <button type="button"
+                            onClick={() => window.dispatchEvent(new Event('open-auth-modal'))}
+                            style={{ background: c.accent, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s' }}
+                            onMouseEnter={e => (e.currentTarget.style.background = c.accentDark)}
+                            onMouseLeave={e => (e.currentTarget.style.background = c.accent)}>
+                            Sign up free
+                        </button>
+                    </div>
+
                     <button type="button" onClick={reset}
                         style={{ display: 'block', width: '100%', textAlign: 'center', marginTop: '20px', color: c.textMuted, fontSize: '0.88rem', cursor: 'pointer', background: 'none', border: 'none', padding: '8px', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
                         Resize more images

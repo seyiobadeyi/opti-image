@@ -7,7 +7,6 @@ import SettingsPanel from '@/components/SettingsPanel';
 import MediaPanel from '@/components/MediaPanel';
 import ProgressTracker from '@/components/ProgressTracker';
 import ResultsPanel from '@/components/ResultsPanel';
-import SubscriptionPaywall from '@/components/SubscriptionPaywall';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import { ImageIcon, RefreshCw, AlertTriangle, CheckCircle, Clipboard, Mic } from 'lucide-react';
@@ -45,7 +44,6 @@ export default function DropZoneClient(): React.JSX.Element {
     const [summary, setSummary] = useState<ProcessingSummary | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [transcriptionResult, setTranscriptionResult] = useState<TranscriptionResult | null>(null);
-    const [showPaywall, setShowPaywall] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const supabase = useMemo(() => createClient(), []);
 
@@ -111,28 +109,8 @@ export default function DropZoneClient(): React.JSX.Element {
         setProcessed(0);
     }, []);
 
-    /** Returns true if the user is authenticated AND has an active subscription. */
-    const checkAuthAndSubscription = async (): Promise<boolean> => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            if (!window.authModalDispatching) {
-                window.authModalDispatching = true;
-                window.dispatchEvent(new CustomEvent('open-auth-modal'));
-                setTimeout(() => { window.authModalDispatching = false; }, 500);
-            }
-            return false;
-        }
-        const status = await apiClient.getSubscriptionStatus();
-        if (!status.active) {
-            setShowPaywall(true);
-            return false;
-        }
-        return true;
-    };
-
     const handleOptimizeImages = async (): Promise<void> => {
         if (files.length === 0) return;
-        if (!(await checkAuthAndSubscription())) return;
 
         setIsProcessing(true);
         setError(null);
@@ -202,7 +180,6 @@ export default function DropZoneClient(): React.JSX.Element {
 
     const handleProcessMedia = async (): Promise<void> => {
         if (files.length === 0) return;
-        if (!(await checkAuthAndSubscription())) return;
 
         setIsProcessing(true);
         setError(null);
@@ -418,12 +395,6 @@ export default function DropZoneClient(): React.JSX.Element {
                 </div>
             )}
 
-            {showPaywall && (
-                <SubscriptionPaywall
-                    onSubscribed={() => setShowPaywall(false)}
-                    onClose={() => setShowPaywall(false)}
-                />
-            )}
         </section>
     );
 }

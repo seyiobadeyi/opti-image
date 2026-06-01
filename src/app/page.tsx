@@ -421,10 +421,10 @@ export default function Home(): React.JSX.Element {
 
             {/* ── Hero ────────────────────────────────────────────────── */}
             <div style={S.hero}>
-                <h1 style={S.h1}>Every image tool you need,<br />right here</h1>
+                <h1 style={S.h1}>The image toolkit that<br />doesn&apos;t charge you to use it</h1>
                 <p style={S.heroSub}>
-                    Compress, convert, resize and deliver your images — free, fast, and built for real work.
-                    No installs. No waiting. Just results.
+                    Compress, convert, resize and deliver your images — completely free.
+                    No installs. No paywalls. No account needed to start.
                 </p>
             </div>
 
@@ -512,21 +512,20 @@ export default function Home(): React.JSX.Element {
                 ))}
             </div>
 
-            {/* ── Premium CTA ─────────────────────────────────────────── */}
+            {/* ── Free account CTA ─────────────────────────────────── */}
             <section style={S.premiumSection}>
                 <div style={S.premiumInner}>
                     <div style={S.premiumText}>
-                        <h2 style={S.premiumH2}>Get more with a Pro account</h2>
+                        <h2 style={S.premiumH2}>All tools free. Sign up to get even more.</h2>
                         <p style={S.premiumSub}>
-                            Unlock unlimited batch processing, client gallery delivery with payment gating, advanced export settings and priority support.
+                            Every image tool on Optimage is free for everyone. Create a free account and unlock processing history, client galleries, and your personal dashboard.
                         </p>
                         <ul style={S.premiumList}>
                             {[
-                                'Unlimited images per session',
-                                'Private client galleries with PIN & payment gate',
-                                'Priority processing queue',
-                                'Advanced filters — Vivid, Muted, B&W, Warm, Cool',
-                                'Custom watermarks & metadata control',
+                                'Processing history — every file you\'ve optimised, searchable',
+                                'Client galleries with PIN protection and download controls',
+                                'Dashboard to manage all your files in one place',
+                                'No file limits, no paywalls, no credit card ever',
                             ].map(item => (
                                 <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem' }}>
                                     <CheckCircle size={15} color="rgba(255,255,255,0.8)" strokeWidth={2.5} />
@@ -534,10 +533,10 @@ export default function Home(): React.JSX.Element {
                                 </li>
                             ))}
                         </ul>
-                        <Link href="/pricing" style={S.premiumBtn}
+                        <Link href="/dashboard" style={S.premiumBtn}
                             onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = '0.92'; }}
                             onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = '1'; }}>
-                            See pricing <ArrowRight size={16} strokeWidth={2.5} />
+                            Create a free account <ArrowRight size={16} strokeWidth={2.5} />
                         </Link>
                     </div>
                 </div>

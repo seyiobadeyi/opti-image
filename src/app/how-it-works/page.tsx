@@ -37,7 +37,7 @@ const features: { icon: React.ReactNode; title: string; body: string }[] = [
     { icon: <Lock size={20} color="#db5a42" />, title: 'Private by design', body: 'Files are processed and deleted promptly. We never use your images for training or analysis.' },
     { icon: <Zap size={20} color="#db5a42" />, title: 'Fast processing', body: 'Powered by professional-grade tools built for speed. Even large batch jobs finish in seconds.' },
     { icon: <Globe size={20} color="#db5a42" />, title: 'Works in any browser', body: 'No app to install. Open any tool in your browser and start processing — desktop, tablet or mobile.' },
-    { icon: <Star size={20} color="#db5a42" />, title: 'Free for everyone', body: 'Core tools are free with no account required. Sign up for higher limits and client gallery features.' },
+    { icon: <Star size={20} color="#db5a42" />, title: 'Free for everyone', body: 'All tools are completely free with no account required. Sign up to access client galleries and processing history.' },
 ];
 
 export default function HowItWorksPage(): React.JSX.Element {
@@ -100,7 +100,7 @@ export default function HowItWorksPage(): React.JSX.Element {
                 <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 2rem)', fontWeight: 800, color: clr.g900, marginBottom: '12px', letterSpacing: '-0.02em' }}>
                     Ready to try it?
                 </h2>
-                <p style={{ color: clr.g400, fontSize: '0.97rem', marginBottom: '28px' }}>Free for up to 5 files. No account needed.</p>
+                <p style={{ color: clr.g400, fontSize: '0.97rem', marginBottom: '28px' }}>Free for everyone. No account needed.</p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
                     <Link href="/compress"
                         style={{ background: clr.accent, color: '#fff', textDecoration: 'none', borderRadius: '12px', padding: '13px 28px', fontSize: '0.97rem', fontWeight: 700 }}>

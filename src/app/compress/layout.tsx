@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     },
     openGraph: {
         title: 'Compress Images Online: Free & Fast | Optimage',
-        description: 'Reduce image file sizes by up to 90% instantly. Supports JPEG, PNG, WebP, AVIF, GIF, HEIC. Free for up to 5 files — no account needed.',
+        description: 'Reduce image file sizes by up to 90% instantly. Supports JPEG, PNG, WebP, AVIF, GIF, HEIC. Free for everyone — no account needed.',
         url: `${SITE_URL}/compress`,
         siteName: 'Optimage',
         images: [

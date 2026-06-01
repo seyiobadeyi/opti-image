@@ -82,12 +82,14 @@ export default function Header(): React.JSX.Element {
     }, [supabase, router]);
 
     useEffect(() => {
-        if (typeof window === 'undefined' || isAuthLoading || user) return;
+        if (typeof window === 'undefined' || isAuthLoading) return;
         const params = new URLSearchParams(window.location.search);
         const hasOnboarding = params.get('onboarding') === '1';
         const hasLogin = params.get('login') === 'true';
         const nextParam = params.get('next');
-        if (hasOnboarding || hasLogin) {
+        // Show onboarding for Google OAuth new users (user IS set but has no display_name yet).
+        // Show login prompt only when not signed in.
+        if (hasOnboarding || (hasLogin && !user)) {
             setAuthModalInitialStep(hasOnboarding ? 'onboarding' : 'email');
             setRedirectUrl(nextParam ?? (window.location.pathname === '/' ? '/dashboard' : window.location.pathname));
             setIsAuthModalOpen(true);
@@ -181,7 +183,6 @@ export default function Header(): React.JSX.Element {
                     <button style={navLinkStyle} onClick={openGalleries}>
                         <Camera size={14} /> Galleries
                     </button>
-                    <Link href="/pricing" style={navLinkStyle}>Pricing</Link>
 
                     <div style={{ marginLeft: '8px', paddingLeft: '12px', borderLeft: `1px solid ${clr.g200}`, display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {isAuthLoading ? (
@@ -233,7 +234,6 @@ export default function Header(): React.JSX.Element {
                             {[
                                 { href: '/', label: 'Home' },
                                 { href: '/blog', label: 'Blog' },
-                                { href: '/pricing', label: 'Pricing' },
                             ].map(({ href, label }) => (
                                 <Link
                                     key={href} href={href}
