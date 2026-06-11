@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
@@ -9,6 +9,7 @@ import { createClient } from '@/utils/supabase/client';
 import AuthModal from '@/components/AuthModal';
 import type { GalleryPublicMeta, GalleryItem } from '@/types';
 import type { Session } from '@supabase/supabase-js';
+import { c } from '@/lib/colors';
 
 interface GalleryViewerProps {
     slug: string;
@@ -420,7 +421,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             <div style={styles.page}>
                 <div style={styles.centered}>
                     <h1 style={{ fontSize: '2rem', marginBottom: '12px' }}>Gallery not found</h1>
-                    <p style={{ color: '#9ca3af' }}>This gallery may have expired or been removed.</p>
+                    <p style={{ color: c.textMuted }}>This gallery may have expired or been removed.</p>
                 </div>
             </div>
         );
@@ -440,22 +441,22 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                         <div style={{ textAlign: 'center' }}>
                             <AlertTriangle size={44} style={{ color: '#f59e0b', margin: '0 auto 16px' }} />
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
-                            <p style={{ color: '#9ca3af', fontSize: '0.95rem', marginTop: '12px', lineHeight: 1.6 }}>
+                            <p style={{ color: c.textMuted, fontSize: '0.95rem', marginTop: '12px', lineHeight: 1.6 }}>
                                 This gallery has expired and is no longer available.
                             </p>
                             {gallery.photographer_name && (
-                                <p style={{ color: '#6b7280', fontSize: '0.82rem', marginTop: '8px' }}>
+                                <p style={{ color: c.gray500, fontSize: '0.82rem', marginTop: '8px' }}>
                                     Gallery by {gallery.photographer_name}
                                 </p>
                             )}
                         </div>
                         <div style={{ textAlign: 'center', marginTop: '32px' }}>
-                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: c.gray500, fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
                                 Go Back
                             </button>
                         </div>
-                        <p style={{ textAlign: 'center', marginTop: '16px', color: '#4b5563', fontSize: '0.78rem' }}>
-                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a>
+                        <p style={{ textAlign: 'center', marginTop: '16px', color: c.gray600, fontSize: '0.78rem' }}>
+                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
@@ -470,20 +471,20 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 <div style={styles.gateContainer}>
                     <div style={styles.gateCard}>
                         <div style={{ textAlign: 'center' }}>
-                            <Clock size={44} style={{ color: '#db5a42', marginBottom: '16px' }} />
+                            <Clock size={44} style={{ color: c.accent, marginBottom: '16px' }} />
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
-                            <p style={{ color: '#9ca3af', fontSize: '0.95rem', marginTop: '12px', lineHeight: 1.6 }}>
+                            <p style={{ color: c.textMuted, fontSize: '0.95rem', marginTop: '12px', lineHeight: 1.6 }}>
                                 This gallery is currently being prepared.<br />
                                 Check back soon — your photographer will let you know when it's ready.
                             </p>
                         </div>
                         <div style={{ textAlign: 'center', marginTop: '24px' }}>
-                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: c.gray500, fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
                                 Go Back
                             </button>
                         </div>
-                        <p style={{ textAlign: 'center', marginTop: '16px', color: '#4b5563', fontSize: '0.78rem' }}>
-                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a>
+                        <p style={{ textAlign: 'center', marginTop: '16px', color: c.gray600, fontSize: '0.78rem' }}>
+                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
@@ -498,10 +499,10 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 <div style={styles.gateContainer}>
                     <div style={styles.gateCard}>
                         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-                            <CreditCard size={44} style={{ color: '#db5a42', margin: '0 auto 16px' }} />
+                            <CreditCard size={44} style={{ color: c.accent, margin: '0 auto 16px' }} />
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
                             {gallery.description && <p style={styles.gateSubtitle}>{gallery.description}</p>}
-                            <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '10px' }}>
+                            <p style={{ color: c.textMuted, fontSize: '0.88rem', marginTop: '10px' }}>
                                 Payment is required to access this gallery.
                             </p>
                         </div>
@@ -510,7 +511,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 <p style={{ color: '#a78bfa', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
                                     Payment instructions
                                 </p>
-                                <p style={{ color: '#e5e7eb', fontSize: '0.9rem', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0 }}>
+                                <p style={{ color: c.border, fontSize: '0.9rem', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0 }}>
                                     {gallery.payment_instructions}
                                 </p>
                             </div>
@@ -521,12 +522,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             </p>
                         </div>
                         <div style={{ textAlign: 'center', marginTop: '24px' }}>
-                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: c.gray500, fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
                                 Cancel / Go Back
                             </button>
                         </div>
-                        <p style={{ textAlign: 'center', marginTop: '16px', color: '#4b5563', fontSize: '0.78rem' }}>
-                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a>
+                        <p style={{ textAlign: 'center', marginTop: '16px', color: c.gray600, fontSize: '0.78rem' }}>
+                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
@@ -561,7 +562,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                                 <AlertTriangle size={40} style={{ color: '#f59e0b', marginBottom: '14px' }} />
                                 <h1 style={styles.gateTitle}>{gallery.title}</h1>
-                                <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '10px', lineHeight: 1.55 }}>
+                                <p style={{ color: c.textMuted, fontSize: '0.88rem', marginTop: '10px', lineHeight: 1.55 }}>
                                     We couldn&apos;t verify your access right now.<br />
                                     You&apos;re signed in — this is likely a temporary server issue.
                                 </p>
@@ -571,12 +572,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 <button onClick={handleRetry} style={styles.gateButton}>
                                     Try again
                                 </button>
-                                <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                                <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: c.gray500, fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
                                     Go Back
                                 </button>
                             </div>
-                            <p style={{ textAlign: 'center', marginTop: '24px', color: '#4b5563', fontSize: '0.78rem' }}>
-                                Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a>
+                            <p style={{ textAlign: 'center', marginTop: '24px', color: c.gray600, fontSize: '0.78rem' }}>
+                                Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                             </p>
                         </div>
                     </div>
@@ -590,10 +591,10 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 <div style={styles.gateContainer}>
                     <div style={styles.gateCard}>
                         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-                            <UserCircle size={44} style={{ color: '#db5a42', marginBottom: '14px' }} />
+                            <UserCircle size={44} style={{ color: c.accent, marginBottom: '14px' }} />
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
                             {gallery.description && <p style={styles.gateSubtitle}>{gallery.description}</p>}
-                            <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: '10px', lineHeight: 1.55 }}>
+                            <p style={{ color: c.textMuted, fontSize: '0.88rem', marginTop: '10px', lineHeight: 1.55 }}>
                                 This gallery is for Optimage members only.<br />
                                 Sign in or create a <strong style={{ color: '#c4b5fd' }}>free account</strong> to view it — no credit card needed.
                             </p>
@@ -603,13 +604,13 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             <button onClick={() => setAuthModalOpen(true)} style={styles.gateButton}>
                                 Sign in & view gallery
                             </button>
-                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                            <button onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: c.gray500, fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
                                 Cancel / Go Back
                             </button>
                         </div>
 
-                        <p style={{ textAlign: 'center', marginTop: '24px', color: '#4b5563', fontSize: '0.78rem' }}>
-                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a>
+                        <p style={{ textAlign: 'center', marginTop: '24px', color: c.gray600, fontSize: '0.78rem' }}>
+                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
@@ -625,12 +626,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     <div style={styles.gateCard}>
                         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                             {gallery.access_type === 'pin'
-                                ? <Lock size={40} style={{ color: '#db5a42', margin: '0 auto 16px' }} />
-                                : <Mail size={40} style={{ color: '#db5a42', margin: '0 auto 16px' }} />
+                                ? <Lock size={40} style={{ color: c.accent, margin: '0 auto 16px' }} />
+                                : <Mail size={40} style={{ color: c.accent, margin: '0 auto 16px' }} />
                             }
                             <h1 style={styles.gateTitle}>{gallery.title}</h1>
                             {gallery.description && <p style={styles.gateSubtitle}>{gallery.description}</p>}
-                            <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginTop: '8px' }}>
+                            <p style={{ color: c.textMuted, fontSize: '0.9rem', marginTop: '8px' }}>
                                 {gallery.access_type === 'pin'
                                     ? 'Enter the PIN to view this gallery'
                                     : 'Enter your email address to request access'}
@@ -650,12 +651,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             <button type="submit" disabled={gateLoading} style={styles.gateButton}>
                                 {gateLoading ? 'Verifying...' : 'View Gallery'}
                             </button>
-                            <button type="button" onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
+                            <button type="button" onClick={() => setShowCover(true)} style={{ background: 'none', border: 'none', color: c.gray500, fontSize: '0.82rem', cursor: 'pointer', padding: '8px' }}>
                                 Cancel / Go Back
                             </button>
                         </form>
-                        <p style={{ textAlign: 'center', marginTop: '20px', color: '#6b7280', fontSize: '0.8rem' }}>
-                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a>
+                        <p style={{ textAlign: 'center', marginTop: '20px', color: c.gray500, fontSize: '0.8rem' }}>
+                            Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
@@ -716,7 +717,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     <h1 style={{
                         fontSize: 'clamp(2.2rem, 7vw, 4.5rem)',
                         fontWeight: 800,
-                        color: '#ffffff',
+                        color: c.white,
                         letterSpacing: '-0.01em',
                         textTransform: 'uppercase',
                         lineHeight: 1.1,
@@ -743,7 +744,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             padding: '14px 40px',
                             border: '1.5px solid rgba(255,255,255,0.75)',
                             background: 'transparent',
-                            color: '#ffffff',
+                            color: c.white,
                             fontSize: '0.82rem',
                             fontWeight: 600,
                             letterSpacing: '0.18em',
@@ -756,7 +757,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             borderRadius: '2px',
                         }}
                         onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6';
+                            (e.currentTarget as HTMLButtonElement).style.background = c.bgMuted;
                         }}
                         onMouseLeave={(e) => {
                             (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
@@ -833,7 +834,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         {(totalItems > 0 || items.length > 0) && (
-                            <span style={{ color: '#6b7280', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ color: c.gray500, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <Eye size={14} /> {totalItems || items.length} {(totalItems || items.length) === 1 ? 'photo' : 'photos'}
                             </span>
                         )}
@@ -842,8 +843,8 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 onClick={toggleSelectMode}
                                 style={{
                                     padding: '8px 16px', borderRadius: '10px', border: '1px solid #2a2a2a',
-                                    background: selectMode ? '#db5a42' : 'transparent',
-                                    color: selectMode ? '#fff' : '#9ca3af',
+                                    background: selectMode ? c.accent : 'transparent',
+                                    color: selectMode ? c.white : c.textMuted,
                                     fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
                                     transition: 'all 0.15s',
                                 }}
@@ -861,7 +862,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             style={{
                                 padding: '8px 16px', borderRadius: '10px', border: '1px solid #2a2a2a',
                                 background: showFavMode ? 'rgba(236,72,153,0.2)' : 'transparent',
-                                color: showFavMode ? '#f472b6' : '#9ca3af',
+                                color: showFavMode ? '#f472b6' : c.textMuted,
                                 fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
                                 transition: 'all 0.15s',
                             }}
@@ -885,11 +886,11 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
                 }}>
                     <button onClick={allSelected ? deselectAll : selectAll}
-                        style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '6px 0' }}>
-                        {allSelected ? <CheckSquare size={16} color="#db5a42" /> : <Square size={16} />}
+                        style={{ background: 'none', border: 'none', color: c.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '6px 0' }}>
+                        {allSelected ? <CheckSquare size={16} color={c.accent} /> : <Square size={16} />}
                         {allSelected ? 'Deselect all' : 'Select all'}
                     </button>
-                    <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>
+                    <span style={{ color: c.gray600, fontSize: '0.85rem' }}>
                         {selectedIds.size > 0 ? `${selectedIds.size} selected` : 'Click photos to select'}
                     </span>
                     {selectedIds.size > 0 && zipProgress === null && (
@@ -902,7 +903,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             </button>
                             <button
                                 onClick={() => requireAuth(() => void downloadSelected(false))}
-                                style={{ padding: '8px 16px', borderRadius: '10px', background: '#db5a42', border: 'none', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                style={{ padding: '8px 16px', borderRadius: '10px', background: c.accent, border: 'none', color: c.white, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
                                 <Package size={14} /> ZIP — Originals
                             </button>
@@ -910,10 +911,10 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     )}
                     {zipProgress !== null && (
                         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '140px', height: '4px', borderRadius: '4px', background: '#f3f4f6', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${zipProgress}%`, background: '#db5a42', borderRadius: '4px', transition: 'width 0.2s' }} />
+                            <div style={{ width: '140px', height: '4px', borderRadius: '4px', background: c.bgMuted, overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${zipProgress}%`, background: c.accent, borderRadius: '4px', transition: 'width 0.2s' }} />
                             </div>
-                            <span style={{ color: '#9ca3af', fontSize: '0.82rem' }}>Building ZIP… {zipProgress}%</span>
+                            <span style={{ color: c.textMuted, fontSize: '0.82rem' }}>Building ZIP… {zipProgress}%</span>
                         </div>
                     )}
                     {zipError && (
@@ -935,7 +936,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
                 }}>
                     <Heart size={16} color="#f472b6" fill="#f472b6" />
-                    <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>
+                    <span style={{ color: c.textMuted, fontSize: '0.85rem' }}>
                         {favoriteIds.size > 0
                             ? `${favoriteIds.size} photo${favoriteIds.size !== 1 ? 's' : ''} liked — click photos to add more`
                             : 'Tap photos to pick your favourites'}
@@ -953,7 +954,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 marginLeft: 'auto',
                                 padding: '8px 20px', borderRadius: '10px',
                                 background: '#ec4899', border: 'none',
-                                color: '#fff', fontSize: '0.85rem', fontWeight: 600,
+                                color: c.white, fontSize: '0.85rem', fontWeight: 600,
                                 cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
                             }}
                         >
@@ -976,7 +977,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     <Heart size={20} color="#f472b6" fill="#f472b6" />
                     <div>
                         <p style={{ color: '#f472b6', fontWeight: 600, margin: 0 }}>Favourites sent!</p>
-                        <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: '2px 0 0 0' }}>
+                        <p style={{ color: c.textMuted, fontSize: '0.85rem', margin: '2px 0 0 0' }}>
                             Your photographer has been notified with your {favoriteIds.size} selected photos.
                         </p>
                     </div>
@@ -998,7 +999,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 className="gallery-grid-item"
                                 style={{
                                     ...styles.gridItem,
-                                    outline: isSelected ? '3px solid #db5a42' : 'none',
+                                    outline: isSelected ? `3px solid ${c.accent}` : 'none',
                                     outlineOffset: '-3px',
                                 }}
                                 onClick={() => selectMode ? toggleSelect(item.id) : (showFavMode ? toggleFavorite(item.id) : openLightbox(index))}
@@ -1018,13 +1019,13 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 {selectMode && (
                                     <div style={{
                                         position: 'absolute', top: '10px', left: '10px', zIndex: 5,
-                                        background: isSelected ? '#db5a42' : 'rgba(0,0,0,0.6)',
-                                        border: `2px solid ${isSelected ? '#db5a42' : 'rgba(255,255,255,0.4)'}`,
+                                        background: isSelected ? c.accent : 'rgba(0,0,0,0.6)',
+                                        border: `2px solid ${isSelected ? c.accent : 'rgba(255,255,255,0.4)'}`,
                                         borderRadius: '6px', width: '22px', height: '22px',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         transition: 'all 0.15s',
                                     }}>
-                                        {isSelected && <X size={13} color="#fff" strokeWidth={3} />}
+                                        {isSelected && <X size={13} color={c.white} strokeWidth={3} />}
                                     </div>
                                 )}
                                 {/* Favourite indicator */}
@@ -1042,8 +1043,8 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                     >
                                         <Heart
                                             size={16}
-                                            color={favoriteIds.has(item.id) ? '#fff' : 'rgba(255,255,255,0.7)'}
-                                            fill={favoriteIds.has(item.id) ? '#fff' : 'none'}
+                                            color={favoriteIds.has(item.id) ? c.white : 'rgba(255,255,255,0.7)'}
+                                            fill={favoriteIds.has(item.id) ? c.white : 'none'}
                                         />
                                     </div>
                                 )}
@@ -1083,7 +1084,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                                     position: 'absolute', top: '10px', left: '10px',
                                                     background: 'rgba(239,68,68,0.9)',
                                                     border: 'none', borderRadius: '6px',
-                                                    color: '#fff', cursor: 'pointer',
+                                                    color: c.white, cursor: 'pointer',
                                                     padding: '5px 9px', fontSize: '0.72rem', fontWeight: 600,
                                                     display: 'flex', alignItems: 'center', gap: '4px',
                                                     zIndex: 10,
@@ -1105,7 +1106,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             {/* Infinite scroll sentinel */}
             <div ref={sentinelRef} style={{ height: 1 }} />
             {itemsLoading && items.length > 0 && (
-                <div style={{ textAlign: 'center', padding: '32px', color: '#9ca3af', fontSize: '0.85rem' }}>
+                <div style={{ textAlign: 'center', padding: '32px', color: c.textMuted, fontSize: '0.85rem' }}>
                     Loading more photos…
                 </div>
             )}
@@ -1137,8 +1138,8 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                         onClick={() => document.getElementById('owner-add-photos-input')?.click()}
                         style={{
                             position: 'fixed', bottom: '32px', right: '32px', zIndex: 200,
-                            background: '#db5a42', border: 'none', borderRadius: '50px',
-                            color: '#fff', cursor: 'pointer',
+                            background: c.accent, border: 'none', borderRadius: '50px',
+                            color: c.white, cursor: 'pointer',
                             padding: '14px 22px', fontSize: '0.9rem', fontWeight: 700,
                             display: 'flex', alignItems: 'center', gap: '8px',
                             boxShadow: '0 4px 24px rgba(124,58,237,0.5)',
@@ -1159,21 +1160,21 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             <footer style={styles.footer}>
                 {gallery.branding_studio_name ? (
                     <div>
-                        <p style={{ fontWeight: 600, color: gallery.branding_color ?? '#9ca3af', marginBottom: '4px' }}>
+                        <p style={{ fontWeight: 600, color: gallery.branding_color ?? c.textMuted, marginBottom: '4px' }}>
                             {gallery.branding_studio_name}
                         </p>
                         {gallery.branding_website && (
                             <a href={gallery.branding_website} target="_blank" rel="noreferrer"
-                                style={{ color: '#6b7280', fontSize: '0.8rem', textDecoration: 'none' }}>
+                                style={{ color: c.gray500, fontSize: '0.8rem', textDecoration: 'none' }}>
                                 {gallery.branding_website.replace(/^https?:\/\//, '')}
                             </a>
                         )}
-                        <p style={{ color: '#374151', fontSize: '0.72rem', marginTop: '12px' }}>
-                            Delivered via <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a>
+                        <p style={{ color: c.textSecondary, fontSize: '0.72rem', marginTop: '12px' }}>
+                            Delivered via <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 ) : (
-                    <p>Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: '#db5a42', textDecoration: 'none' }}>Optimage</a></p>
+                    <p>Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a></p>
                 )}
             </footer>
 
@@ -1246,9 +1247,9 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
                                 padding: '8px 16px', borderRadius: '8px',
-                                background: '#f3f4f6',
+                                background: c.bgMuted,
                                 border: '1px solid rgba(255,255,255,0.2)',
-                                color: '#fff', fontSize: '0.85rem',
+                                color: c.white, fontSize: '0.85rem',
                                 cursor: 'pointer', transition: 'background 0.15s',
                             }}
                             title="Share gallery"
@@ -1259,7 +1260,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
 
                     <div style={styles.lbCounter}>
                         {lightboxIndex + 1} / {items.length}
-                        <span style={{ color: '#6b7280', marginLeft: '8px', fontSize: '0.78rem' }}>
+                        <span style={{ color: c.gray500, marginLeft: '8px', fontSize: '0.78rem' }}>
                             {items[lightboxIndex].filename}
                         </span>
                     </div>
@@ -1272,29 +1273,29 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles: Record<string, React.CSSProperties> = {
-    page:        { minHeight: '100vh', background: '#0a0a0a', color: '#ffffff', fontFamily: 'inherit' },
+    page:        { minHeight: '100vh', background: '#0a0a0a', color: c.white, fontFamily: 'inherit' },
     centered:    { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', textAlign: 'center', padding: '32px' },
-    loading:     { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: '#6b7280', fontSize: '1rem' },
+    loading:     { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: c.gray500, fontSize: '1rem' },
     gateContainer: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '24px' },
     gateCard:    { background: '#111111', border: '1px solid #1f1f1f', borderRadius: '20px', padding: '48px 40px', maxWidth: '420px', width: '100%' },
-    gateTitle:   { fontSize: '1.6rem', fontWeight: 700, color: '#ffffff', marginBottom: '8px' },
-    gateSubtitle:{ fontSize: '0.95rem', color: '#9ca3af', lineHeight: 1.5 },
+    gateTitle:   { fontSize: '1.6rem', fontWeight: 700, color: c.white, marginBottom: '8px' },
+    gateSubtitle:{ fontSize: '0.95rem', color: c.textMuted, lineHeight: 1.5 },
     gateError:   { padding: '12px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', color: '#ef4444', fontSize: '0.9rem', marginBottom: '16px' },
-    gateInput:   { width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #2a2a2a', background: '#1a1a1a', color: '#ffffff', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' },
-    gateButton:  { width: '100%', padding: '14px', borderRadius: '12px', background: '#db5a42', color: '#ffffff', border: 'none', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' },
+    gateInput:   { width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #2a2a2a', background: '#1a1a1a', color: c.white, fontSize: '1rem', outline: 'none', boxSizing: 'border-box' },
+    gateButton:  { width: '100%', padding: '14px', borderRadius: '12px', background: c.accent, color: c.white, border: 'none', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' },
     header:      { borderBottom: '1px solid #1a1a1a', padding: '24px 32px' },
     headerInner: { maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' },
-    galleryTitle:{ fontSize: '1.8rem', fontWeight: 700, color: '#ffffff', margin: 0 },
-    galleryDesc: { color: '#9ca3af', fontSize: '0.95rem', marginTop: '6px', lineHeight: 1.5 },
+    galleryTitle:{ fontSize: '1.8rem', fontWeight: 700, color: c.white, margin: 0 },
+    galleryDesc: { color: c.textMuted, fontSize: '0.95rem', marginTop: '6px', lineHeight: 1.5 },
     grid:        { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px', padding: '4px', maxWidth: '1400px', margin: '0 auto' },
     gridItem:    { position: 'relative', aspectRatio: '1', overflow: 'hidden', cursor: 'pointer', background: '#111', userSelect: 'none' as const, WebkitUserSelect: 'none' as const },
     gridOverlay: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', opacity: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: '12px', transition: 'opacity 0.2s' },
-    downloadBtn: { background: '#e5e7eb', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#ffffff', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    footer:      { textAlign: 'center', padding: '32px', color: '#4b5563', fontSize: '0.85rem', borderTop: '1px solid #1a1a1a', marginTop: '32px' },
+    downloadBtn: { background: c.border, backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: c.white, padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    footer:      { textAlign: 'center', padding: '32px', color: c.gray600, fontSize: '0.85rem', borderTop: '1px solid #1a1a1a', marginTop: '32px' },
     lightboxOverlay: { position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
     lightboxContent: { position: 'relative', width: 'calc(100vw - 160px)', height: 'calc(100vh - 120px)', maxWidth: '1200px' },
-    lbClose:     { position: 'absolute', top: '16px', right: '16px', background: '#f3f4f6', border: 'none', color: '#fff', borderRadius: '50%', width: '44px', height: '44px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
-    lbNav:       { position: 'absolute', top: '50%', transform: 'translateY(-50%)', background: '#f3f4f6', border: 'none', color: '#fff', borderRadius: '50%', width: '52px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
-    lbDownload:  { position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(124,58,237,0.85)', border: '1px solid rgba(124,58,237,0.5)', backdropFilter: 'blur(8px)', color: '#fff', borderRadius: '10px', padding: '10px 20px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', zIndex: 10 },
-    lbCounter:   { position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', color: '#9ca3af', fontSize: '0.85rem', zIndex: 10, whiteSpace: 'nowrap' },
+    lbClose:     { position: 'absolute', top: '16px', right: '16px', background: c.bgMuted, border: 'none', color: c.white, borderRadius: '50%', width: '44px', height: '44px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    lbNav:       { position: 'absolute', top: '50%', transform: 'translateY(-50%)', background: c.bgMuted, border: 'none', color: c.white, borderRadius: '50%', width: '52px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    lbDownload:  { position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(124,58,237,0.85)', border: '1px solid rgba(124,58,237,0.5)', backdropFilter: 'blur(8px)', color: c.white, borderRadius: '10px', padding: '10px 20px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', zIndex: 10 },
+    lbCounter:   { position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', color: c.textMuted, fontSize: '0.85rem', zIndex: 10, whiteSpace: 'nowrap' },
 };

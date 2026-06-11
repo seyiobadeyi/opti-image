@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -18,6 +18,7 @@ import type {
     FileWithCustomName, ProcessingHistoryItem, ReferralStats,
     Gallery, GalleryItem,
 } from '@/types';
+import { c } from '@/lib/colors';
 
 // ─── Helper Functions ───────────────────────────────────────────
 function formatBytes(bytes: number): string {
@@ -41,7 +42,7 @@ function SkeletonBox({ width, height, style }: { width?: string; height?: string
         <div style={{
             width: width || '100%',
             height: height || '16px',
-            background: 'linear-gradient(90deg, #f3f4f6 25%, #2a2a3e 50%, #f3f4f6 75%)',
+            background: `linear-gradient(90deg, ${c.bgMuted} 25%, #2a2a3e 50%, ${c.bgMuted} 75%)`,
             backgroundSize: '200% 100%',
             animation: 'skeletonPulse 1.5s ease-in-out infinite',
             borderRadius: '8px',
@@ -73,14 +74,14 @@ function HistoryRow({ item }: { item: import('@/types').ProcessingHistoryItem })
         });
     };
     return (
-        <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+        <tr style={{ borderBottom: `1px solid ${c.border}` }}>
             <td style={{ padding: '16px 24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     {item.hosted_url ? (
-                        <img src={item.hosted_url} alt={item.file_name} style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, background: '#f3f4f6' }} />
+                        <img src={item.hosted_url} alt={item.file_name} style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, background: c.bgMuted }} />
                     ) : (
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <ImageIcon size={18} color="#9ca3af" />
+                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: c.bgMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <ImageIcon size={18} color={c.textMuted} />
                         </div>
                     )}
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500, maxWidth: '200px' }}>{item.file_name}</span>
@@ -91,8 +92,8 @@ function HistoryRow({ item }: { item: import('@/types').ProcessingHistoryItem })
             </td>
             <td style={{ padding: '16px 24px' }}>
                 {item.action_type === 'compress' ? (
-                    <span style={{ color: '#16a34a', fontWeight: 600 }}>{formatBytes(item.original_size)} → {formatBytes(item.processed_size)}</span>
-                ) : <span style={{ color: '#9ca3af' }}>-</span>}
+                    <span style={{ color: c.success, fontWeight: 600 }}>{formatBytes(item.original_size)} → {formatBytes(item.processed_size)}</span>
+                ) : <span style={{ color: c.textMuted }}>-</span>}
             </td>
             <td style={{ padding: '16px 24px' }}>
                 {item.hosted_url ? (
@@ -100,18 +101,18 @@ function HistoryRow({ item }: { item: import('@/types').ProcessingHistoryItem })
                         <button
                             onClick={copyLink}
                             title="Copy hosted URL"
-                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '8px', border: '1px solid #e5e7eb', background: copied ? 'rgba(46,213,115,0.1)' : '#f3f4f6', color: copied ? '#16a34a' : '#374151', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '8px', border: `1px solid ${c.border}`, background: copied ? 'rgba(46,213,115,0.1)' : c.bgMuted, color: copied ? c.success : c.textSecondary, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
                         >
                             {copied ? <Check size={13} /> : <Copy size={13} />}
                             {copied ? 'Copied' : 'Copy'}
                         </button>
-                        <a href={item.hosted_url} target="_blank" rel="noopener noreferrer" title="Open image" style={{ display: 'flex', alignItems: 'center', padding: '5px', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#9ca3af', transition: 'color 0.15s' }}>
+                        <a href={item.hosted_url} target="_blank" rel="noopener noreferrer" title="Open image" style={{ display: 'flex', alignItems: 'center', padding: '5px', borderRadius: '8px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.textMuted, transition: 'color 0.15s' }}>
                             <ExternalLink size={13} />
                         </a>
                     </div>
-                ) : <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>—</span>}
+                ) : <span style={{ color: c.textMuted, fontSize: '0.85rem' }}>—</span>}
             </td>
-            <td style={{ padding: '16px 24px', color: '#374151' }}>{formatDate(item.created_at)}</td>
+            <td style={{ padding: '16px 24px', color: c.textSecondary }}>{formatDate(item.created_at)}</td>
         </tr>
     );
 }
@@ -170,18 +171,18 @@ function UsernameForm({ profile }: { profile: import('@/types').UserProfile | nu
         }
     };
 
-    const statusColor = checkResult === 'available' ? '#2ed573' : checkResult === 'taken' ? '#ef4444' : '#9ca3af';
+    const statusColor = checkResult === 'available' ? '#2ed573' : checkResult === 'taken' ? '#ef4444' : c.textMuted;
     const statusText = checkResult === 'available' ? 'Available' : checkResult === 'taken' ? 'Already taken' : checkResult === 'checking' ? 'Checking…' : '';
 
     return (
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {currentUsername && (
-                <p style={{ fontSize: '0.82rem', color: '#9ca3af', margin: 0 }}>
-                    Current username: <strong style={{ color: '#111827' }}>@{currentUsername}</strong>
+                <p style={{ fontSize: '0.82rem', color: c.textMuted, margin: 0 }}>
+                    Current username: <strong style={{ color: c.text }}>@{currentUsername}</strong>
                 </p>
             )}
             <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', color: '#9ca3af', marginBottom: '4px' }}>New username</label>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: c.textMuted, marginBottom: '4px' }}>New username</label>
                 <div style={{ position: 'relative' }}>
                     <input
                         type="text"
@@ -195,7 +196,7 @@ function UsernameForm({ profile }: { profile: import('@/types').UserProfile | nu
                             setSaved(false);
                         }}
                         placeholder="e.g. jane_smith"
-                        style={{ padding: '10px 14px', borderRadius: '10px', border: `1px solid ${checkResult === 'available' ? '#2ed57366' : checkResult === 'taken' ? '#ef444466' : '#e5e7eb'}`, background: '#f3f4f6', color: '#111827', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
+                        style={{ padding: '10px 14px', borderRadius: '10px', border: `1px solid ${checkResult === 'available' ? '#2ed57366' : checkResult === 'taken' ? '#ef444466' : c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
                     />
                     {statusText && (
                         <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.78rem', color: statusColor, whiteSpace: 'nowrap' }}>
@@ -203,7 +204,7 @@ function UsernameForm({ profile }: { profile: import('@/types').UserProfile | nu
                         </span>
                     )}
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '4px', margin: '4px 0 0 0' }}>
+                <p style={{ fontSize: '0.75rem', color: c.textMuted, marginTop: '4px', margin: '4px 0 0 0' }}>
                     3–30 characters. Lowercase letters, numbers, and underscores only.
                 </p>
             </div>
@@ -223,7 +224,7 @@ function UsernameForm({ profile }: { profile: import('@/types').UserProfile | nu
 // ─── Branding Form ───────────────────────────────────────────────
 function BrandingForm({ profile }: { profile: import('@/types').UserProfile | null }): React.JSX.Element {
     const [studioName, setStudioName] = useState(profile?.branding_studio_name ?? '');
-    const [color, setColor]           = useState(profile?.branding_color ?? '#db5a42');
+    const [color, setColor]           = useState(profile?.branding_color ?? c.accent);
     const [website, setWebsite]       = useState(profile?.branding_website ?? '');
     const [saving, setSaving]         = useState(false);
     const [saved, setSaved]           = useState(false);
@@ -249,15 +250,15 @@ function BrandingForm({ profile }: { profile: import('@/types').UserProfile | nu
     return (
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', color: '#9ca3af', marginBottom: '4px' }}>Studio / photographer name</label>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: c.textMuted, marginBottom: '4px' }}>Studio / photographer name</label>
                 <input type="text" value={studioName} maxLength={60}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStudioName(e.target.value)}
                     placeholder="e.g. Davies Gbadebo Photography"
-                    style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
+                    style={{ padding: '10px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
                 />
             </div>
             <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', color: '#9ca3af', marginBottom: '4px' }}>Brand colour</label>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: c.textMuted, marginBottom: '4px' }}>Brand colour</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <input type="color" value={color}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setColor(e.target.value)}
@@ -266,17 +267,17 @@ function BrandingForm({ profile }: { profile: import('@/types').UserProfile | nu
                     <input type="text" value={color} maxLength={7}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setColor(e.target.value)}
                         placeholder="#db5a42"
-                        style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.9rem', width: '120px', outline: 'none' }}
+                        style={{ padding: '10px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.9rem', width: '120px', outline: 'none' }}
                     />
-                    <span style={{ color: '#9ca3af', fontSize: '0.82rem' }}>Shown on gallery pages</span>
+                    <span style={{ color: c.textMuted, fontSize: '0.82rem' }}>Shown on gallery pages</span>
                 </div>
             </div>
             <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', color: '#9ca3af', marginBottom: '4px' }}>Your website (optional)</label>
+                <label style={{ display: 'block', fontSize: '0.82rem', color: c.textMuted, marginBottom: '4px' }}>Your website (optional)</label>
                 <input type="url" value={website} maxLength={200}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWebsite(e.target.value)}
                     placeholder="https://yourwebsite.com"
-                    style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
+                    style={{ padding: '10px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' as const, outline: 'none' }}
                 />
             </div>
             <button type="submit" disabled={saving} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem', alignSelf: 'flex-start' }}>
@@ -289,8 +290,8 @@ function BrandingForm({ profile }: { profile: import('@/types').UserProfile | nu
 // ─── Galleries Tab ───────────────────────────────────────────────
 const GALLERY_INPUT_STYLE: React.CSSProperties = {
     padding: '10px 14px', borderRadius: '10px',
-    border: '1px solid #e5e7eb', background: '#f3f4f6',
-    color: '#111827', fontSize: '0.9rem', width: '100%',
+    border: `1px solid ${c.border}`, background: c.bgMuted,
+    color: c.text, fontSize: '0.9rem', width: '100%',
 };
 
 function GalleriesTab(): React.JSX.Element {
@@ -538,7 +539,7 @@ function GalleriesTab(): React.JSX.Element {
 
     // ─── Loading skeleton
     if (loading) {
-        return <div style={{ padding: '40px', color: '#9ca3af', textAlign: 'center' }}>Loading galleries…</div>;
+        return <div style={{ padding: '40px', color: c.textMuted, textAlign: 'center' }}>Loading galleries…</div>;
     }
 
     // ─── Manage view (active gallery open)
@@ -548,7 +549,7 @@ function GalleriesTab(): React.JSX.Element {
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
                     <button onClick={closeGallery}
-                        style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', background: '#fff', color: '#374151', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         ← Back
                     </button>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -564,7 +565,7 @@ function GalleriesTab(): React.JSX.Element {
                                 <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={11} /> Payment confirmed</span>
                             )}
                         </div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.8rem', margin: '2px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <p style={{ color: c.textMuted, fontSize: '0.8rem', margin: '2px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             {items.length} photo{items.length !== 1 ? 's' : ''} ·{' '}
                             {activeGallery.access_type === 'pin'
                                 ? <><Lock size={11} style={{ verticalAlign: 'middle' }} /> PIN</>
@@ -575,7 +576,7 @@ function GalleriesTab(): React.JSX.Element {
                     </div>
                     <div style={{ position: 'relative', maxWidth: '100%' }}>
                     {/* Fade gradient — indicates more buttons are scrollable on mobile */}
-                    <div style={{ pointerEvents: 'none', position: 'absolute', right: 0, top: 0, bottom: 4, width: '48px', background: 'linear-gradient(to right, transparent, #f9fafb)', zIndex: 1, borderRadius: '0 10px 10px 0' }} />
+                    <div style={{ pointerEvents: 'none', position: 'absolute', right: 0, top: 0, bottom: 4, width: '48px', background: `linear-gradient(to right, transparent, ${c.bgSubtle})`, zIndex: 1, borderRadius: '0 10px 10px 0' }} />
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', paddingBottom: '4px', paddingRight: '40px', maxWidth: '100%', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
                         {/* Payment unlock button */}
                         {activeGallery.payment_required && !activeGallery.payment_unlocked && (
@@ -597,7 +598,7 @@ function GalleriesTab(): React.JSX.Element {
                             <Send size={13} /> Send to client
                         </button>
                         <button onClick={() => copyLink(activeGallery.slug)}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', background: '#fff', color: '#111827', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Copy size={13} /> {copiedSlug === activeGallery.slug ? 'Copied!' : 'Copy link'}
                         </button>
                         <button onClick={() => {
@@ -612,7 +613,7 @@ function GalleriesTab(): React.JSX.Element {
                                 window.open(`/g/${activeGallery.slug}`, '_blank');
                             }
                         }}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', background: '#fff', color: '#111827', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <ExternalLink size={13} /> Preview
                         </button>
                         <button onClick={() => handleDelete(activeGallery.id)}
@@ -625,10 +626,10 @@ function GalleriesTab(): React.JSX.Element {
 
                 {/* Send to client modal */}
                 {sendingTo === activeGallery.id && (
-                    <div style={{ background: '#fff', border: '1px solid rgba(124,58,237,0.3)', borderRadius: '16px', padding: '24px', marginBottom: '20px', maxWidth: 'min(480px, calc(100vw - 32px))' }}>
+                    <div style={{ background: c.white, border: '1px solid rgba(124,58,237,0.3)', borderRadius: '16px', padding: '24px', marginBottom: '20px', maxWidth: 'min(480px, calc(100vw - 32px))' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h4 style={{ margin: 0, fontSize: '1rem' }}>Send gallery to client</h4>
-                            <button onClick={() => setSendingTo(null)} style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}><X size={16} /></button>
+                            <button onClick={() => setSendingTo(null)} style={{ background: 'none', border: 'none', color: c.textMuted, cursor: 'pointer', padding: '4px' }}><X size={16} /></button>
                         </div>
                         {sendSuccess ? (
                             <p style={{ color: '#22c55e', textAlign: 'center', padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
@@ -660,19 +661,19 @@ function GalleriesTab(): React.JSX.Element {
                 <div {...getGalleryDropProps()} style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     gap: '10px', padding: '32px', borderRadius: '16px',
-                    border: `2px dashed ${isGalleryDragActive ? '#db5a42' : '#e5e7eb'}`,
-                    background: isGalleryDragActive ? '#fdf3f1' : '#fff',
+                    border: `2px dashed ${isGalleryDragActive ? c.accent : c.border}`,
+                    background: isGalleryDragActive ? c.accentLight : c.white,
                     cursor: uploadingIds.size > 0 ? 'wait' : 'pointer',
                     marginBottom: '24px', transition: 'border-color 0.2s, background 0.2s',
                 }}>
                     <input {...getGalleryInputProps()} />
-                    <Upload size={28} color={isGalleryDragActive ? '#db5a42' : '#9ca3af'} />
-                    <p style={{ color: '#374151', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
+                    <Upload size={28} color={isGalleryDragActive ? c.accent : c.textMuted} />
+                    <p style={{ color: c.textSecondary, fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
                         {uploadingIds.size > 0
                             ? `Uploading ${uploadingIds.size} photo${uploadingIds.size !== 1 ? 's' : ''}…`
                             : isGalleryDragActive ? 'Release to upload photos' : 'Drag & drop photos here or click to browse'}
                     </p>
-                    <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: 0 }}>Up to 20 images per batch · JPEG, PNG, WebP, HEIC</p>
+                    <p style={{ color: c.textMuted, fontSize: '0.78rem', margin: 0 }}>Up to 20 images per batch · JPEG, PNG, WebP, HEIC</p>
                 </div>
 
                 {uploadError && (
@@ -684,15 +685,15 @@ function GalleriesTab(): React.JSX.Element {
 
                 {/* Photo grid */}
                 {itemsLoading ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>Loading photos…</div>
+                    <div style={{ textAlign: 'center', padding: '40px', color: c.textMuted }}>Loading photos…</div>
                 ) : items.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '0.9rem' }}>
+                    <div style={{ textAlign: 'center', padding: '40px', color: c.textMuted, fontSize: '0.9rem' }}>
                         No photos yet — upload some above.
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
                         {items.map(item => (
-                            <div key={item.id} className="gallery-grid-item" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#fff', border: '1px solid #e5e7eb', aspectRatio: '1' }}>
+                            <div key={item.id} className="gallery-grid-item" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: c.white, border: `1px solid ${c.border}`, aspectRatio: '1' }}>
                                 <img
                                     src={item.display_url}
                                     alt={item.filename}
@@ -700,17 +701,17 @@ function GalleriesTab(): React.JSX.Element {
                                 />
                                 {/* Hover overlay */}
                                 <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: 0, transition: 'opacity 0.2s', padding: '12px' }}>
-                                    <p style={{ color: '#fff', fontSize: '0.72rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
+                                    <p style={{ color: c.white, fontSize: '0.72rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
                                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
                                         <button
                                             onClick={(e: React.MouseEvent) => { e.stopPropagation(); void handleSetCover(item); }}
-                                            style={{ padding: '5px 8px', borderRadius: '8px', background: activeGallery.cover_image_url === item.display_url ? 'rgba(124,58,237,0.5)' : '#e5e7eb', color: activeGallery.cover_image_url === item.display_url ? '#c4b5fd' : '#fff', fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                                            style={{ padding: '5px 8px', borderRadius: '8px', background: activeGallery.cover_image_url === item.display_url ? 'rgba(124,58,237,0.5)' : c.border, color: activeGallery.cover_image_url === item.display_url ? '#c4b5fd' : c.white, fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
                                             title="Set as gallery cover photo"
                                         >
                                             <Camera size={10} /> {activeGallery.cover_image_url === item.display_url ? 'Cover (set)' : 'Set cover'}
                                         </button>
                                         <a href={item.original_url} target="_blank" rel="noreferrer" download
-                                            style={{ padding: '5px 8px', borderRadius: '8px', background: '#e5e7eb', color: '#fff', fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                            style={{ padding: '5px 8px', borderRadius: '8px', background: c.border, color: c.white, fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
                                             <Download size={10} /> Save
                                         </a>
                                         <button onClick={() => void handleRemoveItem(item.id)}
@@ -733,7 +734,7 @@ function GalleriesTab(): React.JSX.Element {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                     <h3 style={{ fontSize: '1.4rem', marginBottom: '4px' }}>Client Galleries</h3>
-                    <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Share PIN-protected photo galleries with clients for download.</p>
+                    <p style={{ color: c.textMuted, fontSize: '0.9rem' }}>Share PIN-protected photo galleries with clients for download.</p>
                 </div>
                 <button onClick={() => setShowCreate(v => !v)} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
                     {showCreate ? 'Cancel' : '+ New Gallery'}
@@ -741,7 +742,7 @@ function GalleriesTab(): React.JSX.Element {
             </div>
 
             {showCreate && (
-                <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
                     <h4 style={{ marginBottom: '16px' }}>Create Gallery</h4>
                     {createError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '12px' }}>{createError}</p>}
                     <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -771,18 +772,18 @@ function GalleriesTab(): React.JSX.Element {
                             />
                         )}
                         {createAccessType === 'account' && (
-                            <p style={{ fontSize: '0.82rem', color: '#9ca3af', margin: '0', padding: '8px 12px', background: '#f3f4f6', borderRadius: '8px' }}>
+                            <p style={{ fontSize: '0.82rem', color: c.textMuted, margin: '0', padding: '8px 12px', background: c.bgMuted, borderRadius: '8px' }}>
                                 Viewers will need to sign in or create a free Optimage account. No subscription required to view.
                             </p>
                         )}
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#374151', cursor: 'pointer' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: c.textSecondary, cursor: 'pointer' }}>
                             <input type="checkbox" checked={createAllowDownload}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateAllowDownload(e.target.checked)} />
                             Allow clients to download original-quality images
                         </label>
 
                         {/* Payment gate */}
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#374151', cursor: 'pointer', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: c.textSecondary, cursor: 'pointer', paddingTop: '4px', borderTop: `1px solid ${c.border}` }}>
                             <input type="checkbox" checked={createPaymentRequired}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreatePaymentRequired(e.target.checked)} />
                             Require payment before client can access gallery
@@ -797,8 +798,8 @@ function GalleriesTab(): React.JSX.Element {
                             />
                         )}
                         {/* Expiry date */}
-                        <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '12px' }}>
-                            <label style={{ display: 'block', fontSize: '0.82rem', color: '#9ca3af', marginBottom: '6px' }}>
+                        <div style={{ borderTop: `1px solid ${c.border}`, paddingTop: '12px' }}>
+                            <label style={{ display: 'block', fontSize: '0.82rem', color: c.textMuted, marginBottom: '6px' }}>
                                 Gallery expiry (optional) — leave blank for no expiry
                             </label>
                             <input
@@ -819,15 +820,15 @@ function GalleriesTab(): React.JSX.Element {
             )}
 
             {galleries.length === 0 ? (
-                <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '16px', padding: '56px', textAlign: 'center' }}>
-                    <Images size={44} style={{ color: '#9ca3af', marginBottom: '16px' }} />
+                <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '56px', textAlign: 'center' }}>
+                    <Images size={44} style={{ color: c.textMuted, marginBottom: '16px' }} />
                     <p style={{ fontWeight: 600, marginBottom: '6px' }}>No galleries yet</p>
-                    <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Create your first gallery to share photos with clients.</p>
+                    <p style={{ color: c.textMuted, fontSize: '0.85rem' }}>Create your first gallery to share photos with clients.</p>
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {galleries.map(gallery => (
-                        <div key={gallery.id} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '14px', padding: '16px 20px', cursor: 'default' }}>
+                        <div key={gallery.id} style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', padding: '16px 20px', cursor: 'default' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                                 {/* Left: info */}
                                 <div
@@ -837,7 +838,7 @@ function GalleriesTab(): React.JSX.Element {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
                                         <h4 style={{ fontSize: '1rem', margin: 0 }}>{gallery.title}</h4>
                                         {gallery.access_type === 'pin' && (
-                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: '#f3f4f6', borderRadius: '8px', color: '#9ca3af', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Lock size={10} style={{ verticalAlign: 'middle' }} /> PIN</span>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: c.bgMuted, borderRadius: '8px', color: c.textMuted, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Lock size={10} style={{ verticalAlign: 'middle' }} /> PIN</span>
                                         )}
                                         {gallery.access_type === 'public' && (
                                             <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Globe size={10} style={{ verticalAlign: 'middle' }} /> Public</span>
@@ -852,17 +853,17 @@ function GalleriesTab(): React.JSX.Element {
                                             <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><ClockIcon size={10} style={{ verticalAlign: 'middle' }} /> Awaiting payment</span>
                                         )}
                                         {typeof gallery.item_count === 'number' && (
-                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: '#f3f4f6', borderRadius: '8px', color: '#9ca3af' }}>
+                                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: c.bgMuted, borderRadius: '8px', color: c.textMuted }}>
                                                 {gallery.item_count} photo{gallery.item_count !== 1 ? 's' : ''}
                                             </span>
                                         )}
                                     </div>
-                                    {gallery.description && <p style={{ color: '#9ca3af', fontSize: '0.82rem', margin: '0 0 2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gallery.description}</p>}
-                                    <p style={{ color: '#9ca3af', fontSize: '0.72rem', margin: 0 }}>
+                                    {gallery.description && <p style={{ color: c.textMuted, fontSize: '0.82rem', margin: '0 0 2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gallery.description}</p>}
+                                    <p style={{ color: c.textMuted, fontSize: '0.72rem', margin: 0 }}>
                                         Created {new Date(gallery.created_at).toLocaleDateString()}
                                         {' · '}
                                         <span
-                                            style={{ color: '#db5a42', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
+                                            style={{ color: c.accent, cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
                                             onClick={(e: React.MouseEvent) => { e.stopPropagation(); void loadActivity(gallery.id); }}
                                         >
                                             View activity
@@ -878,11 +879,11 @@ function GalleriesTab(): React.JSX.Element {
                                         <Upload size={12} /> Manage
                                     </button>
                                     <button onClick={() => copyLink(gallery.slug)}
-                                        style={{ padding: '7px 12px', borderRadius: '8px', background: '#f3f4f6', border: '1px solid #e5e7eb', color: '#111827', fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        style={{ padding: '7px 12px', borderRadius: '8px', background: c.bgMuted, border: `1px solid ${c.border}`, color: c.text, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                         <Copy size={11} /> {copiedSlug === gallery.slug ? 'Copied!' : 'Link'}
                                     </button>
                                     <a href={`/g/${gallery.slug}`} target="_blank" rel="noreferrer"
-                                        style={{ padding: '7px 12px', borderRadius: '8px', background: '#f3f4f6', border: '1px solid #e5e7eb', color: '#111827', fontSize: '0.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        style={{ padding: '7px 12px', borderRadius: '8px', background: c.bgMuted, border: `1px solid ${c.border}`, color: c.text, fontSize: '0.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                         <ExternalLink size={11} />
                                     </a>
                                     <button onClick={() => void handleDelete(gallery.id)}
@@ -898,42 +899,42 @@ function GalleriesTab(): React.JSX.Element {
 
             {/* Activity panel */}
             {activityGalleryId && (
-                <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '16px', padding: '24px', marginTop: '16px' }}>
+                <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '24px', marginTop: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <h4 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Eye size={16} color="#9ca3af" /> Gallery Activity
+                            <Eye size={16} color={c.textMuted} /> Gallery Activity
                         </h4>
                         <button onClick={() => { setActivityGalleryId(null); setActivity(null); }}
-                            style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer' }}><X size={16} /></button>
+                            style={{ background: 'none', border: 'none', color: c.textMuted, cursor: 'pointer' }}><X size={16} /></button>
                     </div>
                     {activityLoading ? (
-                        <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Loading activity…</p>
+                        <p style={{ color: c.textMuted, fontSize: '0.9rem' }}>Loading activity…</p>
                     ) : activity ? (
                         <div>
                             <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                                <div style={{ padding: '16px 24px', background: '#f3f4f6', borderRadius: '12px', textAlign: 'center', minWidth: '100px' }}>
-                                    <p style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: '#db5a42' }}>{activity.totalViews}</p>
-                                    <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: 0 }}>total views</p>
+                                <div style={{ padding: '16px 24px', background: c.bgMuted, borderRadius: '12px', textAlign: 'center', minWidth: '100px' }}>
+                                    <p style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: c.accent }}>{activity.totalViews}</p>
+                                    <p style={{ color: c.textMuted, fontSize: '0.78rem', margin: 0 }}>total views</p>
                                 </div>
                             </div>
                             {activity.recentViews.length > 0 ? (
                                 <div>
-                                    <p style={{ color: '#9ca3af', fontSize: '0.78rem', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent activity</p>
+                                    <p style={{ color: c.textMuted, fontSize: '0.78rem', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent activity</p>
                                     {activity.recentViews.slice(0, 20).map((v, i) => (
-                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e5e7eb', fontSize: '0.82rem' }}>
-                                            <span style={{ color: '#374151', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${c.border}`, fontSize: '0.82rem' }}>
+                                            <span style={{ color: c.textSecondary, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                                                 {v.viewer_type === 'user'
                                                     ? <><UserCircle size={13} style={{ verticalAlign: 'middle' }} /> Signed-in viewer</>
                                                     : <><Globe size={13} style={{ verticalAlign: 'middle' }} /> Guest visitor</>}
                                             </span>
-                                            <span style={{ color: '#9ca3af' }}>
+                                            <span style={{ color: c.textMuted }}>
                                                 {new Date(v.created_at).toLocaleString()}
                                             </span>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>No views recorded yet. Share your gallery link to start getting visitors.</p>
+                                <p style={{ color: c.textMuted, fontSize: '0.85rem' }}>No views recorded yet. Share your gallery link to start getting visitors.</p>
                             )}
                         </div>
                     ) : null}
@@ -1253,25 +1254,25 @@ export default function DashboardClient({ user, profile, history: initialHistory
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                 <div>
                     <h1 style={{ fontSize: '2.5rem', marginBottom: '8px', fontWeight: 800, letterSpacing: '-0.02em' }}>Your Workspace</h1>
-                    <p style={{ color: '#9ca3af', fontSize: '1.05rem' }}>Welcome back, <span style={{ color: '#111827', fontWeight: 500 }}>{profile?.display_name || user.email}</span></p>
+                    <p style={{ color: c.textMuted, fontSize: '1.05rem' }}>Welcome back, <span style={{ color: c.text, fontWeight: 500 }}>{profile?.display_name || user.email}</span></p>
                 </div>
             </div>
 
             {/* Stats Row */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-                <div style={{ padding: '20px', background: '#fff', borderRadius: '20px', border: '1px solid #e5e7eb' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#374151', fontSize: '0.9rem', marginBottom: '8px' }}><ImageIcon size={16} /> Images Processed</div>
+                <div style={{ padding: '20px', background: c.white, borderRadius: '20px', border: `1px solid ${c.border}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: c.textSecondary, fontSize: '0.9rem', marginBottom: '8px' }}><ImageIcon size={16} /> Images Processed</div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed}</div>
                 </div>
-                <div style={{ padding: '20px', background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', borderRadius: '20px', color: 'white', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ padding: '20px', background: c.gradient, borderRadius: '20px', color: 'white', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9, fontSize: '0.9rem', marginBottom: '8px' }}>
                         <img src="/logo.png" alt="Bandwidth" style={{ height: '1.2em', width: 'auto', objectFit: 'contain' }} /> Bandwidth Saved
                     </div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{formatBytes(totalSaved)}</div>
                     <img src="/logo.png" alt="" style={{ position: 'absolute', right: '-10px', bottom: '-10px', width: '80px', height: '80px', opacity: 0.15, objectFit: 'contain' }} />
                 </div>
-                <div style={{ padding: '20px', background: '#fff', borderRadius: '20px', border: '1px solid #e5e7eb' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#374151', fontSize: '0.9rem', marginBottom: '8px' }}><BarChart3 size={16} /> Avg Compression</div>
+                <div style={{ padding: '20px', background: c.white, borderRadius: '20px', border: `1px solid ${c.border}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: c.textSecondary, fontSize: '0.9rem', marginBottom: '8px' }}><BarChart3 size={16} /> Avg Compression</div>
                     <div style={{ fontSize: '2rem', fontWeight: 800 }}>{totalProcessed > 0 && totalSaved > 0 ? `${((totalSaved / (totalSaved + (history?.reduce((a, c) => a + (c.processed_size || 0), 0) || 1))) * 100).toFixed(0)}%` : 'N/A'}</div>
                 </div>
             </div>
@@ -1288,8 +1289,8 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
                                 padding: '12px 20px', fontSize: '0.95rem', fontWeight: 600,
-                                border: 'none', borderBottom: isActive ? '2px solid #db5a42' : '2px solid transparent',
-                                background: 'transparent', color: isActive ? '#111827' : '#9ca3af',
+                                border: 'none', borderBottom: isActive ? `2px solid ${c.accent}` : '2px solid transparent',
+                                background: 'transparent', color: isActive ? c.text : c.textMuted,
                                 cursor: 'pointer', transition: 'all 0.2s',
                             }}
                         >
@@ -1310,20 +1311,20 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 <div
                                     {...getImagesDropProps()}
                                     style={{
-                                        border: `2px dashed ${isImagesDragActive ? '#db5a42' : '#e5e7eb'}`,
+                                        border: `2px dashed ${isImagesDragActive ? c.accent : c.border}`,
                                         borderRadius: '24px',
                                         padding: '48px 24px', textAlign: 'center', cursor: 'pointer',
-                                        background: isImagesDragActive ? '#fdf3f1' : '#fff',
+                                        background: isImagesDragActive ? c.accentLight : c.white,
                                         marginBottom: '24px',
                                         transition: 'border-color 0.2s, background 0.2s',
                                     }}
                                 >
                                     <input {...getImagesInputProps()} />
-                                    <Upload size={40} color={isImagesDragActive ? '#db5a42' : '#9ca3af'} style={{ marginBottom: '16px' }} />
+                                    <Upload size={40} color={isImagesDragActive ? c.accent : c.textMuted} style={{ marginBottom: '16px' }} />
                                     <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>
                                         {isImagesDragActive ? 'Release to add images' : 'Drop images here or click to browse'}
                                     </p>
-                                    <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, BMP • Up to 50 files</p>
+                                    <p style={{ color: c.textMuted, fontSize: '0.9rem' }}>JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, BMP • Up to 50 files</p>
                                 </div>
 
                                 {/* File Cards with Rename */}
@@ -1333,14 +1334,14 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
                                                 <ImageIcon size={18} /> {files.length} file{files.length !== 1 ? 's' : ''} queued
                                             </h3>
-                                            <button onClick={handleClearAll} className="text-btn" style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Clear all</button>
+                                            <button onClick={handleClearAll} className="text-btn" style={{ color: c.textMuted, fontSize: '0.85rem' }}>Clear all</button>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             {files.map((file, index) => (
                                                 <div key={`${file.name}-${index}`} style={{
                                                     display: 'flex', alignItems: 'center', gap: '12px',
-                                                    padding: '12px 16px', background: '#fff', borderRadius: '16px',
-                                                    border: '1px solid #e5e7eb',
+                                                    padding: '12px 16px', background: c.white, borderRadius: '16px',
+                                                    border: `1px solid ${c.border}`,
                                                 }}>
                                                     <img
                                                         src={thumbnails[index]}
@@ -1357,27 +1358,27 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                                                     onKeyDown={(e) => { if (e.key === 'Enter') saveRename(index); if (e.key === 'Escape') cancelRename(); }}
                                                                     style={{
                                                                         flex: 1, padding: '6px 10px', borderRadius: '8px',
-                                                                        border: '1px solid #db5a42', background: '#f3f4f6',
-                                                                        color: '#111827', outline: 'none', fontSize: '0.9rem',
+                                                                        border: `1px solid ${c.accent}`, background: c.bgMuted,
+                                                                        color: c.text, outline: 'none', fontSize: '0.9rem',
                                                                     }}
                                                                 />
-                                                                <button onClick={() => saveRename(index)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#16a34a', padding: '4px' }}><Check size={18} /></button>
-                                                                <button onClick={cancelRename} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '4px' }}><X size={18} /></button>
+                                                                <button onClick={() => saveRename(index)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: c.success, padding: '4px' }}><Check size={18} /></button>
+                                                                <button onClick={cancelRename} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: c.textMuted, padding: '4px' }}><X size={18} /></button>
                                                             </div>
                                                         ) : (
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                                 <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={file.name}>
                                                                     {getDisplayName(index)}
                                                                 </span>
-                                                                {fileNames[index] && <span style={{ fontSize: '0.75rem', color: '#db5a42', background: 'rgba(219,90,66,0.1)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>renamed</span>}
-                                                                <button onClick={() => startRename(index)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '2px', flexShrink: 0 }} title="Rename output file"><Pencil size={14} /></button>
+                                                                {fileNames[index] && <span style={{ fontSize: '0.75rem', color: c.accent, background: 'rgba(219,90,66,0.1)', padding: '2px 8px', borderRadius: '100px', flexShrink: 0 }}>renamed</span>}
+                                                                <button onClick={() => startRename(index)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: c.textMuted, padding: '2px', flexShrink: 0 }} title="Rename output file"><Pencil size={14} /></button>
                                                             </div>
                                                         )}
-                                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '2px' }}>
+                                                        <div style={{ fontSize: '0.8rem', color: c.textMuted, marginTop: '2px' }}>
                                                             {formatBytes(file.size)} • {file.type.split('/')[1]?.toUpperCase() || 'IMAGE'}
                                                         </div>
                                                     </div>
-                                                    <button onClick={() => handleRemoveFile(index)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '4px' }} title="Remove"><X size={18} /></button>
+                                                    <button onClick={() => handleRemoveFile(index)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: c.textMuted, padding: '4px' }} title="Remove"><X size={18} /></button>
                                                 </div>
                                             ))}
                                         </div>
@@ -1411,21 +1412,21 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             /* ── Results ── */
                             <div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-                                    <div style={{ padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                    <div style={{ padding: '16px', background: c.white, borderRadius: '16px', border: `1px solid ${c.border}`, textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{summary?.filesProcessed ?? 0}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Processed</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>Processed</div>
                                     </div>
-                                    <div style={{ padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                    <div style={{ padding: '16px', background: c.white, borderRadius: '16px', border: `1px solid ${c.border}`, textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{formatBytes(summary?.totalOriginalSize ?? 0)}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Original</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>Original</div>
                                     </div>
-                                    <div style={{ padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                    <div style={{ padding: '16px', background: c.white, borderRadius: '16px', border: `1px solid ${c.border}`, textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{formatBytes(summary?.totalProcessedSize ?? 0)}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>New Size</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>New Size</div>
                                     </div>
                                     <div style={{ padding: '16px', background: 'rgba(46,213,115,0.1)', borderRadius: '16px', border: '1px solid rgba(46,213,115,0.2)', textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2ed573' }}>{summary?.totalSavingsPercent ?? '0'}%</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Saved</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>Saved</div>
                                     </div>
                                 </div>
 
@@ -1433,14 +1434,14 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     {results.map((result, index) => (
                                         <div key={index} style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                            padding: '16px', background: '#fff', borderRadius: '16px',
-                                            border: '1px solid #e5e7eb', gap: '12px', flexWrap: 'wrap',
+                                            padding: '16px', background: c.white, borderRadius: '16px',
+                                            border: `1px solid ${c.border}`, gap: '12px', flexWrap: 'wrap',
                                         }}>
                                             <div style={{ flex: 1, minWidth: 0 }}>
                                                 <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                     {fileNames[index] || result.originalName}
                                                 </div>
-                                                <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '4px' }}>
+                                                <div style={{ fontSize: '0.8rem', color: c.textMuted, marginTop: '4px' }}>
                                                     {formatBytes(result.originalSize)} → {formatBytes(result.processedSize)}
                                                     <span style={{ color: '#2ed573', marginLeft: '8px', fontWeight: 600 }}>↓ {result.savingsPercent}%</span>
                                                 </div>
@@ -1484,16 +1485,16 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
                     {/* Right: Settings Panel */}
                     <div style={{ flex: '1 1 35%', minWidth: '280px' }}>
-                        <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #e5e7eb', padding: '24px', position: 'sticky', top: '100px' }}>
+                        <div style={{ background: c.white, borderRadius: '24px', border: `1px solid ${c.border}`, padding: '24px', position: 'sticky', top: '100px' }}>
                             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', fontSize: '1.2rem' }}><SlidersHorizontal size={20} /> Output Settings</h3>
 
                             {/* Format */}
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#9ca3af', marginBottom: '8px', fontWeight: 500 }}>Output Format</label>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: c.textMuted, marginBottom: '8px', fontWeight: 500 }}>Output Format</label>
                                 <select
                                     value={imageSettings.format}
                                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setImageSettings(prev => ({ ...prev, format: e.target.value as ImageSettings['format'] }))}
-                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.95rem', outline: 'none' }}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.95rem', outline: 'none' }}
                                 >
                                     <option value="">Same as input</option>
                                     <option value="webp">WebP (Best for web)</option>
@@ -1508,47 +1509,47 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
                             {/* Quality */}
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#9ca3af', marginBottom: '8px', fontWeight: 500 }}>
-                                    Quality <span style={{ color: '#111827', fontWeight: 700 }}>{imageSettings.quality}%</span>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: c.textMuted, marginBottom: '8px', fontWeight: 500 }}>
+                                    Quality <span style={{ color: c.text, fontWeight: 700 }}>{imageSettings.quality}%</span>
                                 </label>
                                 <input
                                     type="range" min="1" max="100"
                                     value={imageSettings.quality}
                                     onChange={(e) => setImageSettings(prev => ({ ...prev, quality: parseInt(e.target.value) }))}
-                                    style={{ width: '100%', accentColor: '#db5a42' }}
+                                    style={{ width: '100%', accentColor: c.accent }}
                                 />
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: c.textMuted }}>
                                     <span>Smallest file</span><span>Best quality</span>
                                 </div>
                             </div>
 
                             {/* Resize */}
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#9ca3af', marginBottom: '8px', fontWeight: 500 }}>Resize (optional)</label>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: c.textMuted, marginBottom: '8px', fontWeight: 500 }}>Resize (optional)</label>
                                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                                     <input
                                         type="number" placeholder="Width"
                                         value={imageSettings.width}
                                         onChange={(e) => setImageSettings(prev => ({ ...prev, width: e.target.value }))}
-                                        style={{ flex: '1 1 40%', minWidth: '80px', padding: '10px', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.9rem', outline: 'none' }}
+                                        style={{ flex: '1 1 40%', minWidth: '80px', padding: '10px', borderRadius: '12px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.9rem', outline: 'none' }}
                                     />
-                                    <span style={{ color: '#9ca3af' }}>×</span>
+                                    <span style={{ color: c.textMuted }}>×</span>
                                     <input
                                         type="number" placeholder="Height"
                                         value={imageSettings.height}
                                         onChange={(e) => setImageSettings(prev => ({ ...prev, height: e.target.value }))}
-                                        style={{ flex: '1 1 40%', minWidth: '80px', padding: '10px', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.9rem', outline: 'none' }}
+                                        style={{ flex: '1 1 40%', minWidth: '80px', padding: '10px', borderRadius: '12px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.9rem', outline: 'none' }}
                                     />
                                 </div>
                             </div>
 
                             {/* Rotation */}
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#9ca3af', marginBottom: '8px', fontWeight: 500 }}>Rotation</label>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: c.textMuted, marginBottom: '8px', fontWeight: 500 }}>Rotation</label>
                                 <select
                                     value={imageSettings.rotate ?? 0}
                                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setImageSettings(prev => ({ ...prev, rotate: parseInt(e.target.value) as ImageSettings['rotate'] }))}
-                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.95rem', outline: 'none' }}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.95rem', outline: 'none' }}
                                 >
                                     <option value={0}>No rotation</option>
                                     <option value={90}>90° Clockwise</option>
@@ -1559,20 +1560,20 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
                             {/* Toggles */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f3f4f6', borderRadius: '12px', cursor: 'pointer' }}>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: c.bgMuted, borderRadius: '12px', cursor: 'pointer' }}>
                                     <div>
                                         <span style={{ fontSize: '0.9rem', fontWeight: 500, display: 'block' }}>Auto-Enhance</span>
-                                        <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Boost brightness, contrast &amp; sharpness</span>
+                                        <span style={{ fontSize: '0.75rem', color: c.textMuted }}>Boost brightness, contrast &amp; sharpness</span>
                                     </div>
-                                    <input type="checkbox" checked={imageSettings.autoEnhance ?? false} onChange={(e) => setImageSettings(prev => ({ ...prev, autoEnhance: e.target.checked }))} style={{ accentColor: '#db5a42', width: '20px', height: '20px', flexShrink: 0 }} />
+                                    <input type="checkbox" checked={imageSettings.autoEnhance ?? false} onChange={(e) => setImageSettings(prev => ({ ...prev, autoEnhance: e.target.checked }))} style={{ accentColor: c.accent, width: '20px', height: '20px', flexShrink: 0 }} />
                                 </label>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f3f4f6', borderRadius: '12px', cursor: 'pointer' }}>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: c.bgMuted, borderRadius: '12px', cursor: 'pointer' }}>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Strip Metadata</span>
-                                    <input type="checkbox" checked={imageSettings.stripMetadata} onChange={(e) => setImageSettings(prev => ({ ...prev, stripMetadata: e.target.checked }))} style={{ accentColor: '#db5a42', width: '20px', height: '20px' }} />
+                                    <input type="checkbox" checked={imageSettings.stripMetadata} onChange={(e) => setImageSettings(prev => ({ ...prev, stripMetadata: e.target.checked }))} style={{ accentColor: c.accent, width: '20px', height: '20px' }} />
                                 </label>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f3f4f6', borderRadius: '12px', cursor: 'pointer' }}>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: c.bgMuted, borderRadius: '12px', cursor: 'pointer' }}>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Maintain Aspect Ratio</span>
-                                    <input type="checkbox" checked={imageSettings.maintainAspectRatio} onChange={(e) => setImageSettings(prev => ({ ...prev, maintainAspectRatio: e.target.checked }))} style={{ accentColor: '#db5a42', width: '20px', height: '20px' }} />
+                                    <input type="checkbox" checked={imageSettings.maintainAspectRatio} onChange={(e) => setImageSettings(prev => ({ ...prev, maintainAspectRatio: e.target.checked }))} style={{ accentColor: c.accent, width: '20px', height: '20px' }} />
                                 </label>
                             </div>
                         </div>
@@ -1582,17 +1583,17 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
             {/* ═══════════ Tab: History ═══════════ */}
             {activeTab === 'history' && (
-                <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+                <div style={{ background: c.white, borderRadius: '24px', border: `1px solid ${c.border}`, overflow: 'hidden' }}>
                     {history && history.length > 0 ? (
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.95rem' }}>
                                 <thead>
-                                    <tr style={{ borderBottom: '1px solid #e5e7eb', background: '#f3f4f6' }}>
-                                        <th style={{ padding: '16px 24px', color: '#9ca3af', fontWeight: 500 }}>File</th>
-                                        <th style={{ padding: '16px 24px', color: '#9ca3af', fontWeight: 500 }}>Action</th>
-                                        <th style={{ padding: '16px 24px', color: '#9ca3af', fontWeight: 500 }}>Savings</th>
-                                        <th style={{ padding: '16px 24px', color: '#9ca3af', fontWeight: 500 }}>Link</th>
-                                        <th style={{ padding: '16px 24px', color: '#9ca3af', fontWeight: 500 }}>Date</th>
+                                    <tr style={{ borderBottom: `1px solid ${c.border}`, background: c.bgMuted }}>
+                                        <th style={{ padding: '16px 24px', color: c.textMuted, fontWeight: 500 }}>File</th>
+                                        <th style={{ padding: '16px 24px', color: c.textMuted, fontWeight: 500 }}>Action</th>
+                                        <th style={{ padding: '16px 24px', color: c.textMuted, fontWeight: 500 }}>Savings</th>
+                                        <th style={{ padding: '16px 24px', color: c.textMuted, fontWeight: 500 }}>Link</th>
+                                        <th style={{ padding: '16px 24px', color: c.textMuted, fontWeight: 500 }}>Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1604,11 +1605,11 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         </div>
                     ) : (
                         <div style={{ padding: '64px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <ImageIcon size={32} color="#9ca3af" />
+                            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: c.bgMuted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ImageIcon size={32} color={c.textMuted} />
                             </div>
                             <h3 style={{ fontSize: '1.2rem', marginBottom: '4px' }}>No activity yet</h3>
-                            <p style={{ color: '#9ca3af', maxWidth: '300px' }}>Your optimization history will appear here as you process images.</p>
+                            <p style={{ color: c.textMuted, maxWidth: '300px' }}>Your optimization history will appear here as you process images.</p>
                             <button onClick={() => setActiveTab('optimize')} className="btn btn-secondary" style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                                 Start Optimizing <ArrowRight size={16} />
                             </button>
@@ -1627,7 +1628,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                 <div style={{ maxWidth: '700px' }}>
                     {/* Referral Hero Card */}
                     <div style={{
-                        background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', borderRadius: '24px',
+                        background: c.gradient, borderRadius: '24px',
                         padding: '32px', marginBottom: '24px', color: 'white', position: 'relative', overflow: 'hidden',
                     }}>
                         <img src="/logo.png" alt="" style={{ position: 'absolute', right: '-20px', bottom: '-20px', width: '120px', height: '120px', opacity: 0.1, objectFit: 'contain' }} />
@@ -1642,15 +1643,15 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
                     {/* Referral Link Card */}
                     <div style={{
-                        background: '#fff', borderRadius: '24px',
-                        border: '1px solid #e5e7eb', padding: '28px', marginBottom: '24px',
+                        background: c.white, borderRadius: '24px',
+                        border: `1px solid ${c.border}`, padding: '28px', marginBottom: '24px',
                     }}>
                         <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', marginBottom: '16px' }}>
                             <Share2 size={20} /> Your Referral Link
                         </h3>
 
                         {referralLoading ? (
-                            <div style={{ padding: '20px', textAlign: 'center', color: '#9ca3af' }}>Loading...</div>
+                            <div style={{ padding: '20px', textAlign: 'center', color: c.textMuted }}>Loading...</div>
                         ) : referralLink ? (
                             <>
                                 {/* Link display + copy */}
@@ -1659,8 +1660,8 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 }}>
                                     <div style={{
                                         flex: 1, padding: '12px 16px', borderRadius: '12px',
-                                        background: '#f3f4f6', border: '1px solid #e5e7eb',
-                                        fontSize: '0.9rem', color: '#111827',
+                                        background: c.bgMuted, border: `1px solid ${c.border}`,
+                                        fontSize: '0.9rem', color: c.text,
                                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                                         fontFamily: 'monospace',
                                     }}>
@@ -1685,9 +1686,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         onClick={handleShareTwitter}
                                         style={{
                                             flex: '1 1 auto', padding: '12px 16px', borderRadius: '12px',
-                                            border: '1px solid #e5e7eb', background: '#f3f4f6',
+                                            border: `1px solid ${c.border}`, background: c.bgMuted,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827',
+                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: c.text,
                                             transition: 'border-color 0.2s',
                                         }}
                                     >
@@ -1698,9 +1699,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         onClick={handleShareWhatsApp}
                                         style={{
                                             flex: '1 1 auto', padding: '12px 16px', borderRadius: '12px',
-                                            border: '1px solid #e5e7eb', background: '#f3f4f6',
+                                            border: `1px solid ${c.border}`, background: c.bgMuted,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827',
+                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: c.text,
                                             transition: 'border-color 0.2s',
                                         }}
                                     >
@@ -1711,9 +1712,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         onClick={handleShareEmail}
                                         style={{
                                             flex: '1 1 auto', padding: '12px 16px', borderRadius: '12px',
-                                            border: '1px solid #e5e7eb', background: '#f3f4f6',
+                                            border: `1px solid ${c.border}`, background: c.bgMuted,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#111827',
+                                            gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: c.text,
                                             transition: 'border-color 0.2s',
                                         }}
                                     >
@@ -1722,7 +1723,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 </div>
                             </>
                         ) : (
-                            <div style={{ padding: '20px', textAlign: 'center', color: '#9ca3af', fontSize: '0.9rem' }}>
+                            <div style={{ padding: '20px', textAlign: 'center', color: c.textMuted, fontSize: '0.9rem' }}>
                                 Your referral code will be generated when your account is fully set up.
                             </div>
                         )}
@@ -1734,38 +1735,38 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         gap: '16px', marginBottom: '24px',
                     }}>
                         <div style={{
-                            padding: '24px', background: '#fff', borderRadius: '20px',
-                            border: '1px solid #e5e7eb', textAlign: 'center',
+                            padding: '24px', background: c.white, borderRadius: '20px',
+                            border: `1px solid ${c.border}`, textAlign: 'center',
                         }}>
-                            <Users size={24} color="#db5a42" style={{ marginBottom: '12px' }} />
+                            <Users size={24} color={c.accent} style={{ marginBottom: '12px' }} />
                             <div style={{ fontSize: '2rem', fontWeight: 800 }}>
                                 {referralStats?.totalReferred ?? 0}
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '4px' }}>
+                            <div style={{ fontSize: '0.85rem', color: c.textMuted, marginTop: '4px' }}>
                                 Friends Referred
                             </div>
                         </div>
                         <div style={{
-                            padding: '24px', background: '#fff', borderRadius: '20px',
-                            border: '1px solid #e5e7eb', textAlign: 'center',
+                            padding: '24px', background: c.white, borderRadius: '20px',
+                            border: `1px solid ${c.border}`, textAlign: 'center',
                         }}>
                             <Check size={24} color="#2ed573" style={{ marginBottom: '12px' }} />
                             <div style={{ fontSize: '2rem', fontWeight: 800 }}>
                                 {referralStats?.totalConverted ?? 0}
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '4px' }}>
+                            <div style={{ fontSize: '0.85rem', color: c.textMuted, marginTop: '4px' }}>
                                 Subscribed
                             </div>
                         </div>
                         <div style={{
-                            padding: '24px', background: '#fff', borderRadius: '20px',
-                            border: '1px solid #e5e7eb', textAlign: 'center',
+                            padding: '24px', background: c.white, borderRadius: '20px',
+                            border: `1px solid ${c.border}`, textAlign: 'center',
                         }}>
                             <Gift size={24} color="#e8866f" style={{ marginBottom: '12px' }} />
                             <div style={{ fontSize: '1.3rem', fontWeight: 800 }}>
                                 {referralStats?.rewardEarned ?? 'None yet'}
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '4px' }}>
+                            <div style={{ fontSize: '0.85rem', color: c.textMuted, marginTop: '4px' }}>
                                 Reward Earned
                             </div>
                         </div>
@@ -1773,8 +1774,8 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
                     {/* How It Works */}
                     <div style={{
-                        background: '#fff', borderRadius: '24px',
-                        border: '1px solid #e5e7eb', padding: '28px',
+                        background: c.white, borderRadius: '24px',
+                        border: `1px solid ${c.border}`, padding: '28px',
                     }}>
                         <h3 style={{ fontSize: '1.1rem', marginBottom: '20px' }}>How It Works</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1786,7 +1787,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 <div key={item.step} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                                     <div style={{
                                         width: '36px', height: '36px', borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', color: 'white',
+                                        background: c.gradient, color: 'white',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         fontWeight: 800, fontSize: '0.9rem', flexShrink: 0,
                                     }}>
@@ -1794,7 +1795,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 600, marginBottom: '4px' }}>{item.title}</div>
-                                        <div style={{ fontSize: '0.85rem', color: '#9ca3af', lineHeight: 1.5 }}>{item.desc}</div>
+                                        <div style={{ fontSize: '0.85rem', color: c.textMuted, lineHeight: 1.5 }}>{item.desc}</div>
                                     </div>
                                 </div>
                             ))}
@@ -1806,36 +1807,36 @@ export default function DashboardClient({ user, profile, history: initialHistory
             {/* ═══════════ Tab: Settings/Preferences ═══════════ */}
             {activeTab === 'settings' && (
                 <div style={{ maxWidth: '600px' }}>
-                    <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #e5e7eb', padding: '32px', marginBottom: '24px' }}>
+                    <div style={{ background: c.white, borderRadius: '24px', border: `1px solid ${c.border}`, padding: '32px', marginBottom: '24px' }}>
                         <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.3rem', marginBottom: '8px' }}><Settings size={20} /> Default Preferences</h3>
-                        <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.6 }}>These settings will be your default every time you open the optimizer.</p>
+                        <p style={{ color: c.textMuted, fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.6 }}>These settings will be your default every time you open the optimizer.</p>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#f3f4f6', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: c.bgMuted, borderRadius: '16px' }}>
                                 <div>
                                     <div style={{ fontWeight: 600 }}>Auto-Convert to WebP</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '4px' }}>Automatically output all images as WebP for maximum compression.</div>
+                                    <div style={{ fontSize: '0.8rem', color: c.textMuted, marginTop: '4px' }}>Automatically output all images as WebP for maximum compression.</div>
                                 </div>
                                 <button
                                     onClick={() => handlePrefsAutoWebPChange(!prefsAutoWebP)}
                                     style={{
                                         width: '48px', height: '28px', borderRadius: '20px', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0,
-                                        background: prefsAutoWebP ? '#db5a42' : '#e5e7eb', transition: 'background 0.2s',
+                                        background: prefsAutoWebP ? c.accent : c.border, transition: 'background 0.2s',
                                     }}
                                 >
                                     <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.2s', left: prefsAutoWebP ? '23px' : '3px' }} />
                                 </button>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#f3f4f6', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: c.bgMuted, borderRadius: '16px' }}>
                                 <div>
                                     <div style={{ fontWeight: 600 }}>Strip EXIF Metadata</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '4px' }}>Remove GPS, camera model, and other metadata from exported images.</div>
+                                    <div style={{ fontSize: '0.8rem', color: c.textMuted, marginTop: '4px' }}>Remove GPS, camera model, and other metadata from exported images.</div>
                                 </div>
                                 <button
                                     onClick={() => handlePrefsStripMetaChange(!prefsStripMeta)}
                                     style={{
                                         width: '48px', height: '28px', borderRadius: '20px', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0,
-                                        background: prefsStripMeta ? '#db5a42' : '#e5e7eb', transition: 'background 0.2s',
+                                        background: prefsStripMeta ? c.accent : c.border, transition: 'background 0.2s',
                                     }}
                                 >
                                     <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.2s', left: prefsStripMeta ? '23px' : '3px' }} />
@@ -1844,29 +1845,29 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         </div>
                     </div>
 
-                    <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #e5e7eb', padding: '32px' }}>
+                    <div style={{ background: c.white, borderRadius: '24px', border: `1px solid ${c.border}`, padding: '32px' }}>
                         <h3 style={{ fontSize: '1.3rem', marginBottom: '8px' }}>Account</h3>
-                        <p style={{ color: '#9ca3af', fontSize: '0.9rem', lineHeight: 1.6 }}>Signed in as <strong style={{ color: '#111827' }}>{user.email}</strong></p>
+                        <p style={{ color: c.textMuted, fontSize: '0.9rem', lineHeight: 1.6 }}>Signed in as <strong style={{ color: c.text }}>{user.email}</strong></p>
 
 
-                        <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginTop: '16px', lineHeight: 1.6 }}>
-                            Need to change your password or manage your account? Head to the <Link href="/" style={{ color: '#db5a42' }}>homepage</Link> and click &quot;Forgot Password&quot; in the login modal.
+                        <p style={{ color: c.textMuted, fontSize: '0.85rem', marginTop: '16px', lineHeight: 1.6 }}>
+                            Need to change your password or manage your account? Head to the <Link href="/" style={{ color: c.accent }}>homepage</Link> and click &quot;Forgot Password&quot; in the login modal.
                         </p>
                     </div>
 
                     {/* Username */}
-                    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                    <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
                         <h4 style={{ marginBottom: '4px' }}>Username</h4>
-                        <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginBottom: '20px' }}>
+                        <p style={{ color: c.textMuted, fontSize: '0.85rem', marginBottom: '20px' }}>
                             Your unique username is shown when you share galleries. It can only contain lowercase letters, numbers, and underscores.
                         </p>
                         <UsernameForm profile={profile} />
                     </div>
 
                     {/* Photographer Branding */}
-                    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                    <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
                         <h4 style={{ marginBottom: '4px' }}>Gallery Branding</h4>
-                        <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginBottom: '20px' }}>
+                        <p style={{ color: c.textMuted, fontSize: '0.85rem', marginBottom: '20px' }}>
                             Your studio name, colour, and website appear on your gallery pages instead of the Optimage defaults.
                         </p>
                         <BrandingForm profile={profile} />
@@ -1884,29 +1885,29 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                 <div
                                     {...getVideoDropProps()}
                                     style={{
-                                        border: `2px dashed ${isVideoDragActive ? '#db5a42' : '#e5e7eb'}`,
+                                        border: `2px dashed ${isVideoDragActive ? c.accent : c.border}`,
                                         borderRadius: '24px', padding: '48px 24px', textAlign: 'center', cursor: 'pointer',
-                                        background: isVideoDragActive ? '#fdf3f1' : '#fff',
+                                        background: isVideoDragActive ? c.accentLight : c.white,
                                         marginBottom: '24px', transition: 'border-color 0.2s, background 0.2s',
                                     }}
                                 >
                                     <input {...getVideoInputProps()} />
-                                    <Film size={40} color={isVideoDragActive ? '#db5a42' : '#9ca3af'} style={{ marginBottom: '16px' }} />
+                                    <Film size={40} color={isVideoDragActive ? c.accent : c.textMuted} style={{ marginBottom: '16px' }} />
                                     <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>
                                         {isVideoDragActive ? 'Release to add video' : 'Drop a video file here or click to browse'}
                                     </p>
-                                    <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max {process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50'}MB • Requires login</p>
+                                    <p style={{ color: c.textMuted, fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max {process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50'}MB • Requires login</p>
                                 </div>
 
                                 {videoFile && (
                                     <div style={{ marginBottom: '24px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', marginBottom: '16px' }}>
-                                            <Film size={24} color="#db5a42" />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: c.white, borderRadius: '16px', border: `1px solid ${c.border}`, marginBottom: '16px' }}>
+                                            <Film size={24} color={c.accent} />
                                             <div style={{ flex: 1, minWidth: 0 }}>
                                                 <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{videoFile.name}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{formatBytes(videoFile.size)} • {videoFile.type}</div>
+                                                <div style={{ fontSize: '0.8rem', color: c.textMuted }}>{formatBytes(videoFile.size)} • {videoFile.type}</div>
                                             </div>
-                                            <button onClick={() => setVideoFile(null)} style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer' }}><X size={18} /></button>
+                                            <button onClick={() => setVideoFile(null)} style={{ background: 'transparent', border: 'none', color: c.textMuted, cursor: 'pointer' }}><X size={18} /></button>
                                         </div>
 
                                         <button
@@ -1956,24 +1957,24 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         ) : (
                             <div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-                                    <div style={{ padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                    <div style={{ padding: '16px', background: c.white, borderRadius: '16px', border: `1px solid ${c.border}`, textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>{formatBytes(videoResult.originalSize)}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Original</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>Original</div>
                                     </div>
-                                    <div style={{ padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                                    <div style={{ padding: '16px', background: c.white, borderRadius: '16px', border: `1px solid ${c.border}`, textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>{formatBytes(videoResult.processedSize)}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Compressed</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>Compressed</div>
                                     </div>
                                     <div style={{ padding: '16px', background: 'rgba(46,213,115,0.1)', borderRadius: '16px', border: '1px solid rgba(46,213,115,0.2)', textAlign: 'center' }}>
                                         <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#2ed573' }}>{videoResult.savingsPercent}%</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Saved</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>Saved</div>
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', marginBottom: '16px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: c.white, borderRadius: '16px', border: `1px solid ${c.border}`, marginBottom: '16px' }}>
                                     <div>
                                         <div style={{ fontWeight: 500 }}>{videoResult.originalName}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{formatBytes(videoResult.originalSize)} → {formatBytes(videoResult.processedSize)}</div>
+                                        <div style={{ fontSize: '0.8rem', color: c.textMuted }}>{formatBytes(videoResult.originalSize)} → {formatBytes(videoResult.processedSize)}</div>
                                     </div>
                                     <button
                                         className="btn btn-secondary"
@@ -2011,12 +2012,12 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
                     {/* Right: Video Settings */}
                     <div style={{ flex: '1 1 35%', minWidth: '280px' }}>
-                        <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #e5e7eb', padding: '24px', position: 'sticky', top: '100px' }}>
+                        <div style={{ background: c.white, borderRadius: '24px', border: `1px solid ${c.border}`, padding: '24px', position: 'sticky', top: '100px' }}>
                             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', fontSize: '1.2rem' }}><SlidersHorizontal size={20} /> Video Settings</h3>
 
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#9ca3af', marginBottom: '8px', fontWeight: 500 }}>Output Format</label>
-                                <select value={videoSettings.format} onChange={(e) => setVideoSettings(prev => ({ ...prev, format: e.target.value }))} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#111827', fontSize: '0.95rem', outline: 'none' }}>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: c.textMuted, marginBottom: '8px', fontWeight: 500 }}>Output Format</label>
+                                <select value={videoSettings.format} onChange={(e) => setVideoSettings(prev => ({ ...prev, format: e.target.value }))} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: `1px solid ${c.border}`, background: c.bgMuted, color: c.text, fontSize: '0.95rem', outline: 'none' }}>
                                     <option value="mp4">MP4 (Universal)</option>
                                     <option value="webm">WebM (Web optimized)</option>
                                     <option value="avi">AVI (Legacy)</option>
@@ -2024,17 +2025,17 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             </div>
 
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#9ca3af', marginBottom: '8px', fontWeight: 500 }}>
-                                    Compression Level (CRF) <span style={{ color: '#111827', fontWeight: 700 }}>{videoSettings.quality}</span>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: c.textMuted, marginBottom: '8px', fontWeight: 500 }}>
+                                    Compression Level (CRF) <span style={{ color: c.text, fontWeight: 700 }}>{videoSettings.quality}</span>
                                 </label>
-                                <input type="range" min="18" max="40" value={videoSettings.quality} onChange={(e) => setVideoSettings(prev => ({ ...prev, quality: parseInt(e.target.value) }))} style={{ width: '100%', accentColor: '#db5a42' }} />
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af' }}>
+                                <input type="range" min="18" max="40" value={videoSettings.quality} onChange={(e) => setVideoSettings(prev => ({ ...prev, quality: parseInt(e.target.value) }))} style={{ width: '100%', accentColor: c.accent }} />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: c.textMuted }}>
                                     <span>Best quality</span><span>Smallest file</span>
                                 </div>
                             </div>
 
                             <div style={{ padding: '16px', background: 'rgba(219,90,66,0.08)', borderRadius: '12px', marginTop: '16px' }}>
-                                <p style={{ fontSize: '0.85rem', color: '#374151', lineHeight: 1.5 }}>
+                                <p style={{ fontSize: '0.85rem', color: c.textSecondary, lineHeight: 1.5 }}>
                                     <strong>CRF 18–23:</strong> Near-lossless, large output<br />
                                     <strong>CRF 24–28:</strong> Good balance (recommended)<br />
                                     <strong>CRF 29–40:</strong> Heavy compression, smaller file
@@ -2048,9 +2049,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                             return (
                                 <div style={{
                                     marginTop: '20px',
-                                    background: '#fff',
+                                    background: c.white,
                                     borderRadius: '24px',
-                                    border: '1px solid #e5e7eb',
+                                    border: `1px solid ${c.border}`,
                                     padding: '24px',
                                     position: 'relative',
                                     overflow: 'hidden',
@@ -2084,7 +2085,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                         </svg>
                                         AI Audio Transcription
                                     </h3>
-                                    <p style={{ fontSize: '0.82rem', color: '#9ca3af', lineHeight: 1.6, marginBottom: '16px' }}>
+                                    <p style={{ fontSize: '0.82rem', color: c.textMuted, lineHeight: 1.6, marginBottom: '16px' }}>
                                         Automatically transcribe audio tracks from your media files using AI.
                                     </p>
 
@@ -2095,9 +2096,9 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                                 width: '100%',
                                                 padding: '11px',
                                                 borderRadius: '12px',
-                                                border: '1px solid #e5e7eb',
-                                                background: '#f3f4f6',
-                                                color: transcriptionAvailable ? '#111827' : '#9ca3af',
+                                                border: `1px solid ${c.border}`,
+                                                background: c.bgMuted,
+                                                color: transcriptionAvailable ? c.text : c.textMuted,
                                                 fontSize: '0.88rem',
                                                 fontWeight: 600,
                                                 cursor: transcriptionAvailable ? 'pointer' : 'not-allowed',
