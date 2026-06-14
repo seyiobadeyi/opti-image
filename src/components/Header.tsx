@@ -157,27 +157,27 @@ export default function Header(): React.JSX.Element {
                 justifyContent: 'space-between',
             }}>
                 {/* Logo */}
-                <Link
-                    href="/"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
-                >
-                    <img src="/logo.png" alt="Optimage" style={{ height: '2rem', width: 'auto' }} />
-                    <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                    <Link
+                        href="/"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
+                    >
+                        <img src="/logo.png" alt="Optimage" style={{ height: '2rem', width: 'auto' }} />
                         <span style={{ fontSize: '1.1rem', fontWeight: 700, color: clr.g900 }}>Optimage</span>
-                        <a
-                            href="https://dreamintrepid.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ fontSize: '0.6rem', color: clr.g400, textDecoration: 'none', fontWeight: 400 }}
-                        >
-                            by Dream Intrepid Ltd
-                        </a>
-                    </span>
-                </Link>
+                    </Link>
+                    <a
+                        href="https://dreamintrepid.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '0.6rem', color: clr.g400, textDecoration: 'none', fontWeight: 400, marginLeft: '42px' }}
+                    >
+                        by Dream Intrepid Ltd
+                    </a>
+                </div>
 
                 {/* Desktop nav */}
-                <nav style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="header-desktop-nav">
+                <nav style={{ alignItems: 'center', gap: '4px' }} className="header-desktop-nav">
                     <Link href="/" style={navLinkStyle}>Home</Link>
                     <Link href="/blog" style={navLinkStyle}>Blog</Link>
                     <button style={navLinkStyle} onClick={openGalleries}>

@@ -358,9 +358,19 @@ body {
   box-shadow: var(--shadow-glow);
 }
 
+.dropzone.active {
+  transform: scale(1.02);
+  border-style: solid;
+  border-width: 3px;
+}
+
 .dropzone:hover::before,
 .dropzone.active::before {
   opacity: 1;
+}
+
+.dropzone.active::before {
+  animation: pulse-glow 1.2s ease-in-out infinite;
 }
 
 .dropzone-icon {
@@ -370,6 +380,12 @@ body {
   position: relative;
   z-index: 1;
   animation: float 3s ease-in-out infinite;
+  transition: transform var(--transition-base);
+}
+
+.dropzone.active .dropzone-icon {
+  animation: bounce-up 0.6s ease-in-out infinite;
+  transform: scale(1.15);
 }
 
 @keyframes float {
@@ -381,6 +397,30 @@ body {
 
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes bounce-up {
+
+  0%,
+  100% {
+    transform: scale(1.15) translateY(0px);
+  }
+
+  50% {
+    transform: scale(1.15) translateY(-12px);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
   }
 }
 
