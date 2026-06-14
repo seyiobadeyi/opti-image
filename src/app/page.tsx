@@ -105,7 +105,6 @@ const TOOLS: Tool[] = [
         Icon: Scissors,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
-        soon: true,
     },
     {
         name: 'Upscale Image',
@@ -132,7 +131,6 @@ const TOOLS: Tool[] = [
         Icon: Type,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'convert'],
-        soon: true,
     },
     {
         name: 'Photo Editor',

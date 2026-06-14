@@ -198,7 +198,27 @@ export interface ConvertImageOptions {
   autoEnhance?: boolean;
   flipHorizontal?: boolean;
   flipVertical?: boolean;
+
+  /** Crop box in pixels, relative to the oriented (post-rotate/flip) image. */
+  cropLeft?: number;
+  cropTop?: number;
+  cropWidth?: number;
+  cropHeight?: number;
+
+  /** Watermark text overlay. Non-empty text enables the watermark. */
+  watermarkText?: string;
+  watermarkPosition?: WatermarkPosition;
+  watermarkOpacity?: number;
+  watermarkSize?: number;
+  watermarkColor?: string;
 }
+
+/** Where the watermark text is placed on the output image. */
+export type WatermarkPosition =
+  | 'top-left' | 'top-center' | 'top-right'
+  | 'center-left' | 'center' | 'center-right'
+  | 'bottom-left' | 'bottom-center' | 'bottom-right'
+  | 'tile';
 
 /** Options passed to apiClient.processMedia(). */
 export interface ProcessMediaOptions {

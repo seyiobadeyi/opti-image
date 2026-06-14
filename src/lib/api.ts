@@ -86,6 +86,24 @@ export const apiClient = {
             formData.append('flipHorizontal', 'true');
         if (options.flipVertical)
             formData.append('flipVertical', 'true');
+        if (options.cropLeft !== undefined)
+            formData.append('cropLeft', String(options.cropLeft));
+        if (options.cropTop !== undefined)
+            formData.append('cropTop', String(options.cropTop));
+        if (options.cropWidth !== undefined)
+            formData.append('cropWidth', String(options.cropWidth));
+        if (options.cropHeight !== undefined)
+            formData.append('cropHeight', String(options.cropHeight));
+        if (options.watermarkText)
+            formData.append('watermarkText', options.watermarkText);
+        if (options.watermarkPosition)
+            formData.append('watermarkPosition', options.watermarkPosition);
+        if (options.watermarkOpacity !== undefined)
+            formData.append('watermarkOpacity', String(options.watermarkOpacity));
+        if (options.watermarkSize !== undefined)
+            formData.append('watermarkSize', String(options.watermarkSize));
+        if (options.watermarkColor)
+            formData.append('watermarkColor', options.watermarkColor);
 
         const response = await fetch(`${API_BASE}/api/images/convert`, {
             method: 'POST',
