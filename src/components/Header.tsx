@@ -157,24 +157,14 @@ export default function Header(): React.JSX.Element {
                 justifyContent: 'space-between',
             }}>
                 {/* Logo */}
-                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                    <Link
-                        href="/"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
-                    >
-                        <img src="/logo.png" alt="Optimage" style={{ height: '2rem', width: 'auto' }} />
-                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: clr.g900 }}>Optimage</span>
-                    </Link>
-                    <a
-                        href="https://dreamintrepid.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ fontSize: '0.6rem', color: clr.g400, textDecoration: 'none', fontWeight: 400, marginLeft: '42px' }}
-                    >
-                        by Dream Intrepid Ltd
-                    </a>
-                </div>
+                <Link
+                    href="/"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
+                >
+                    <img src="/logo.png" alt="Optimage" style={{ height: '34px', width: 'auto', display: 'block' }} />
+                    <span style={{ fontSize: '1.15rem', fontWeight: 700, color: clr.g900, lineHeight: 1 }}>Optimage</span>
+                </Link>
 
                 {/* Desktop nav */}
                 <nav style={{ alignItems: 'center', gap: '4px' }} className="header-desktop-nav">
