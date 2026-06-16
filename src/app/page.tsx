@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Minimize2, RefreshCw, Crop, RotateCcw, Sparkles, ShieldOff,
@@ -352,49 +352,58 @@ const S: Record<string, React.CSSProperties> = {
     trustLbl: { fontSize: '0.82rem', color: c.gray500 },
 };
 
-const TRUST = [
-    { num: '500K+', lbl: 'Images processed' },
-    { num: '90%',   lbl: 'Average size reduction' },
-    { num: '50',    lbl: 'Images per batch' },
-    { num: '5+',    lbl: 'Output formats' },
-];
+const TRUST_STATIC = [
+    { key: 'imagesProcessed', fallback: '500K+', lbl: 'Images processed' },
+    { key: 'avgReduction',    fallback: '90%',   lbl: 'Average size reduction' },
+    { key: 'batchSize',       fallback: '50',    lbl: 'Images per batch' },
+    { key: 'formats',         fallback: '5+',    lbl: 'Output formats' },
+] as const;
+
+function fmtCount(n: number): string {
+    if (n <= 0) return '';
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M+`;
+    if (n >= 100_000)   return `${Math.floor(n / 100_000) * 100}K+`;
+    if (n >= 10_000)    return `${Math.floor(n / 10_000) * 10}K+`;
+    if (n >= 1_000)     return `${Math.floor(n / 1_000)}K+`;
+    return `${n}+`;
+}
 
 const FEATURES = [
     {
         Icon: Zap,
         name: 'Lightning fast processing',
         desc: 'Powered by Sharp — the fastest image processing library available. Most files are ready in under a second.',
-        href: '/compress',
+        href: '/features/fast-processing',
     },
     {
         Icon: Layers,
         name: 'True bulk operations',
         desc: 'Upload up to 50 images and apply compression, format conversion and resizing all in one go.',
-        href: '/compress',
+        href: '/features/bulk',
     },
     {
         Icon: Camera,
         name: 'Client gallery delivery',
         desc: 'Share work with clients in private, PIN-protected galleries. Set download rules, payment gates and expiry dates.',
-        href: '/dashboard?tab=galleries',
+        href: '/features/client-galleries',
     },
     {
         Icon: Globe,
         name: 'Works anywhere',
         desc: 'No software to install. Works in any browser on desktop, tablet or phone. Your images stay on your device until you compress.',
-        href: '/compress',
+        href: '/features/works-anywhere',
     },
     {
         Icon: RefreshCw,
         name: 'Any format, any direction',
         desc: 'Convert between JPEG, PNG, WebP, AVIF, TIFF and GIF. Modern formats like WebP cut file size by up to 35% over JPEG at the same quality.',
-        href: '/compress',
+        href: '/features/formats',
     },
     {
         Icon: CheckCircle,
         name: 'Built for real workflows',
         desc: 'Rename files before download, adjust per-image settings, and re-compress the same batch with different settings without re-uploading.',
-        href: '/compress',
+        href: '/features/workflows',
     },
 ];
 
@@ -402,6 +411,22 @@ const FEATURES = [
 
 export default function Home(): React.JSX.Element {
     const [category, setCategory] = useState<Category>('all');
+    const [liveStats, setLiveStats] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+        fetch(`${api}/stats`)
+            .then(r => r.json())
+            .then((d: { totalFilesProcessed?: number; averageReduction?: number }) => {
+                const processed = fmtCount(d.totalFilesProcessed ?? 0);
+                const reduction = (d.averageReduction ?? 0) > 0 ? `${d.averageReduction}%` : '';
+                setLiveStats({
+                    imagesProcessed: processed || '',
+                    avgReduction: reduction,
+                });
+            })
+            .catch(() => { /* keep fallbacks */ });
+    }, []);
 
     const visibleTools = TOOLS.filter(t => t.category.includes(category));
 
@@ -494,9 +519,9 @@ export default function Home(): React.JSX.Element {
 
             {/* ── Trust strip ─────────────────────────────────────────── */}
             <div style={S.trustStrip}>
-                {TRUST.map(({ num, lbl }) => (
+                {TRUST_STATIC.map(({ key, fallback, lbl }) => (
                     <div key={lbl} style={S.trustItem}>
-                        <span style={S.trustNum}>{num}</span>
+                        <span style={S.trustNum}>{liveStats[key] || fallback}</span>
                         <span style={S.trustLbl}>{lbl}</span>
                     </div>
                 ))}

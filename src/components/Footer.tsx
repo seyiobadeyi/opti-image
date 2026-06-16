@@ -83,9 +83,68 @@ export default function Footer(): React.JSX.Element {
     };
 
     return (
-        <footer style={{ background: c.bg }}>
-            {/* Main content */}
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '64px 24px 24px' }}>
+        <footer style={{ background: c.bg, paddingTop: '90px' }}>
+
+            {/* Floating newsletter CTA — pulled up above the footer top edge */}
+            <div style={{ maxWidth: '1100px', margin: '-90px auto 0', padding: '0 24px', position: 'relative', zIndex: 2 }}>
+                <div className="footer-newsletter" style={{
+                    background: c.bg,
+                    border: `1px solid ${c.border}`,
+                    borderRadius: '20px',
+                    boxShadow: '0 8px 40px rgba(17, 24, 39, 0.09)',
+                    padding: '28px 36px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '28px',
+                }}>
+                    {/* Icon + text */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Mail size={20} color={c.accent} />
+                        </div>
+                        <div>
+                            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: c.text, margin: 0, marginBottom: '3px', whiteSpace: 'nowrap' }}>
+                                Stay in the loop
+                            </h4>
+                            <p style={{ fontSize: '0.82rem', color: c.textSecondary, margin: 0, lineHeight: 1.5, whiteSpace: 'nowrap' }}>
+                                Optimization tips, new tools, and format news.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Form — expands to fill remaining width */}
+                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '10px', flex: 1, minWidth: 0, position: 'relative' }}>
+                        <input
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            required
+                            disabled={status === 'loading'}
+                            style={{ flex: 1, minWidth: 0, padding: '11px 16px', borderRadius: '10px', border: `1.5px solid ${c.border}`, background: c.bgSubtle, color: c.text, fontSize: '0.88rem', outline: 'none' }}
+                        />
+                        <button
+                            type="submit"
+                            disabled={status === 'loading'}
+                            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 22px', background: status === 'success' ? c.success : c.accent, color: '#fff', border: 'none', borderRadius: '10px', fontSize: '0.88rem', fontWeight: 600, cursor: status === 'loading' ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s', flexShrink: 0 }}
+                            onMouseEnter={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accentDark; }}
+                            onMouseLeave={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accent; }}
+                        >
+                            {status === 'loading' ? '...' : status === 'success' ? (isAlreadySubscribed ? 'Already in!' : 'Done!') : (
+                                <>Subscribe <ArrowRight size={14} /></>
+                            )}
+                        </button>
+                        {status === 'error' && (
+                            <p style={{ position: 'absolute', bottom: '-22px', left: 0, color: c.error, fontSize: '0.78rem', margin: 0 }}>
+                                Something went wrong. Try again.
+                            </p>
+                        )}
+                    </form>
+                </div>
+            </div>
+
+            {/* Main footer content */}
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '64px 24px 32px' }}>
                 <div className="footer-grid" style={{ display: 'flex', gap: '48px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
 
                     {/* Branding */}
@@ -128,70 +187,9 @@ export default function Footer(): React.JSX.Element {
                 </div>
             </div>
 
-            {/* Floating newsletter CTA — straddles the line between content and bottom bar */}
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', position: 'relative' }}>
-                <div className="footer-newsletter" style={{
-                    position: 'relative',
-                    zIndex: 2,
-                    margin: '0 auto -52px',
-                    maxWidth: '880px',
-                    background: c.bg,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: '20px',
-                    boxShadow: '0 12px 32px rgba(17, 24, 39, 0.07)',
-                    padding: '28px 36px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '24px',
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <Mail size={18} color={c.accent} />
-                        </div>
-                        <div>
-                            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: c.text, margin: 0, marginBottom: '2px' }}>
-                                Stay in the loop
-                            </h4>
-                            <p style={{ fontSize: '0.82rem', color: c.textSecondary, margin: 0, lineHeight: 1.5 }}>
-                                Optimization tips, new tools, and AVIF codec news.
-                            </p>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                        <input
-                            type="email"
-                            placeholder="you@example.com"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                            disabled={status === 'loading'}
-                            style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.border}`, background: c.bgSubtle, color: c.text, fontSize: '0.85rem', outline: 'none', minWidth: 0, width: '220px' }}
-                        />
-                        <button
-                            type="submit"
-                            disabled={status === 'loading'}
-                            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 18px', background: status === 'success' ? c.success : c.accent, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: status === 'loading' ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s', flexShrink: 0 }}
-                            onMouseEnter={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accentDark; }}
-                            onMouseLeave={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accent; }}
-                        >
-                            {status === 'loading' ? '...' : status === 'success' ? (isAlreadySubscribed ? 'Already in!' : 'Done!') : (
-                                <>Subscribe <ArrowRight size={14} /></>
-                            )}
-                        </button>
-                    </form>
-                    {status === 'error' && (
-                        <p style={{ position: 'absolute', bottom: '-22px', left: '36px', color: c.error, fontSize: '0.78rem', margin: 0 }}>
-                            Something went wrong. Try again.
-                        </p>
-                    )}
-                </div>
-            </div>
-
             {/* Bottom bar */}
             <div style={{ borderTop: `1px solid ${c.border}`, background: c.bgSubtle }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '76px 24px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '22px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <img src="/logo.png" alt="Optimage" style={{ height: '20px', width: 'auto', display: 'block' }} />
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: c.text, lineHeight: 1 }}>Optimage</span>
@@ -206,17 +204,19 @@ export default function Footer(): React.JSX.Element {
             </div>
 
             <style>{`
-                @media (max-width: 860px) {
+                @media (max-width: 900px) {
                     .footer-cols { grid-template-columns: repeat(3, minmax(110px, 1fr)) !important; }
-                    .footer-newsletter { flex-direction: column !important; align-items: stretch !important; text-align: center; }
-                    .footer-newsletter > div:first-child { justify-content: center; }
-                    .footer-newsletter-form { width: 100%; }
-                    .footer-newsletter-form input { width: auto !important; }
+                    .footer-newsletter { flex-direction: column !important; align-items: stretch !important; gap: 20px !important; }
+                    .footer-newsletter > div:first-child { flex-shrink: 1 !important; }
+                    .footer-newsletter > div:first-child p,
+                    .footer-newsletter > div:first-child h4 { white-space: normal !important; }
+                    .footer-newsletter-form { flex: 1 !important; }
                 }
                 @media (max-width: 600px) {
                     .footer-cols { grid-template-columns: repeat(2, minmax(110px, 1fr)) !important; gap: 28px 20px !important; }
-                    .footer-newsletter { margin-bottom: -64px !important; padding: 24px !important; border-radius: 16px !important; }
-                    .footer-newsletter-form { flex-direction: column; }
+                    .footer-newsletter { padding: 24px !important; border-radius: 16px !important; }
+                    .footer-newsletter-form { flex-direction: column !important; }
+                    .footer-newsletter-form button { width: 100% !important; justify-content: center !important; }
                 }
             `}</style>
         </footer>
