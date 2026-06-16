@@ -85,28 +85,22 @@ export default function Footer(): React.JSX.Element {
     return (
         <footer style={{ background: c.bg, paddingTop: '90px' }}>
 
-            {/* Floating newsletter CTA — pulled up above the footer top edge */}
-            <div style={{ maxWidth: '1100px', margin: '-90px auto 0', padding: '0 24px', position: 'relative', zIndex: 2, boxSizing: 'border-box' }}>
-                <div className="footer-newsletter" style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
+            {/* Floating newsletter CTA */}
+            <div style={{ maxWidth: '860px', margin: '-90px auto 0', padding: '0 24px', position: 'relative', zIndex: 2 }}>
+                <div style={{
                     background: c.bg,
                     border: `1px solid ${c.border}`,
                     borderRadius: '20px',
                     boxShadow: '0 8px 40px rgba(17, 24, 39, 0.09)',
-                    padding: '28px 36px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '24px',
+                    padding: '28px 32px 32px',
                 }}>
-                    {/* Left — icon + text */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 auto', minWidth: 0 }}>
-                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <Mail size={20} color={c.accent} />
+                    {/* Icon + heading */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
+                        <div style={{ width: '42px', height: '42px', borderRadius: '11px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Mail size={19} color={c.accent} />
                         </div>
                         <div>
-                            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: c.text, margin: 0, marginBottom: '3px' }}>
+                            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: c.text, margin: 0, marginBottom: '2px' }}>
                                 Stay in the loop
                             </h4>
                             <p style={{ fontSize: '0.83rem', color: c.textSecondary, margin: 0, lineHeight: 1.5 }}>
@@ -115,8 +109,8 @@ export default function Footer(): React.JSX.Element {
                         </div>
                     </div>
 
-                    {/* Right — form */}
-                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0, position: 'relative' }}>
+                    {/* Form row */}
+                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '8px', position: 'relative' }}>
                         <input
                             type="email"
                             placeholder="your@email.com"
@@ -126,13 +120,14 @@ export default function Footer(): React.JSX.Element {
                             disabled={status === 'loading'}
                             className="footer-newsletter-input"
                             style={{
-                                width: '240px',
-                                padding: '11px 16px',
+                                flex: 1,
+                                minWidth: 0,
+                                padding: '12px 16px',
                                 borderRadius: '10px',
                                 border: `1.5px solid ${c.border}`,
                                 background: c.bgSubtle,
                                 color: c.text,
-                                fontSize: '0.88rem',
+                                fontSize: '0.9rem',
                                 outline: 'none',
                                 transition: 'border-color 0.15s',
                             }}
@@ -142,10 +137,10 @@ export default function Footer(): React.JSX.Element {
                             disabled={status === 'loading'}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
-                                padding: '11px 22px',
+                                padding: '12px 24px',
                                 background: status === 'success' ? c.success : c.accent,
                                 color: '#fff', border: 'none', borderRadius: '10px',
-                                fontSize: '0.88rem', fontWeight: 600,
+                                fontSize: '0.9rem', fontWeight: 600,
                                 cursor: status === 'loading' ? 'not-allowed' : 'pointer',
                                 whiteSpace: 'nowrap', transition: 'background 0.15s', flexShrink: 0,
                             }}
@@ -229,13 +224,9 @@ export default function Footer(): React.JSX.Element {
                 .footer-newsletter-input:focus { border-color: ${c.accent} !important; }
                 @media (max-width: 860px) {
                     .footer-cols { grid-template-columns: repeat(3, minmax(110px, 1fr)) !important; }
-                    .footer-newsletter { flex-direction: column !important; align-items: stretch !important; gap: 20px !important; padding: 26px 28px !important; }
-                    .footer-newsletter-form { flex-shrink: 1 !important; }
-                    .footer-newsletter-input { width: 100% !important; }
                 }
                 @media (max-width: 600px) {
                     .footer-cols { grid-template-columns: repeat(2, minmax(110px, 1fr)) !important; gap: 28px 20px !important; }
-                    .footer-newsletter { padding: 22px 20px !important; border-radius: 16px !important; }
                     .footer-newsletter-form { flex-direction: column !important; }
                     .footer-newsletter-form button { width: 100% !important; justify-content: center !important; }
                 }
