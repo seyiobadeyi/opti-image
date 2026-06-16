@@ -91,14 +91,6 @@ const TOOLS: Tool[] = [
         badge: 'New',
     },
     {
-        name: 'Batch Process',
-        desc: 'Upload up to 50 images at once and apply all settings in a single click.',
-        href: '/compress',
-        Icon: Layers,
-        iconBg: IC.bg, iconColor: IC.color,
-        category: ['all', 'optimize'],
-    },
-    {
         name: 'Crop Image',
         desc: 'Trim your images to a specific area or aspect ratio. Portrait, landscape or square.',
         href: '/crop',
