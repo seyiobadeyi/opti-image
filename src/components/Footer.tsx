@@ -92,50 +92,70 @@ export default function Footer(): React.JSX.Element {
                     border: `1px solid ${c.border}`,
                     borderRadius: '20px',
                     boxShadow: '0 8px 40px rgba(17, 24, 39, 0.09)',
-                    padding: '28px 36px',
+                    padding: '30px 40px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '28px',
+                    justifyContent: 'space-between',
+                    gap: '32px',
                 }}>
-                    {/* Icon + text */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {/* Left — icon + text */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
+                        <div style={{ width: '46px', height: '46px', borderRadius: '13px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <Mail size={20} color={c.accent} />
                         </div>
-                        <div>
-                            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: c.text, margin: 0, marginBottom: '3px', whiteSpace: 'nowrap' }}>
+                        <div style={{ minWidth: 0 }}>
+                            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: c.text, margin: 0, marginBottom: '3px' }}>
                                 Stay in the loop
                             </h4>
-                            <p style={{ fontSize: '0.82rem', color: c.textSecondary, margin: 0, lineHeight: 1.5, whiteSpace: 'nowrap' }}>
-                                Optimization tips, new tools, and format news.
+                            <p style={{ fontSize: '0.83rem', color: c.textSecondary, margin: 0, lineHeight: 1.5 }}>
+                                Optimization tips, new tools, and format news — no spam.
                             </p>
                         </div>
                     </div>
 
-                    {/* Form — expands to fill remaining width */}
-                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '10px', flex: 1, minWidth: 0, position: 'relative' }}>
+                    {/* Right — form */}
+                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '8px', alignItems: 'stretch', flexShrink: 0, position: 'relative' }}>
                         <input
                             type="email"
-                            placeholder="you@example.com"
+                            placeholder="your@email.com"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
                             disabled={status === 'loading'}
-                            style={{ flex: 1, minWidth: 0, padding: '11px 16px', borderRadius: '10px', border: `1.5px solid ${c.border}`, background: c.bgSubtle, color: c.text, fontSize: '0.88rem', outline: 'none' }}
+                            className="footer-newsletter-input"
+                            style={{
+                                width: '240px',
+                                padding: '11px 16px',
+                                borderRadius: '10px',
+                                border: `1.5px solid ${c.border}`,
+                                background: c.bgSubtle,
+                                color: c.text,
+                                fontSize: '0.88rem',
+                                outline: 'none',
+                                transition: 'border-color 0.15s',
+                            }}
                         />
                         <button
                             type="submit"
                             disabled={status === 'loading'}
-                            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '11px 22px', background: status === 'success' ? c.success : c.accent, color: '#fff', border: 'none', borderRadius: '10px', fontSize: '0.88rem', fontWeight: 600, cursor: status === 'loading' ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s', flexShrink: 0 }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                padding: '11px 22px',
+                                background: status === 'success' ? c.success : c.accent,
+                                color: '#fff', border: 'none', borderRadius: '10px',
+                                fontSize: '0.88rem', fontWeight: 600,
+                                cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                                whiteSpace: 'nowrap', transition: 'background 0.15s', flexShrink: 0,
+                            }}
                             onMouseEnter={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accentDark; }}
-                            onMouseLeave={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accent; }}
+                            onMouseLeave={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = status === 'success' ? c.success : c.accent; }}
                         >
-                            {status === 'loading' ? '...' : status === 'success' ? (isAlreadySubscribed ? 'Already in!' : 'Done!') : (
+                            {status === 'loading' ? '…' : status === 'success' ? (isAlreadySubscribed ? 'Already in!' : 'Done!') : (
                                 <>Subscribe <ArrowRight size={14} /></>
                             )}
                         </button>
                         {status === 'error' && (
-                            <p style={{ position: 'absolute', bottom: '-22px', left: 0, color: c.error, fontSize: '0.78rem', margin: 0 }}>
+                            <p style={{ position: 'absolute', bottom: '-22px', left: 0, color: c.error, fontSize: '0.75rem', margin: 0, whiteSpace: 'nowrap' }}>
                                 Something went wrong. Try again.
                             </p>
                         )}
@@ -204,17 +224,16 @@ export default function Footer(): React.JSX.Element {
             </div>
 
             <style>{`
-                @media (max-width: 900px) {
+                .footer-newsletter-input:focus { border-color: ${c.accent} !important; }
+                @media (max-width: 860px) {
                     .footer-cols { grid-template-columns: repeat(3, minmax(110px, 1fr)) !important; }
-                    .footer-newsletter { flex-direction: column !important; align-items: stretch !important; gap: 20px !important; }
-                    .footer-newsletter > div:first-child { flex-shrink: 1 !important; }
-                    .footer-newsletter > div:first-child p,
-                    .footer-newsletter > div:first-child h4 { white-space: normal !important; }
-                    .footer-newsletter-form { flex: 1 !important; }
+                    .footer-newsletter { flex-direction: column !important; align-items: stretch !important; gap: 20px !important; padding: 26px 28px !important; }
+                    .footer-newsletter-form { flex-shrink: 1 !important; }
+                    .footer-newsletter-input { width: 100% !important; }
                 }
                 @media (max-width: 600px) {
                     .footer-cols { grid-template-columns: repeat(2, minmax(110px, 1fr)) !important; gap: 28px 20px !important; }
-                    .footer-newsletter { padding: 24px !important; border-radius: 16px !important; }
+                    .footer-newsletter { padding: 22px 20px !important; border-radius: 16px !important; }
                     .footer-newsletter-form { flex-direction: column !important; }
                     .footer-newsletter-form button { width: 100% !important; justify-content: center !important; }
                 }
