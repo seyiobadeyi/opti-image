@@ -86,24 +86,26 @@ export default function Footer(): React.JSX.Element {
         <footer style={{ background: c.bg, paddingTop: '90px' }}>
 
             {/* Floating newsletter CTA — pulled up above the footer top edge */}
-            <div style={{ maxWidth: '1100px', margin: '-90px auto 0', padding: '0 24px', position: 'relative', zIndex: 2 }}>
+            <div style={{ maxWidth: '1100px', margin: '-90px auto 0', padding: '0 24px', position: 'relative', zIndex: 2, boxSizing: 'border-box' }}>
                 <div className="footer-newsletter" style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
                     background: c.bg,
                     border: `1px solid ${c.border}`,
                     borderRadius: '20px',
                     boxShadow: '0 8px 40px rgba(17, 24, 39, 0.09)',
-                    padding: '30px 40px',
+                    padding: '28px 36px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '32px',
+                    gap: '24px',
                 }}>
                     {/* Left — icon + text */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
-                        <div style={{ width: '46px', height: '46px', borderRadius: '13px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 auto', minWidth: 0 }}>
+                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: c.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <Mail size={20} color={c.accent} />
                         </div>
-                        <div style={{ minWidth: 0 }}>
+                        <div>
                             <h4 style={{ fontSize: '1rem', fontWeight: 700, color: c.text, margin: 0, marginBottom: '3px' }}>
                                 Stay in the loop
                             </h4>
@@ -114,7 +116,7 @@ export default function Footer(): React.JSX.Element {
                     </div>
 
                     {/* Right — form */}
-                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '8px', alignItems: 'stretch', flexShrink: 0, position: 'relative' }}>
+                    <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0, position: 'relative' }}>
                         <input
                             type="email"
                             placeholder="your@email.com"
