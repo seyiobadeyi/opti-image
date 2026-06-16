@@ -415,7 +415,7 @@ export default function Home(): React.JSX.Element {
 
     useEffect(() => {
         const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-        fetch(`${api}/stats`)
+        fetch(`${api}/api/stats`)
             .then(r => r.json())
             .then((d: { totalFilesProcessed?: number; averageReduction?: number }) => {
                 const processed = fmtCount(d.totalFilesProcessed ?? 0);
@@ -489,6 +489,16 @@ export default function Home(): React.JSX.Element {
                 ))}
             </div>
 
+            {/* ── Trust strip ─────────────────────────────────────────── */}
+            <div style={S.trustStrip}>
+                {TRUST_STATIC.map(({ key, fallback, lbl }) => (
+                    <div key={lbl} style={S.trustItem}>
+                        <span style={S.trustNum}>{liveStats[key] || fallback}</span>
+                        <span style={S.trustLbl}>{lbl}</span>
+                    </div>
+                ))}
+            </div>
+
             {/* ── "Work your way" feature section ─────────────────────── */}
             <section style={S.featureSection}>
                 <div style={S.featureInner}>
@@ -516,16 +526,6 @@ export default function Home(): React.JSX.Element {
                     </div>
                 </div>
             </section>
-
-            {/* ── Trust strip ─────────────────────────────────────────── */}
-            <div style={S.trustStrip}>
-                {TRUST_STATIC.map(({ key, fallback, lbl }) => (
-                    <div key={lbl} style={S.trustItem}>
-                        <span style={S.trustNum}>{liveStats[key] || fallback}</span>
-                        <span style={S.trustLbl}>{lbl}</span>
-                    </div>
-                ))}
-            </div>
 
             {/* ── Free account CTA ─────────────────────────────────── */}
             <section style={S.premiumSection}>
