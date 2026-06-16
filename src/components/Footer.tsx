@@ -150,7 +150,7 @@ export default function Footer(): React.JSX.Element {
                                 whiteSpace: 'nowrap', transition: 'background 0.15s', flexShrink: 0,
                             }}
                             onMouseEnter={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accentDark; }}
-                            onMouseLeave={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = status === 'success' ? c.success : c.accent; }}
+                            onMouseLeave={e => { if (status !== 'success' && status !== 'loading') (e.currentTarget as HTMLButtonElement).style.background = c.accent; }}
                         >
                             {status === 'loading' ? '…' : status === 'success' ? (isAlreadySubscribed ? 'Already in!' : 'Done!') : (
                                 <>Subscribe <ArrowRight size={14} /></>
