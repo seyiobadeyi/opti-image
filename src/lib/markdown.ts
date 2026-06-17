@@ -1,9 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { remark } from 'remark';
-import html from 'remark-html';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
+import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
+import rehypeStringify from 'rehype-stringify';
 import type { BlogPostMeta, BlogPostData } from '@/types';
 
 const postsDirectory: string = path.join(process.cwd(), '_posts');
@@ -82,9 +85,12 @@ export async function getPostData(slug: string): Promise<BlogPostData> {
     const matterResult = matter(fileContents);
     const data = matterResult.data as PostFrontmatter;
 
-    const processedContent = await remark()
+    const processedContent = await unified()
+        .use(remarkParse)
         .use(remarkGfm)
-        .use(html)
+        .use(remarkRehype, { allowDangerousHtml: true })
+        .use(rehypeRaw)
+        .use(rehypeStringify, { allowDangerousHtml: true })
         .process(matterResult.content);
     const contentHtml = processedContent.toString();
 
