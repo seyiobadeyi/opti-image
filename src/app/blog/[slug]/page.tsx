@@ -115,7 +115,7 @@ function RelatedPosts({ posts }: { posts: BlogPostMeta[] }) {
                     >
                         <span style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 500 }}>{formatDate(post.date)}</span>
                         <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#111827', lineHeight: 1.4 }}>{post.title}</span>
-                        <span style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, flex: 1 }}>{post.excerpt.substring(0, 100)}…</span>
+                        <span style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, flex: 1 }}>{(post.excerpt ?? '').substring(0, 100)}…</span>
                         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#db5a42', marginTop: '4px' }}>Read more →</span>
                     </Link>
                 ))}

@@ -1,6 +1,7 @@
 ---
 title: "Instagram's 2026 Algorithm Now Penalises Low-Quality Images: The Complete Guide"
 description: "Instagram updated its ranking algorithm in late 2025 and early 2026 to deprioritise content with visible compression artefacts, low resolution, and recycled images. Here is what changed and exactly how to keep your content performing."
+excerpt: "Instagram now scores every uploaded image for sharpness, compression artefacts, and originality before deciding how widely to distribute it. Here is what changed in 2026 and how to keep your content performing."
 date: "2026-02-05"
 author: "Optimage Team"
 tags: ["Instagram", "social media", "image quality", "algorithm", "content strategy"]

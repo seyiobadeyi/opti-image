@@ -1,6 +1,7 @@
 ---
 title: "Google's INP Metric Is Now Live: What It Means for Image-Heavy Websites"
 description: "Interaction to Next Paint replaced First Input Delay in March 2024, and by early 2026 it is actively influencing search rankings. If your site has a lot of images, here is exactly how INP is affected and what you need to fix."
+excerpt: "INP replaced FID in March 2024 and is now actively influencing search rankings. Image-heavy sites are disproportionately affected — here is exactly which image patterns cause poor INP and how to fix them."
 date: "2026-01-29"
 author: "Optimage Team"
 tags: ["Core Web Vitals", "INP", "web performance", "Google ranking", "image optimization"]

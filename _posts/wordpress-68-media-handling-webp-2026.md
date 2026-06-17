@@ -1,6 +1,7 @@
 ---
 title: "WordPress 6.8 and the New Media Handling: What Every Site Owner Needs to Know"
 description: "WordPress 6.8, expected in April 2026, brings significant changes to media handling, WebP generation, AVIF support, and image upload workflows. Here is what is changing and how to prepare your site now."
+excerpt: "WordPress 6.8 adds AVIF support, separate quality settings for WebP and AVIF, and a Performance Mode that enables lazy loading, progressive WebP generation, and fetchpriority on first images — all in one toggle."
 date: "2026-03-13"
 author: "Optimage Team"
 tags: ["WordPress", "WebP", "AVIF", "media library", "CMS", "image optimization"]

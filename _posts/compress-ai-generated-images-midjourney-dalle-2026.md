@@ -1,6 +1,7 @@
 ---
 title: "AI-Generated Images Are Beautiful and Enormous: Here Is How to Compress Them"
 description: "Midjourney v7 and DALL-E 3 produce stunning images, but they also produce files that can be 8MB to 25MB per image. If you are using AI art on your website, in marketing, or in presentations, here is the complete guide to compressing them without destroying what makes them special."
+excerpt: "Midjourney v7 outputs PNG files between 3MB and 20MB by default. Converting to WebP at quality 78 reduces them to 200-500KB with no visible loss — a 90%+ reduction that makes AI art practical for web use."
 date: "2026-01-15"
 author: "Optimage Team"
 tags: ["AI images", "Midjourney", "DALL-E", "image compression", "web performance"]

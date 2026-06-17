@@ -47,7 +47,8 @@ export function getSortedPostsData(): BlogPostMeta[] {
         const fileContents = fs.readFileSync(fullPath, 'utf8');
         const matterResult = matter(fileContents);
         const data = matterResult.data as PostFrontmatter;
-        return { slug, title: data.title, date: data.date, excerpt: data.excerpt };
+        const fm = matterResult.data as PostFrontmatter & { description?: string };
+        return { slug, title: data.title, date: data.date, excerpt: fm.excerpt ?? fm.description ?? '' };
     });
     return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
