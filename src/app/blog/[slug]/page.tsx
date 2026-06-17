@@ -1,7 +1,7 @@
-import { getPostData, getAllPostSlugs } from '@/lib/markdown';
+import { getPostData, getAllPostSlugs, getRelatedPosts } from '@/lib/markdown';
 import './blog.css';
 import type { Metadata } from 'next';
-import type { BlogPostData } from '@/types';
+import type { BlogPostData, BlogHeading, BlogPostMeta } from '@/types';
 import Link from 'next/link';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintrepid.com';
@@ -14,6 +14,12 @@ function readingTime(html: string): number {
     const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const words = text.split(' ').filter(Boolean).length;
     return Math.max(1, Math.ceil(words / 200));
+}
+
+function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
+    });
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
@@ -48,9 +54,82 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     };
 }
 
+function KeyTakeaways({ items }: { items: string[] }) {
+    return (
+        <div style={{ background: '#fdf3f1', border: '1px solid #f9c5b8', borderRadius: '16px', padding: '24px 28px', marginBottom: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ width: '28px', height: '28px', background: '#db5a42', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#111827', letterSpacing: '-0.01em' }}>Key Takeaways</span>
+            </div>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {items.map((item, i) => (
+                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.92rem', color: '#374151', lineHeight: 1.65 }}>
+                        <span style={{ color: '#db5a42', fontWeight: 700, flexShrink: 0, marginTop: '1px' }}>✓</span>
+                        <span>{item}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function TableOfContents({ headings }: { headings: BlogHeading[] }) {
+    if (headings.length < 2) return null;
+    return (
+        <nav aria-label="Table of contents" style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '16px', padding: '22px 26px', marginBottom: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <span style={{ fontWeight: 700, fontSize: '0.82rem', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em' }}>In this article</span>
+            </div>
+            <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {headings.map((h, i) => (
+                    <li key={h.id} style={{ paddingLeft: h.level === 3 ? '16px' : '0' }}>
+                        <a
+                            href={`#${h.id}`}
+                            style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: '#374151', textDecoration: 'none', fontSize: h.level === 3 ? '0.83rem' : '0.88rem', lineHeight: 1.5, padding: '3px 0' }}
+                        >
+                            <span style={{ color: '#db5a42', fontWeight: 700, fontSize: '0.72rem', flexShrink: 0, minWidth: '18px' }}>{i + 1}.</span>
+                            <span>{h.text}</span>
+                        </a>
+                    </li>
+                ))}
+            </ol>
+        </nav>
+    );
+}
+
+function RelatedPosts({ posts }: { posts: BlogPostMeta[] }) {
+    if (posts.length === 0) return null;
+    return (
+        <div style={{ marginTop: '64px', paddingTop: '48px', borderTop: '1px solid #e5e7eb' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#111827', marginBottom: '20px', letterSpacing: '-0.01em' }}>Continue reading</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
+                {posts.map(post => (
+                    <Link
+                        key={post.slug}
+                        href={`/blog/${post.slug}`}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '20px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '14px', textDecoration: 'none', transition: 'border-color 0.15s, box-shadow 0.15s' }}
+                        className="related-post-card"
+                    >
+                        <span style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: 500 }}>{formatDate(post.date)}</span>
+                        <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#111827', lineHeight: 1.4 }}>{post.title}</span>
+                        <span style={{ fontSize: '0.82rem', color: '#6b7280', lineHeight: 1.55, flex: 1 }}>{post.excerpt.substring(0, 100)}…</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#db5a42', marginTop: '4px' }}>Read more →</span>
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export default async function Post({ params }: BlogPostPageProps): Promise<React.JSX.Element> {
     const { slug } = await params;
-    const postData: BlogPostData = await getPostData(slug);
+    const [postData, relatedPosts] = await Promise.all([
+        getPostData(slug),
+        Promise.resolve(getRelatedPosts(slug, 3)),
+    ]);
     const postUrl = `${SITE_URL}/blog/${slug}`;
     const mins = readingTime(postData.contentHtml);
 
@@ -90,10 +169,6 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
             { '@type': 'ListItem', position: 3, name: postData.title, item: postUrl },
         ],
     };
-
-    const formattedDate = new Date(postData.date).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-    });
 
     return (
         <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
@@ -138,7 +213,11 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.83rem', fontWeight: 600, color: '#111827', lineHeight: 1.2 }}>Optimage</div>
-                                <time dateTime={postData.date} style={{ fontSize: '0.73rem', color: '#9ca3af' }}>{formattedDate}</time>
+                                <div style={{ fontSize: '0.73rem', color: '#9ca3af' }}>
+                                    <time dateTime={postData.date}>Published {formatDate(postData.date)}</time>
+                                    <span style={{ margin: '0 6px' }}>·</span>
+                                    <span>Updated {new Date(postData.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                                </div>
                             </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginLeft: 'auto' }}>
@@ -151,10 +230,21 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
 
             {/* Article body */}
             <article style={{ maxWidth: '800px', margin: '0 auto', padding: '52px 24px 80px' }}>
+
+                {/* Key Takeaways */}
+                <KeyTakeaways items={postData.keyTakeaways} />
+
+                {/* Table of Contents */}
+                <TableOfContents headings={postData.headings} />
+
+                {/* Post content */}
                 <div className="blog-content" dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
 
-                {/* In-article CTA */}
-                <div style={{ marginTop: '72px', padding: '36px', background: '#fdf3f1', borderRadius: '20px', border: '1px solid #f9c5b8', textAlign: 'center' }}>
+                {/* Related posts */}
+                <RelatedPosts posts={relatedPosts} />
+
+                {/* CTA */}
+                <div style={{ marginTop: '56px', padding: '36px', background: '#fdf3f1', borderRadius: '20px', border: '1px solid #f9c5b8', textAlign: 'center' }}>
                     <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#db5a42', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
@@ -173,6 +263,13 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                     </Link>
                 </div>
             </article>
+
+            <style>{`
+                .related-post-card:hover {
+                    border-color: #db5a42 !important;
+                    box-shadow: 0 4px 20px rgba(219,90,66,0.1) !important;
+                }
+            `}</style>
         </div>
     );
 }

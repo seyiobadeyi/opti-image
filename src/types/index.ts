@@ -305,9 +305,18 @@ export interface BlogPostMeta {
   excerpt: string;
 }
 
+/** A single heading extracted from a blog post for the TOC. */
+export interface BlogHeading {
+  id: string;
+  text: string;
+  level: 2 | 3;
+}
+
 /** Full blog post data including rendered HTML content. */
 export interface BlogPostData extends BlogPostMeta {
   contentHtml: string;
+  headings: BlogHeading[];
+  keyTakeaways: string[];
 }
 
 // ──────────────────────────────────────────────
