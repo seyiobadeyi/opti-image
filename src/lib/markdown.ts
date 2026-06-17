@@ -65,7 +65,7 @@ function extractHeadings(html: string): BlogHeading[] {
     const pattern = /<h([23])[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h[23]>/gi;
     let match: RegExpExecArray | null;
     while ((match = pattern.exec(html)) !== null) {
-        const level = parseInt(match[1]) as 2 | 3;
+        const level = parseInt(match[1]!) as 2 | 3;
         const id = match[2];
         const text = match[3].replace(/<[^>]+>/g, '').trim();
         if (text) headings.push({ id, text, level });
