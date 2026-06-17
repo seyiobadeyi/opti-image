@@ -8,7 +8,7 @@ import remarkRehype from 'remark-rehype';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
-import type { BlogPostMeta, BlogPostData, BlogHeading } from '@/types';
+import type { BlogPostMeta, BlogPostData, BlogHeading, BlogVariant } from '@/types';
 
 const postsDirectory: string = path.join(process.cwd(), '_posts');
 
@@ -19,6 +19,8 @@ interface PostFrontmatter {
     date: string;
     excerpt: string;
     keyTakeaways?: string[];
+    /** Optional rotating variants — excerpt + keyTakeaways rotate every 3 days */
+    variants?: BlogVariant[];
 }
 
 export function getPostCount(): number {
@@ -65,29 +67,43 @@ function extractHeadings(html: string): BlogHeading[] {
     while ((match = pattern.exec(html)) !== null) {
         const level = parseInt(match[1]) as 2 | 3;
         const id = match[2];
-        // Strip any nested HTML tags from the heading text
         const text = match[3].replace(/<[^>]+>/g, '').trim();
         if (text) headings.push({ id, text, level });
     }
     return headings;
 }
 
-/** Auto-generate key takeaways from the excerpt (split on '. '). */
-function deriveKeyTakeaways(excerpt: string, title: string): string[] {
-    // Split excerpt into sentences, clean up, take up to 4
+/** Auto-generate key takeaways from the excerpt when no frontmatter variants exist. */
+function deriveKeyTakeaways(excerpt: string): string[] {
     const sentences = excerpt
         .split(/(?<=\.)\s+/)
         .map(s => s.trim())
         .filter(s => s.length > 20 && s.length < 200);
-
     if (sentences.length >= 2) return sentences.slice(0, 4);
-
-    // Fallback: split on em-dash or comma-separated clauses
     const parts = excerpt.split(/[—,]/).map(s => s.trim()).filter(s => s.length > 20);
     if (parts.length >= 2) return parts.slice(0, 4);
-
-    // Last resort: return excerpt as single takeaway
     return [excerpt];
+}
+
+/**
+ * Pick which variant is active based on a 3-day rotation cycle.
+ * Deterministic: same day always returns same variant, so Vercel's cached
+ * page is consistent until the next staggered revalidation fires.
+ */
+function pickVariant(variants: BlogVariant[] | undefined): BlogVariant | null {
+    if (!variants?.length) return null;
+    const cycleIndex = Math.floor(Date.now() / (3 * 24 * 60 * 60 * 1000));
+    return variants[cycleIndex % variants.length];
+}
+
+/** Pick which posts to revalidate in this cron run (5 per run, rotating). */
+export function getStaggeredBatch(batchSize = 5): string[] {
+    const all = getAllPostSlugs().map(s => s.params.slug);
+    const totalBatches = Math.ceil(all.length / batchSize);
+    const cycleIndex = Math.floor(Date.now() / (3 * 24 * 60 * 60 * 1000));
+    const batchIndex = cycleIndex % totalBatches;
+    const start = batchIndex * batchSize;
+    return all.slice(start, start + batchSize);
 }
 
 /** Pick 3 related posts (adjacent by date, excluding current slug). */
@@ -95,7 +111,6 @@ export function getRelatedPosts(currentSlug: string, count = 3): BlogPostMeta[] 
     const all = getSortedPostsData();
     const idx = all.findIndex(p => p.slug === currentSlug);
     const others = all.filter(p => p.slug !== currentSlug);
-    // Prefer neighbours around the current post, then fill from start
     const nearby = [
         ...others.slice(Math.max(0, idx - 2), idx),
         ...others.slice(idx, idx + count),
@@ -121,17 +136,22 @@ export async function getPostData(slug: string): Promise<BlogPostData> {
 
     const contentHtml = processedContent.toString();
     const headings = extractHeadings(contentHtml);
-    const keyTakeaways = data.keyTakeaways?.length
-        ? data.keyTakeaways
-        : deriveKeyTakeaways(data.excerpt, data.title);
+    const activeVariant = pickVariant(data.variants);
+
+    // Active variant overrides static fields; fall back to frontmatter, then auto-derive
+    const keyTakeaways = activeVariant?.keyTakeaways
+        ?? data.keyTakeaways
+        ?? deriveKeyTakeaways(data.excerpt);
 
     return {
         slug,
         contentHtml,
         headings,
         keyTakeaways,
+        activeVariant,
         title: data.title,
+        // Serve the variant excerpt to the page so hero + meta rotate
+        excerpt: activeVariant?.excerpt ?? data.excerpt,
         date: data.date,
-        excerpt: data.excerpt,
     };
 }

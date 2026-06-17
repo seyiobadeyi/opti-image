@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { getAllPostSlugs } from '@/lib/markdown';
+import { getStaggeredBatch, getAllPostSlugs } from '@/lib/markdown';
 
 export const runtime = 'nodejs';
 
@@ -12,26 +12,49 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    try {
-        // Revalidate the blog index and all individual post pages
-        revalidatePath('/blog', 'layout');
+    // Optional ?all=true param forces full revalidation (for manual use only)
+    const forceAll = request.nextUrl.searchParams.get('all') === 'true';
 
-        const slugs = getAllPostSlugs();
-        for (const { params } of slugs) {
-            revalidatePath(`/blog/${params.slug}`, 'page');
+    try {
+        let slugsToRevalidate: string[];
+
+        if (forceAll) {
+            slugsToRevalidate = getAllPostSlugs().map(s => s.params.slug);
+        } else {
+            // Normal cron run: only 5 posts from the current rotation batch
+            slugsToRevalidate = getStaggeredBatch(5);
         }
 
-        // Ping sitemaps so search engines re-crawl on next cycle
+        // Revalidate selected post pages
+        for (const slug of slugsToRevalidate) {
+            revalidatePath(`/blog/${slug}`, 'page');
+        }
+
+        // Always keep the blog index fresh
+        revalidatePath('/blog', 'layout');
+
+        // Ping sitemaps (fire-and-forget, failures are non-fatal)
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintrepid.com';
         const sitemapUrl = encodeURIComponent(`${siteUrl}/sitemap.xml`);
-        await Promise.allSettled([
-            fetch(`https://www.google.com/ping?sitemap=${sitemapUrl}`, { method: 'GET' }),
-            fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, { method: 'GET' }),
+        void Promise.allSettled([
+            fetch(`https://www.google.com/ping?sitemap=${sitemapUrl}`),
+            fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`),
         ]);
+
+        const totalPosts = getAllPostSlugs().length;
+        const batchSize = 5;
+        const totalBatches = Math.ceil(totalPosts / batchSize);
+        const cycleIndex = Math.floor(Date.now() / (3 * 24 * 60 * 60 * 1000));
+        const batchIndex = cycleIndex % totalBatches;
 
         return NextResponse.json({
             revalidated: true,
-            posts: slugs.length,
+            mode: forceAll ? 'full' : 'staggered',
+            batch: forceAll ? 'all' : `${batchIndex + 1}/${totalBatches}`,
+            postsRevalidated: slugsToRevalidate.length,
+            slugs: slugsToRevalidate,
+            nextBatchIn: '3 days',
+            fullCycleIn: `${totalBatches * 3} days`,
             timestamp: new Date().toISOString(),
         });
     } catch (err) {

@@ -312,11 +312,18 @@ export interface BlogHeading {
   level: 2 | 3;
 }
 
+/** One rotating variant of a blog post's meta-signals. */
+export interface BlogVariant {
+  excerpt: string;
+  keyTakeaways: string[];
+}
+
 /** Full blog post data including rendered HTML content. */
 export interface BlogPostData extends BlogPostMeta {
   contentHtml: string;
   headings: BlogHeading[];
   keyTakeaways: string[];
+  activeVariant: BlogVariant | null;
 }
 
 // ──────────────────────────────────────────────
