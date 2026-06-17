@@ -66,8 +66,8 @@ function extractHeadings(html: string): BlogHeading[] {
     let match: RegExpExecArray | null;
     while ((match = pattern.exec(html)) !== null) {
         const level = parseInt(match[1]!) as 2 | 3;
-        const id = match[2];
-        const text = match[3].replace(/<[^>]+>/g, '').trim();
+        const id = match[2]!;
+        const text = match[3]!.replace(/<[^>]+>/g, '').trim();
         if (text) headings.push({ id, text, level });
     }
     return headings;
@@ -93,7 +93,7 @@ function deriveKeyTakeaways(excerpt: string): string[] {
 function pickVariant(variants: BlogVariant[] | undefined): BlogVariant | null {
     if (!variants?.length) return null;
     const cycleIndex = Math.floor(Date.now() / (3 * 24 * 60 * 60 * 1000));
-    return variants[cycleIndex % variants.length];
+    return variants[cycleIndex % variants.length] ?? null;
 }
 
 /** Pick which posts to revalidate in this cron run (5 per run, rotating). */
