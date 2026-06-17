@@ -2,6 +2,25 @@
 title: "Best Image Format for Sports Photography in 2026 — AVIF vs WebP vs JPEG Compared"
 date: "2026-06-12T09:30:00Z"
 excerpt: "Use JPEG for camera output and client archives, WebP for web delivery, and AVIF for long-term storage — sports photos have specific compression characteristics that make this order matter."
+variants:
+  - excerpt: "Use JPEG for camera output and client archives, WebP for web delivery, and AVIF for long-term storage — sports photos have specific compression characteristics that make this order matter."
+    keyTakeaways:
+      - "JPEG: universal compatibility for editorial submissions and camera buffer speed"
+      - "WebP: 25-35% smaller than JPEG at equivalent quality — best for sports photo websites"
+      - "AVIF: 40-50% smaller than JPEG — best for long-term sports photo archives"
+      - "Sports photos compress harder than portraits due to motion blur and high-frequency edge detail"
+  - excerpt: "Sports photos are harder to compress than portraits or landscapes. Motion blur, high-contrast uniform textures, and fast-action detail at frame edges all challenge lossy codecs. Plan for 15-20% larger file sizes versus equivalent portrait photos at the same quality setting."
+    keyTakeaways:
+      - "Motion blur increases perceptual compression difficulty — codec sees noise, not motion"
+      - "High-contrast edge detail (jerseys, grass textures) reveals compression artifacts earlier"
+      - "Use quality 85 for sports vs quality 80 for portraits for the same perceived output quality"
+      - "AVIF handles motion-blur artifacts better than JPEG due to its intra-frame prediction model"
+  - excerpt: "The most efficient sports photography workflow: shoot RAW or JPEG in-camera, edit in Lightroom, export as JPEG for editorial, convert to WebP via Optimage for web galleries, keep AVIF archive copies for licensing."
+    keyTakeaways:
+      - "RAW to JPEG: use Lightroom export at 90% quality for editorial submissions"
+      - "JPEG to WebP: Optimage batch converts an entire match gallery in under 2 minutes"
+      - "WebP at quality 82 equals JPEG at quality 90 visually, with 30% smaller file size"
+      - "AVIF archive: convert once, store indefinitely — AVIF has no patent licensing concerns"
 ---
 
 The best image format for sports photography depends on where the image ends up. Use JPEG for camera output and editorial delivery. Use WebP for web publication and client previews — it is 25–35% smaller than JPEG at the same visual quality. Use AVIF for archiving and long-term storage where encoding time is not a constraint. Never convert directly from RAW to AVIF for live event delivery — the encoder is too slow under deadline. [Optimage /convert](/convert) handles all three formats in batch from your browser, free, with no software install.

@@ -2,6 +2,25 @@
 title: "How to Resize Images Online for Free — Exact Pixels, Percentage, or Aspect Ratio"
 date: "2026-02-28T11:00:00Z"
 excerpt: "Resize images online for free at Optimage /resize — enter exact pixel dimensions, a percentage scale, or choose a preset aspect ratio. No account, no installation, supports up to 50 files at once."
+variants:
+  - excerpt: "Resize images online for free at Optimage /resize — enter exact pixel dimensions, a percentage scale, or choose a preset aspect ratio. No account, no installation, supports up to 50 files at once."
+    keyTakeaways:
+      - "Exact pixel resize: type in width and height — maintains aspect ratio by default"
+      - "Percentage resize: scale by 50% or 75% to halve or reduce file count uniformly"
+      - "Preset ratios: 1:1, 4:5, 16:9 for common social platform requirements"
+      - "Batch resize: up to 50 files at once, all to the same dimensions"
+  - excerpt: "Resizing for social media means knowing each platform's native dimensions. LinkedIn posts display at 1200x627px. Instagram feed is capped at 1080px wide. Twitter/X shows images at 1200x675px. Optimage's resize tool accepts exact pixel inputs for precision."
+    keyTakeaways:
+      - "LinkedIn post image: 1200x627px — images smaller than this get upscaled and look blurry"
+      - "Instagram feed: 1080px wide maximum — portrait ratio 4:5 at 1080x1350px"
+      - "Twitter/X image: 1200x675px (16:9) — square and portrait also supported"
+      - "Facebook feed: 1200x630px — matching this prevents cropping in the feed preview"
+  - excerpt: "Resize reduces file size by reducing pixel count — a 4000x3000px image resized to 2000x1500px has one quarter the pixels and typically one quarter the file size before compression. For web use, images wider than 1500px are rarely displayed at full resolution."
+    keyTakeaways:
+      - "Halving dimensions reduces file size to approximately 25% of the original"
+      - "Web images rarely need to be wider than 1500px — browser renders at display resolution"
+      - "Resize first, then compress — correct order for maximum file size reduction"
+      - "Upscaling (making image larger than original) reduces quality — avoid it"
 ---
 
 Go to [Optimage Resize](/resize), upload your image, enter your target dimensions in pixels or a percentage, and download. It takes under 10 seconds, works in any browser, and handles up to 50 files at once without an account or software install.

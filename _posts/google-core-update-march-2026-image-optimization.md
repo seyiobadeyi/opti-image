@@ -6,11 +6,40 @@ author: "Optimage Team"
 tags: ["Google core update", "SEO", "image optimization", "Core Web Vitals", "search ranking"]
 category: "SEO & Performance"
 featured: true
+excerpt: "Early data from the March 2026 Core Update shows sites with strong Core Web Vitals scores are disproportionately winning — and image optimization is the fastest way to improve all three metrics simultaneously."
+variants:
+  - excerpt: "Sites with Good Core Web Vitals scores are disproportionately winning in the March 2026 Core Update — and image optimization is the single fastest way to improve all three metrics at once."
+    keyTakeaways:
+      - "The LCP element is an image on over 70% of pages, making image optimization central to ranking improvement"
+      - "A seven-day action plan covers audit, CLS fix, LCP image delivery, site-wide compression, INP fixes, alt text, and verification"
+      - "Target file sizes: hero images under 150KB WebP, article images under 80KB, thumbnails under 40KB"
+      - "CrUX data updates monthly, so improvements take 28 days to appear in the Core Web Vitals report"
+  - excerpt: "The LCP element is an image on over 70% of pages — and images are the primary driver of all three Core Web Vitals metrics. Fixing image delivery is the highest-leverage technical SEO action available right now."
+    keyTakeaways:
+      - "Sites with mobile LCP under 2.5 seconds are performing better in the March 2026 update than those above it"
+      - "Adding width and height attributes to images fixes CLS in markup and CSS with no infrastructure changes needed"
+      - "WebP and AVIF format images reduce download time by 25–40% at equivalent visual quality vs JPEG"
+      - "The fetchpriority='high' attribute and preload link are required on LCP images for best ranking performance"
+  - excerpt: "Panic-compressing images so aggressively that visual quality suffers can worsen content quality signals even while improving file size metrics — the goal is appropriate compression, not maximum compression."
+    keyTakeaways:
+      - "Original photography and custom illustrations outperform widely-licensed stock imagery in core update assessments"
+      - "Alt text that accurately describes image content correlates with better core update performance"
+      - "INP appears more heavily weighted in the March 2026 update than in previous core updates"
+      - "Do not make major content or structural site changes while an update is still rolling out"
 ---
 
 Google core updates are notoriously difficult to prepare for because they target quality signals holistically rather than specific on-page factors. The March 2026 Core Update, which began rolling out in the third week of February and is expected to complete over several weeks, follows this pattern. It is not a specific algorithm penalty for a specific behaviour; it is a broad reassessment of which pages best satisfy user intent for their target queries.
 
 What makes this update particularly interesting, based on early data from SEO monitoring tools and from the sites that have seen the largest positive movements, is the correlation between Core Web Vitals scores and ranking gains. Sites that made improvements to their Core Web Vitals metrics in 2025 are disproportionately represented among the March 2026 winners. Sites that have poor INP, LCP, or CLS scores are disproportionately represented among the losers.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">70%+</text><text x="110" y="78" text-anchor="middle" class="sl">Pages: image is LCP</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">22%</text><text x="350" y="78" text-anchor="middle" class="sl">More organic traffic</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">2.5s</text><text x="590" y="78" text-anchor="middle" class="sl">Good LCP threshold</text></g>
+</svg>
+</div>
 
 Of all the Core Web Vitals improvements you can make, image optimisation is simultaneously the highest impact and the most achievable in a short timeframe. This is not a coincidence: images are the primary driver of three out of three Core Web Vitals metrics for most websites. This article explains what the update appears to target, what the data shows, and what specific image optimisation actions you can take this week.
 
@@ -159,6 +188,18 @@ Specific visual presentation factors that correlate with better core update perf
 
 ## A Seven-Day Image Optimisation Action Plan {#action-plan}
 
+<figure role="img" aria-label="Seven-day image optimization action plan overview" style="margin:32px 0">
+<svg viewBox="0 0 660 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block">
+  <style>.px{animation:pi .5s ease-out both}.px:nth-child(1){animation-delay:0s}.px:nth-child(2){animation-delay:.2s}.px:nth-child(3){animation-delay:.4s}@keyframes pi{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}.pn{font:700 13px system-ui,sans-serif;fill:#db5a42}.pt{font:500 11px system-ui,sans-serif;fill:#374151}</style>
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#d1d5db"/></marker></defs>
+  <g class="px"><rect x="10" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="97" y="46" text-anchor="middle" class="pn">① Audit &amp; Fix CLS</text><text x="97" y="66" text-anchor="middle" class="pt">Days 1–2</text></g>
+  <line x1="188" y1="50" x2="238" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="243" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="330" y="46" text-anchor="middle" class="pn">② Fix LCP &amp; Compress</text><text x="330" y="66" text-anchor="middle" class="pt">Days 3–4</text></g>
+  <line x1="421" y1="50" x2="471" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="476" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="563" y="46" text-anchor="middle" class="pn">③ INP, Alt Text &amp; Monitor</text><text x="563" y="66" text-anchor="middle" class="pt">Days 5–7</text></g>
+</svg>
+</figure>
+
 If you want to make meaningful improvements during the March 2026 Core Update rollout, here is a prioritised action plan that can be completed in one week.
 
 **Day 1: Audit and measure**
@@ -216,3 +257,32 @@ A few common mistakes to avoid during the March 2026 update rollout:
 The March 2026 Core Update, like all core updates, will take weeks to fully roll out and additional weeks for winners and losers to stabilise. The sites that make genuine, user-experience-focused improvements, including the image optimisation work outlined above, will be best positioned not just for this update but for every core update going forward. Google's trajectory is clear: user experience, measured through real signals from real users, is the quality standard, and images are at the centre of that experience on almost every type of website.
 
 *Optimage helps you compress and convert images for Core Web Vitals performance gains, with batch processing and WebP/AVIF output. [Try it free.](/)*
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does image optimization help with Google's March 2026 Core Update?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Image optimization directly improves all three Core Web Vitals metrics: LCP (the largest image loads faster), CLS (images with declared dimensions prevent layout shifts), and INP (smaller images decode faster during interactions). Early data from the March 2026 update shows a strong correlation between Good Core Web Vitals scores and ranking gains." }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the target file sizes for images after Core Web Vitals optimization?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Target hero images under 150KB in WebP, article images under 80KB WebP, and thumbnails under 40KB WebP. These sizes ensure images load within the 2.5-second LCP Good threshold for most users on mobile connections, without sacrificing visual quality at normal display sizes." }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take for image optimization improvements to appear in Google Search Console?",
+      "acceptedAnswer": { "@type": "Answer", "text": "CrUX data updates monthly, so improvements you make today will take approximately 28 days to appear in the Core Web Vitals report in Google Search Console. However, real users experience the improvements from day one, and the underlying data collection begins immediately after you deploy your changes." }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use WebP or AVIF for images to improve Core Web Vitals?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Both WebP and AVIF outperform JPEG by 25–40% at equivalent visual quality. WebP has broader support and is the safer default. AVIF produces smaller files for photographic content and handles saturated colors better, making it worth implementing via a picture element with WebP as fallback for browsers that do not yet support AVIF." }
+    }
+  ]
+}
+</script>

@@ -2,6 +2,25 @@
 title: "How to Auto-Enhance Photos Online for Free"
 date: "2026-04-05T09:00:00Z"
 excerpt: "Auto-enhance fixes brightness, contrast, and colour in one click — no editing skills needed. Optimage's free enhance tool corrects your photos instantly, with no Lightroom subscription required."
+variants:
+  - excerpt: "Auto-enhance fixes brightness, contrast, and colour in one click — no editing skills needed. Optimage's free enhance tool corrects your photos instantly, with no Lightroom subscription required."
+    keyTakeaways:
+      - "Corrects brightness, contrast, saturation, and white balance in a single analysis pass"
+      - "Works on JPG, PNG, and WebP — no format conversion required before enhancing"
+      - "Free with no account — no Lightroom or Photoshop subscription required"
+      - "Result downloads instantly in the same format as the original"
+  - excerpt: "Auto-enhancement works best on underexposed or flat photos. A shot taken in poor indoor lighting that looks grey and lifeless often becomes presentable in one click — because the tool can see where the histogram has been compressed."
+    keyTakeaways:
+      - "Most effective on underexposed, flat, or white-balance-shifted photos"
+      - "Less effective on already well-exposed photos — may over-saturate already vivid colors"
+      - "Process runs entirely in your browser — no upload to a remote server"
+      - "After enhance, use compress to reduce file size before uploading to social media or email"
+  - excerpt: "The practical use case for free auto-enhance: quick fix of phone photos before sharing, product photos taken in imperfect lighting, and scanned documents with yellowed backgrounds. Professional portfolio work should still go through Lightroom."
+    keyTakeaways:
+      - "Phone photos in dim lighting are the best candidates for auto-enhance"
+      - "Product photos against white backgrounds often have grey casts auto-enhance corrects well"
+      - "Result is a flattened JPEG or PNG — no adjustment layers or non-destructive editing"
+      - "Pair with Optimage compress after enhancing to reduce file size before web upload"
 ---
 
 Auto-enhancing a photo online takes one click with [Optimage's enhance tool](/enhance). The tool analyses your image and automatically corrects brightness, contrast, saturation, and white balance — turning a flat, underexposed, or washed-out shot into a clean, well-balanced photo in seconds. It is completely free, works on any device, and requires no account or Lightroom subscription.

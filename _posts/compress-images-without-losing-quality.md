@@ -2,6 +2,25 @@
 title: "How to Compress Images Without Losing Quality — The Complete 2026 Guide"
 date: "2026-03-15T10:00:00Z"
 excerpt: "Compress images without visible quality loss by using lossy compression at 80–85% quality setting. At this level, file sizes drop 60–80% while the SSIM perceptual quality score stays above 0.95 — indistinguishable from the original to the human eye."
+variants:
+  - excerpt: "Compress images without visible quality loss by using lossy compression at 80–85% quality setting. At this level, file sizes drop 60–80% while the SSIM perceptual quality score stays above 0.95 — indistinguishable from the original to the human eye."
+    keyTakeaways:
+      - "SSIM 0.95+ is the scientific threshold for 'visually identical' — achievable at quality 80-85"
+      - "WebP at quality 80 produces files 30% smaller than JPEG at quality 80 with equal SSIM"
+      - "Lossless compression only achieves 10-30% reduction — rarely sufficient for most web needs"
+      - "The quality/size sweet spot for web photos: WebP at 80-82 quality"
+  - excerpt: "Quality 80 vs quality 85 on WebP: at quality 80 you get roughly 40% smaller files than quality 85. At normal screen size the difference is invisible. At 200% zoom you can see minor detail softening in high-frequency areas like fabric textures and hair."
+    keyTakeaways:
+      - "Quality 80: invisible loss at normal screen size, 40% smaller files than quality 85"
+      - "Quality 85: safe for close-inspection product photography where fine detail matters"
+      - "Quality 90+: diminishing returns — files 70% larger than quality 80 with less than 5% SSIM gain"
+      - "Quality 60-70: visible blocking artifacts in high-contrast edges and color gradients"
+  - excerpt: "The reason 'compress without losing quality' is achievable for web use: screens display at 72-144 PPI and you view from 40-70cm. At those parameters, human vision cannot distinguish between SSIM 0.95 and SSIM 1.00. Quality loss only becomes visible when printing or zooming past 100%."
+    keyTakeaways:
+      - "Human visual acuity at 50cm and 96PPI cannot distinguish SSIM differences above 0.94"
+      - "Print use requires higher quality (90+) because print PPI is 300+ and viewing distance is shorter"
+      - "Optimage's default setting targets SSIM 0.95 — the empirically validated perceptual threshold"
+      - "AVIF achieves SSIM 0.95 at smaller file sizes than WebP — best choice for 2026 web delivery"
 ---
 
 Compress images at 80–85% lossy quality. At that setting, file sizes drop **60–80%** while the SSIM (Structural Similarity Index) perceptual quality score stays at 0.95 or above — the scientific threshold for "visually identical." A 2.4MB JPEG becomes 320KB. Optimage's [compress tool](/compress) applies this automatically, for free, in any browser.

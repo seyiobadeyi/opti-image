@@ -6,11 +6,39 @@ author: "Optimage Team"
 tags: ["AI images", "Midjourney", "DALL-E", "image compression", "web performance"]
 category: "How-To Guides"
 featured: false
+variants:
+  - excerpt: "Midjourney v7 outputs PNG files between 3MB and 20MB by default. Converting to WebP at quality 78 reduces them to 200-500KB with no visible loss — a 90%+ reduction that makes AI art practical for web use."
+    keyTakeaways:
+      - "Midjourney default PNG output: 3-8MB; upscaled versions can exceed 20MB"
+      - "WebP at quality 78 typically reduces AI image files to 200-500KB at 1456x816"
+      - "AI images require slightly higher quality settings than photos due to high-frequency noise structure"
+      - "Strip all EXIF metadata — AI files often embed your full generation prompt and model parameters"
+  - excerpt: "AVIF compresses AI-generated images 40-60% smaller than JPEG at equivalent quality, but encodes significantly slower. For static web use, AVIF is the best format; for real-time or batch workflows, WebP is the practical choice."
+    keyTakeaways:
+      - "AVIF handles high-frequency diffusion noise better than JPEG — use quality 65-75"
+      - "WebP at quality 75-80 matches JPEG at quality 85 for AI images, at significantly smaller file size"
+      - "JPEG at quality 75 (standard photo setting) causes visible artefacts in AI images — use 80-85 minimum"
+      - "AVIF browser support reached 96.4% in 2026 — a practical primary format with WebP fallback"
+  - excerpt: "The creators and developers who treat compression as part of their AI image workflow, not an afterthought, deliver faster pages, better email performance, and more professional output across every channel."
+    keyTakeaways:
+      - "Hero image target: under 300KB WebP or AVIF for a 1920px wide image"
+      - "Blog post header: under 150KB WebP at 1200px wide"
+      - "Email newsletter header: under 100KB JPEG — many clients still do not support WebP or AVIF"
+      - "Always work from original PNG source, not a re-encoded social media download"
 ---
 
 Midjourney released version 7 of its model in early 2026, and the images it produces are genuinely extraordinary. The detail, the coherence, the lighting, the texture of fabric and skin and stone, it is the kind of output that would have seemed impossible from an AI system two years ago. Design teams, marketing departments, indie developers, and content creators are reaching for these tools at a rate that would have been hard to predict even twelve months ago.
 
 There is just one problem: the files are enormous.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">20MB</text><text x="110" y="78" text-anchor="middle" class="sl">Typical AI image PNG size</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">90%</text><text x="350" y="78" text-anchor="middle" class="sl">Size reduction achievable</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">q78</text><text x="590" y="78" text-anchor="middle" class="sl">Optimal WebP quality setting</text></g>
+</svg>
+</div>
 
 A single Midjourney v7 image at the default generation resolution comes in at between 3MB and 8MB as a PNG. Upscaled versions can easily exceed 20MB. DALL-E 3 images from the API at 1024x1024 are typically 1.5MB to 4MB as PNG. Adobe Firefly exports can be larger still. When you start using these images for website hero sections, blog post headers, social media cards, and email newsletters, the file size problem compounds quickly.
 
@@ -57,6 +85,26 @@ The practical consequence is that AI images require a higher JPEG quality settin
 This is not a reason to avoid compressing AI images. It is a reason to be thoughtful about which format and settings you choose.
 
 ## PNG vs JPEG vs WebP vs AVIF for AI Images {#format-comparison}
+
+<figure role="img" aria-label="File size comparison for AI images across formats" style="margin:32px 0">
+<svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;display:block;margin:0 auto">
+  <style>.bc{animation:bg .7s ease-out both}.bc:nth-child(1){animation-delay:0s}.bc:nth-child(2){animation-delay:.2s}.bc:nth-child(3){animation-delay:.4s}.bc:nth-child(4){animation-delay:.6s}@keyframes bg{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}.bl{font:600 13px system-ui,sans-serif;fill:#374151;text-anchor:middle}.bv{font:700 15px system-ui,sans-serif;fill:#db5a42;text-anchor:middle}</style>
+  <line x1="60" y1="20" x2="60" y2="165" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="60" y1="165" x2="620" y2="165" stroke="#e5e7eb" stroke-width="1"/>
+  <rect class="bc" x="80" y="25" width="100" height="140" rx="6" fill="#9ca3af" opacity=".85"/>
+  <text x="130" y="18" class="bv" style="fill:#6b7280">5 MB</text>
+  <text x="130" y="180" class="bl">PNG</text>
+  <rect class="bc" x="240" y="80" width="100" height="85" rx="6" fill="#db5a42" opacity=".75"/>
+  <text x="290" y="73" class="bv">580 KB</text>
+  <text x="290" y="180" class="bl">JPEG q82</text>
+  <rect class="bc" x="400" y="110" width="100" height="55" rx="6" fill="#db5a42" opacity=".85"/>
+  <text x="450" y="103" class="bv">350 KB</text>
+  <text x="450" y="180" class="bl">WebP q78</text>
+  <rect class="bc" x="490" y="135" width="100" height="30" rx="6" fill="#db5a42"/>
+  <text x="540" y="128" class="bv">200 KB</text>
+  <text x="540" y="180" class="bl">AVIF q70</text>
+</svg>
+</figure>
 
 Let us be concrete about what each format does to a typical Midjourney v7 image.
 
@@ -109,8 +157,6 @@ Here are practical targets for AI-generated images in common web contexts:
 **Email newsletter header:** Under 100KB in JPEG (many email clients still do not support WebP or AVIF). Always use JPEG for email.
 
 **Thumbnail or card image (400px wide):** Under 50KB in WebP or AVIF, under 80KB in JPEG.
-
-These targets assume that the image is the primary visual element and quality matters. For secondary or decorative images, you can push significantly harder on compression.
 
 ## Step-by-Step Compression Workflow {#compression-workflow}
 
@@ -213,3 +259,44 @@ AI-generated imagery is one of the most significant creative tools to emerge in 
 The creators and developers who treat compression as part of their AI image workflow, not an afterthought, will deliver faster pages, better email open rates, and more professional work across the board. The file sizes are large because the models are powerful, but there is no reason those bytes need to reach every viewer.
 
 *Optimage compresses AI-generated images in bulk, supporting PNG, JPEG, WebP, and AVIF output with metadata stripping and batch processing. [Get started free.](/)*
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why are AI-generated images so large?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI images from Midjourney and DALL-E are large because of four factors: they are exported as lossless PNG by default, they contain high-frequency noise throughout the image (not just in detailed areas like photographs), they are generated at high resolutions (1456x816 or larger), and they contain extensive metadata including generation prompts and model parameters. A single Midjourney v7 image can easily be 3-20MB as a PNG."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best format to compress Midjourney images for web use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WebP at quality 75-80 is the best single-format choice for web delivery of AI images in 2026. It handles the high-frequency noise structure of AI images better than JPEG, producing files 25-35% smaller at equivalent visual quality. For performance-critical uses where encoding time is not a constraint, AVIF at quality 65-75 achieves even smaller files. Never deliver the original PNG to web users."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use the same JPEG quality settings for AI images as for photographs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. AI images require higher JPEG quality settings than photographs because their diffusion-generated noise structure contains fine detail throughout the entire image, leaving JPEG's block-based compression algorithm with no smooth regions to exploit. Where a photograph looks excellent at JPEG quality 75, an equivalent AI image typically needs quality 80-85 to avoid visible blocking artefacts in sky, background, and gradient areas."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I strip metadata from AI images before publishing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, always. AI generation tools embed extensive metadata in output files including your full generation prompt, model version, seed value, and sometimes account information. This metadata adds unnecessary bytes to every file served, and exposes information you may not intend to share publicly. Strip all EXIF and metadata as part of your compression workflow using tools like ExifTool or Optimage's built-in metadata stripping."
+      }
+    }
+  ]
+}
+</script>

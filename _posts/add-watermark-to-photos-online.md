@@ -2,6 +2,25 @@
 title: "How to Add a Watermark to Photos Online for Free"
 date: "2026-05-08T10:00:00Z"
 excerpt: "Add a text or image watermark to your photos online in seconds — free, no account required. Optimage lets you choose position, opacity, and style, then download your protected image instantly."
+variants:
+  - excerpt: "Add a text or image watermark to your photos online in seconds — free, no account required. Optimage lets you choose position, opacity, and style, then download your protected image instantly."
+    keyTakeaways:
+      - "9 placement positions available: all four corners, all four edges, and centered"
+      - "Set opacity between 10% and 100% — lower opacity for subtle branding, 100% for bold protection"
+      - "Upload a logo PNG or type text for the watermark — both are free with no account required"
+      - "Entire workflow takes under 30 seconds: upload, position, set opacity, download"
+  - excerpt: "A watermark in the corner at 30% opacity is a visible deterrent without obscuring your subject. A tiled full-image watermark at 15% opacity makes the image unusable for theft. Both positions take seconds to set in Optimage."
+    keyTakeaways:
+      - "Text watermarks support custom font size and color — match your brand without external editors"
+      - "Tiled watermark mode covers the entire image surface — preferred for stock photo protection"
+      - "Downloaded file is the original resolution — watermark is burned in, not a separate layer"
+      - "No account means no stored files — images are processed and deleted from the browser immediately"
+  - excerpt: "The most effective photo watermark strategy is layered: a visible logo in one corner (deters casual theft) plus a subtle tiled watermark at low opacity (defeats crop-and-use). Optimage supports both in the same session."
+    keyTakeaways:
+      - "Right-click protection alone doesn't work — right-click disable is bypassed by screenshot"
+      - "Low-resolution preview + watermark + PIN gallery = three-layer protection for client work"
+      - "JPEG and PNG both supported for watermark output — choose JPEG to reduce file size"
+      - "Batch watermarking: apply the same watermark to multiple photos in one session"
 ---
 
 You can add a watermark to photos online for free using [Optimage's watermark tool](/watermark). Upload your photo, type your watermark text (or upload a logo), choose a corner or tiled position, set opacity between 10% and 100%, and download your protected image — all in under 30 seconds, with no account or software needed.

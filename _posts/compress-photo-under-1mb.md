@@ -2,6 +2,25 @@
 title: "How to Compress a Photo to Under 1MB Online — Free and Fast"
 date: "2026-03-10T09:30:00Z"
 excerpt: "Compressing a photo to under 1MB takes under 3 seconds using Optimage — convert to WebP at 80% quality and a typical 4MB JPEG becomes 200–400KB, well under any file size limit."
+variants:
+  - excerpt: "Compressing a photo to under 1MB takes under 3 seconds using Optimage — convert to WebP at 80% quality and a typical 4MB JPEG becomes 200–400KB, well under any file size limit."
+    keyTakeaways:
+      - "WebP at quality 80: most 4-6MB smartphone JPEGs compress to 200-400KB"
+      - "JPEG at quality 75: achieves under 1MB for most photos with universal compatibility"
+      - "Processing takes under 3 seconds in browser — no software installation required"
+      - "Optimage is free with no file size limit and no account required"
+  - excerpt: "When you need a photo under a specific file size for a form upload, email attachment, or platform requirement, the fastest path is WebP at quality 80. If the result is still too large, resize the image dimensions first, then compress."
+    keyTakeaways:
+      - "Under 1MB: WebP quality 80 works for most 12-50MP smartphone photos"
+      - "Under 500KB: try quality 70 first; if still too large, scale dimensions by 50%"
+      - "Under 100KB: reduce dimensions to 800-1000px wide before compressing"
+      - "Resize first, then compress — dimension reduction is more efficient than quality reduction alone"
+  - excerpt: "Form upload limits like '2MB maximum' or email attachment limits are the most common reason people need to compress photos. The fastest workflow: drag photo to Optimage, select WebP quality 80, download. Under 60 seconds for most photos."
+    keyTakeaways:
+      - "Passport and visa photo forms: typically 200KB-1MB limit — WebP quality 75 reliably hits this"
+      - "Email attachments: use JPEG at quality 80 for maximum compatibility across email clients"
+      - "LinkedIn and Twitter profile photos: platforms recompress anyway — JPEG quality 85 is sufficient"
+      - "Batch compress before sending multiple photos: 10 photos to ZIP in under 90 seconds"
 ---
 
 Compressing a photo to under 1MB is straightforward: convert it to WebP format at 80% quality using [Optimage's compress tool](/compress). A typical 4MB JPEG from a smartphone becomes 200–400KB — a 90–95% reduction — with no visible quality loss at normal viewing sizes. The entire process takes under 3 seconds and requires no account or software installation.

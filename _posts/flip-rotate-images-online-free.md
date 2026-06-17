@@ -2,6 +2,25 @@
 title: "How to Flip and Rotate Images Online for Free — Horizontal, Vertical, Any Angle"
 date: "2026-01-20T08:30:00Z"
 excerpt: "Flip or rotate images online for free at Optimage /rotate — horizontal flip, vertical flip, 90/180/270-degree rotation, or any custom angle. No account, no software, works in any browser in seconds."
+variants:
+  - excerpt: "Flip or rotate images online for free at Optimage /rotate — horizontal flip, vertical flip, 90/180/270-degree rotation, or any custom angle. No account, no software, works in any browser in seconds."
+    keyTakeaways:
+      - "Lossless rotation at 90°/180°/270° — no quality degradation for JPEG files"
+      - "1° increment rotation for fine-tuning horizon lines and straightening crooked scans"
+      - "Horizontal flip corrects mirror selfies and mirrored document scans"
+      - "Processing is instant in browser — no file upload to a remote server"
+  - excerpt: "Rotating a JPEG by 90° does not reduce quality if the rotation is lossless — a mathematical transform, not a re-encode. Most online tools recompress the image during rotation. Optimage applies the transform without re-encoding the JPEG data."
+    keyTakeaways:
+      - "Lossless JPEG rotation: 90°, 180°, 270° transforms can be applied without re-encoding"
+      - "Arbitrary rotation (1-89°) requires re-encoding — some quality loss is unavoidable"
+      - "Flip operations (horizontal/vertical) are always lossless — no quality loss in any direction"
+      - "After rotation, image dimensions may swap — portrait becomes landscape and vice versa"
+  - excerpt: "The practical use cases for free online rotation: fixing portrait-mode phone photos that uploaded sideways, correcting scanned documents, mirroring product photos for e-commerce listings, and straightening horizon lines in landscape shots."
+    keyTakeaways:
+      - "Sideways phone photos: caused by EXIF orientation tags being ignored by upload systems"
+      - "Mirror flip for selfies: reverses camera-facing view to match how others see you"
+      - "Document scan rotation: correct pages scanned at 90° without retyping content"
+      - "After rotation, use Optimage compress to reduce file size before uploading"
 ---
 
 Go to [Optimage Rotate](/rotate), upload your image, choose horizontal flip, vertical flip, or your desired rotation angle, and download. The tool handles 90°, 180°, and 270° rotation, custom angles, and both flip directions — free, in any browser, no account required.

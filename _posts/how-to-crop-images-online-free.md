@@ -2,6 +2,25 @@
 title: "How to Crop Images Online for Free — Exact Pixels, Aspect Ratios, and Portrait/Landscape"
 date: "2026-02-10T09:00:00Z"
 excerpt: "Crop images online for free at Optimage /crop — choose exact pixel coordinates, a preset aspect ratio (1:1, 4:5, 16:9), or freehand selection. No account or installation needed, processes instantly in any browser."
+variants:
+  - excerpt: "Crop images online for free at Optimage /crop — choose exact pixel coordinates, a preset aspect ratio (1:1, 4:5, 16:9), or freehand selection. No account or installation needed, processes instantly in any browser."
+    keyTakeaways:
+      - "Exact pixel cropping: type in X, Y, width, height coordinates for precise cuts"
+      - "Preset aspect ratios: 1:1 for Instagram, 4:5 for portrait, 16:9 for YouTube thumbnails"
+      - "Freehand selection: drag handles to crop any area visually"
+      - "Crop up to 50 images at once — batch crop with the same dimensions"
+  - excerpt: "Cropping for social media requires knowing each platform's native crop ratio. Instagram feed is 1:1 or 4:5. LinkedIn posts are 1.91:1. YouTube thumbnails are 16:9. Optimage's preset ratios match platform requirements so you do not need to calculate pixels."
+    keyTakeaways:
+      - "Instagram square: 1:1 — 1080x1080px recommended upload size"
+      - "Instagram portrait: 4:5 — 1080x1350px — maximizes feed real estate"
+      - "YouTube thumbnail: 16:9 — 1280x720px minimum recommended"
+      - "LinkedIn cover photo: 1584x396px (4:1 ratio) — not a common preset, use exact pixels"
+  - excerpt: "The difference between cropping and resizing: cropping removes part of the image to change the framing. Resizing scales the entire image to new dimensions. For social media, you typically crop first to the right ratio, then resize to the platform's pixel specification."
+    keyTakeaways:
+      - "Crop: removes part of the image — changes what is visible, not overall image scale"
+      - "Resize: scales the entire image — changes pixel dimensions without removing content"
+      - "Correct order: crop first to the right aspect ratio, then resize to target pixel dimensions"
+      - "After crop and resize, compress to reduce file size — full pipeline in Optimage for free"
 ---
 
 Go to [Optimage Crop](/crop), upload your image, drag the crop handles to your desired area or type in exact pixel coordinates, and download. The tool supports all common aspect ratios, freehand selection, and exact pixel cropping — all free, no account required, processed in seconds.

@@ -2,6 +2,25 @@
 title: "How to Share High-Resolution Photos Without Google Drive — Faster, More Private Alternatives"
 date: "2026-02-05T08:30:00Z"
 excerpt: "Optimage client galleries give photographers PIN-gated, optimised photo delivery with no storage limits and no Google account required for recipients — free alternatives to Google Drive for photo sharing."
+variants:
+  - excerpt: "Optimage client galleries give photographers PIN-gated, optimised photo delivery with no storage limits and no Google account required for recipients — free alternatives to Google Drive for photo sharing."
+    keyTakeaways:
+      - "Optimage gallery: PIN-protected, no Google account for recipients, selective downloads"
+      - "WeTransfer: best for one-off large file transfers, expires after 7 days free"
+      - "Dropbox shared folder: good for ongoing collaboration, no PIN protection"
+      - "Google Drive requires recipient to have or create a Google account to download"
+  - excerpt: "The specific problem with Google Drive for client photo delivery: recipients need a Google account to download files, the sharing UI is confusing for non-technical clients, and there are no access controls beyond view/edit permission on the entire folder."
+    keyTakeaways:
+      - "Google Drive share: recipient needs a Google account — not all clients have one"
+      - "No download controls: anyone with the link can download everything"
+      - "No PIN protection: link sharing is all-or-nothing"
+      - "Optimage gallery: accessible with just a PIN, no account, with selective download controls"
+  - excerpt: "For photographers sharing high-resolution files with clients after a shoot, the criteria are: privacy (not publicly indexable), no client account required, download controls, and a professional presentation. Only Optimage and Pixieset meet all four criteria — and Optimage is free."
+    keyTakeaways:
+      - "Google Drive: public indexing possible if sharing settings are wrong"
+      - "WeTransfer: no PIN or password, anyone with the link can download"
+      - "Dropbox: professional enough, but no per-gallery PIN or download controls"
+      - "Optimage: PIN-protected, selective downloads, professional gallery view — free"
 ---
 
 The fastest, most private way to share high-resolution photos without Google Drive is to use Optimage client galleries: upload your images, set a PIN, and send a single link. Recipients open the gallery on any device without a Google account, no sign-in required, and download at the resolution you choose. WeTransfer works for temporary one-off transfers, Dropbox for ongoing shared folders, but neither offers per-gallery access control or client-facing selection tools. Optimage is the option built specifically for photo delivery.

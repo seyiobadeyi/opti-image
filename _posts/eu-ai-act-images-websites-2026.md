@@ -6,9 +6,38 @@ author: "Optimage Team"
 tags: ["EU AI Act", "AI images", "compliance", "GDPR", "web regulation"]
 category: "Legal & Compliance"
 featured: true
+excerpt: "The EU AI Act's Article 50 requires visible disclosure and C2PA metadata preservation for AI-generated images on websites accessible to EU users. Here is a practical compliance guide for website owners."
+variants:
+  - excerpt: "If your website uses AI-generated images and is accessible in Europe, the EU AI Act requires visible disclosure labels and C2PA metadata preservation — regardless of where your business is based."
+    keyTakeaways:
+      - "Article 50 of the EU AI Act requires deployers to label AI-generated images as such in a clear, perceivable way"
+      - "Disclosure only in a privacy policy does not satisfy the requirement — visible labelling per image or per page is needed"
+      - "Many compression tools strip C2PA metadata by default, which may put websites out of compliance"
+      - "The Act applies to any site that actively markets to or serves EU residents, not just EU-based businesses"
+  - excerpt: "C2PA metadata embedded by Midjourney, Adobe Firefly, and DALL-E must be preserved through your image compression workflow — stripping it may violate EU AI Act requirements."
+    keyTakeaways:
+      - "Adobe Firefly, Midjourney, and DALL-E all embed C2PA provenance metadata in AI-generated images as of 2025"
+      - "Common image processing tools strip metadata by default; configure them to preserve XMP and C2PA blocks"
+      - "SMEs are not exempt from Article 50 transparency obligations even under lighter general compliance rules"
+      - "Heightened disclosure requirements apply to AI images that realistically depict real people or real events"
+  - excerpt: "EU AI Act compliance for website owners is achievable without abandoning AI-generated imagery — it primarily requires visible labels, metadata preservation, and a documented six-step workflow."
+    keyTakeaways:
+      - "A six-step compliance checklist covers audit, visible disclosure, workflow update, policy addition, real-person review, and documentation"
+      - "C2PA metadata can now be embedded in JPEG, PNG, WebP, AVIF, and HEIC files as of 2025–2026 specification updates"
+      - "Page-level or section-level AI disclosure notices are accepted where per-image labelling is not feasible"
+      - "The EU AI Act works alongside GDPR and does not replace existing data protection obligations"
 ---
 
 The European Union Artificial Intelligence Act, which entered into force in August 2024, is not just a framework for AI system developers. Its provisions around AI-generated content, synthetic media disclosure, and metadata requirements affect any website that uses AI-generated images and that is accessible to users in the European Union.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">Aug 2024</text><text x="110" y="78" text-anchor="middle" class="sl">EU AI Act in force</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">Art. 50</text><text x="350" y="78" text-anchor="middle" class="sl">Disclosure obligation</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">C2PA</text><text x="590" y="78" text-anchor="middle" class="sl">Metadata standard</text></g>
+</svg>
+</div>
 
 By early 2026, the enforcement mechanisms for the portions of the Act that cover AI-generated content are operational. The European AI Office, established within the European Commission, has published guidance for content providers, and several national data protection authorities have begun incorporating AI Act compliance into their audit frameworks alongside GDPR.
 
@@ -122,6 +151,18 @@ However, you cannot rely entirely on provider-level compliance. The deployer obl
 
 ## Practical Compliance Steps for Website Owners {#compliance-steps}
 
+<figure role="img" aria-label="Six-step EU AI Act compliance workflow for website owners" style="margin:32px 0">
+<svg viewBox="0 0 660 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block">
+  <style>.px{animation:pi .5s ease-out both}.px:nth-child(1){animation-delay:0s}.px:nth-child(2){animation-delay:.2s}.px:nth-child(3){animation-delay:.4s}@keyframes pi{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}.pn{font:700 13px system-ui,sans-serif;fill:#db5a42}.pt{font:500 11px system-ui,sans-serif;fill:#374151}</style>
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#d1d5db"/></marker></defs>
+  <g class="px"><rect x="10" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="97" y="46" text-anchor="middle" class="pn">① Audit</text><text x="97" y="66" text-anchor="middle" class="pt">Identify all AI images</text></g>
+  <line x1="188" y1="50" x2="238" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="243" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="330" y="46" text-anchor="middle" class="pn">② Label</text><text x="330" y="66" text-anchor="middle" class="pt">Add visible AI disclosure</text></g>
+  <line x1="421" y1="50" x2="471" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="476" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="563" y="46" text-anchor="middle" class="pn">③ Preserve</text><text x="563" y="66" text-anchor="middle" class="pt">Keep C2PA metadata</text></g>
+</svg>
+</figure>
+
 Here is a practical action list for website owners using AI-generated images:
 
 **Step 1: Audit your AI image usage.**
@@ -169,3 +210,32 @@ Regulatory bodies prioritise high-profile cases initially, but the obligations a
 The EU AI Act represents a significant shift in the regulatory environment for anyone publishing AI-generated content, and the image-specific requirements are among the most operationally impactful. The good news is that compliance is achievable without abandoning AI-generated imagery: it primarily requires disclosure, metadata preservation, and documented process. The infrastructure for this (C2PA metadata standards, disclosure UI patterns) is mature and supported by the major tool providers. The main work is in your own workflow and website implementation.
 
 *Optimage supports metadata-preserving compression for AI-generated images, including C2PA provenance data. [Learn more.](/)*
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does the EU AI Act apply to my website if I am based outside the EU?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The EU AI Act follows the same geographic scope as GDPR: it applies whenever a European user is the intended audience, regardless of where the website operator is located. If your website actively markets to or serves EU residents, the AI content provisions apply to you." }
+    },
+    {
+      "@type": "Question",
+      "name": "What counts as sufficient disclosure for AI-generated images under Article 50?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Disclosure must be clear and perceivable to end users. Acceptable approaches include image-level labels, page-level statements at the top of the page, or section-level notices for areas that consistently use AI imagery. Disclosure only in a privacy policy or terms of service does not satisfy the requirement." }
+    },
+    {
+      "@type": "Question",
+      "name": "Will compressing AI-generated images strip the C2PA metadata required by the EU AI Act?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Many image compression tools strip all metadata by default, including C2PA provenance data. You need to configure your compression workflow to specifically preserve XMP and C2PA metadata blocks. Test the output using an online C2PA verification tool to confirm metadata is retained after compression." }
+    },
+    {
+      "@type": "Question",
+      "name": "Are small businesses or SMEs exempt from EU AI Act image disclosure requirements?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. The transparency obligations under Article 50 for AI-generated content do not include SME exemptions. The disclosure and labelling requirements apply regardless of business size. SMEs have lighter requirements in some other areas of the Act, but not for AI content disclosure." }
+    }
+  ]
+}
+</script>

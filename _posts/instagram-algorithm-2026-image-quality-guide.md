@@ -6,6 +6,25 @@ author: "Optimage Team"
 tags: ["Instagram", "social media", "image quality", "algorithm", "content strategy"]
 category: "Social Media"
 featured: false
+variants:
+  - excerpt: "Instagram now scores every uploaded image for sharpness, compression artefacts, and originality before deciding how widely to distribute it in the algorithm."
+    keyTakeaways:
+      - "Images under 1080x1080 pixels receive reduced distribution in the Explore tab and algorithmic feed"
+      - "Uploading a PNG source gives Instagram clean data — a single compression pass instead of two"
+      - "Portrait posts at 1080x1350px (4:5) consistently outperform square posts for organic reach"
+      - "Custom Reels cover images should be 1080x1920px with the key visual in the centre square"
+  - excerpt: "Instagram's 2026 algorithm changes mean that a JPEG exported at quality 70–80 and then re-encoded by Instagram produces noticeably worse results than uploading PNG or quality 95+ JPEG."
+    keyTakeaways:
+      - "Instagram applies its own compression on upload — double JPEG compression creates visible artefacts in faces and text"
+      - "Watermark detection now extends beyond TikTok to other platform logos and heavy overlays"
+      - "Content with high visual similarity to previously posted images receives a reduced novelty score"
+      - "Business account ad creatives face the same quality scoring as organic posts, affecting CPC in auctions"
+  - excerpt: "Creators thriving on Instagram in 2026 treat every post as a deliberate quality decision, not an afterthought, with workflows that make high-quality output the default."
+    keyTakeaways:
+      - "Export designed content as PNG at 1080x1350px and upload directly — do not derive a JPEG from the PNG first"
+      - "For photography, export as JPEG at quality 90–95 and upload the high-quality JPEG directly"
+      - "Check Reels cover images in profile grid view on a phone before publishing — only the centre square is visible in the grid"
+      - "Reshared UGC is subject to the same quality assessment as owned content — improve exposure and crop before reposting"
 ---
 
 Instagram's product team has been more transparent about algorithm changes in 2025 and 2026 than at any point in the platform's history, and one of the clearest signals they have communicated is that image quality directly affects content distribution. Low-resolution images, content with visible JPEG compression artefacts, and images that have been "recycled" (previously posted and shared multiple times across accounts) are all receiving reduced reach in the recommendation system, particularly in the Explore tab and Reels suggestions.
@@ -13,6 +32,15 @@ Instagram's product team has been more transparent about algorithm changes in 20
 This is not a rumour or a theory from social media marketers. Instagram's engineering blog and public statements from the head of Instagram have directly addressed image quality as a ranking signal. The reasoning is straightforward: Instagram's recommendation algorithm prioritises content that users engage with positively, and research consistently shows that users engage less with visually degraded content even when they cannot consciously identify why.
 
 This guide explains exactly what has changed, what Instagram's quality assessment looks for, and how to ensure your images and videos are optimised for maximum distribution in 2026.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">1080px</text><text x="110" y="78" text-anchor="middle" class="sl">Minimum image width</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">4:5</text><text x="350" y="78" text-anchor="middle" class="sl">Top-performing aspect ratio</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">95+</text><text x="590" y="78" text-anchor="middle" class="sl">Min JPEG quality to upload</text></g>
+</svg>
+</div>
 
 ## Table of Contents
 - [What Instagram Changed and When](#what-changed)
@@ -159,6 +187,18 @@ For business accounts, the image quality algorithm changes have specific implica
 
 Here is a complete workflow for ensuring consistent image quality across all Instagram content.
 
+<figure role="img" aria-label="Instagram content quality workflow" style="margin:32px 0">
+<svg viewBox="0 0 660 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block">
+  <style>.px{animation:pi .5s ease-out both}.px:nth-child(1){animation-delay:0s}.px:nth-child(2){animation-delay:.2s}.px:nth-child(3){animation-delay:.4s}@keyframes pi{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}.pn{font:700 13px system-ui,sans-serif;fill:#db5a42}.pt{font:500 11px system-ui,sans-serif;fill:#374151}</style>
+  <defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#d1d5db"/></marker></defs>
+  <g class="px"><rect x="10" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="97" y="46" text-anchor="middle" class="pn">① Create</text><text x="97" y="66" text-anchor="middle" class="pt">Design at 1080x1350px</text></g>
+  <line x1="188" y1="50" x2="238" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar2)"/>
+  <g class="px"><rect x="243" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="330" y="46" text-anchor="middle" class="pn">② Export</text><text x="330" y="66" text-anchor="middle" class="pt">PNG or JPEG quality 95+</text></g>
+  <line x1="421" y1="50" x2="471" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar2)"/>
+  <g class="px"><rect x="476" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="563" y="46" text-anchor="middle" class="pn">③ Upload</text><text x="563" y="66" text-anchor="middle" class="pt">Direct — no pre-compression</text></g>
+</svg>
+</figure>
+
 **For designed content (branded posts, promotional graphics):**
 1. Design at 1080x1350px (portrait) for feed posts
 2. Export as PNG at 1080x1350px
@@ -193,3 +233,32 @@ Instagram's emphasis on image quality in 2026 is not a punishment for creators: 
 The creators who are thriving in 2026 on Instagram are those who treat every post as a deliberate quality decision, not an afterthought, and who have workflows that make high-quality output the default rather than the exception.
 
 *Optimage helps you batch-compress and convert images to web-optimal formats, so your social media content is always at the right size and quality. [Get started free.](/)*
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does Instagram penalise low-quality images in 2026?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Instagram now scores uploaded images for sharpness, compression artefacts, exposure, and aspect ratio correctness before deciding initial distribution. Images that score poorly receive less initial reach, which compounds over time because lower early engagement signals lead to further reduced distribution in the Explore tab and algorithmic feed." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best format to upload to Instagram — PNG or JPEG?",
+      "acceptedAnswer": { "@type": "Answer", "text": "For designed content, upload PNG. Instagram re-encodes all uploads internally, so giving it a lossless PNG source means only one compression pass occurs. For photography, upload JPEG at quality 90 to 95. Never upload a pre-compressed JPEG at quality 70 to 80, as Instagram's additional compression will produce visible artefacts in the final image." }
+    },
+    {
+      "@type": "Question",
+      "name": "What resolution does Instagram recommend for feed posts in 2026?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The recommended resolution for Instagram square posts is 1080x1080 pixels and for portrait posts (the better-performing format) is 1080x1350 pixels at a 4:5 ratio. Portrait posts take more screen space in the feed and consistently outperform square posts for organic reach. Images below 1080 pixels wide receive reduced distribution in Explore and algorithmic placement." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is recycled content getting less reach on Instagram in 2026?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Instagram's algorithm now applies stronger originality signals. Content that has been posted before, cross-posted from other platforms with watermarks, or that closely resembles widely shared stock images receives a reduced novelty score, leading to lower distribution. The fix is to create platform-specific versions of content rather than uploading the same file across multiple platforms." }
+    }
+  ]
+}
+</script>

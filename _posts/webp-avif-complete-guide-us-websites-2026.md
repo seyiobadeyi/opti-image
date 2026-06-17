@@ -2,6 +2,25 @@
 title: "WebP vs AVIF: The Complete Guide for US and Canadian Websites in 2026"
 date: "2026-02-17T09:00:00Z"
 excerpt: "WebP cut file sizes in half. AVIF cuts them in half again. Here is what every US and Canadian web developer, designer, and site owner needs to know about modern image formats in 2026 and which one to actually use."
+variants:
+  - excerpt: "JPEG was introduced in 1992 and is still the default for most websites. Switching from JPEG to AVIF can cut image data by 40-60% per request — a change that takes an afternoon to implement and pays off on every page load forever."
+    keyTakeaways:
+      - "WebP is typically 25-35% smaller than JPEG at equivalent perceptual quality; AVIF is 40-55% smaller"
+      - "AVIF browser coverage for US and Canadian audiences is approximately 93-95% in 2026"
+      - "WebP coverage is approximately 97-98% — essentially universal for US and Canadian audiences"
+      - "AVIF quality 60 is typically comparable to JPEG quality 90 at roughly half the file size"
+  - excerpt: "A product page with 10 images averaging 250KB each in JPEG carries 2.5MB of image data. The same page in AVIF at equivalent quality carries approximately 1.0MB — saving 0.6 seconds of download time on a 4G mobile connection, for every visitor, on every page load."
+    keyTakeaways:
+      - "Portrait photography in AVIF: average 120KB vs 280KB for JPEG at equivalent quality — 57% smaller"
+      - "E-commerce product photos in AVIF: average 88KB vs 220KB for JPEG — 60% smaller"
+      - "Food photography in AVIF: average 185KB vs 380KB for JPEG — 51% smaller"
+      - "UI screenshots in AVIF: average 195KB vs 420KB for PNG — 54% smaller"
+  - excerpt: "Serving AVIF with WebP and JPEG fallbacks is now the recommended standard for US and Canadian websites. The HTML picture element makes this a 3-line implementation, and CDNs like Cloudflare handle it automatically with no code changes."
+    keyTakeaways:
+      - "Small business sites switching to AVIF typically see PageSpeed mobile scores improve from 38-52 to 72-85"
+      - "Ecommerce product pages often improve from 28-45 to 68-82 with AVIF conversion"
+      - "AVIF LCP improvement: a 400KB JPEG hero image becomes 170KB AVIF, saving roughly 1 second on mobile LCP"
+      - "AVIF encoding is 5-10x slower than WebP — pre-process images rather than relying on real-time CDN conversion for large batches"
 ---
 
 ## Table of Contents
@@ -27,6 +46,15 @@ It did materialize. And just as WebP became genuinely universal, AVIF arrived to
 We are now at a point where a US or Canadian website using JPEG for its primary photographic content is leaving 40 to 60% of its image data on the table every single request, for every single visitor. This is not a marginal edge-case improvement. For a site that serves 100,000 page views per month, switching from JPEG to AVIF can reduce monthly bandwidth by hundreds of gigabytes, improve mobile load times by 2 to 4 seconds, and meaningfully boost Google PageSpeed scores. The question is no longer whether to switch. It is how and when.
 
 This guide answers both.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">35%</text><text x="110" y="78" text-anchor="middle" class="sl">WebP vs JPEG savings</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">57%</text><text x="350" y="78" text-anchor="middle" class="sl">AVIF vs JPEG savings</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">97%</text><text x="590" y="78" text-anchor="middle" class="sl">WebP browser support</text></g>
+</svg>
+</div>
 
 ---
 
@@ -229,6 +257,18 @@ You need animation. Use AVIF animated or WebP animated instead. The file size sa
 
 The `<picture>` element is the standard HTML mechanism for serving different image formats based on browser support. Here is the correct implementation.
 
+<figure role="img" aria-label="Three-step format serving process" style="margin:32px 0">
+<svg viewBox="0 0 660 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block">
+  <style>.px{animation:pi .5s ease-out both}.px:nth-child(1){animation-delay:0s}.px:nth-child(2){animation-delay:.2s}.px:nth-child(3){animation-delay:.4s}@keyframes pi{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}.pn{font:700 13px system-ui,sans-serif;fill:#db5a42}.pt{font:500 11px system-ui,sans-serif;fill:#374151}</style>
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#d1d5db"/></marker></defs>
+  <g class="px"><rect x="10" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="97" y="46" text-anchor="middle" class="pn">① AVIF</text><text x="97" y="66" text-anchor="middle" class="pt">Modern browsers</text></g>
+  <line x1="188" y1="50" x2="238" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="243" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="330" y="46" text-anchor="middle" class="pn">② WebP</text><text x="330" y="66" text-anchor="middle" class="pt">Fallback, 97% support</text></g>
+  <line x1="421" y1="50" x2="471" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="476" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="563" y="46" text-anchor="middle" class="pn">③ JPEG</text><text x="563" y="66" text-anchor="middle" class="pt">Universal fallback</text></g>
+</svg>
+</figure>
+
 ### Basic WebP with JPEG fallback
 
 ```html
@@ -415,3 +455,16 @@ JPEG XL (JXL) is a next-generation format with excellent compression and a uniqu
 - [Why Your LCP Is Failing and How to Fix It](/blog/why-your-lcp-is-failing-and-how-to-fix-it): How format choice feeds into Core Web Vitals LCP scores and what else affects them.
 - [Mastering Lossless Compression](/blog/mastering-lossless-compression): When you need zero quality loss alongside format conversion.
 - [Browser vs. Server: Which Is Better for Compression](/blog/browser-vs-server-which-is-better-for-compression): Architectural decisions about where in your pipeline format conversion should happen.
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question","name": "Is AVIF better than WebP for websites in 2026?","acceptedAnswer": {"@type": "Answer","text": "AVIF produces 20-35% smaller files than WebP at equivalent quality, and both have strong browser support for US and Canadian audiences (AVIF: 93-95%, WebP: 97-98%). For new projects, AVIF is the better choice as the primary format, served with WebP and JPEG fallbacks using the HTML picture element. If encoding speed is a concern — WebP encodes 5-10x faster than AVIF — WebP is the more practical choice for large batch processing without CDN automation."}},
+    {"@type": "Question","name": "How much smaller are AVIF images compared to JPEG?","acceptedAnswer": {"@type": "Answer","text": "AVIF images are typically 40-60% smaller than JPEG at equivalent perceptual quality. Specific results from our benchmark: portrait photography 57% smaller, e-commerce product photos 60% smaller, lifestyle photography 56% smaller, food photography 51% smaller, and UI screenshots 54% smaller than PNG. AVIF quality 60 is roughly comparable to JPEG quality 90 at approximately half the file size."}},
+    {"@type": "Question","name": "Does switching to WebP or AVIF improve Google PageSpeed scores?","acceptedAnswer": {"@type": "Answer","text": "Yes, significantly. Small business websites typically improve PageSpeed mobile scores from 38-52 to 72-85 after switching from JPEG to AVIF. Ecommerce product pages often improve from 28-45 to 68-82. The LCP metric sees the most dramatic improvement: a 400KB JPEG hero image that took 1.8 seconds to download on mobile becomes a 170KB AVIF at the same quality, downloading in under 0.8 seconds. Google PageSpeed explicitly flags images in JPEG or PNG format under 'Serve images in next-gen formats'."}},
+    {"@type": "Question","name": "How do I serve AVIF with a JPEG fallback for older browsers?","acceptedAnswer": {"@type": "Answer","text": "Use the HTML picture element with source elements listed in order from most to least preferred: first AVIF, then WebP, then JPEG in the img element as the final fallback. The browser reads source elements in order and uses the first format it supports. For CDN-based serving, Cloudflare Image Resizing, Fastly, Imgix, and Cloudinary all support automatic format negotiation based on the browser's Accept header, serving AVIF or WebP automatically without any HTML changes required."}}
+  ]
+}
+</script>

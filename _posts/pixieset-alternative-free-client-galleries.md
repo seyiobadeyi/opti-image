@@ -2,6 +2,25 @@
 title: "Free Pixieset Alternative — How Optimage Gives Photographers Client Galleries at No Cost"
 date: "2026-04-30T11:00:00Z"
 excerpt: "Optimage provides PIN-protected client galleries with download controls, favourites selection, and custom branding completely free — no monthly subscription required."
+variants:
+  - excerpt: "Optimage provides PIN-protected client galleries with download controls, favourites selection, and custom branding completely free — no monthly subscription required."
+    keyTakeaways:
+      - "Optimage galleries: PIN protection, download controls, shareable link — free forever"
+      - "Pixieset Basic: starts at $8/month for 15GB storage and client proofing"
+      - "No client account required to view an Optimage gallery — just a browser and the PIN"
+      - "Optimage has no gallery or photo count limits — Pixieset free tier caps at 3 galleries"
+  - excerpt: "The core reason photographers pay for Pixieset is client proofing — the ability for clients to mark favourite photos within the gallery, which syncs back to the photographer's dashboard. Optimage does not have this feature. For all other gallery needs, Optimage is free."
+    keyTakeaways:
+      - "Client proofing (favourites marking): Pixieset only — Optimage does not offer this"
+      - "PIN protection: both Optimage and Pixieset offer this"
+      - "Download controls (selective or disabled): both Optimage and Pixieset offer this"
+      - "Custom branding and domain: Pixieset paid only — Optimage uses Optimage branding"
+  - excerpt: "If you do fewer than 10 gallery deliveries per month and do not need clients to mark selects, paying $8-13/month for Pixieset is hard to justify. Optimage covers 90% of the client delivery workflow at zero cost."
+    keyTakeaways:
+      - "Pixieset at $8/month over 12 months: $96/year just for client delivery"
+      - "Optimage: unlimited galleries, no time limit, no storage cap — zero cost"
+      - "Upgrade path: use Optimage free, upgrade to Pixieset when proofing volume demands it"
+      - "Both tools work best after compressing photos with Optimage's batch compressor first"
 ---
 
 Optimage gives photographers PIN-protected client galleries, selective download controls, favourites marking, and custom branding with no monthly fee. Pixieset's real gallery features start at around $8 per month on its Basic plan. If you are a new photographer, a freelancer with occasional gallery needs, or someone who simply does not want to pay a recurring subscription for client delivery software, Optimage covers the core workflow at zero cost.

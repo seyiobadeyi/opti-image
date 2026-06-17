@@ -2,6 +2,25 @@
 title: "How to Stop WhatsApp from Destroying Your Photo Quality — Compress Before Sending"
 date: "2026-03-22T10:00:00Z"
 excerpt: "WhatsApp recompresses photos to roughly 640px wide at 60% quality when sent as a Photo — to preserve quality, compress to WebP at 80% first with Optimage, or send as a Document to bypass compression entirely."
+variants:
+  - excerpt: "WhatsApp recompresses photos to roughly 640px wide at 60% quality when sent as a Photo — to preserve quality, compress to WebP at 80% first with Optimage, or send as a Document to bypass compression entirely."
+    keyTakeaways:
+      - "WhatsApp Photo mode: compresses to ~640px wide at approximately 60% JPEG quality"
+      - "WhatsApp Document mode: bypasses all compression — recipient gets the original file"
+      - "Pre-compress to WebP at 80%: limits WhatsApp's degradation to one generation"
+      - "Sending as Document requires the recipient to tap to download rather than auto-display"
+  - excerpt: "The Document workaround is the cleanest solution: instead of tapping the photo icon, tap the attachment icon, choose Document, and select your photo. WhatsApp delivers the file without any re-encoding. The downside is that recipients see a file attachment, not an inline photo preview."
+    keyTakeaways:
+      - "Document mode: tap the paperclip icon, not the camera icon — file is delivered uncompressed"
+      - "Recipient receives the original file and must tap to open it, not an inline photo"
+      - "File size limit for WhatsApp Document: 2GB — well above any photo file"
+      - "This method works for PNG, WebP, AVIF, and RAW files — not just JPEG"
+  - excerpt: "Pre-compressing before sending as a Photo controls what WhatsApp compresses. If you send an 8MB JPEG, WhatsApp applies aggressive compression. If you send a 500KB WebP at quality 80, WhatsApp has little to degrade further. The result looks almost identical to the original."
+    keyTakeaways:
+      - "Pre-compress to WebP quality 80: typical 8MB JPEG becomes 400-600KB"
+      - "Smaller input = less WhatsApp degradation — the compression ratio is applied proportionally"
+      - "Use Optimage's free compressor before every WhatsApp photo share for better results"
+      - "Batch compress all photos at once if sending a multi-photo event album via WhatsApp"
 ---
 
 WhatsApp recompresses every photo you send as a "Photo" — typically reducing it to around 640 pixels wide and re-encoding it at approximately 60% JPEG quality. The result is a blurry, washed-out image that looks nothing like what left your camera. There are two ways to fix this: compress the image yourself before sending (so WhatsApp has less to degrade), or send as a **Document** instead of a Photo, which bypasses WhatsApp's compression pipeline entirely.

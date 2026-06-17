@@ -2,6 +2,25 @@
 title: "Sports Photography at FIFA World Cup 2026 — Format, Compression, and Delivery Guide"
 date: "2026-06-13T10:00:00Z"
 excerpt: "Export from camera as JPEG, convert selects to WebP for web delivery, and use Optimage to batch compress and deliver match galleries to clients without Dropbox or WeTransfer."
+variants:
+  - excerpt: "Export from camera as JPEG, convert selects to WebP for web delivery, and use Optimage to batch compress and deliver match galleries to clients without Dropbox or WeTransfer."
+    keyTakeaways:
+      - "Shoot: RAW for flexibility, JPEG for speed — World Cup deadline work is often JPEG direct"
+      - "Edit: Lightroom selects exported at 90% JPEG for editorial, 80% WebP for web"
+      - "Deliver: Optimage batch compress for client galleries, no Dropbox or WeTransfer needed"
+      - "Optimage gallery: client browses photos via PIN link without creating an account"
+  - excerpt: "The World Cup 2026 photographer's post-match workflow is a race: you have 60-90 minutes from final whistle to first-edition editorial deadline. Every workflow step must be optimized — export presets, batch compression, and gallery delivery tools need to be set up before the tournament."
+    keyTakeaways:
+      - "Lightroom export preset: 90% JPEG, sRGB, long edge 3000px for editorial deadlines"
+      - "Optimage batch compress: 200 selects compressed and downloaded in under 4 minutes"
+      - "WebP gallery delivery: 30% smaller files than JPEG, faster client loading on mobile"
+      - "Optimage gallery setup: create gallery, upload, set PIN — under 3 minutes"
+  - excerpt: "For non-accredited photographers and fans at World Cup 2026 matches, the challenge is the opposite: sharing great moments quickly from a phone with slow stadium connectivity. The browser-based compression approach works because it does not require fast internet for the processing step."
+    keyTakeaways:
+      - "Phone photo from stands: 5-8MB JPEG — compress to 400KB before sharing"
+      - "Stadium WiFi is typically congested — browser compression reduces upload size by 90%"
+      - "Compress 10 photos in batch in under 60 seconds before the half-time sharing window closes"
+      - "Create a match-day gallery for family abroad: PIN link, no app download required"
 ---
 
 For photographers covering FIFA World Cup 2026, the post-match workflow is the job. Shooting 1,500 frames per match is straightforward. Getting 200 edited selects compressed, formatted for client specs, and delivered before the editor's deadline is where tournaments are won and lost professionally. Export your RAW files as high-quality JPEG from Lightroom, run the selects through Optimage's [batch compressor](/compress) for web-ready WebP delivery, and push client galleries through [Optimage galleries](/galleries) — no Dropbox subscription, no file-size cap emails, no sign-up required for clients browsing the gallery.

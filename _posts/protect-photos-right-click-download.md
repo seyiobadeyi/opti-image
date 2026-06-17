@@ -2,6 +2,25 @@
 title: "How to Protect Photos from Right-Click Download and Theft Online"
 date: "2026-02-18T08:00:00Z"
 excerpt: "No single method stops a determined image thief, but layering right-click disabling, watermarks, and PIN-protected galleries makes theft hard enough to deter most offenders."
+variants:
+  - excerpt: "No single method stops a determined image thief, but layering right-click disabling, watermarks, and PIN-protected galleries makes theft hard enough to deter most offenders."
+    keyTakeaways:
+      - "Layer 1: low-resolution previews — stolen images are too small for commercial use"
+      - "Layer 2: right-click disable — stops casual theft, bypassed by screenshot"
+      - "Layer 3: visible watermarks via Optimage — deters use even if image is stolen"
+      - "Layer 4: PIN-protected gallery — only clients with the PIN see unwatermarked images"
+  - excerpt: "Right-click protection is the weakest of the four layers — any screenshot bypasses it instantly. The strongest deterrents are watermarks on previews (makes the stolen image unusable) and PIN-gated galleries (limits who can see the images at all)."
+    keyTakeaways:
+      - "Right-click disable: takes 5 minutes to add, stops about 20% of casual attempts"
+      - "Screenshot workaround: any user can press PrtSc or use browser DevTools to save images"
+      - "Watermark: works even after screenshot — stolen image still carries your branding"
+      - "PIN gallery: the only method that prevents seeing the photo without authorization"
+  - excerpt: "The practical recommendation for photographers: display low-resolution watermarked previews publicly, deliver full-resolution unwatermarked images through PIN-protected Optimage galleries to paying clients only. This is how stock photo libraries operate."
+    keyTakeaways:
+      - "Public preview: max 800px wide, watermarked at 40% opacity corner and center diagonal"
+      - "Client delivery: full resolution, no watermark, via Optimage PIN gallery after payment"
+      - "This model is used by Getty, Shutterstock, and every major stock library"
+      - "Optimage handles both steps: watermark tool for previews, galleries for delivery"
 ---
 
 You cannot make a photo on the internet completely impossible to steal — but you can make theft difficult enough that most people give up. The most effective protection combines four layers: displaying low-resolution previews, disabling right-click in the browser, applying visible watermarks with [Optimage's watermark tool](/watermark), and delivering final images through a [PIN-protected private gallery](/galleries). Each layer stops a different class of theft attempt.

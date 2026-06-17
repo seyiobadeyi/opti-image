@@ -2,6 +2,25 @@
 title: "How to Share Stadium Photos Instantly During a Match — Compress and Send in Under 60 Seconds"
 date: "2026-06-10T07:00:00Z"
 excerpt: "Open Optimage in your phone browser, drop your stadium photos in, download the compressed files, and send — no app install, no account, works on slow stadium WiFi in under 60 seconds."
+variants:
+  - excerpt: "Open Optimage in your phone browser, drop your stadium photos in, download the compressed files, and send — no app install, no account, works on slow stadium WiFi in under 60 seconds."
+    keyTakeaways:
+      - "Compression runs in browser — works on slow stadium WiFi because no upload to server"
+      - "A 5MB stadium JPEG compresses to under 400KB in about 10 seconds"
+      - "Total time from photo to sent message: under 60 seconds"
+      - "Works on iPhone and Android — open optimage.dreamintrepid.com in your phone browser"
+  - excerpt: "Stadium WiFi is typically congested during matches — dozens of thousands of people uploading simultaneously. Browser-based compression works in this environment because the heavy processing happens on your phone, not a remote server. Only the small compressed file needs to be uploaded."
+    keyTakeaways:
+      - "5MB file upload on slow WiFi: can take 30-60 seconds or fail entirely"
+      - "400KB file upload on slow WiFi: typically under 5 seconds — reliably completes"
+      - "Browser compression uses your phone's CPU — no internet connection needed for that step"
+      - "Only the final compressed file needs internet to send via WhatsApp or iMessage"
+  - excerpt: "The fastest workflow at a stadium: take photo → open Optimage in browser → drop photo → download compressed file → send via WhatsApp. No need to open Instagram, no need to connect to a slow app, no need to create an account mid-game."
+    keyTakeaways:
+      - "Works offline for compression step — only need WiFi or data when sending the result"
+      - "Batch 5-10 photos at once — drag all selected photos to Optimage in one go"
+      - "WhatsApp Document mode: send compressed photo without WhatsApp applying a second compression"
+      - "Save Optimage to phone home screen for one-tap access at future events"
 ---
 
 Open [optimage.dreamintrepid.com/compress](/compress) in your phone browser, upload your stadium photos, download the compressed versions, and send. That is the complete process. It works without installing an app, without signing up, and without a fast internet connection — because the compression happens in your browser, not on a remote server. A 5 MB photo compresses to under 400 KB in about 10 seconds. Total time from photo to sent message: under 60 seconds.

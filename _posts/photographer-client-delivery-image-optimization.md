@@ -2,6 +2,25 @@
 title: "How Professional Photographers Deliver Client Work Faster Without Sacrificing Quality"
 date: "2026-02-10T10:30:00Z"
 excerpt: "Delivering a 500-photo wedding gallery as 80MB JPEGs is a bad client experience and a storage cost problem. This guide shows how professional photographers in the US and Canada are using smart compression workflows to deliver galleries clients can actually download, share, and print."
+variants:
+  - excerpt: "A 600-photo wedding gallery exported from Lightroom at quality 90 averages 1.8 MB per file — running a second Optimage pass at quality 83 drops that to 680 KB, a 62% reduction, with no identifiable quality difference in blind comparison."
+    keyTakeaways:
+      - "Lightroom export at quality 90 produces 1.08 GB for 600 photos; Optimage at quality 83 produces 408 MB — a 62% reduction"
+      - "Web gallery files should target 2048px on the longest side, JPEG quality 82 to 85, at 300 to 700 KB per file"
+      - "A 600-photo optimized gallery downloads in 90 seconds at 50 Mbps versus nearly 2 hours for raw exports at 22 MB each"
+      - "Optimage takes approximately 4 minutes to process a 600-photo gallery on Apple M3 Pro, running in the background"
+  - excerpt: "Wedding photographers who deliver 587 JPEGs at 22 MB each — 12.9 GB total — are creating a 1.9-hour download experience on typical home WiFi that directly reflects on their professional reputation."
+    keyTakeaways:
+      - "500 photos at 12 MB average creates a 6 GB delivery package that most clients cannot download in a reasonable time"
+      - "Clients cannot attach full-resolution files to email — corporate email limits are typically 25 to 35 MB total"
+      - "A 2048px web gallery file is adequate for any print up to 5x7 at 300 PPI and comfortable for 8x10 at 240 PPI"
+      - "Gallery delivery platforms like Pixieset display images at a maximum of 2500px — uploading 6000px files wastes storage without improving display quality"
+  - excerpt: "Photographers who deliver a separate social media folder with 10 to 20 Instagram-optimized highlights eliminate the most common post-delivery support request and position themselves as thoughtful professionals."
+    keyTakeaways:
+      - "Include a social media folder with 1080x1350px portrait crops at quality 82 for Instagram — clients will share these regardless"
+      - "EXIF stripping removes GPS coordinates, camera serial numbers, and venue location data from all delivered files"
+      - "A 5-year-old studio may have 10 to 15 TB of archive data — delivered JPEGs can be recompressed to quality 80 to 82 for storage savings"
+      - "Split delivery into web gallery (408 MB, downloads in 90 seconds) and print files (9 GB, downloaded on demand) to solve the client download problem without compromising print quality"
 ---
 
 ## Table of Contents
@@ -167,6 +186,18 @@ The key is to lead with the experience ("beautiful on any screen," "easy to shar
 ## The Delivery Workflow: Lightroom Plus Optimage as a Two-Pass System {#the-delivery-workflow-lightroom-plus-optimage-as-a-two-pass-system}
 
 The workflow that consistently produces the best results for professional photographers is a two-pass system: Lightroom handles the editing and initial export, then Optimage handles the final compression optimization pass.
+
+<figure role="img" aria-label="Two-pass photographer delivery workflow" style="margin:32px 0">
+<svg viewBox="0 0 660 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block">
+  <style>.px{animation:pi .5s ease-out both}.px:nth-child(1){animation-delay:0s}.px:nth-child(2){animation-delay:.2s}.px:nth-child(3){animation-delay:.4s}@keyframes pi{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}.pn{font:700 13px system-ui,sans-serif;fill:#db5a42}.pt{font:500 11px system-ui,sans-serif;fill:#374151}</style>
+  <defs><marker id="ar5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#d1d5db"/></marker></defs>
+  <g class="px"><rect x="10" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="97" y="46" text-anchor="middle" class="pn">① Lightroom</text><text x="97" y="66" text-anchor="middle" class="pt">Edit + export JPEG q90, 2048px</text></g>
+  <line x1="188" y1="50" x2="238" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar5)"/>
+  <g class="px"><rect x="243" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="330" y="46" text-anchor="middle" class="pn">② Optimage</text><text x="330" y="66" text-anchor="middle" class="pt">Compress q83, strip EXIF</text></g>
+  <line x1="421" y1="50" x2="471" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar5)"/>
+  <g class="px"><rect x="476" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="563" y="46" text-anchor="middle" class="pn">③ Deliver</text><text x="563" y="66" text-anchor="middle" class="pt">Upload to Pixieset / Shootproof</text></g>
+</svg>
+</figure>
 
 **Lightroom Export Settings for the First Pass:**
 
@@ -344,3 +375,32 @@ The implementation is not complex. The Lightroom export settings take 10 minutes
 - [Cloud Storage Costs from Unoptimized Images](/blog/cloud-storage-costs-unoptimized-images): the financial case for optimizing your archival files and reducing your long-term storage bill.
 - [Real Estate Photo Optimization for US and Canada](/blog/real-estate-photo-optimization-us-canada): if you do real estate photography, this covers the MLS upload requirements and turnaround time optimization specific to that market.
 - [Social Media Image Size Guide: All Platforms 2026](/blog/social-media-image-size-guide-all-platforms-2026): exact dimensions for every platform your clients will share their photos on.
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What file size should wedding photographers deliver for online galleries?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Web gallery delivery files should target 300 to 700 KB per photo, at 2048 pixels on the longest side, JPEG quality 82 to 85. At these settings, a 600-photo wedding gallery weighs 250 to 350 MB total and downloads in 4 to 7 minutes on typical home broadband. This is dramatically different from delivering raw Lightroom exports at 8 to 20 MB each, which can create a 90-minute to 2-hour download experience for clients." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the two-pass wedding photo delivery workflow?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The two-pass workflow uses Lightroom for editing and initial export at quality 90, 2048px long edge, and then runs the exported files through Optimage at quality 83 to produce the final delivery files. The second Optimage pass reduces file sizes by an additional 35 to 55% compared to Lightroom-only exports, because Lightroom's built-in JPEG encoder is less optimized than a dedicated compression tool. The Optimage pass takes approximately 4 minutes for a 600-photo gallery on Apple Silicon." }
+    },
+    {
+      "@type": "Question",
+      "name": "Should photographers strip EXIF data from client delivery files?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, always. Camera EXIF data includes GPS coordinates (which reveal the exact location of the venue, client home, or shoot location), camera serial numbers, and precise timestamps. For wedding photography, files may contain the client's home address from getting-ready photos. When clients share gallery photos online, this metadata is visible to anyone who downloads the file. Optimage strips EXIF data during its compression pass with no additional time cost, while preserving copyright information." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you explain compressed web gallery files to clients who worry about quality?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Frame it around the two delivery types: web-ready files sized for beautiful screen display and digital sharing, and full-resolution print files for ordering prints. Emphasize that both are full quality, just sized for their purpose. The analogy that resonates with most clients is streaming services like Netflix and Spotify, which deliver compressed content optimized for the delivery medium while sounding and looking excellent. Lead with the outcome — beautiful on any screen, downloads in seconds — rather than the technical process." }
+    }
+  ]
+}
+</script>

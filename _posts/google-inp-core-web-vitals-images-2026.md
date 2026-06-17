@@ -6,9 +6,37 @@ author: "Optimage Team"
 tags: ["Core Web Vitals", "INP", "web performance", "Google ranking", "image optimization"]
 category: "SEO & Performance"
 featured: true
+variants:
+  - excerpt: "INP replaced FID in March 2024 and is now actively influencing search rankings. Image-heavy sites are disproportionately affected — here is exactly which image patterns cause poor INP and how to fix them."
+    keyTakeaways:
+      - "INP measures any interaction throughout the session, not just the first click like FID did"
+      - "Google's Good threshold is under 200ms; Poor is over 500ms at the 75th percentile"
+      - "decoding='async' offloads image decode from the main thread — the single most impactful INP fix"
+      - "Carousel images, modals, and infinite scroll feeds are the most common image-related INP culprits"
+  - excerpt: "Image decode on the main thread is the leading cause of poor INP on image-heavy sites. Adding decoding='async' to non-hero images eliminates this — and takes about 30 minutes to implement across a typical site."
+    keyTakeaways:
+      - "Large PNG and high-quality JPEG decoding blocks the main thread, directly worsening INP scores"
+      - "Add decoding='async' to all images except the LCP hero to prevent main-thread blocking at click time"
+      - "Set explicit width and height on all images to prevent layout shifts that extend presentation delay"
+      - "Carousel slides should preload the next slide with img.decode() before the user clicks"
+  - excerpt: "Sites that fixed their image-related INP problems since the 2024 launch have seen measurable improvements in Core Web Vitals scores and search performance — the fixes are well-understood and can be implemented incrementally."
+    keyTakeaways:
+      - "Target file sizes: carousel slides under 100KB, modals under 150KB, thumbnails under 50KB"
+      - "Use fetchpriority='high' on the LCP image — do not apply loading='lazy' or decoding='async' to it"
+      - "Chrome DevTools Performance panel shows 'Decode Image' entries with exact decode times"
+      - "HTTP/2 or HTTP/3 must be enabled for multiplexed image requests to not block each other"
 ---
 
 In March 2024, Google officially replaced First Input Delay (FID) with Interaction to Next Paint (INP) as a Core Web Vital metric. The change was announced well in advance, debated extensively in the performance engineering community, and implemented on schedule. By mid-2024, INP scores were actively factored into Google's Page Experience signal, which influences search ranking.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">200ms</text><text x="110" y="78" text-anchor="middle" class="sl">INP "Good" threshold</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">75th</text><text x="350" y="78" text-anchor="middle" class="sl">Percentile used for CWV score</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">5</text><text x="590" y="78" text-anchor="middle" class="sl">Common image INP causes</text></g>
+</svg>
+</div>
 
 Now, in early 2026, INP has had almost two years to affect real websites in real search results. The patterns are clear: image-heavy websites are disproportionately likely to have poor INP scores, and the sites that have addressed their image-related INP problems have seen measurable improvements in both their Core Web Vitals dashboard and their search performance.
 
@@ -51,7 +79,7 @@ Images affect INP through several specific mechanisms, some obvious and some sub
 
 **Large images block the main thread during decode.** When a browser receives an image file, it must decode the compressed image data into raw pixel values before it can paint those pixels to screen. For large, complex image files (particularly PNGs and high-quality JPEGs), this decoding process can take tens of milliseconds and runs on the main thread by default. If a user interaction triggers an image to become visible (scrolling into view, clicking a tab that reveals an image, opening a modal with a product photo), the image decode happens on the main thread and blocks the response to the interaction.
 
-**Layout shifts caused by images without dimensions.** If an image loads and causes a layout shift, the browser must recalculate the positions of all affected elements, a potentially expensive operation that can extend the time to the next paint and worsen INP. Even if the layout shift itself happens during page load (contributing to CLS), the recalculation work can sometimes affect interactive performance.
+**Layout shifts caused by images without dimensions.** If an image loads and causes a layout shift, the browser must recalculate the positions of all affected elements, a potentially expensive operation that can extend the time to the next paint and worsen INP.
 
 **Unoptimised images in JavaScript-driven UI.** Single-page applications and dynamic product galleries often load images via JavaScript, sometimes after user interaction. If those images are large uncompressed files, the fetch and decode time gets added directly to the interaction's total time, worsening INP.
 
@@ -125,16 +153,6 @@ img {
 
 When both the `width`/`height` attributes and `height: auto` are set, the browser can calculate the correct aspect ratio from the attributes and reserve the right space even before the image loads, completely eliminating image-caused layout shifts.
 
-If you are using CSS `background-image` instead of `<img>` elements, you need a different approach since background images do not have intrinsic dimensions. Use the `aspect-ratio` CSS property on the container:
-
-```css
-.hero-background {
-  aspect-ratio: 16 / 9;
-  background-image: url('hero.webp');
-  background-size: cover;
-}
-```
-
 ## Fixing INP: Oversized Images Blocking the Main Thread {#fix-main-thread}
 
 Beyond decoding optimisation, simply having smaller image files reduces the decode time because there is less data to process. A 100KB WebP image decodes faster than an equivalent 800KB JPEG, not because WebP is inherently faster to decode (it is often slightly slower), but because there is less data in the file.
@@ -144,15 +162,25 @@ For INP purposes, the most important images to optimise are:
 - Images that are loaded after user interaction
 - Images in infinite scroll feeds
 
-For static above-the-fold images, LCP optimisation (fast load time) is more important than INP optimisation. But for any image that appears as a result of a user interaction, file size directly affects INP.
-
-**Target file sizes for interactive-context images:**
-- Carousel slides: under 100KB per image in WebP
-- Modal product images: under 150KB in WebP (display size 600-800px)
-- Tab content images: under 80KB in WebP
-- Infinite scroll feed images: under 50KB per thumbnail
-
-These are conservative targets that ensure decode time is negligible even on mid-range mobile hardware.
+<figure role="img" aria-label="INP image file size targets by context" style="margin:32px 0">
+<svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;display:block;margin:0 auto">
+  <style>.bc{animation:bg .7s ease-out both}.bc:nth-child(1){animation-delay:0s}.bc:nth-child(2){animation-delay:.15s}.bc:nth-child(3){animation-delay:.3s}.bc:nth-child(4){animation-delay:.45s}@keyframes bg{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}.bl{font:600 12px system-ui,sans-serif;fill:#374151;text-anchor:middle}.bv{font:700 13px system-ui,sans-serif;fill:#db5a42;text-anchor:middle}</style>
+  <line x1="50" y1="20" x2="50" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="50" y1="160" x2="620" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+  <rect class="bc" x="70" y="60" width="100" height="100" rx="6" fill="#db5a42" opacity=".85"/>
+  <text x="120" y="52" class="bv">200KB</text>
+  <text x="120" y="178" class="bl">Hero / LCP</text>
+  <rect class="bc" x="230" y="110" width="100" height="50" rx="6" fill="#db5a42" opacity=".85"/>
+  <text x="280" y="102" class="bv">100KB</text>
+  <text x="280" y="178" class="bl">Carousel</text>
+  <rect class="bc" x="390" y="85" width="100" height="75" rx="6" fill="#db5a42" opacity=".85"/>
+  <text x="440" y="77" class="bv">150KB</text>
+  <text x="440" y="178" class="bl">Modal</text>
+  <rect class="bc" x="500" y="135" width="100" height="25" rx="6" fill="#db5a42" opacity=".65"/>
+  <text x="550" y="127" class="bv">50KB</text>
+  <text x="550" y="178" class="bl">Thumbnails</text>
+</svg>
+</figure>
 
 ## Measuring Your Image-Related INP Impact {#measuring}
 
@@ -202,7 +230,6 @@ Use this checklist to systematically identify and fix image-related INP problems
 **Infrastructure audit:**
 - [ ] Images are served from a CDN with edge caching (not the origin server)
 - [ ] Images are served with appropriate `Cache-Control` headers (at least 1 year for versioned assets)
-- [ ] Images are served with Brotli or gzip compression for JPEG (PNG and WebP compress less at the transport layer but still benefit)
 - [ ] HTTP/2 or HTTP/3 is enabled on the image origin to allow multiplexed requests
 
 INP is a more complex and demanding metric than FID was, but the good news is that the fixes are well-understood. The image-related causes of poor INP are among the most tractable: they respond to clear technical interventions like adding `decoding="async"`, setting `width` and `height` attributes, and reducing file sizes. None of these changes require architectural overhauls. They can be implemented incrementally and the impact can be measured precisely in the Chrome DevTools Performance panel.
@@ -210,3 +237,44 @@ INP is a more complex and demanding metric than FID was, but the good news is th
 Start with your highest-traffic pages, focus on the interactive image components (carousels, modals, galleries), and work through the checklist above. The sites that have done this work since INP launched in 2024 have seen meaningful improvements in their Core Web Vitals scores, and there is no reason to wait any longer to start.
 
 *Optimage compresses images for web delivery, converting to WebP and AVIF with batch processing and dimension control. [Try it free.](/)*
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is INP and how does it affect Google rankings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "INP (Interaction to Next Paint) measures the time from a user interaction to the next visual update on screen. Google's Good threshold is under 200ms at the 75th percentile. Since March 2024, INP is an official Core Web Vital and directly influences Google's Page Experience ranking signal — poor INP can negatively impact search positions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do images cause poor INP scores?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Images cause poor INP primarily through synchronous main-thread decoding. When a user interaction reveals a large image (opening a modal, clicking a carousel, scrolling to a product), the browser decodes that image on the main thread, blocking the visual response. Images without explicit dimensions also cause layout shifts that extend presentation delay, worsening INP."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is decoding='async' and does it help INP?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The decoding='async' attribute on an img element tells the browser to decode the image off the main thread when resources are available, rather than blocking synchronously. For images that are revealed by user interaction — carousel slides, modal images, lazy-loaded content — this is the single most impactful fix for image-related INP problems. It should be applied to all images except the above-the-fold LCP image."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What file size targets should I use for images to improve INP?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For INP optimization, target: hero/LCP images under 200KB in WebP, carousel slide images under 100KB each, modal product images under 150KB, and infinite scroll thumbnails under 50KB. Smaller files decode faster, reducing the main-thread blocking time that contributes to poor INP scores on image-heavy pages."
+      }
+    }
+  ]
+}
+</script>

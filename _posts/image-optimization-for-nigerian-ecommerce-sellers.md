@@ -2,6 +2,25 @@
 title: "The Nigerian E-Commerce Seller's Guide to Image Optimization: More Sales, Faster Pages"
 date: "2026-03-11T09:00:00Z"
 excerpt: "Whether you sell on Jumia, Konga, Jiji, or your own website, your product photos are silently costing you sales. Here is how Nigerian online sellers can fix that in under 30 minutes."
+variants:
+  - excerpt: "Nigerian mobile networks average 17 Mbps — unoptimized product images at 3–8 MB each kill conversions before customers reach checkout."
+    keyTakeaways:
+      - "A product listing with 8–12 unoptimized photos can load 24–96 MB of data on Nigerian 4G"
+      - "Converting photos to WebP quality 80 reduces a 4 MB image to under 400 KB with no visible quality loss"
+      - "Jiji sellers using WebP at quality 75 see file sizes drop from 3 MB to 150–200 KB per image"
+      - "The full optimization workflow for 30 product photos takes 8–12 minutes using bulk upload"
+  - excerpt: "Every additional second of mobile load time cuts e-commerce conversions by 12% — Nigerian sellers with 60 MB listing pages lose buyers in under 20 seconds."
+    keyTakeaways:
+      - "Google research: each extra second of mobile load time drops conversions by an average of 12%"
+      - "Jumia recommends 1200x1200 WebP at quality 82 — seller-controlled compression beats platform auto-compression"
+      - "A typical Nigerian startup landing page drops from 30.8 MB to 1.66 MB after image optimization — a 94.6% reduction"
+      - "Konga's 2 MB file size limit means pre-compressing to 1024x1024 JPEG at quality 80 is mandatory"
+  - excerpt: "Nigerian online sellers who optimize product images report more Jiji inquiries, better Jumia search rankings, and lower bounce rates on standalone stores."
+    keyTakeaways:
+      - "Optimized images improve search ranking on Jumia and Konga, both of which factor page performance into results"
+      - "Faster-loading listings generate more impressions on classified platforms like Jiji"
+      - "A professional, fast-loading store increases customer trust and purchase confidence"
+      - "Food photography needs WebP quality 85 minimum — lower settings shift colors and reduce appetite appeal"
 ---
 
 ## The Photo Problem Most Nigerian Sellers Do Not See
@@ -15,6 +34,15 @@ The answer is almost always the same: your product images are too heavy, and Nig
 A typical product photo taken on a modern smartphone is between 3 and 8 MB. An average product listing page loads 8 to 12 photos. That is between 24 MB and 96 MB of image data per page, downloaded over an MTN or Airtel connection before a customer can even decide if they want to buy.
 
 At average Nigerian mobile speeds, 60 MB of images takes between 20 and 40 seconds to fully load. By then, your potential customer has already left.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">12%</text><text x="110" y="78" text-anchor="middle" class="sl">Conv. drop per extra second</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">94%</text><text x="350" y="78" text-anchor="middle" class="sl">Avg. image size reduction</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">8 min</text><text x="590" y="78" text-anchor="middle" class="sl">To optimize 30 photos</text></g>
+</svg>
+</div>
 
 ## What the Research Actually Shows
 
@@ -57,6 +85,18 @@ Standard recommendations for Nigerian store owners:
 - Use lazy loading so only images in the visible viewport download immediately (Next.js and WooCommerce both support this natively)
 
 ## The Categories Where This Matters Most
+
+<figure role="img" aria-label="Product category optimization workflow" style="margin:32px 0">
+<svg viewBox="0 0 660 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block">
+  <style>.px{animation:pi .5s ease-out both}.px:nth-child(1){animation-delay:0s}.px:nth-child(2){animation-delay:.2s}.px:nth-child(3){animation-delay:.4s}@keyframes pi{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}.pn{font:700 13px system-ui,sans-serif;fill:#db5a42}.pt{font:500 11px system-ui,sans-serif;fill:#374151}</style>
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#d1d5db"/></marker></defs>
+  <g class="px"><rect x="10" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="97" y="46" text-anchor="middle" class="pn">① Photograph</text><text x="97" y="66" text-anchor="middle" class="pt">Full-quality source photo</text></g>
+  <line x1="188" y1="50" x2="238" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="243" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="330" y="46" text-anchor="middle" class="pn">② Compress</text><text x="330" y="66" text-anchor="middle" class="pt">WebP quality 75–85</text></g>
+  <line x1="421" y1="50" x2="471" y2="50" stroke="#d1d5db" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="px"><rect x="476" y="15" width="175" height="70" rx="12" fill="#fdf3f1" stroke="#f9c5b8" stroke-width="1.5"/><text x="563" y="46" text-anchor="middle" class="pn">③ Upload</text><text x="563" y="66" text-anchor="middle" class="pt">Platform-ready listing image</text></g>
+</svg>
+</figure>
 
 **Fashion and Clothing**
 Fabric textures require higher quality to show detail, but background is largely irrelevant. Crop tightly to the product, shoot on a plain background, and compress to WebP quality 82. A typical fashion photo goes from 4 MB to under 350 KB with no visible difference in product detail.
@@ -105,3 +145,32 @@ Start with your top 5 products. Compress their images, upload the optimized vers
 - [Why Website Speed Matters Twice as Much in Nigeria](/blog/website-speed-nigeria-africa-why-it-matters-more) — the network and device context behind these numbers
 - [AVIF vs WebP vs JPEG: The 2026 Benchmark](/blog/avif-vs-webp-vs-jpeg-2026-benchmark) — which format to use for which product category
 - [Social Media Image Sizes for Every Platform in 2026](/blog/social-media-image-size-guide-all-platforms-2026) — once your products are optimized, make sure they are sized correctly for Instagram, Facebook, and WhatsApp
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What image format should Nigerian e-commerce sellers use for product photos?",
+      "acceptedAnswer": { "@type": "Answer", "text": "WebP is the recommended format for Nigerian e-commerce sellers. At quality 80, WebP typically reduces a 4 MB product photo to under 400 KB with no visible quality loss. It is supported by all modern browsers including Chrome, Firefox, and Safari on iPhones from 2020 onward." }
+    },
+    {
+      "@type": "Question",
+      "name": "What image size does Jumia recommend for product photos?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Jumia recommends product images at exactly 1200x1200 pixels. Uploading pre-compressed WebP files at this size and quality 82 gives you control over compression quality rather than relying on Jumia's automatic compression, which can introduce visible artifacts especially around text on packaging." }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take to optimize product images for Nigerian online stores?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Using a bulk tool like Optimage, optimizing 30 product photos takes approximately 8 to 12 minutes. The process involves uploading photos in batch, selecting WebP format, setting quality to 80, processing, and downloading the optimized files ready to upload to Jumia, Konga, Jiji, or your own store." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do Jiji listings load slowly and what quality setting should I use?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Jiji listings load slowly because sellers upload unoptimized phone photos that can be 3 MB or more each. For Jiji, compress images to WebP at quality 75. This reduces a typical 3 MB phone photo to 150 to 200 KB while remaining visually sharp in the Jiji grid view and listing pages, which matters for Jiji's primarily mobile audience on budget Android devices." }
+    }
+  ]
+}
+</script>

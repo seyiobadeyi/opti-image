@@ -2,11 +2,39 @@
 title: "How to Optimize Images for Every Social Media Platform in 2026: The Complete Cheat Sheet"
 date: "2026-03-14T20:30:00Z"
 excerpt: "Every major platform has different dimension requirements, compression behavior, and format preferences. Get it wrong and your images get re-compressed into blurry messes. Get it right and your content looks crisp everywhere."
+variants:
+  - excerpt: "Every social media platform re-compresses your images the moment you upload them. The trick is to pre-optimize to exactly what each platform expects — then their compression either skips or runs at maximum quality, leaving your images crisp."
+    keyTakeaways:
+      - "Instagram targets 80-200KB per image; uploads above 1MB trigger aggressive re-compression"
+      - "Facebook strips all color profile metadata — convert to sRGB before uploading or colors will look washed out"
+      - "X (Twitter) converts all images to WebP on modern browsers, JPEG as fallback"
+      - "YouTube thumbnails need JPEG quality 85+ — over-compressed thumbnails look terrible in search results at small sizes"
+  - excerpt: "LinkedIn is the only major platform where uploading a high-quality PNG is actually beneficial for graphics with text — their PNG compression is gentler than Instagram or Twitter, making it the right choice for infographics and data visualizations."
+    keyTakeaways:
+      - "LinkedIn post images: 1200x627px (1.91:1) or 1200x1200px square"
+      - "Facebook cover photos under 100KB get noticeably sharper rendering than larger covers"
+      - "Instagram feed: 4:5 portrait (1080x1350) displays larger in feed than square or landscape"
+      - "Always strip EXIF metadata before uploading — GPS coordinates and device info add file size and expose private data"
+  - excerpt: "The universal pre-upload checklist: convert to sRGB, strip EXIF, export at exact target dimensions, use JPEG quality 80-85 for photos, PNG for text graphics. Five steps that prevent 90% of platform compression problems."
+    keyTakeaways:
+      - "TikTok has the most aggressive compression — always upload at maximum supported resolution"
+      - "Pinterest vertical (1000x1500, 2:3 ratio) gets 40% more feed space than square or landscape pins"
+      - "YouTube channel art safe zone: 1546x423px centered — design within this or TV apps will crop your branding"
+      - "Animated content: always use MP4, not GIF — a short GIF is 10-50x larger than an equivalent MP4"
 ---
 
 ## Why Your Social Media Images Look Terrible
 
 You took a sharp, well-composed photo. You uploaded it. It came back blurry, with crushed shadows, and that telltale JPEG artifact ring around every high-contrast edge.
+
+<div role="presentation" style="margin:32px 0">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block">
+  <style>.sn{font:700 32px/1 system-ui,sans-serif;fill:#db5a42}.sl{font:500 13px/1 system-ui,sans-serif;fill:#374151}.sb{animation:fu .6s ease-out both}.sb:nth-child(2){animation-delay:.15s}.sb:nth-child(3){animation-delay:.3s}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}</style>
+  <g class="sb"><rect x="30" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="110" y="58" text-anchor="middle" class="sn">6</text><text x="110" y="78" text-anchor="middle" class="sl">Platforms, 6 compression pipelines</text></g>
+  <g class="sb"><rect x="270" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="350" y="58" text-anchor="middle" class="sn">1MB</text><text x="350" y="78" text-anchor="middle" class="sl">Instagram compression trigger</text></g>
+  <g class="sb"><rect x="510" y="20" width="160" height="70" rx="12" fill="#fdf3f1"/><text x="590" y="58" text-anchor="middle" class="sn">sRGB</text><text x="590" y="78" text-anchor="middle" class="sl">Required color space everywhere</text></g>
+</svg>
+</div>
 
 This is not a coincidence. Every major social media platform runs your image through its own compression pipeline the moment you upload it. Each platform has different target file size budgets, different dimension constraints, and different codec preferences. If you hand them a 4MB PNG with the wrong aspect ratio, they will resize and re-compress it aggressively. Every generation of re-compression multiplies artifact damage.
 
@@ -91,6 +119,32 @@ YouTube images appear in three primary contexts: thumbnails, channel art, and vi
 
 Facebook applies the most aggressive re-compression of all the major platforms for images posted to personal feeds and Pages.
 
+<figure role="img" aria-label="Platform-by-platform compression aggressiveness" style="margin:32px 0">
+<svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;display:block;margin:0 auto">
+  <style>.bc{animation:bg .7s ease-out both}.bc:nth-child(1){animation-delay:0s}.bc:nth-child(2){animation-delay:.12s}.bc:nth-child(3){animation-delay:.24s}.bc:nth-child(4){animation-delay:.36s}.bc:nth-child(5){animation-delay:.48s}.bc:nth-child(6){animation-delay:.6s}@keyframes bg{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}.bl{font:600 11px system-ui,sans-serif;fill:#374151;text-anchor:middle}.bv{font:700 12px system-ui,sans-serif;fill:#db5a42;text-anchor:middle}</style>
+  <line x1="40" y1="20" x2="40" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="40" y1="160" x2="620" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+  <rect class="bc" x="55" y="30" width="72" height="130" rx="4" fill="#db5a42" opacity=".9"/>
+  <text x="91" y="23" class="bv">Most</text>
+  <text x="91" y="178" class="bl">Facebook</text>
+  <rect class="bc" x="145" y="50" width="72" height="110" rx="4" fill="#db5a42" opacity=".75"/>
+  <text x="181" y="43" class="bv">High</text>
+  <text x="181" y="178" class="bl">TikTok</text>
+  <rect class="bc" x="235" y="65" width="72" height="95" rx="4" fill="#db5a42" opacity=".65"/>
+  <text x="271" y="58" class="bv">Med-High</text>
+  <text x="271" y="178" class="bl">Instagram</text>
+  <rect class="bc" x="325" y="80" width="72" height="80" rx="4" fill="#db5a42" opacity=".55"/>
+  <text x="361" y="73" class="bv">Medium</text>
+  <text x="361" y="178" class="bl">Twitter/X</text>
+  <rect class="bc" x="415" y="100" width="72" height="60" rx="4" fill="#db5a42" opacity=".45"/>
+  <text x="451" y="93" class="bv">Lower</text>
+  <text x="451" y="178" class="bl">YouTube</text>
+  <rect class="bc" x="505" y="118" width="72" height="42" rx="4" fill="#db5a42" opacity=".35"/>
+  <text x="541" y="111" class="bv">Least</text>
+  <text x="541" y="178" class="bl">LinkedIn</text>
+</svg>
+</figure>
+
 **Shared link thumbnails:** 1200 x 630px
 **Feed photos:** 1080 x 1350px (4:5 portrait) or 1080 x 1080px (square)
 **Stories:** 1080 x 1920px
@@ -117,3 +171,44 @@ Subscribe to our [weekly newsletter](/) for more workflows like this, delivered 
 ## Summary
 
 Every platform re-compresses your images. Your goal is to give them nothing to do. When your upload already matches their preferred dimensions and is pre-compressed to a reasonable quality level, the re-compression either skips or runs at maximum quality settings. The result is images that look crisp and professional instead of soft and artifact-ridden.
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why do my images look blurry after uploading to social media?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Every social media platform re-compresses images you upload with its own compression algorithm. If you upload an image that is larger than their target size or at the wrong dimensions, they resize and re-compress it aggressively, multiplying artifact damage. The solution is to pre-optimize images to exactly each platform's preferred dimensions and file size before uploading, so the platform's compression either skips entirely or runs at maximum quality."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What image size should I use for Instagram in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For Instagram feed posts, 1080x1350px (4:5 portrait) is the optimal format — it displays larger in the feed than square or landscape posts, giving you more visual real estate. Upload JPEG at quality 80 and keep file size under 1MB to avoid Instagram's most aggressive compression pass. For Stories and Reels, use 1080x1920px (9:16) and keep critical content within the center safe zone to avoid cropping."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Facebook compress images more than other platforms?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Facebook applies the most aggressive re-compression of all major social platforms for images posted to personal feeds and Pages. Facebook also strips all EXIF and ICC color profile metadata from uploaded images — if your image uses a wide gamut profile like P3 or AdobeRGB, it will look washed out after Facebook's processing. Always convert to sRGB before uploading to Facebook. Cover photos perform best when kept under 100KB before upload."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What color space should I use for social media images?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "sRGB is the required color space for all major social media platforms. Wide gamut profiles like Adobe RGB (1998) and Display P3 are stripped by every platform during upload processing, causing colors to appear washed out or incorrectly saturated. Always convert images to sRGB as part of your export workflow before uploading to Instagram, Facebook, Twitter, LinkedIn, YouTube, or TikTok."
+      }
+    }
+  ]
+}
+</script>

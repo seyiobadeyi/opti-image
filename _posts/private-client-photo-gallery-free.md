@@ -2,6 +2,25 @@
 title: "How to Create a Private Client Photo Gallery for Free"
 date: "2026-03-28T11:00:00Z"
 excerpt: "Create a PIN-protected private photo gallery for clients in minutes using Optimage — free, no Pixieset subscription needed. Upload photos, set a PIN or email access list, and share a secure link."
+variants:
+  - excerpt: "Create a PIN-protected private photo gallery for clients in minutes using Optimage — free, no Pixieset subscription needed. Upload photos, set a PIN or email access list, and share a secure link."
+    keyTakeaways:
+      - "PIN protection: only people with your link and PIN can access the gallery"
+      - "Download controls: choose whether clients can download originals or not at all"
+      - "No client account required — gallery opens in any browser with just the PIN"
+      - "Free with unlimited galleries and no photo count limits"
+  - excerpt: "A private client gallery solves the three problems with sharing photos via cloud storage: no access control on Dropbox links, no download controls on Google Photos, and no professional presentation in WeTransfer. An Optimage gallery gives you all three."
+    keyTakeaways:
+      - "Dropbox link: anyone who gets the link can view and download — no PIN option"
+      - "Google Photos share: no PIN protection, may be indexed by Google"
+      - "WeTransfer: expires after 7 days (free tier), no access control"
+      - "Optimage gallery: PIN-gated, no expiry, with selective download control"
+  - excerpt: "The professional client delivery workflow: compress photos in Optimage's batch compressor, upload the compressed files to a gallery, set a PIN, send the link to your client. The whole setup takes under 5 minutes for a 50-photo session."
+    keyTakeaways:
+      - "Compress before uploading: reduces gallery loading time for clients on mobile"
+      - "Gallery setup time: under 2 minutes to create, upload, and set PIN"
+      - "Link sharing: copy-paste the gallery URL into any messaging app or email"
+      - "After client views gallery, revoke access by changing the PIN at any time"
 ---
 
 You can create a PIN-protected private client photo gallery for free using [Optimage's gallery tool](/galleries). Create a gallery in your dashboard, upload your photos, set a PIN or email-restricted access, and share the link with your client. They open the URL, enter the PIN, and browse or download their images — no app download, no account, and no Pixieset subscription required.
