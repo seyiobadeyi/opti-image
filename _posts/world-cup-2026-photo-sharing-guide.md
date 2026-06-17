@@ -56,7 +56,7 @@ The fix is to control the compression yourself, before the platform gets it. Whe
 </svg>
 </figure>
 
-Open [optimage.dreamintrepid.com/compress](/compress) in your phone or laptop browser. Drop up to 50 photos in at once. Optimage processes everything locally in your browser — nothing goes to a server, so your photos stay private. Click download, then share the output files directly. That is the entire workflow.
+Open [optimage.dreamintrepid.com/compress](/compress) in your phone or laptop browser. Drop up to 50 photos in at once. Optimage compresses your photos and returns them ready to download — files are not retained after your session ends. Click download, then share the output files directly. That is the entire workflow.
 
 ## Target File Sizes by Platform
 

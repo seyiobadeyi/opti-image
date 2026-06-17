@@ -75,7 +75,7 @@ This is precisely why converting HEIC to JPEG matters: JPEG works everywhere, fr
 3. In the output format selector, choose **JPEG**.
 4. Click Convert, then download your JPG file.
 
-No account creation. No email required. No watermarks. Files are processed in your browser or on Optimage's servers and are never stored beyond your session.
+No account creation. No email required. No watermarks added to your output.
 
 ## HEIC vs JPG: Quality Trade-Off When Converting
 

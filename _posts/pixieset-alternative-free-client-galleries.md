@@ -5,7 +5,7 @@ excerpt: "Optimage provides PIN-protected client galleries with download control
 variants:
   - excerpt: "Optimage provides PIN-protected client galleries with download controls, favourites selection, and custom branding completely free — no monthly subscription required."
     keyTakeaways:
-      - "Optimage galleries: PIN protection, download controls, shareable link — free forever"
+      - "Optimage galleries: PIN protection, download controls, shareable link — included with your free account"
       - "Pixieset Basic: starts at $8/month for 15GB storage and client proofing"
       - "No client account required to view an Optimage gallery — just a browser and the PIN"
       - "Optimage has no gallery or photo count limits — Pixieset free tier caps at 3 galleries"

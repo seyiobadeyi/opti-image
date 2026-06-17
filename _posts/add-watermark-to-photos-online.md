@@ -67,7 +67,7 @@ Go to [Optimage's watermark page](/watermark) and follow these steps:
 2. **Type your watermark text** — your name, website, studio name, copyright symbol + year (e.g. `© 2026 Jane Smith`), or any phrase. Choose font size and colour.
 3. **Pick a position** — nine anchor points cover every corner, mid-edge, and the center of the image. The "tiled" option repeats your watermark across the entire photo, making cropping attacks useless.
 4. **Adjust opacity** — 100% is fully opaque; 30–50% is the sweet spot for most portfolio work (visible but not distracting). Go lower for subtle branding on final deliverables.
-5. **Click Download** — your watermarked image downloads immediately. The original is never stored on our servers.
+5. **Click Download** — your watermarked image downloads immediately.
 
 ## Choosing the Right Watermark Position
 

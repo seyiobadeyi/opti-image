@@ -100,7 +100,7 @@ The sharpness row is important. All three formats handle sports freeze-frames we
 </svg>
 </figure>
 
-Open [Optimage /convert](/convert). Drop your JPEG selects in. Choose WebP as the output format. Download the batch ZIP. The converted files are ready for web publishing. For a gallery of 100 images, total conversion time in-browser is typically 2–4 minutes.
+Open [Optimage /convert](/convert). Drop your JPEG selects in. Choose WebP as the output format. Download the batch ZIP. The converted files are ready for web publishing. For a gallery of 100 images, total processing time is typically 2–4 minutes.
 
 ## Does AVIF Handle Motion and Action Shots Well?
 
