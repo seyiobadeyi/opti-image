@@ -505,19 +505,124 @@ export default function GalleriesLandingPage({
                     50%      { transform: translateY(7px); }
                 }
                 .gallery-rain-card img { pointer-events: none; }
+
+                /* Panel stacking (desktop) */
                 .audience-panel  { position: absolute; inset: 0; will-change: transform; }
                 .audience-panel:not(:first-child)  { transform: translateY(100%); }
                 .step-panel      { position: absolute; inset: 0; will-change: transform; }
                 .step-panel:not(:first-child) { transform: translateY(100%); }
+
+                /* Panel inner layout (default desktop: 50/50 row) */
+                .audience-inner, .step-inner {
+                    display: flex;
+                    height: 100%;
+                    align-items: stretch;
+                }
+                .panel-img-half {
+                    flex: 0 0 50%;
+                    position: relative;
+                    overflow: hidden;
+                    min-height: 280px;
+                }
+                .panel-img-half img {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                }
+                .panel-text-half {
+                    flex: 0 0 50%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: clamp(32px,5vw,72px) clamp(24px,4vw,64px);
+                    overflow-y: auto;
+                }
+
+                /* Feature cards — min width on track items */
+                .feat-card { flex: 0 0 300px; }
+
+                /* Showcase grid */
+                .showcase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+                /* Comparison table */
+                .comp-table { overflow-x: auto; border-radius: 20px; border: 1px solid #e5e7eb; }
+                .comp-table table { width: 100%; border-collapse: collapse; font-size: 0.92rem; background: #ffffff; }
+
+                /* Trust bar */
+                .trust-bar { display: flex; justify-content: space-around; align-items: center; gap: 24px; flex-wrap: wrap; }
+                .trust-item { display: flex; align-items: center; gap: 12px; min-width: 160px; }
+
+                /* Hero buttons */
+                .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+                .hero-btn-primary, .hero-btn-secondary { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+
+                /* Viral / showcase two-col */
+                .viral-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 56px; align-items: center; }
+
+                /* Final CTA buttons */
+                .final-cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+                /* ── TABLET (≤900px) ── */
                 @media (max-width: 900px) {
-                    .audience-inner  { flex-direction: column !important; }
-                    .step-inner      { flex-direction: column !important; }
-                    .hero-btns       { flex-direction: column !important; align-items: stretch !important; }
-                    .trust-bar       { flex-wrap: wrap !important; gap: 16px !important; justify-content: center !important; }
-                    .viral-cols      { grid-template-columns: 1fr !important; }
-                    .final-cta-btns  { flex-direction: column !important; align-items: stretch !important; }
-                    .comp-table td,
-                    .comp-table th   { padding: 10px 14px !important; font-size: 0.8rem !important; }
+                    /* Stack panels vertically on mobile: image on top, text below */
+                    .audience-inner, .step-inner { flex-direction: column !important; }
+                    .step-inner.img-left { flex-direction: column !important; }
+                    .panel-img-half { flex: 0 0 45vh !important; width: 100%; }
+                    .panel-text-half { flex: 1 1 auto !important; width: 100%; padding: 28px 24px !important; overflow-y: auto; }
+
+                    /* Feature cards narrower */
+                    .feat-card { flex: 0 0 260px !important; }
+
+                    /* Showcase 2-col on tablet */
+                    .showcase-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+                    /* Hero */
+                    .hero-btns { flex-direction: column; align-items: stretch; }
+                    .hero-btn-primary, .hero-btn-secondary { justify-content: center; }
+
+                    /* Viral cols single */
+                    .viral-cols { grid-template-columns: 1fr !important; gap: 40px !important; }
+
+                    /* CTA buttons */
+                    .final-cta-btns { flex-direction: column; align-items: stretch; }
+                    .final-cta-btns a { justify-content: center; }
+
+                    /* Trust bar */
+                    .trust-bar { gap: 20px; justify-content: center; }
+                    .trust-item { min-width: 140px; }
+
+                    /* Comparison */
+                    .comp-table td, .comp-table th { padding: 10px 12px !important; font-size: 0.78rem !important; }
+                }
+
+                /* ── MOBILE (≤600px) ── */
+                @media (max-width: 600px) {
+                    /* Pinned sections: on very small screens disable pinning gracefully */
+                    .panel-img-half { flex: 0 0 38vh !important; }
+                    .panel-text-half { padding: 20px 18px !important; }
+
+                    /* Feature section: just scroll normally */
+                    .feat-card { flex: 0 0 240px !important; }
+
+                    /* Showcase 1-col */
+                    .showcase-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
+
+                    /* Rain cards narrower on mobile */
+                    .gallery-rain-card { width: 100px !important; }
+                    .gallery-rain-card img { height: 125px !important; }
+
+                    /* Trust bar: 2 per row */
+                    .trust-bar { justify-content: flex-start; gap: 16px 24px; }
+                    .trust-item { min-width: calc(50% - 24px); }
+
+                    /* Comparison: hide last column, simplify */
+                    .comp-col-others { display: none; }
+
+                    /* Text scale */
+                    .panel-num-ghost { font-size: clamp(3.5rem,18vw,6rem) !important; }
                 }
             `}</style>
 
@@ -569,11 +674,11 @@ export default function GalleriesLandingPage({
                         Free — zero commissions, no per-gallery fees.
                     </p>
 
-                    <div className="hero-btns" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 30px', borderRadius: '100px', background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', color: 'white', fontWeight: 700, fontSize: '1rem', textDecoration: 'none', boxShadow: '0 0 32px rgba(219,90,66,0.45)' }}>
+                    <div className="hero-btns">
+                        <Link href="/dashboard" className="hero-btn-primary" style={{ padding: '14px 30px', borderRadius: '100px', background: 'linear-gradient(135deg, #db5a42 0%, #c44d32 100%)', color: 'white', fontWeight: 700, fontSize: '1rem', textDecoration: 'none', boxShadow: '0 0 32px rgba(219,90,66,0.45)' }}>
                             Start free <ArrowRight size={16} />
                         </Link>
-                        <a href="#how-it-works" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 28px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.88)', fontWeight: 600, fontSize: '1rem', textDecoration: 'none' }}>
+                        <a href="#how-it-works" className="hero-btn-secondary" style={{ padding: '14px 28px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.88)', fontWeight: 600, fontSize: '1rem', textDecoration: 'none' }}>
                             See how it works <ChevronRight size={16} />
                         </a>
                     </div>
@@ -590,14 +695,14 @@ export default function GalleriesLandingPage({
 
             {/* ── TRUST BAR ────────────────────────────────────────────────── */}
             <section style={{ background: '#ffffff', borderBottom: `1px solid ${BORDER}`, padding: '28px 24px' }}>
-                <div className="trust-bar" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-around', alignItems: 'center', gap: '24px' }}>
+                <div className="trust-bar" style={{ maxWidth: '1100px', margin: '0 auto' }}>
                     {[
-                        { icon: <Zap size={18} color={ACCENT} />,          stat: '0%',     label: 'Commission on payments' },
-                        { icon: <CheckCircle size={18} color={SUCCESS} />,  stat: 'Free',   label: 'All features included'  },
-                        { icon: <Lock size={18} color={ACCENT} />,          stat: '4',      label: 'Access control modes'   },
-                        { icon: <Star size={18} color="#f59e0b" />,         stat: '< 5 min',label: 'Gallery setup time'     },
+                        { icon: <Zap size={18} color={ACCENT} />,          stat: '0%',      label: 'Commission on payments' },
+                        { icon: <CheckCircle size={18} color={SUCCESS} />,  stat: 'Free',    label: 'All features included'  },
+                        { icon: <Lock size={18} color={ACCENT} />,          stat: '4',       label: 'Access control modes'   },
+                        { icon: <Star size={18} color="#f59e0b" />,         stat: '< 5 min', label: 'Gallery setup time'     },
                     ].map(({ icon, stat, label }) => (
-                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div key={label} className="trust-item">
                             {icon}
                             <div>
                                 <p style={{ fontSize: '1.05rem', fontWeight: 800, color: TEXT_PRIMARY, lineHeight: 1, marginBottom: '2px' }}>{stat}</p>
@@ -619,44 +724,41 @@ export default function GalleriesLandingPage({
                         className="audience-panel"
                         style={{ background: panel.bg }}
                     >
-                        <div
-                            className="audience-inner"
-                            style={{ display: 'flex', height: '100%', alignItems: 'stretch' }}
-                        >
+                        <div className="audience-inner">
                             {/* Image half */}
-                            <div style={{ flex: '0 0 50%', position: 'relative', overflow: 'hidden' }}>
+                            <div className="panel-img-half">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     className="audience-img"
                                     src={panel.image}
                                     alt={panel.label}
-                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transformOrigin: 'center center' }}
-                                    loading="lazy"
+                                    style={{ transformOrigin: 'center center' }}
+                                    loading={i === 0 ? 'eager' : 'lazy'}
                                 />
                                 {/* Color overlay */}
                                 <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to right, ${panel.bg}88, transparent)` }} />
                                 {/* Label pill */}
-                                <div style={{ position: 'absolute', bottom: '32px', left: '32px', padding: '6px 14px', borderRadius: '100px', background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)', border: `1px solid ${panel.accent}44` }}>
+                                <div style={{ position: 'absolute', bottom: '20px', left: '20px', padding: '6px 14px', borderRadius: '100px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', border: `1px solid ${panel.accent}44`, zIndex: 2 }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: panel.accent, letterSpacing: '0.06em' }}>{panel.label}</span>
                                 </div>
                             </div>
 
                             {/* Text half */}
-                            <div style={{ flex: '0 0 50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px,6vw,80px) clamp(32px,5vw,72px)' }}>
-                                <p className="panel-line" style={{ fontSize: '0.72rem', fontWeight: 700, color: panel.accent, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '24px' }}>
+                            <div className="panel-text-half">
+                                <p className="panel-line" style={{ fontSize: '0.72rem', fontWeight: 700, color: panel.accent, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '20px' }}>
                                     {String(i + 1).padStart(2, '0')} / {AUDIENCE_PANELS.length.toString().padStart(2, '0')}
                                 </p>
-                                <h2 className="panel-line" style={{ fontSize: 'clamp(2rem,4vw,3.2rem)', fontWeight: 900, color: '#ffffff', lineHeight: 1.12, letterSpacing: '-0.04em', marginBottom: '24px', whiteSpace: 'pre-line' }}>
+                                <h2 className="panel-line" style={{ fontSize: 'clamp(1.7rem,3.5vw,3rem)', fontWeight: 900, color: '#ffffff', lineHeight: 1.12, letterSpacing: '-0.04em', marginBottom: '20px', whiteSpace: 'pre-line' }}>
                                     {panel.heading}
                                 </h2>
-                                <p className="panel-line" style={{ fontSize: 'clamp(0.95rem,1.5vw,1.05rem)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: '36px', maxWidth: '460px' }}>
+                                <p className="panel-line" style={{ fontSize: 'clamp(0.9rem,1.4vw,1.05rem)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, marginBottom: '28px', maxWidth: '440px' }}>
                                     {panel.body}
                                 </p>
-                                <ul className="panel-line" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                <ul className="panel-line" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {panel.benefits.map((b) => (
-                                        <li key={b} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                                            <CheckCircle size={16} color={panel.accent} style={{ flexShrink: 0, marginTop: '3px' }} />
-                                            <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}>{b}</span>
+                                        <li key={b} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                                            <CheckCircle size={15} color={panel.accent} style={{ flexShrink: 0, marginTop: '3px' }} />
+                                            <span style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}>{b}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -680,35 +782,30 @@ export default function GalleriesLandingPage({
                     >
                         <div
                             className="step-inner"
-                            style={{
-                                display: 'flex',
-                                height: '100%',
-                                alignItems: 'stretch',
-                                flexDirection: step.imgLeft ? 'row-reverse' : 'row',
-                            }}
+                            style={{ flexDirection: step.imgLeft ? 'row-reverse' : 'row' }}
                         >
                             {/* Image half */}
-                            <div style={{ flex: '0 0 50%', position: 'relative', overflow: 'hidden' }}>
+                            <div className="panel-img-half">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     className="step-img"
                                     src={step.image}
                                     alt={step.title}
-                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transformOrigin: 'center center' }}
-                                    loading="lazy"
+                                    style={{ transformOrigin: 'center center' }}
+                                    loading={i === 0 ? 'eager' : 'lazy'}
                                 />
                                 <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(${step.imgLeft ? 'to left' : 'to right'}, ${step.bg}66, transparent)` }} />
                             </div>
 
                             {/* Text half */}
-                            <div style={{ flex: '0 0 50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px,6vw,80px) clamp(32px,5vw,72px)' }}>
-                                <p className="step-line" style={{ fontSize: 'clamp(5rem,12vw,9rem)', fontWeight: 900, color: 'rgba(255,255,255,0.04)', lineHeight: 1, letterSpacing: '-0.06em', marginBottom: '-24px', userSelect: 'none' }}>
+                            <div className="panel-text-half">
+                                <p className="step-line panel-num-ghost" style={{ fontSize: 'clamp(4rem,10vw,8rem)', fontWeight: 900, color: 'rgba(255,255,255,0.05)', lineHeight: 1, letterSpacing: '-0.06em', marginBottom: '-20px', userSelect: 'none' }}>
                                     {step.num}
                                 </p>
-                                <h2 className="step-line" style={{ fontSize: 'clamp(1.8rem,3.5vw,2.8rem)', fontWeight: 800, color: '#ffffff', lineHeight: 1.15, letterSpacing: '-0.03em', marginBottom: '20px' }}>
+                                <h2 className="step-line" style={{ fontSize: 'clamp(1.6rem,3vw,2.6rem)', fontWeight: 800, color: '#ffffff', lineHeight: 1.15, letterSpacing: '-0.03em', marginBottom: '16px' }}>
                                     {step.title}
                                 </h2>
-                                <p className="step-line" style={{ fontSize: 'clamp(0.95rem,1.5vw,1.05rem)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.85, maxWidth: '460px' }}>
+                                <p className="step-line" style={{ fontSize: 'clamp(0.88rem,1.4vw,1rem)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.85, maxWidth: '440px' }}>
                                     {step.body}
                                 </p>
                             </div>
@@ -738,8 +835,8 @@ export default function GalleriesLandingPage({
                     {FEATURE_CARDS.map((f) => (
                         <div
                             key={f.name}
+                            className="feat-card"
                             style={{
-                                flex: '0 0 320px',
                                 background: 'rgba(255,255,255,0.04)',
                                 border: '1px solid rgba(255,255,255,0.08)',
                                 borderRadius: '20px',
@@ -859,7 +956,7 @@ export default function GalleriesLandingPage({
                                 <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
                                     <th style={{ textAlign: 'left', padding: '16px 24px', color: TEXT_MUTED, fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '50%' }}>Feature</th>
                                     <th style={{ textAlign: 'center', padding: '16px 24px', color: ACCENT, fontWeight: 700, fontSize: '0.88rem' }}>Optimage</th>
-                                    <th style={{ textAlign: 'center', padding: '16px 24px', color: TEXT_MUTED, fontWeight: 600, fontSize: '0.88rem' }}>Pixieset / ShootProof</th>
+                                    <th className="comp-col-others" style={{ textAlign: 'center', padding: '16px 24px', color: TEXT_MUTED, fontWeight: 600, fontSize: '0.88rem' }}>Pixieset / ShootProof</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -871,7 +968,7 @@ export default function GalleriesLandingPage({
                                                 <CheckCircle size={14} color={SUCCESS} />{row.optimage}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '14px 24px', textAlign: 'center', color: TEXT_MUTED, fontSize: '0.88rem' }}>{row.others}</td>
+                                        <td className="comp-col-others" style={{ padding: '14px 24px', textAlign: 'center', color: TEXT_MUTED, fontSize: '0.88rem' }}>{row.others}</td>
                                     </tr>
                                 ))}
                             </tbody>
