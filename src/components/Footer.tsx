@@ -83,10 +83,10 @@ export default function Footer(): React.JSX.Element {
     };
 
     return (
-        <footer style={{ background: c.bg, paddingTop: '90px' }}>
+        <footer style={{ background: c.bg, paddingTop: '160px' }}>
 
             {/* Floating newsletter CTA */}
-            <div style={{ maxWidth: '860px', margin: '-90px auto 0', padding: '0 24px', position: 'relative', zIndex: 2 }}>
+            <div style={{ maxWidth: '860px', margin: '-100px auto 0', padding: '0 24px', position: 'relative', zIndex: 2 }}>
                 <div style={{
                     background: c.bg,
                     border: `1px solid ${c.border}`,

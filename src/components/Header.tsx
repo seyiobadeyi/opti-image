@@ -34,6 +34,7 @@ export default function Header(): React.JSX.Element {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+    const [headerHidden, setHeaderHidden] = useState<boolean>(false);
     const supabase = useMemo(() => createClient(), []);
 
     const handleSyncGuestHistory = async (): Promise<void> => {
@@ -47,6 +48,17 @@ export default function Header(): React.JSX.Element {
             console.error('Failed to sync guest history', err instanceof Error ? err.message : 'An unknown error occurred');
         }
     };
+
+    useEffect(() => {
+        let lastY = 0;
+        const onScroll = () => {
+            const y = window.scrollY;
+            setHeaderHidden(y > lastY && y > 90);
+            lastY = y;
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     useEffect(() => {
         const pingServer = () => { apiClient.checkHealth().catch(() => {}); };
@@ -146,6 +158,8 @@ export default function Header(): React.JSX.Element {
             zIndex: 100,
             background: '#fff',
             borderBottom: `1px solid ${clr.g200}`,
+            transform: headerHidden ? 'translateY(-100%)' : 'translateY(0)',
+            transition: 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)',
         }}>
             <div style={{
                 maxWidth: '1200px',
