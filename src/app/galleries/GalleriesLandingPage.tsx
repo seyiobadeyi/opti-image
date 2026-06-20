@@ -110,7 +110,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 const AUDIENCE_PANELS = [
     {
         bg: '#0d0d12',
-        image: 'https://images.unsplash.com/photo-1554048612-b6a482b667e5?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=1200&q=80',
         label: 'For Photographers',
         heading: 'Your work delivered\nwith the attention\nit deserves.',
         body: 'Stop sending Dropbox links for galleries that represent months of your creative work. Every delivery reflects your brand.',
@@ -124,7 +124,7 @@ const AUDIENCE_PANELS = [
     },
     {
         bg: '#180d07',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1511578314322-25622de14422?auto=format&fit=crop&w=1200&q=80',
         label: 'For Event Planners',
         heading: 'One link.\nEvery attendee.\nZero headaches.',
         body: 'Share event coverage with hundreds of attendees, sponsors, and vendors — all from a single branded gallery link.',
@@ -138,7 +138,7 @@ const AUDIENCE_PANELS = [
     },
     {
         bg: '#111827',
-        image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
         label: 'For Organisations',
         heading: 'Internal media.\nSecure. Organized.\nActually findable.',
         body: 'Team headshots, office events, product launches — keep visual assets accessible to the right people without IT overhead.',
@@ -220,192 +220,118 @@ export default function GalleriesLandingPage({
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        let gsapMod: typeof import('gsap');
-        let ScrollTriggerMod: typeof import('gsap/ScrollTrigger').ScrollTrigger;
+        let mounted = true;
+        let ctx: { revert: () => void } | null = null;
 
-        const init = async () => {
+        (async () => {
             const { gsap } = await import('gsap');
             const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+            if (!mounted) return;
+
             gsap.registerPlugin(ScrollTrigger);
-            gsapMod = gsap as unknown as typeof import('gsap');
-            ScrollTriggerMod = ScrollTrigger;
+            // Let GSAP know the scroller is window
+            ScrollTrigger.defaults({ scroller: window });
 
-            const ctx = gsap.context(() => {
-                const vh = window.innerHeight;
-
+            ctx = gsap.context(() => {
                 // ── Hero: text parallax out ───────────────────────────────────
-                if (heroContentRef.current) {
+                if (heroRef.current && heroContentRef.current) {
                     gsap.to(heroContentRef.current, {
-                        y: -100,
+                        y: -80,
                         opacity: 0,
                         ease: 'none',
                         scrollTrigger: {
                             trigger: heroRef.current,
                             start: 'top top',
                             end: 'bottom top',
-                            scrub: 1.2,
+                            scrub: true,
                         },
                     });
                 }
 
-                // ── Audience panels: stack in from below ──────────────────────
+                // ── Audience panels: single scrubbed timeline (correct pattern) ─
                 const audiencePanels = gsap.utils.toArray<HTMLElement>('.audience-panel');
-                if (audienceWrapRef.current && audiencePanels.length > 1) {
-                    ScrollTrigger.create({
-                        trigger: audienceWrapRef.current,
-                        start: 'top top',
-                        end: `+=${(audiencePanels.length - 1) * vh}`,
-                        pin: true,
-                        pinSpacing: true,
-                        invalidateOnRefresh: true,
+                if (audienceWrapRef.current && audiencePanels.length > 0) {
+                    const aTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: audienceWrapRef.current,
+                            start: 'top top',
+                            end: `+=${audiencePanels.length * window.innerHeight}`,
+                            pin: true,
+                            pinSpacing: true,
+                            scrub: 0.8,
+                            invalidateOnRefresh: true,
+                        },
                     });
 
                     audiencePanels.forEach((panel, i) => {
-                        if (i === 0) {
-                            // Animate first panel's content in on load
-                            const kids = panel.querySelectorAll<HTMLElement>('.panel-line');
-                            gsap.from(kids, { y: 40, opacity: 0, stagger: 0.12, duration: 0.9, ease: 'power3.out', delay: 0.3 });
-                            return;
-                        }
-
-                        // Slide each subsequent panel up from below
-                        gsap.fromTo(panel,
+                        if (i === 0) return; // first panel is already visible
+                        // Each transition occupies 1 "unit" of timeline time
+                        aTl.fromTo(
+                            panel,
                             { yPercent: 100 },
-                            {
-                                yPercent: 0,
-                                ease: 'none',
-                                scrollTrigger: {
-                                    trigger: audienceWrapRef.current,
-                                    start: `top+=${(i - 1) * vh} top`,
-                                    end: `top+=${i * vh} top`,
-                                    scrub: 0.6,
-                                    invalidateOnRefresh: true,
-                                },
-                            },
+                            { yPercent: 0, ease: 'power2.inOut', duration: 1 },
+                            i - 1,
                         );
-
-                        // Image parallax within the panel
+                        // Subtle image scale while sliding in
                         const img = panel.querySelector<HTMLElement>('.audience-img');
                         if (img) {
-                            gsap.fromTo(img,
-                                { scale: 1.12 },
-                                {
-                                    scale: 1,
-                                    ease: 'none',
-                                    scrollTrigger: {
-                                        trigger: audienceWrapRef.current,
-                                        start: `top+=${(i - 1) * vh} top`,
-                                        end: `top+=${i * vh} top`,
-                                        scrub: 1,
-                                        invalidateOnRefresh: true,
-                                    },
-                                },
+                            aTl.fromTo(
+                                img,
+                                { scale: 1.1 },
+                                { scale: 1, ease: 'power2.inOut', duration: 1 },
+                                i - 1,
                             );
                         }
-
-                        // Content lines animate in as panel settles
-                        const kids = panel.querySelectorAll<HTMLElement>('.panel-line');
-                        gsap.from(kids, {
-                            y: 50,
-                            opacity: 0,
-                            stagger: 0.1,
-                            duration: 0.8,
-                            ease: 'power3.out',
-                            scrollTrigger: {
-                                trigger: audienceWrapRef.current,
-                                start: `top+=${(i - 0.15) * vh} top`,
-                                toggleActions: 'play none none reset',
-                                invalidateOnRefresh: true,
-                            },
-                        });
                     });
                 }
 
-                // ── Step panels: stack in from below ──────────────────────────
+                // ── Step panels: single scrubbed timeline ─────────────────────
                 const stepPanels = gsap.utils.toArray<HTMLElement>('.step-panel');
-                if (stepsWrapRef.current && stepPanels.length > 1) {
-                    ScrollTrigger.create({
-                        trigger: stepsWrapRef.current,
-                        start: 'top top',
-                        end: `+=${(stepPanels.length - 1) * vh}`,
-                        pin: true,
-                        pinSpacing: true,
-                        invalidateOnRefresh: true,
+                if (stepsWrapRef.current && stepPanels.length > 0) {
+                    const sTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: stepsWrapRef.current,
+                            start: 'top top',
+                            end: `+=${stepPanels.length * window.innerHeight}`,
+                            pin: true,
+                            pinSpacing: true,
+                            scrub: 0.8,
+                            invalidateOnRefresh: true,
+                        },
                     });
 
                     stepPanels.forEach((panel, i) => {
-                        if (i === 0) {
-                            const lines = panel.querySelectorAll<HTMLElement>('.step-line');
-                            gsap.from(lines, { x: -50, opacity: 0, stagger: 0.1, duration: 0.9, ease: 'power3.out', delay: 0.2 });
-                            return;
-                        }
-
-                        gsap.fromTo(panel,
+                        if (i === 0) return;
+                        sTl.fromTo(
+                            panel,
                             { yPercent: 100 },
-                            {
-                                yPercent: 0,
-                                ease: 'none',
-                                scrollTrigger: {
-                                    trigger: stepsWrapRef.current,
-                                    start: `top+=${(i - 1) * vh} top`,
-                                    end: `top+=${i * vh} top`,
-                                    scrub: 0.6,
-                                    invalidateOnRefresh: true,
-                                },
-                            },
+                            { yPercent: 0, ease: 'power2.inOut', duration: 1 },
+                            i - 1,
                         );
-
-                        // Image scale reveals as panel slides in
                         const img = panel.querySelector<HTMLElement>('.step-img');
                         if (img) {
-                            gsap.fromTo(img,
-                                { scale: 1.18, xPercent: -3 },
-                                {
-                                    scale: 1,
-                                    xPercent: 0,
-                                    ease: 'none',
-                                    scrollTrigger: {
-                                        trigger: stepsWrapRef.current,
-                                        start: `top+=${(i - 1) * vh} top`,
-                                        end: `top+=${i * vh} top`,
-                                        scrub: 1,
-                                        invalidateOnRefresh: true,
-                                    },
-                                },
+                            sTl.fromTo(
+                                img,
+                                { scale: 1.12 },
+                                { scale: 1, ease: 'power2.inOut', duration: 1 },
+                                i - 1,
                             );
                         }
-
-                        // Text comes in from side
-                        const lines = panel.querySelectorAll<HTMLElement>('.step-line');
-                        const isImgLeft = panel.classList.contains('img-left');
-                        gsap.from(lines, {
-                            x: isImgLeft ? 60 : -60,
-                            opacity: 0,
-                            stagger: 0.1,
-                            duration: 0.9,
-                            ease: 'power3.out',
-                            scrollTrigger: {
-                                trigger: stepsWrapRef.current,
-                                start: `top+=${(i - 0.15) * vh} top`,
-                                toggleActions: 'play none none reset',
-                                invalidateOnRefresh: true,
-                            },
-                        });
                     });
                 }
 
                 // ── Features: horizontal scroll ───────────────────────────────
                 if (featSecRef.current && featTrackRef.current) {
                     const track = featTrackRef.current;
-                    const getScrollWidth = () => track.scrollWidth - featSecRef.current!.offsetWidth;
+                    const getOverflow = () => track.scrollWidth - window.innerWidth;
 
                     gsap.to(track, {
-                        x: () => -getScrollWidth(),
+                        x: () => -getOverflow(),
                         ease: 'none',
                         scrollTrigger: {
                             trigger: featSecRef.current,
                             start: 'top top',
-                            end: () => `+=${getScrollWidth()}`,
+                            end: () => `+=${getOverflow()}`,
                             pin: true,
                             pinSpacing: true,
                             scrub: 1,
@@ -414,12 +340,12 @@ export default function GalleriesLandingPage({
                     });
                 }
 
-                // ── Generic section reveals ───────────────────────────────────
+                // ── Generic scroll reveals ────────────────────────────────────
                 gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
                     gsap.from(el, {
-                        y: 48,
+                        y: 40,
                         opacity: 0,
-                        duration: 0.9,
+                        duration: 0.85,
                         ease: 'power3.out',
                         scrollTrigger: {
                             trigger: el,
@@ -429,45 +355,38 @@ export default function GalleriesLandingPage({
                     });
                 });
 
-                // ── Showcase photos stagger in ────────────────────────────────
                 gsap.from('.showcase-photo', {
-                    scale: 0.92,
+                    scale: 0.9,
                     opacity: 0,
-                    stagger: 0.07,
-                    duration: 0.7,
+                    stagger: 0.06,
+                    duration: 0.65,
                     ease: 'power3.out',
                     scrollTrigger: {
                         trigger: '.showcase-grid',
-                        start: 'top 80%',
+                        start: 'top 82%',
                         toggleActions: 'play none none none',
                     },
                 });
 
-                // ── Comparison rows slide in ──────────────────────────────────
                 gsap.from('.comp-row', {
-                    x: -32,
+                    x: -24,
                     opacity: 0,
-                    stagger: 0.06,
-                    duration: 0.6,
+                    stagger: 0.05,
+                    duration: 0.55,
                     ease: 'power3.out',
                     scrollTrigger: {
                         trigger: '.comp-table',
-                        start: 'top 80%',
+                        start: 'top 82%',
                         toggleActions: 'play none none none',
                     },
                 });
 
             }, containerRef);
+        })();
 
-            return () => {
-                ctx.revert();
-                ScrollTrigger.getAll().forEach(t => t.kill());
-            };
-        };
-
-        const cleanup = init();
         return () => {
-            cleanup.then(fn => fn?.());
+            mounted = false;
+            ctx?.revert();
         };
     }, []);
 
@@ -696,20 +615,20 @@ export default function GalleriesLandingPage({
             </section>
 
             {/* ── TRUST BAR ────────────────────────────────────────────────── */}
-            <section style={{ background: '#ffffff', borderBottom: `1px solid ${BORDER}`, padding: '28px 24px' }}>
-                <div className="trust-bar" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+            <section style={{ background: '#ffffff', borderBottom: `1px solid ${BORDER}`, padding: '0 24px' }}>
+                <div className="trust-bar" style={{ maxWidth: '1100px', margin: '0 auto', height: '52px' }}>
                     {[
-                        { icon: <Zap size={18} color={ACCENT} />,          stat: '0%',      label: 'Commission on payments' },
-                        { icon: <CheckCircle size={18} color={SUCCESS} />,  stat: 'Free',    label: 'All features included'  },
-                        { icon: <Lock size={18} color={ACCENT} />,          stat: '4',       label: 'Access control modes'   },
-                        { icon: <Star size={18} color="#f59e0b" />,         stat: '< 5 min', label: 'Gallery setup time'     },
-                    ].map(({ icon, stat, label }) => (
-                        <div key={label} className="trust-item">
+                        { icon: <Zap size={13} color={TEXT_MUTED} />,         label: '0% commission on payments'   },
+                        { icon: <CheckCircle size={13} color={TEXT_MUTED} />,  label: 'All features free'           },
+                        { icon: <Lock size={13} color={TEXT_MUTED} />,         label: '4 access control modes'      },
+                        { icon: <Star size={13} color={TEXT_MUTED} />,         label: 'Gallery live in under 5 min' },
+                    ].map(({ icon, label }, idx, arr) => (
+                        <div key={label} className="trust-item" style={{ gap: '7px', minWidth: 'auto' }}>
                             {icon}
-                            <div>
-                                <p style={{ fontSize: '1.05rem', fontWeight: 800, color: TEXT_PRIMARY, lineHeight: 1, marginBottom: '2px' }}>{stat}</p>
-                                <p style={{ fontSize: '0.75rem', color: TEXT_MUTED, fontWeight: 500 }}>{label}</p>
-                            </div>
+                            <span style={{ fontSize: '0.78rem', color: TEXT_MUTED, fontWeight: 500, whiteSpace: 'nowrap' }}>{label}</span>
+                            {idx < arr.length - 1 && (
+                                <span aria-hidden style={{ width: '1px', height: '14px', background: BORDER, marginLeft: '16px', flexShrink: 0 }} />
+                            )}
                         </div>
                     ))}
                 </div>
