@@ -34,11 +34,10 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
     const [message, setMessage] = useState<string | null>(null);
     const [resendCooldownMs, setResendCooldownMs] = useState<number>(0);
     const [displayName, setDisplayName] = useState<string>('');
-    const [phone, setPhone] = useState<string>('');
-    const [phoneCode, setPhoneCode] = useState<string>('+1');
-    const [dobDay, setDobDay] = useState<string>('');
-    const [dobMonth, setDobMonth] = useState<string>('');
-    const [dobYear, setDobYear] = useState<string>('');
+    const [onboardingSubStep, setOnboardingSubStep] = useState<number>(0);
+    const [focusAreas, setFocusAreas] = useState<string[]>([]);
+    const [workType, setWorkType] = useState<string>('');
+    const [referral, setReferral] = useState<string>('');
 
     useEffect(() => {
         window.dispatchEvent(new CustomEvent(isOpen ? 'optimage:overlay:open' : 'optimage:overlay:close'));
@@ -48,6 +47,16 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
     useEffect(() => {
         if (isOpen) setStep(initialStep ?? 'email');
     }, [isOpen, initialStep]);
+
+    // Reset onboarding wizard when entering that step
+    useEffect(() => {
+        if (step === 'onboarding') {
+            setOnboardingSubStep(0);
+            setFocusAreas([]);
+            setWorkType('');
+            setReferral('');
+        }
+    }, [step]);
 
     useEffect(() => {
         if (step !== 'otp') return;
@@ -203,16 +212,12 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         }
     };
 
-    const handleOnboardingSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-        e.preventDefault();
+    const finishOnboarding = async (): Promise<void> => {
         if (!displayName.trim()) return;
         setLoading(true);
-        const dobString = dobYear && dobMonth && dobDay
-            ? `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`
-            : undefined;
-        const fullPhone = phone.trim() ? `${phoneCode}${phone.trim().replace(/^0+/, '')}` : undefined;
+        const useCase = JSON.stringify({ focus: focusAreas, type: workType, referral });
         try {
-            await apiClient.updateProfile({ display_name: displayName.trim(), phone_number: fullPhone, date_of_birth: dobString });
+            await apiClient.updateProfile({ display_name: displayName.trim(), use_case: useCase });
         } catch { /* non-blocking */ } finally { setLoading(false); }
         onClose();
         if (redirectAfterAuth) {
@@ -220,6 +225,12 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         } else if (typeof window !== 'undefined' && window.location.pathname === '/') {
             router.push('/dashboard');
         }
+    };
+
+    const skipOnboarding = (): void => {
+        onClose();
+        if (redirectAfterAuth) router.push(redirectAfterAuth);
+        else if (typeof window !== 'undefined' && window.location.pathname === '/') router.push('/dashboard');
     };
 
     const resetFlow = (): void => {
@@ -253,12 +264,6 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         background: T.bg, color: T.text,
         border: `1px solid ${T.border}`,
         cursor: 'pointer', transition: 'background 0.2s',
-    };
-
-    const selectStyle: React.CSSProperties = {
-        padding: '13px 10px', borderRadius: '10px',
-        border: `1px solid ${T.border}`, background: T.bgSub,
-        color: T.text, outline: 'none', fontSize: '0.9rem', cursor: 'pointer',
     };
 
     return (
@@ -331,14 +336,22 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
 
                     <div style={{ marginBottom: '28px' }}>
                         <h2 style={{ fontSize: '1.7rem', fontWeight: 800, marginBottom: '8px', color: T.text, letterSpacing: '-0.01em' }}>
-                            {step === 'email' ? 'Sign in to Optimage' : step === 'otp' ? 'Check your email' : 'Almost done'}
+                            {step === 'email' ? 'Sign in to Optimage'
+                                : step === 'otp' ? 'Check your email'
+                                : onboardingSubStep === 0 ? 'Welcome! What\'s your name?'
+                                : onboardingSubStep === 1 ? 'What\'s your primary focus?'
+                                : onboardingSubStep === 2 ? 'What type of work do you deliver?'
+                                : 'One last thing…'}
                         </h2>
                         <p style={{ color: T.textSub, fontSize: '0.95rem', lineHeight: 1.5 }}>
                             {step === 'email'
                                 ? 'Enter your email to sign in or create a free account.'
                                 : step === 'otp'
                                     ? `We sent an 8-digit code to ${email}. Enter it below to sign in.`
-                                    : 'Tell us your name so we can personalise your experience.'}
+                                : onboardingSubStep === 0 ? 'Tell us what to call you — this is how you\'ll appear to clients.'
+                                : onboardingSubStep === 1 ? 'Select all that apply — helps us tailor your gallery experience.'
+                                : onboardingSubStep === 2 ? 'We\'ll customise your gallery views to match your work.'
+                                : 'How did you hear about Optimage?'}
                         </p>
                     </div>
 
@@ -362,83 +375,138 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                     )}
 
                     {step === 'onboarding' ? (
-                        <form onSubmit={handleOnboardingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
-                                    What should we call you?
-                                </label>
-                                <input
-                                    type="text" value={displayName}
-                                    onChange={(e) => setDisplayName(e.target.value)}
-                                    placeholder="Your name" maxLength={80} required autoFocus
-                                    style={inputStyle}
-                                    onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
-                                    onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
-                                />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            {/* Progress bar */}
+                            <div style={{ display: 'flex', gap: '5px' }}>
+                                {[0, 1, 2, 3].map(i => (
+                                    <div key={i} style={{ height: '3px', flex: 1, borderRadius: '2px', background: i <= onboardingSubStep ? T.accent : T.border, transition: 'background 0.3s' }} />
+                                ))}
                             </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
-                                    Phone number <span style={{ color: T.textMuted, fontWeight: 400 }}>(optional)</span>
-                                </label>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <select value={phoneCode} onChange={(e) => setPhoneCode(e.target.value)} style={selectStyle}>
-                                        <option value="+1">🇺🇸 +1</option>
-                                        <option value="+44">🇬🇧 +44</option>
-                                        <option value="+234">🇳🇬 +234</option>
-                                        <option value="+27">🇿🇦 +27</option>
-                                        <option value="+233">🇬🇭 +233</option>
-                                        <option value="+254">🇰🇪 +254</option>
-                                        <option value="+49">🇩🇪 +49</option>
-                                        <option value="+33">🇫🇷 +33</option>
-                                        <option value="+91">🇮🇳 +91</option>
-                                        <option value="+61">🇦🇺 +61</option>
-                                        <option value="+55">🇧🇷 +55</option>
-                                        <option value="+52">🇲🇽 +52</option>
-                                        <option value="+1-CA">🇨🇦 +1</option>
-                                        <option value="+971">🇦🇪 +971</option>
-                                        <option value="+65">🇸🇬 +65</option>
-                                    </select>
-                                    <input
-                                        type="tel" value={phone}
-                                        onChange={(e) => setPhone(e.target.value.replace(/[^\d\s\-().]/g, ''))}
-                                        placeholder="800 000 0000" maxLength={15}
-                                        style={{ ...inputStyle, flex: 1, padding: '13px 14px' }}
-                                        onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
-                                        onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
-                                    />
+
+                            {/* Step 0: Name */}
+                            {onboardingSubStep === 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
+                                            Your name
+                                        </label>
+                                        <input
+                                            type="text" value={displayName}
+                                            onChange={(e) => setDisplayName(e.target.value)}
+                                            placeholder="e.g. Sarah Johnson" maxLength={80} autoFocus
+                                            style={inputStyle}
+                                            onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
+                                            onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' && displayName.trim()) setOnboardingSubStep(1); }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button type="button" onClick={skipOnboarding} style={btnSecondary}>Skip</button>
+                                        <button type="button" disabled={!displayName.trim()} onClick={() => setOnboardingSubStep(1)}
+                                            style={{ ...btnPrimary, opacity: !displayName.trim() ? 0.5 : 1 }}>
+                                            <span>Continue</span><ArrowRight size={16} />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
-                                    Date of birth <span style={{ color: T.textMuted, fontWeight: 400 }}>(optional)</span>
-                                </label>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                                    {[
-                                        { value: dobDay, setter: setDobDay, placeholder: 'Day', options: Array.from({ length: 31 }, (_, i) => ({ v: String(i+1), l: String(i+1) })) },
-                                        { value: dobMonth, setter: setDobMonth, placeholder: 'Month', options: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m,i) => ({ v: String(i+1), l: m })) },
-                                        { value: dobYear, setter: setDobYear, placeholder: 'Year', options: Array.from({ length: 80 }, (_, i) => { const y = new Date().getFullYear() - 18 - i; return { v: String(y), l: String(y) }; }) },
-                                    ].map(({ value, setter, placeholder, options }) => (
-                                        <select key={placeholder} value={value}
-                                            onChange={(e) => setter(e.target.value)}
-                                            style={{ ...selectStyle, color: value ? T.text : T.textMuted }}>
-                                            <option value="">{placeholder}</option>
-                                            {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-                                        </select>
-                                    ))}
+                            )}
+
+                            {/* Step 1: Focus areas */}
+                            {onboardingSubStep === 1 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {['Weddings', 'Portraits', 'Family', 'Corporate', 'Events', 'Boudoir', 'Commercial', 'School', 'Travel & Nature', 'Sports', 'Food', 'Other'].map(area => {
+                                            const active = focusAreas.includes(area);
+                                            return (
+                                                <button key={area} type="button"
+                                                    onClick={() => setFocusAreas(prev => active ? prev.filter(a => a !== area) : [...prev, area])}
+                                                    style={{
+                                                        padding: '8px 16px', borderRadius: '100px', fontSize: '0.88rem', fontWeight: 500, cursor: 'pointer',
+                                                        border: `1.5px solid ${active ? T.accent : T.border}`,
+                                                        background: active ? `${T.accent}14` : T.bg,
+                                                        color: active ? T.accent : T.textSub,
+                                                        transition: 'all 0.15s',
+                                                    }}>
+                                                    {area}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button type="button" onClick={() => setOnboardingSubStep(0)} style={btnSecondary}>Back</button>
+                                        <button type="button" onClick={() => setOnboardingSubStep(2)} style={btnPrimary}>
+                                            <span>{focusAreas.length ? 'Continue' : 'Skip'}</span><ArrowRight size={16} />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-                                <button type="button" onClick={onClose} style={btnSecondary}>Cancel</button>
-                                <button type="submit" disabled={loading || !displayName.trim()} style={{ ...btnPrimary, opacity: loading || !displayName.trim() ? 0.6 : 1 }}>
-                                    {loading ? 'Saving...' : <><span>Get Started</span><ArrowRight size={16} /></>}
-                                </button>
-                            </div>
-                            <button type="button"
-                                onClick={() => { onClose(); if (redirectAfterAuth) { router.push(redirectAfterAuth); } else if (window.location.pathname === '/') { router.push('/dashboard'); } }}
-                                style={{ background: 'none', border: 'none', color: T.textMuted, fontSize: '0.85rem', cursor: 'pointer', textAlign: 'center' }}>
-                                Skip for now
-                            </button>
-                        </form>
+                            )}
+
+                            {/* Step 2: Work type */}
+                            {onboardingSubStep === 2 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                        {[
+                                            { value: 'photos', label: 'Photos', icon: '📷' },
+                                            { value: 'videos', label: 'Videos', icon: '🎬' },
+                                            { value: 'photos_videos', label: 'Photos & Videos', icon: '🎞️' },
+                                            { value: 'art', label: 'Art Galleries', icon: '🖼️' },
+                                            { value: 'other', label: 'Other', icon: '✦' },
+                                        ].map(({ value, label, icon }) => {
+                                            const active = workType === value;
+                                            return (
+                                                <button key={value} type="button" onClick={() => setWorkType(value)}
+                                                    style={{
+                                                        padding: '16px 12px', borderRadius: '12px', textAlign: 'center',
+                                                        border: `1.5px solid ${active ? T.accent : T.border}`,
+                                                        background: active ? `${T.accent}14` : T.bgSub,
+                                                        color: active ? T.accent : T.text, cursor: 'pointer',
+                                                        fontSize: '0.88rem', fontWeight: 600, transition: 'all 0.15s',
+                                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                                                    }}>
+                                                    <span style={{ fontSize: '1.4rem' }}>{icon}</span>
+                                                    {label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button type="button" onClick={() => setOnboardingSubStep(1)} style={btnSecondary}>Back</button>
+                                        <button type="button" onClick={() => setOnboardingSubStep(3)} style={btnPrimary}>
+                                            <span>{workType ? 'Continue' : 'Skip'}</span><ArrowRight size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Step 3: Referral */}
+                            {onboardingSubStep === 3 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {['Instagram', 'Facebook', 'YouTube', 'Google Search', 'Referral from a friend', 'Conference or event', 'ChatGPT', 'TV', 'I don\'t remember', 'Other'].map(src => {
+                                            const active = referral === src;
+                                            return (
+                                                <button key={src} type="button" onClick={() => setReferral(active ? '' : src)}
+                                                    style={{
+                                                        padding: '11px 16px', borderRadius: '10px', textAlign: 'left', width: '100%',
+                                                        border: `1.5px solid ${active ? T.accent : T.border}`,
+                                                        background: active ? `${T.accent}14` : T.bg,
+                                                        color: active ? T.accent : T.text, cursor: 'pointer',
+                                                        fontSize: '0.9rem', fontWeight: active ? 600 : 400, transition: 'all 0.15s',
+                                                    }}>
+                                                    {src}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button type="button" onClick={() => setOnboardingSubStep(2)} style={btnSecondary}>Back</button>
+                                        <button type="button" disabled={loading} onClick={finishOnboarding}
+                                            style={{ ...btnPrimary, opacity: loading ? 0.7 : 1 }}>
+                                            {loading ? 'Saving…' : <><span>Get Started</span><ArrowRight size={16} /></>}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     ) : step === 'email' ? (
                         <>
                             {/* Google OAuth */}

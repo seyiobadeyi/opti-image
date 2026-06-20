@@ -545,6 +545,31 @@ export const apiClient = {
     },
 
     /**
+     * Submit a guestbook message for a gallery. Requires auth to prevent spam.
+     */
+    async submitGalleryMessage(slug: string, guestName: string, message: string): Promise<void> {
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify({ guest_name: guestName, message }),
+        });
+        if (!response.ok) throw new Error('Failed to submit message');
+    },
+
+    /**
+     * Owner: fetch all guestbook messages for a gallery.
+     */
+    async getGalleryMessages(galleryId: string): Promise<Array<{ id: string; guest_name: string; message: string; created_at: string }>> {
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/messages`, {
+            headers: { ...authHeaders },
+        });
+        if (!response.ok) throw new Error('Failed to fetch messages');
+        return response.json();
+    },
+
+    /**
      * Create a Lemon Squeezy checkout URL for USD payment.
      */
     async createUsdCheckout(planId: string, promoCode?: string): Promise<{ checkoutUrl: string }> {

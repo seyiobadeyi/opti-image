@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import JSZip from 'jszip';
-import { Lock, Mail, Download, X, ChevronLeft, ChevronRight, Eye, CheckSquare, Square, Package, UserCircle, Clock, CreditCard, Camera, ArrowRight, AlertTriangle, Heart, Send, Share2 } from 'lucide-react';
+import { Lock, Mail, Download, X, ChevronLeft, ChevronRight, Eye, CheckSquare, Square, Package, UserCircle, Clock, CreditCard, Camera, ArrowRight, AlertTriangle, Heart, Send, Share2, MessageSquare } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import AuthModal from '@/components/AuthModal';
@@ -65,6 +65,15 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
 
     // ── Share state
     const [shareCopied, setShareCopied]         = useState(false);
+
+    // ── Guestbook state
+    const [showGuestbook, setShowGuestbook]     = useState(false);
+    const [gbName, setGbName]                   = useState('');
+    const [gbAnon, setGbAnon]                   = useState(false);
+    const [gbMessage, setGbMessage]             = useState('');
+    const [gbSubmitting, setGbSubmitting]       = useState(false);
+    const [gbSubmitted, setGbSubmitted]         = useState(false);
+    const [gbError, setGbError]                 = useState<string | null>(null);
 
     // ── Auth modal (gallery has no Header, so it manages its own)
     const [authModalOpen, setAuthModalOpen]     = useState(false);
@@ -872,9 +881,153 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 ? (favoriteIds.size > 0 ? `${favoriteIds.size} liked` : 'Pick favourites')
                                 : 'Pick favourites'}
                         </button>
+                        <button
+                            onClick={() => requireAuth(() => { setShowGuestbook(true); setGbSubmitted(false); setGbError(null); })}
+                            style={{
+                                padding: '8px 16px', borderRadius: '10px', border: '1px solid #2a2a2a',
+                                background: 'transparent', color: c.textMuted,
+                                fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                transition: 'all 0.15s',
+                            }}
+                        >
+                            <MessageSquare size={15} /> Leave a message
+                        </button>
                     </div>
                 </div>
             </header>
+
+            {/* Guestbook modal */}
+            {showGuestbook && (
+                <div
+                    onClick={() => setShowGuestbook(false)}
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 10000,
+                        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            background: '#111', border: '1px solid #1f1f1f', borderRadius: '20px',
+                            padding: '36px', width: '100%', maxWidth: '480px', position: 'relative',
+                        }}
+                    >
+                        <button
+                            onClick={() => setShowGuestbook(false)}
+                            style={{
+                                position: 'absolute', top: '16px', right: '16px',
+                                background: '#1f1f1f', border: 'none', color: c.textMuted,
+                                borderRadius: '50%', width: '32px', height: '32px',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                        >
+                            <X size={15} />
+                        </button>
+
+                        <div style={{ marginBottom: '24px' }}>
+                            <h3 style={{ color: c.white, fontSize: '1.3rem', fontWeight: 700, marginBottom: '6px' }}>
+                                Leave a message
+                            </h3>
+                            <p style={{ color: c.textMuted, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                                Write a note for the gallery — they&apos;ll see it in their dashboard.
+                            </p>
+                        </div>
+
+                        {gbSubmitted ? (
+                            <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>✉️</div>
+                                <p style={{ color: c.white, fontWeight: 600, fontSize: '1.05rem', marginBottom: '6px' }}>
+                                    Message sent!
+                                </p>
+                                <p style={{ color: c.textMuted, fontSize: '0.88rem' }}>
+                                    Your note has been delivered to the gallery owner.
+                                </p>
+                                <button
+                                    onClick={() => setShowGuestbook(false)}
+                                    style={{ marginTop: '20px', padding: '10px 28px', borderRadius: '10px', background: c.accent, color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                {gbError && (
+                                    <div style={{ padding: '10px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', color: '#ef4444', fontSize: '0.85rem' }}>
+                                        {gbError}
+                                    </div>
+                                )}
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}>
+                                    <input
+                                        type="checkbox" checked={gbAnon}
+                                        onChange={e => setGbAnon(e.target.checked)}
+                                        style={{ width: '16px', height: '16px', accentColor: c.accent, cursor: 'pointer' }}
+                                    />
+                                    <span style={{ fontSize: '0.9rem', color: c.textMuted }}>
+                                        Post anonymously — your account won&apos;t be shown
+                                    </span>
+                                </label>
+
+                                {!gbAnon && (
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px', color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                            Display name
+                                        </label>
+                                        <input
+                                            type="text" value={gbName} maxLength={80}
+                                            onChange={e => setGbName(e.target.value)}
+                                            placeholder="How should your message be signed?"
+                                            style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #2a2a2a', background: '#1a1a1a', color: c.white, fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' }}
+                                        />
+                                    </div>
+                                )}
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px', color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                        Your message
+                                    </label>
+                                    <textarea
+                                        value={gbMessage} maxLength={500}
+                                        onChange={e => setGbMessage(e.target.value)}
+                                        placeholder="Write something kind…"
+                                        rows={4}
+                                        style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #2a2a2a', background: '#1a1a1a', color: c.white, fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
+                                    />
+                                    <div style={{ textAlign: 'right', fontSize: '0.75rem', color: c.gray600, marginTop: '4px' }}>
+                                        {gbMessage.length}/500
+                                    </div>
+                                </div>
+                                <button
+                                    disabled={gbSubmitting || (!gbAnon && !gbName.trim()) || !gbMessage.trim()}
+                                    onClick={async () => {
+                                        const nameToSend = gbAnon ? 'Anonymous' : gbName.trim();
+                                        if (!nameToSend || !gbMessage.trim()) return;
+                                        setGbSubmitting(true);
+                                        setGbError(null);
+                                        try {
+                                            await apiClient.submitGalleryMessage(slug, nameToSend, gbMessage.trim());
+                                            setGbSubmitted(true);
+                                            setGbName('');
+                                            setGbMessage('');
+                                        } catch {
+                                            setGbError('Failed to send — please try again.');
+                                        } finally {
+                                            setGbSubmitting(false);
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '13px', borderRadius: '10px', background: c.accent, color: '#fff',
+                                        border: 'none', fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer',
+                                        opacity: (gbSubmitting || (!gbAnon && !gbName.trim()) || !gbMessage.trim()) ? 0.5 : 1,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    }}
+                                >
+                                    {gbSubmitting ? 'Sending…' : <><Send size={15} /> Send message</>}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Selection toolbar */}
             {selectMode && (

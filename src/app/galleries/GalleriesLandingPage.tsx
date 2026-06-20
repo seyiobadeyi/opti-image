@@ -129,7 +129,7 @@ const AUDIENCE_PANELS = [
     },
     {
         bg: '#180d07',
-        image: 'https://images.unsplash.com/photo-1511578314322-25622de14422?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80',
         label: 'For Event Planners',
         heading: 'One link.\nEvery attendee.\nZero headaches.',
         body: 'Share event coverage with hundreds of attendees, sponsors, and vendors — all from a single branded gallery link.',
@@ -143,7 +143,7 @@ const AUDIENCE_PANELS = [
     },
     {
         bg: '#111827',
-        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
         label: 'For Organisations',
         heading: 'Internal media.\nSecure. Organized.\nActually findable.',
         body: 'Team headshots, office events, product launches — keep visual assets accessible to the right people without IT overhead.',
@@ -172,7 +172,7 @@ const STEP_PANELS = [
         num: '02',
         title: 'Upload your edited photos.',
         body: 'Drag in your JPEGs or WebPs. Files are compressed, format-optimised, and stored in your private Cloudinary folder. Originals preserved. Fast delivery builds ready immediately.',
-        image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80',
         imgLeft: true,
     },
     {
@@ -180,7 +180,7 @@ const STEP_PANELS = [
         num: '03',
         title: 'Set exactly who can open it.',
         body: 'Public link, PIN-protected, email-list only, or Optimage account required. Switch access modes any time. Enable or disable downloads independently. One click to go live.',
-        image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?auto=format&fit=crop&w=1200&q=80',
         imgLeft: false,
     },
     {
@@ -188,7 +188,7 @@ const STEP_PANELS = [
         num: '04',
         title: 'Your client takes it from there.',
         body: 'Click Send to Client, enter their email. They receive a branded delivery notification. They browse, heart their favourites, download. You get notified at every step — view, select, download.',
-        image: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1484807352052-23338990c6c6?auto=format&fit=crop&w=1200&q=80',
         imgLeft: true,
     },
 ];

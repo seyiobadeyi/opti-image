@@ -274,6 +274,7 @@ export interface UpdateProfileData {
   branding_color?: string;
   branding_website?: string;
   username?: string;
+  use_case?: string;
 }
 
 /** A single processing history record from the Supabase processing_history table. */
