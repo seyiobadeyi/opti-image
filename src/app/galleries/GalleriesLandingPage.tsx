@@ -248,74 +248,67 @@ export default function GalleriesLandingPage({
                     });
                 }
 
-                // ── Audience panels: single scrubbed timeline (correct pattern) ─
+                // ── Audience panels ───────────────────────────────────────────
                 const audiencePanels = gsap.utils.toArray<HTMLElement>('.audience-panel');
-                if (audienceWrapRef.current && audiencePanels.length > 0) {
+                if (audienceWrapRef.current && audiencePanels.length > 1) {
+                    // GSAP owns the transform — set panels 1..n below viewport now
+                    audiencePanels.forEach((panel, i) => {
+                        if (i > 0) gsap.set(panel, { yPercent: 100 });
+                    });
+
+                    const aCount = audiencePanels.length - 1; // number of transitions
                     const aTl = gsap.timeline({
                         scrollTrigger: {
                             trigger: audienceWrapRef.current,
                             start: 'top top',
-                            end: `+=${audiencePanels.length * window.innerHeight}`,
+                            end: `+=${aCount * window.innerHeight}`,
                             pin: true,
                             pinSpacing: true,
-                            scrub: 0.8,
+                            scrub: 1,
                             invalidateOnRefresh: true,
                         },
                     });
 
                     audiencePanels.forEach((panel, i) => {
-                        if (i === 0) return; // first panel is already visible
-                        // Each transition occupies 1 "unit" of timeline time
-                        aTl.fromTo(
-                            panel,
-                            { yPercent: 100 },
-                            { yPercent: 0, ease: 'power2.inOut', duration: 1 },
-                            i - 1,
-                        );
-                        // Subtle image scale while sliding in
+                        if (i === 0) return;
+                        // Slide panel up — each transition = 1 timeline unit
+                        aTl.to(panel, { yPercent: 0, ease: 'none', duration: 1 }, i - 1);
+                        // Image zooms in as panel lands
                         const img = panel.querySelector<HTMLElement>('.audience-img');
                         if (img) {
-                            aTl.fromTo(
-                                img,
-                                { scale: 1.1 },
-                                { scale: 1, ease: 'power2.inOut', duration: 1 },
-                                i - 1,
-                            );
+                            gsap.set(img, { scale: 1.08 });
+                            aTl.to(img, { scale: 1, ease: 'none', duration: 1 }, i - 1);
                         }
                     });
                 }
 
-                // ── Step panels: single scrubbed timeline ─────────────────────
+                // ── Step panels ───────────────────────────────────────────────
                 const stepPanels = gsap.utils.toArray<HTMLElement>('.step-panel');
-                if (stepsWrapRef.current && stepPanels.length > 0) {
+                if (stepsWrapRef.current && stepPanels.length > 1) {
+                    stepPanels.forEach((panel, i) => {
+                        if (i > 0) gsap.set(panel, { yPercent: 100 });
+                    });
+
+                    const sCount = stepPanels.length - 1;
                     const sTl = gsap.timeline({
                         scrollTrigger: {
                             trigger: stepsWrapRef.current,
                             start: 'top top',
-                            end: `+=${stepPanels.length * window.innerHeight}`,
+                            end: `+=${sCount * window.innerHeight}`,
                             pin: true,
                             pinSpacing: true,
-                            scrub: 0.8,
+                            scrub: 1,
                             invalidateOnRefresh: true,
                         },
                     });
 
                     stepPanels.forEach((panel, i) => {
                         if (i === 0) return;
-                        sTl.fromTo(
-                            panel,
-                            { yPercent: 100 },
-                            { yPercent: 0, ease: 'power2.inOut', duration: 1 },
-                            i - 1,
-                        );
+                        sTl.to(panel, { yPercent: 0, ease: 'none', duration: 1 }, i - 1);
                         const img = panel.querySelector<HTMLElement>('.step-img');
                         if (img) {
-                            sTl.fromTo(
-                                img,
-                                { scale: 1.12 },
-                                { scale: 1, ease: 'power2.inOut', duration: 1 },
-                                i - 1,
-                            );
+                            gsap.set(img, { scale: 1.1 });
+                            sTl.to(img, { scale: 1, ease: 'none', duration: 1 }, i - 1);
                         }
                     });
                 }
@@ -425,11 +418,9 @@ export default function GalleriesLandingPage({
                 }
                 .gallery-rain-card img { pointer-events: none; }
 
-                /* Panel stacking (desktop) */
+                /* Panel stacking — GSAP owns the transforms, no CSS initial offset */
                 .audience-panel  { position: absolute; inset: 0; will-change: transform; }
-                .audience-panel:not(:first-child)  { transform: translateY(100%); }
                 .step-panel      { position: absolute; inset: 0; will-change: transform; }
-                .step-panel:not(:first-child) { transform: translateY(100%); }
 
                 /* Panel inner layout (default desktop: 50/50 row) */
                 .audience-inner, .step-inner {
