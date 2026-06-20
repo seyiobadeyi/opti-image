@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { FeaturedPhoto } from '../api/galleries/featured-photos/route';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -10,6 +12,9 @@ import {
     CheckCircle, ChevronRight, ChevronDown, Share2, Shield, Users,
     Globe, Star, Zap,
 } from 'lucide-react';
+
+// Register once at module level — safe in 'use client' (never runs on server)
+gsap.registerPlugin(ScrollTrigger);
 
 const ACCENT = '#db5a42';
 const TEXT_PRIMARY = '#111827';
@@ -218,62 +223,103 @@ export default function GalleriesLandingPage({
 
     // ── GSAP effects ──────────────────────────────────────────────────────────
     useEffect(() => {
-        if (typeof window === 'undefined') return;
+        // gsap + ScrollTrigger are imported synchronously at module level —
+        // no async flash, no race with cleanup.
+        const ctx = gsap.context(() => {
+            const mm = gsap.matchMedia();
 
-        let mounted = true;
-        let ctx: { revert: () => void } | null = null;
+            // ── Animations that run at ALL screen sizes ──────────────────────
 
-        (async () => {
-            const { gsap } = await import('gsap');
-            const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-            if (!mounted) return;
+            // Hero text parallax out
+            if (heroRef.current && heroContentRef.current) {
+                gsap.to(heroContentRef.current, {
+                    y: -80,
+                    opacity: 0,
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: heroRef.current,
+                        start: 'top top',
+                        end: 'bottom top',
+                        scrub: true,
+                    },
+                });
+            }
 
-            gsap.registerPlugin(ScrollTrigger);
-            // Let GSAP know the scroller is window
-            ScrollTrigger.defaults({ scroller: window });
+            // Generic reveals (all viewports)
+            gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
+                gsap.from(el, {
+                    y: 40,
+                    opacity: 0,
+                    duration: 0.85,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 88%',
+                        toggleActions: 'play none none none',
+                    },
+                });
+            });
 
-            ctx = gsap.context(() => {
-                // ── Hero: text parallax out ───────────────────────────────────
-                if (heroRef.current && heroContentRef.current) {
-                    gsap.to(heroContentRef.current, {
-                        y: -80,
-                        opacity: 0,
-                        ease: 'none',
-                        scrollTrigger: {
-                            trigger: heroRef.current,
-                            start: 'top top',
-                            end: 'bottom top',
-                            scrub: true,
-                        },
-                    });
-                }
+            gsap.from('.showcase-photo', {
+                scale: 0.9,
+                opacity: 0,
+                stagger: 0.06,
+                duration: 0.65,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: '.showcase-grid',
+                    start: 'top 82%',
+                    toggleActions: 'play none none none',
+                },
+            });
 
+            gsap.from('.comp-row', {
+                x: -24,
+                opacity: 0,
+                stagger: 0.05,
+                duration: 0.55,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: '.comp-table',
+                    start: 'top 82%',
+                    toggleActions: 'play none none none',
+                },
+            });
+
+            // ── Desktop only: pinned stacking panels + horizontal scroll ─────
+            // matchMedia disables pin-based effects on narrow viewports where
+            // GSAP pinning is unreliable and hurts UX (industry standard).
+            mm.add('(min-width: 768px)', () => {
                 // ── Audience panels ───────────────────────────────────────────
                 const audiencePanels = gsap.utils.toArray<HTMLElement>('.audience-panel');
                 if (audienceWrapRef.current && audiencePanels.length > 1) {
-                    // GSAP owns the transform — set panels 1..n below viewport now
-                    audiencePanels.forEach((panel, i) => {
-                        if (i > 0) gsap.set(panel, { yPercent: 100 });
+                    // GSAP owns the transform — set off-screen synchronously
+                    // before first paint so there's no flash of all panels.
+                    audiencePanels.forEach((p, i) => {
+                        if (i > 0) gsap.set(p, { yPercent: 100 });
                     });
 
-                    const aCount = audiencePanels.length - 1; // number of transitions
+                    const aCount = audiencePanels.length - 1;
+
                     const aTl = gsap.timeline({
                         scrollTrigger: {
                             trigger: audienceWrapRef.current,
                             start: 'top top',
-                            end: `+=${aCount * window.innerHeight}`,
+                            // Each transition = 1 full viewport height of scroll
+                            end: () => `+=${aCount * window.innerHeight}`,
                             pin: true,
                             pinSpacing: true,
-                            scrub: 1,
+                            // scrub: true = 1:1 with scroll position (most premium feel)
+                            scrub: true,
                             invalidateOnRefresh: true,
                         },
                     });
 
                     audiencePanels.forEach((panel, i) => {
                         if (i === 0) return;
-                        // Slide panel up — each transition = 1 timeline unit
+                        // ease: 'none' is correct for scrub — smoothness comes from
+                        // the scrub lag, not the tween easing.
                         aTl.to(panel, { yPercent: 0, ease: 'none', duration: 1 }, i - 1);
-                        // Image zooms in as panel lands
                         const img = panel.querySelector<HTMLElement>('.audience-img');
                         if (img) {
                             gsap.set(img, { scale: 1.08 });
@@ -285,19 +331,20 @@ export default function GalleriesLandingPage({
                 // ── Step panels ───────────────────────────────────────────────
                 const stepPanels = gsap.utils.toArray<HTMLElement>('.step-panel');
                 if (stepsWrapRef.current && stepPanels.length > 1) {
-                    stepPanels.forEach((panel, i) => {
-                        if (i > 0) gsap.set(panel, { yPercent: 100 });
+                    stepPanels.forEach((p, i) => {
+                        if (i > 0) gsap.set(p, { yPercent: 100 });
                     });
 
                     const sCount = stepPanels.length - 1;
+
                     const sTl = gsap.timeline({
                         scrollTrigger: {
                             trigger: stepsWrapRef.current,
                             start: 'top top',
-                            end: `+=${sCount * window.innerHeight}`,
+                            end: () => `+=${sCount * window.innerHeight}`,
                             pin: true,
                             pinSpacing: true,
-                            scrub: 1,
+                            scrub: true,
                             invalidateOnRefresh: true,
                         },
                     });
@@ -327,60 +374,23 @@ export default function GalleriesLandingPage({
                             end: () => `+=${getOverflow()}`,
                             pin: true,
                             pinSpacing: true,
-                            scrub: 1,
+                            scrub: true,
                             invalidateOnRefresh: true,
                         },
                     });
                 }
 
-                // ── Generic scroll reveals ────────────────────────────────────
-                gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
-                    gsap.from(el, {
-                        y: 40,
-                        opacity: 0,
-                        duration: 0.85,
-                        ease: 'power3.out',
-                        scrollTrigger: {
-                            trigger: el,
-                            start: 'top 88%',
-                            toggleActions: 'play none none none',
-                        },
-                    });
-                });
+                // matchMedia callback return = cleanup for this breakpoint
+                return () => {
+                    // Reset panel positions when dropping below 768px
+                    gsap.utils.toArray<HTMLElement>('.audience-panel, .step-panel')
+                        .forEach((p) => gsap.set(p, { clearProps: 'transform' }));
+                };
+            });
 
-                gsap.from('.showcase-photo', {
-                    scale: 0.9,
-                    opacity: 0,
-                    stagger: 0.06,
-                    duration: 0.65,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: '.showcase-grid',
-                        start: 'top 82%',
-                        toggleActions: 'play none none none',
-                    },
-                });
+        }, containerRef); // scope to container — auto-cleans child tweens/triggers
 
-                gsap.from('.comp-row', {
-                    x: -24,
-                    opacity: 0,
-                    stagger: 0.05,
-                    duration: 0.55,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: '.comp-table',
-                        start: 'top 82%',
-                        toggleActions: 'play none none none',
-                    },
-                });
-
-            }, containerRef);
-        })();
-
-        return () => {
-            mounted = false;
-            ctx?.revert();
-        };
+        return () => ctx.revert();
     }, []);
 
     const comparisonRows = [
@@ -477,12 +487,24 @@ export default function GalleriesLandingPage({
                 /* Final CTA buttons */
                 .final-cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
+                /* ── Below 768px: panels leave pin mode, stack as normal flow ── */
+                @media (max-width: 767px) {
+                    /* Panels revert to normal document flow */
+                    .audience-panel, .step-panel {
+                        position: relative !important;
+                        inset: unset !important;
+                        transform: none !important;
+                    }
+                    /* Wrappers auto-height instead of fixed 100vh */
+                    .panel-wrapper { height: auto !important; }
+                }
+
                 /* ── TABLET (≤900px) ── */
                 @media (max-width: 900px) {
-                    /* Stack panels vertically on mobile: image on top, text below */
+                    /* Stack panels vertically on tablet/mobile: image on top, text below */
                     .audience-inner, .step-inner { flex-direction: column !important; }
                     .step-inner.img-left { flex-direction: column !important; }
-                    .panel-img-half { flex: 0 0 45vh !important; width: 100%; }
+                    .panel-img-half { flex: 0 0 42vh !important; width: 100%; }
                     .panel-text-half { flex: 1 1 auto !important; width: 100%; padding: 28px 24px !important; overflow-y: auto; }
 
                     /* Feature cards narrower */
@@ -628,6 +650,7 @@ export default function GalleriesLandingPage({
             {/* ── AUDIENCE PANELS (stacked, GSAP pinned) ───────────────────── */}
             <div
                 ref={audienceWrapRef}
+                className="panel-wrapper"
                 style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}
             >
                 {AUDIENCE_PANELS.map((panel, i) => (
@@ -684,6 +707,7 @@ export default function GalleriesLandingPage({
             <div
                 id="how-it-works"
                 ref={stepsWrapRef}
+                className="panel-wrapper"
                 style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}
             >
                 {STEP_PANELS.map((step, i) => (
