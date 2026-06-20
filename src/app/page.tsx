@@ -84,7 +84,7 @@ const TOOLS: Tool[] = [
     {
         name: 'Client Galleries',
         desc: 'Deliver your work in private, PIN-protected galleries with download controls.',
-        href: '/dashboard?tab=galleries',
+        href: '/galleries',
         Icon: Camera,
         iconBg: IC.bg, iconColor: IC.color,
         category: ['all', 'deliver'],

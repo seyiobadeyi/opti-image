@@ -517,7 +517,9 @@ export default function GalleriesLandingPage({
                     display: flex;
                     height: 100%;
                     align-items: stretch;
+                    flex-direction: row;
                 }
+                .step-inner.img-left { flex-direction: row-reverse; }
                 .panel-img-half {
                     flex: 0 0 50%;
                     position: relative;
@@ -780,10 +782,7 @@ export default function GalleriesLandingPage({
                         className={`step-panel${step.imgLeft ? ' img-left' : ''}`}
                         style={{ background: step.bg }}
                     >
-                        <div
-                            className="step-inner"
-                            style={{ flexDirection: step.imgLeft ? 'row-reverse' : 'row' }}
-                        >
+                        <div className={`step-inner${step.imgLeft ? ' img-left' : ''}`}>
                             {/* Image half */}
                             <div className="panel-img-half">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}

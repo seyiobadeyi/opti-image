@@ -126,13 +126,7 @@ export default function Header(): React.JSX.Element {
     };
 
     const openGalleries = () => {
-        if (user) { router.push('/galleries'); }
-        else {
-            setAuthModalLeftTitle('Client Galleries');
-            setAuthModalLeftSubtitle('Share your work in private, PIN-protected galleries with download controls. Free to sign up.');
-            setRedirectUrl('/galleries');
-            setIsAuthModalOpen(true);
-        }
+        router.push('/galleries');
     };
 
     const navLinkStyle: React.CSSProperties = {
