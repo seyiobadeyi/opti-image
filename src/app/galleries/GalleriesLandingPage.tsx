@@ -125,6 +125,7 @@ const AUDIENCE_PANELS = [
             'Hold delivery until the invoice is settled',
             'Your studio name and brand on every gallery page',
         ],
+        cta: 'Create your studio gallery',
         accent: '#db5a42',
     },
     {
@@ -139,6 +140,7 @@ const AUDIENCE_PANELS = [
             'Full activity log: who viewed, who downloaded, and when',
             'No per-attendee fees or download limits',
         ],
+        cta: 'Set up your event gallery',
         accent: '#e8866f',
     },
     {
@@ -153,6 +155,7 @@ const AUDIENCE_PANELS = [
             'Activity log for audit trails and compliance teams',
             'No subscription — all included with your free account',
         ],
+        cta: 'Organise your team media',
         accent: '#c9b8b0',
     },
 ];
@@ -689,7 +692,7 @@ export default function GalleriesLandingPage({
                                 <p className="panel-line" style={{ fontSize: 'clamp(0.9rem,1.4vw,1.05rem)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, marginBottom: '28px', maxWidth: '440px' }}>
                                     {panel.body}
                                 </p>
-                                <ul className="panel-line" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <ul className="panel-line" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
                                     {panel.benefits.map((b) => (
                                         <li key={b} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                                             <CheckCircle size={15} color={panel.accent} style={{ flexShrink: 0, marginTop: '3px' }} />
@@ -697,6 +700,23 @@ export default function GalleriesLandingPage({
                                         </li>
                                     ))}
                                 </ul>
+                                <div className="panel-line" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                                    <Link
+                                        href="/dashboard"
+                                        style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                            padding: '11px 22px', borderRadius: '100px',
+                                            background: ACCENT, color: '#fff',
+                                            fontWeight: 700, fontSize: '0.88rem',
+                                            textDecoration: 'none',
+                                            boxShadow: '0 0 24px rgba(219,90,66,0.4)',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {panel.cta} <ArrowRight size={14} />
+                                    </Link>
+                                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>Free account · No credit card</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -738,9 +758,28 @@ export default function GalleriesLandingPage({
                                 <h2 className="step-line" style={{ fontSize: 'clamp(1.6rem,3vw,2.6rem)', fontWeight: 800, color: '#ffffff', lineHeight: 1.15, letterSpacing: '-0.03em', marginBottom: '16px' }}>
                                     {step.title}
                                 </h2>
-                                <p className="step-line" style={{ fontSize: 'clamp(0.88rem,1.4vw,1rem)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.85, maxWidth: '440px' }}>
+                                <p className="step-line" style={{ fontSize: 'clamp(0.88rem,1.4vw,1rem)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.85, maxWidth: '440px', marginBottom: i === STEP_PANELS.length - 1 ? '32px' : '0' }}>
                                     {step.body}
                                 </p>
+                                {i === STEP_PANELS.length - 1 && (
+                                    <div className="step-line" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                                        <Link
+                                            href="/dashboard"
+                                            style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                                padding: '12px 24px', borderRadius: '100px',
+                                                background: ACCENT, color: '#fff',
+                                                fontWeight: 700, fontSize: '0.92rem',
+                                                textDecoration: 'none',
+                                                boxShadow: '0 0 28px rgba(219,90,66,0.45)',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            Create your first gallery <ArrowRight size={15} />
+                                        </Link>
+                                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.28)' }}>Free · Live in 5 minutes</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -759,7 +798,23 @@ export default function GalleriesLandingPage({
                         <h2 style={{ fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1.15, maxWidth: '560px', margin: 0 }}>
                             Everything a working photographer needs.
                         </h2>
-                        <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', margin: 0 }}>Scroll to explore →</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                            <Link
+                                href="/dashboard"
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                    padding: '10px 20px', borderRadius: '100px',
+                                    background: ACCENT, color: '#fff',
+                                    fontWeight: 700, fontSize: '0.85rem',
+                                    textDecoration: 'none',
+                                    boxShadow: '0 0 20px rgba(219,90,66,0.4)',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                Get all features free <ArrowRight size={14} />
+                            </Link>
+                            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', margin: 0, textAlign: 'right' }}>Scroll to explore →</p>
+                        </div>
                     </div>
                 </div>
 
@@ -809,7 +864,7 @@ export default function GalleriesLandingPage({
                                 Each gallery carries a subtle studio credit — your name, your website, discoverable by
                                 every person who opens the link.
                             </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '32px' }}>
                                 {[
                                     { icon: <Share2 size={15} color={ACCENT} />, text: 'Client shares gallery link with 30 guests' },
                                     { icon: <Eye size={15} color={ACCENT} />,    text: '30 guests see your studio brand in the footer' },
@@ -822,6 +877,22 @@ export default function GalleriesLandingPage({
                                         <p style={{ fontSize: '0.9rem', color: TEXT_SECONDARY, lineHeight: 1.6, paddingTop: '4px' }}>{text}</p>
                                     </div>
                                 ))}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                                <Link
+                                    href="/dashboard"
+                                    style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                        padding: '12px 24px', borderRadius: '100px',
+                                        background: ACCENT, color: '#fff',
+                                        fontWeight: 700, fontSize: '0.92rem',
+                                        textDecoration: 'none',
+                                        boxShadow: '0 4px 20px rgba(219,90,66,0.3)',
+                                    }}
+                                >
+                                    Create your gallery <ArrowRight size={15} />
+                                </Link>
+                                <span style={{ fontSize: '0.8rem', color: TEXT_MUTED }}>Takes under 5 minutes</span>
                             </div>
                         </div>
 
@@ -907,6 +978,29 @@ export default function GalleriesLandingPage({
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Post-comparison CTA */}
+                    <div className="reveal" style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', textAlign: 'center' }}>
+                        <p style={{ fontSize: '1rem', color: TEXT_SECONDARY, fontWeight: 500 }}>
+                            Everything in that left column is included in your free Optimage account. No catch.
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <Link
+                                href="/dashboard"
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                    padding: '12px 28px', borderRadius: '100px',
+                                    background: ACCENT, color: '#fff',
+                                    fontWeight: 700, fontSize: '0.95rem',
+                                    textDecoration: 'none',
+                                    boxShadow: '0 4px 20px rgba(219,90,66,0.28)',
+                                }}
+                            >
+                                Start for free <ArrowRight size={15} />
+                            </Link>
+                            <span style={{ fontSize: '0.8rem', color: TEXT_MUTED }}>No credit card · No commission ever</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -920,6 +1014,27 @@ export default function GalleriesLandingPage({
                         {faqItems.map((item) => (
                             <FaqItem key={item.question} {...item} />
                         ))}
+                    </div>
+
+                    {/* Post-FAQ CTA */}
+                    <div className="reveal" style={{ marginTop: '48px', padding: '32px', borderRadius: '20px', background: '#f9fafb', border: `1px solid ${BORDER}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+                        <div>
+                            <p style={{ fontWeight: 700, fontSize: '1rem', color: TEXT_PRIMARY, marginBottom: '4px' }}>Ready to send your next gallery?</p>
+                            <p style={{ fontSize: '0.88rem', color: TEXT_MUTED, margin: 0 }}>Free account. Live in under 5 minutes.</p>
+                        </div>
+                        <Link
+                            href="/dashboard"
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                padding: '11px 24px', borderRadius: '100px',
+                                background: ACCENT, color: '#fff',
+                                fontWeight: 700, fontSize: '0.9rem',
+                                textDecoration: 'none',
+                                flexShrink: 0,
+                            }}
+                        >
+                            Create a gallery <ArrowRight size={15} />
+                        </Link>
                     </div>
                 </div>
             </section>
