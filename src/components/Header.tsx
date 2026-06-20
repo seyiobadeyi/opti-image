@@ -146,6 +146,7 @@ export default function Header(): React.JSX.Element {
     };
 
     return (
+        <>
         <header style={{
             position: 'sticky',
             top: 0,
@@ -286,24 +287,25 @@ export default function Header(): React.JSX.Element {
                 </div>
             )}
 
-            <AnimatePresence>
-                {isAuthModalOpen && (
-                    <AuthModal
-                        isOpen={isAuthModalOpen}
-                        onClose={() => {
-                            setIsAuthModalOpen(false);
-                            setAuthModalInitialStep('email');
-                            setRedirectUrl(undefined);
-                            setAuthModalLeftTitle(undefined);
-                            setAuthModalLeftSubtitle(undefined);
-                        }}
-                        initialStep={authModalInitialStep}
-                        redirectAfterAuth={redirectUrl}
-                        leftTitle={authModalLeftTitle}
-                        leftSubtitle={authModalLeftSubtitle}
-                    />
-                )}
-            </AnimatePresence>
         </header>
+        <AnimatePresence>
+            {isAuthModalOpen && (
+                <AuthModal
+                    isOpen={isAuthModalOpen}
+                    onClose={() => {
+                        setIsAuthModalOpen(false);
+                        setAuthModalInitialStep('email');
+                        setRedirectUrl(undefined);
+                        setAuthModalLeftTitle(undefined);
+                        setAuthModalLeftSubtitle(undefined);
+                    }}
+                    initialStep={authModalInitialStep}
+                    redirectAfterAuth={redirectUrl}
+                    leftTitle={authModalLeftTitle}
+                    leftSubtitle={authModalLeftSubtitle}
+                />
+            )}
+        </AnimatePresence>
+        </>
     );
 }
