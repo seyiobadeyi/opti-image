@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Mail, ArrowRight, Key } from 'lucide-react';
+import { X, Mail, ArrowRight, Key, Camera, CalendarDays, Building2, Eye, MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { apiClient } from '@/lib/api';
@@ -33,10 +33,11 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     const [resendCooldownMs, setResendCooldownMs] = useState<number>(0);
-    const [displayName, setDisplayName] = useState<string>('');
+    const [firstName, setFirstName] = useState<string>('');
+    const [lastName, setLastName] = useState<string>('');
     const [onboardingSubStep, setOnboardingSubStep] = useState<number>(0);
     const [focusAreas, setFocusAreas] = useState<string[]>([]);
-    const [workType, setWorkType] = useState<string>('');
+    const [userRole, setUserRole] = useState<string>('');
     const [referral, setReferral] = useState<string>('');
 
     useEffect(() => {
@@ -48,15 +49,28 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         if (isOpen) setStep(initialStep ?? 'email');
     }, [isOpen, initialStep]);
 
-    // Reset onboarding wizard when entering that step
+    // Reset onboarding wizard when entering that step; pre-fill name from Google OAuth metadata
     useEffect(() => {
         if (step === 'onboarding') {
-            setOnboardingSubStep(0);
             setFocusAreas([]);
-            setWorkType('');
+            setUserRole('');
             setReferral('');
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                const meta = session?.user?.user_metadata;
+                const gn = meta?.given_name || (meta?.name || meta?.full_name || '').split(' ')[0] || '';
+                const fn = meta?.family_name || (meta?.name || meta?.full_name || '').split(' ').slice(1).join(' ') || '';
+                if (gn) {
+                    setFirstName(gn);
+                    setLastName(fn);
+                    setOnboardingSubStep(1); // skip name step — already have it from Google
+                } else {
+                    setFirstName('');
+                    setLastName('');
+                    setOnboardingSubStep(0);
+                }
+            });
         }
-    }, [step]);
+    }, [step, supabase]);
 
     useEffect(() => {
         if (step !== 'otp') return;
@@ -213,11 +227,12 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
     };
 
     const finishOnboarding = async (): Promise<void> => {
-        if (!displayName.trim()) return;
+        const displayName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ');
+        if (!displayName) return;
         setLoading(true);
-        const useCase = JSON.stringify({ focus: focusAreas, type: workType, referral });
+        const useCase = JSON.stringify({ role: userRole, focus: focusAreas, referral });
         try {
-            await apiClient.updateProfile({ display_name: displayName.trim(), use_case: useCase });
+            await apiClient.updateProfile({ display_name: displayName, use_case: useCase });
         } catch { /* non-blocking */ } finally { setLoading(false); }
         onClose();
         if (redirectAfterAuth) {
@@ -338,9 +353,9 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                         <h2 style={{ fontSize: '1.7rem', fontWeight: 800, marginBottom: '8px', color: T.text, letterSpacing: '-0.01em' }}>
                             {step === 'email' ? 'Sign in to Optimage'
                                 : step === 'otp' ? 'Check your email'
-                                : onboardingSubStep === 0 ? 'Welcome! What\'s your name?'
-                                : onboardingSubStep === 1 ? 'What\'s your primary focus?'
-                                : onboardingSubStep === 2 ? 'What type of work do you deliver?'
+                                : onboardingSubStep === 0 ? 'What should we call you?'
+                                : onboardingSubStep === 1 ? 'How are you using Optimage?'
+                                : onboardingSubStep === 2 ? 'What\'s your primary focus?'
                                 : 'One last thing…'}
                         </h2>
                         <p style={{ color: T.textSub, fontSize: '0.95rem', lineHeight: 1.5 }}>
@@ -348,9 +363,9 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                 ? 'Enter your email to sign in or create a free account.'
                                 : step === 'otp'
                                     ? `We sent an 8-digit code to ${email}. Enter it below to sign in.`
-                                : onboardingSubStep === 0 ? 'Tell us what to call you — this is how you\'ll appear to clients.'
-                                : onboardingSubStep === 1 ? 'Select all that apply — helps us tailor your gallery experience.'
-                                : onboardingSubStep === 2 ? 'We\'ll customise your gallery views to match your work.'
+                                : onboardingSubStep === 0 ? 'This is how you\'ll appear to gallery owners and clients.'
+                                : onboardingSubStep === 1 ? 'Helps us tailor your experience on the platform.'
+                                : onboardingSubStep === 2 ? 'Select all that apply — we\'ll customise your gallery views accordingly.'
                                 : 'How did you hear about Optimage?'}
                         </p>
                     </div>
@@ -383,35 +398,98 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                 ))}
                             </div>
 
-                            {/* Step 0: Name */}
+                            {/* Step 0: First + Last name */}
                             {onboardingSubStep === 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
-                                            Your name
-                                        </label>
-                                        <input
-                                            type="text" value={displayName}
-                                            onChange={(e) => setDisplayName(e.target.value)}
-                                            placeholder="e.g. Sarah Johnson" maxLength={80} autoFocus
-                                            style={inputStyle}
-                                            onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
-                                            onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
-                                            onKeyDown={(e) => { if (e.key === 'Enter' && displayName.trim()) setOnboardingSubStep(1); }}
-                                        />
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
+                                                First name
+                                            </label>
+                                            <input
+                                                type="text" value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
+                                                placeholder="Sarah" maxLength={50} autoFocus
+                                                style={inputStyle}
+                                                onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
+                                                onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
+                                                onKeyDown={(e) => { if (e.key === 'Enter' && firstName.trim()) setOnboardingSubStep(1); }}
+                                            />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: T.text }}>
+                                                Last name
+                                            </label>
+                                            <input
+                                                type="text" value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
+                                                placeholder="Johnson" maxLength={50}
+                                                style={inputStyle}
+                                                onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
+                                                onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
+                                                onKeyDown={(e) => { if (e.key === 'Enter' && firstName.trim()) setOnboardingSubStep(1); }}
+                                            />
+                                        </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px' }}>
                                         <button type="button" onClick={skipOnboarding} style={btnSecondary}>Skip</button>
-                                        <button type="button" disabled={!displayName.trim()} onClick={() => setOnboardingSubStep(1)}
-                                            style={{ ...btnPrimary, opacity: !displayName.trim() ? 0.5 : 1 }}>
+                                        <button type="button" disabled={!firstName.trim()} onClick={() => setOnboardingSubStep(1)}
+                                            style={{ ...btnPrimary, opacity: !firstName.trim() ? 0.5 : 1 }}>
                                             <span>Continue</span><ArrowRight size={16} />
                                         </button>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Step 1: Focus areas */}
+                            {/* Step 1: Role / intent */}
                             {onboardingSubStep === 1 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                        {([
+                                            { value: 'photographer', label: 'Photographer / Videographer', Icon: Camera },
+                                            { value: 'event_planner', label: 'Event Planner', Icon: CalendarDays },
+                                            { value: 'organisation', label: 'Organisation / Business', Icon: Building2 },
+                                            { value: 'viewer', label: 'Viewing a gallery', Icon: Eye },
+                                            { value: 'other', label: 'Other', Icon: MoreHorizontal },
+                                        ] as { value: string; label: string; Icon: React.FC<{ size: number; color: string }> }[]).map(({ value, label, Icon }) => {
+                                            const active = userRole === value;
+                                            return (
+                                                <button key={value} type="button" onClick={() => setUserRole(value)}
+                                                    style={{
+                                                        padding: '16px 12px', borderRadius: '12px', textAlign: 'center',
+                                                        border: `1.5px solid ${active ? T.accent : T.border}`,
+                                                        background: active ? `${T.accent}14` : T.bgSub,
+                                                        color: active ? T.accent : T.text, cursor: 'pointer',
+                                                        fontSize: '0.82rem', fontWeight: 600, transition: 'all 0.15s',
+                                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                                                        lineHeight: 1.3,
+                                                    }}>
+                                                    <Icon size={22} color={active ? T.accent : T.textMuted} />
+                                                    {label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button type="button" onClick={() => setOnboardingSubStep(0)} style={btnSecondary}>Back</button>
+                                        <button type="button"
+                                            onClick={() => {
+                                                // Viewer / other roles skip focus areas — jump to referral
+                                                if (!userRole || userRole === 'viewer' || userRole === 'other') {
+                                                    setOnboardingSubStep(3);
+                                                } else {
+                                                    setOnboardingSubStep(2);
+                                                }
+                                            }}
+                                            style={btnPrimary}>
+                                            <span>{userRole ? 'Continue' : 'Skip'}</span><ArrowRight size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Step 2: Focus areas — only for creators */}
+                            {onboardingSubStep === 2 && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                         {['Weddings', 'Portraits', 'Family', 'Corporate', 'Events', 'Boudoir', 'Commercial', 'School', 'Travel & Nature', 'Sports', 'Food', 'Other'].map(area => {
@@ -432,46 +510,9 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                         })}
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px' }}>
-                                        <button type="button" onClick={() => setOnboardingSubStep(0)} style={btnSecondary}>Back</button>
-                                        <button type="button" onClick={() => setOnboardingSubStep(2)} style={btnPrimary}>
-                                            <span>{focusAreas.length ? 'Continue' : 'Skip'}</span><ArrowRight size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 2: Work type */}
-                            {onboardingSubStep === 2 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                                        {[
-                                            { value: 'photos', label: 'Photos', icon: '📷' },
-                                            { value: 'videos', label: 'Videos', icon: '🎬' },
-                                            { value: 'photos_videos', label: 'Photos & Videos', icon: '🎞️' },
-                                            { value: 'art', label: 'Art Galleries', icon: '🖼️' },
-                                            { value: 'other', label: 'Other', icon: '✦' },
-                                        ].map(({ value, label, icon }) => {
-                                            const active = workType === value;
-                                            return (
-                                                <button key={value} type="button" onClick={() => setWorkType(value)}
-                                                    style={{
-                                                        padding: '16px 12px', borderRadius: '12px', textAlign: 'center',
-                                                        border: `1.5px solid ${active ? T.accent : T.border}`,
-                                                        background: active ? `${T.accent}14` : T.bgSub,
-                                                        color: active ? T.accent : T.text, cursor: 'pointer',
-                                                        fontSize: '0.88rem', fontWeight: 600, transition: 'all 0.15s',
-                                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                                                    }}>
-                                                    <span style={{ fontSize: '1.4rem' }}>{icon}</span>
-                                                    {label}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '10px' }}>
                                         <button type="button" onClick={() => setOnboardingSubStep(1)} style={btnSecondary}>Back</button>
                                         <button type="button" onClick={() => setOnboardingSubStep(3)} style={btnPrimary}>
-                                            <span>{workType ? 'Continue' : 'Skip'}</span><ArrowRight size={16} />
+                                            <span>{focusAreas.length ? 'Continue' : 'Skip'}</span><ArrowRight size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -498,7 +539,16 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                         })}
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px' }}>
-                                        <button type="button" onClick={() => setOnboardingSubStep(2)} style={btnSecondary}>Back</button>
+                                        <button type="button"
+                                            onClick={() => {
+                                                // Viewer / other skipped step 2 — go back to role step
+                                                if (!userRole || userRole === 'viewer' || userRole === 'other') {
+                                                    setOnboardingSubStep(1);
+                                                } else {
+                                                    setOnboardingSubStep(2);
+                                                }
+                                            }}
+                                            style={btnSecondary}>Back</button>
                                         <button type="button" disabled={loading} onClick={finishOnboarding}
                                             style={{ ...btnPrimary, opacity: loading ? 0.7 : 1 }}>
                                             {loading ? 'Saving…' : <><span>Get Started</span><ArrowRight size={16} /></>}
