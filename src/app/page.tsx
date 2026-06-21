@@ -385,7 +385,7 @@ const FEATURES = [
         Icon: Camera,
         name: 'Client gallery delivery',
         desc: 'Share work with clients in private, PIN-protected galleries. Set download rules, payment gates and expiry dates.',
-        href: '/features/client-galleries',
+        href: '/galleries',
     },
     {
         Icon: Globe,
