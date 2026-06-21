@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
@@ -294,7 +295,8 @@ const GALLERY_INPUT_STYLE: React.CSSProperties = {
     color: c.text, fontSize: '0.9rem', width: '100%',
 };
 
-function GalleriesTab(): React.JSX.Element {
+function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: string | null; initialGalleryId?: string }): React.JSX.Element {
+    const router = useRouter();
     // ── list state
     const [galleries, setGalleries] = useState<Gallery[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -335,11 +337,30 @@ function GalleriesTab(): React.JSX.Element {
     const [editError, setEditError]           = useState<string | null>(null);
     const [editSaved, setEditSaved]           = useState<boolean>(false);
 
-    // ── Photo reorder + focal point state
+    // ── Photo reorder + focal point + detail modal state
     const [draggedId, setDraggedId]           = useState<string | null>(null);
     const [dragOverId, setDragOverId]         = useState<string | null>(null);
-    const [focalItemId, setFocalItemId]       = useState<string | null>(null); // item in focal-point picking mode
+    const [photoModal, setPhotoModal]         = useState<GalleryItem | null>(null); // detail/focal modal
+    const [focalPicking, setFocalPicking]     = useState<boolean>(false); // focal pick mode inside photo modal
     const [showTips, setShowTips]             = useState<boolean>(false);
+
+    // ── Slug edit state (settings tab)
+    const [editSlug, setEditSlug]             = useState<string>('');
+    const [slugCheck, setSlugCheck]           = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+
+    useEffect(() => {
+        if (!activeGallery) return;
+        const clean = editSlug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        if (!clean || clean === activeGallery.slug) { setSlugCheck('idle'); return; }
+        if (clean.length < 3) { setSlugCheck('taken'); return; }
+        setSlugCheck('checking');
+        const t = setTimeout(() => {
+            void apiClient.checkSlugAvailable(clean, activeGallery.id).then(res => {
+                setSlugCheck(res.available ? 'available' : 'taken');
+            }).catch(() => setSlugCheck('idle'));
+        }, 500);
+        return () => clearTimeout(t);
+    }, [editSlug, activeGallery]);
 
     // ── Send to client state
     const [sendingTo, setSendingTo]           = useState<string | null>(null); // gallery ID being sent
@@ -358,11 +379,19 @@ function GalleriesTab(): React.JSX.Element {
         apiClient.listGalleries().then(data => {
             setGalleries(data);
             setLoading(false);
+            // Auto-open gallery if ID was passed in URL (?gallery=...)
+            if (initialGalleryId) {
+                const target = data.find(g => g.id === initialGalleryId);
+                if (target) void openGallery(target);
+            }
         }).catch(() => setLoading(false));
-    }, []);
+        // openGallery is stable (defined in render scope); intentionally omitted from deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialGalleryId]);
 
     // ── open manage view and load items
     const openGallery = async (gallery: Gallery): Promise<void> => {
+        router.push(`/dashboard/galleries?gallery=${gallery.id}`, { scroll: false });
         setActiveGallery(gallery);
         setItems([]);
         setUploadError(null);
@@ -377,20 +406,23 @@ function GalleriesTab(): React.JSX.Element {
         setEditPaymentRequired(gallery.payment_required ?? false);
         setEditPaymentInstructions((gallery as Gallery & { payment_instructions?: string }).payment_instructions || '');
         setEditExpiresAt(gallery.expires_at ? (new Date(gallery.expires_at).toISOString().split('T')[0] ?? '') : '');
+        setEditSlug(gallery.slug);
+        setSlugCheck('idle');
         setEditSaved(false);
         setEditError(null);
         try {
-            // For 'account' type the owner needs to pass their own Supabase token
-            let supabaseToken: string | undefined;
-            if (gallery.access_type === 'account') {
-                const { createClient: mkClient } = await import('@/utils/supabase/client');
-                const { data } = await mkClient().auth.getSession();
-                supabaseToken = data.session?.access_token;
-            }
+            // Always pass the owner's Supabase token so the server can grant
+            // owner-level access regardless of gallery access_type (e.g. PIN-protected)
+            const { createClient: mkClient } = await import('@/utils/supabase/client');
+            const { data: sessionData } = await mkClient().auth.getSession();
+            const supabaseToken = sessionData.session?.access_token;
             const token = await apiClient.verifyGalleryAccess(gallery.slug, undefined, undefined, supabaseToken);
             const data = await apiClient.getGalleryItems(gallery.slug, token);
             setItems(data.items);
-        } catch {
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            // Surface the error so the user knows something went wrong (e.g. missing DB columns)
+            setUploadError(`Could not load photos: ${msg}. If this is a new setup, you may need to run the DB migration.`);
             setItems([]);
         } finally {
             setItemsLoading(false);
@@ -398,6 +430,7 @@ function GalleriesTab(): React.JSX.Element {
     };
 
     const closeGallery = (): void => {
+        router.push('/dashboard/galleries', { scroll: false });
         setActiveGallery(null);
         setItems([]);
         setUploadError(null);
@@ -526,30 +559,39 @@ function GalleriesTab(): React.JSX.Element {
         setDragOverId(null);
     };
 
-    // ── set focal point for a photo (click position within the image)
-    const handleFocalClick = (e: React.MouseEvent<HTMLDivElement>, item: GalleryItem): void => {
+    // ── set focal point for a photo (click position within the image element)
+    const handleFocalClick = (e: React.MouseEvent<HTMLImageElement>): void => {
+        if (!photoModal) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
         const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
         const fp = `${x}% ${y}%`;
-        setItems(prev => prev.map(i => i.id === item.id ? { ...i, focal_point: fp } : i));
-        void apiClient.updateGalleryItem(item.gallery_id, item.id, { focal_point: fp });
-        // If this is the cover photo, update gallery cover_focal_point too
-        if (activeGallery && activeGallery.cover_image_url === item.display_url) {
+        const updated = { ...photoModal, focal_point: fp };
+        setItems(prev => prev.map(i => i.id === photoModal.id ? updated : i));
+        setPhotoModal(updated);
+        void apiClient.updateGalleryItem(photoModal.gallery_id, photoModal.id, { focal_point: fp });
+        if (activeGallery && activeGallery.cover_image_url === photoModal.display_url) {
             void apiClient.updateGallery(activeGallery.id, { cover_focal_point: fp });
             setActiveGallery(prev => prev ? { ...prev, cover_focal_point: fp } : prev);
         }
-        setFocalItemId(null);
+        setFocalPicking(false);
     };
 
-    // ── copy gallery link
+    // ── copy gallery link (use /:username/:slug if owner has username)
     const copyLink = (slug: string): void => {
-        const url = `${window.location.origin}/g/${slug}`;
+        const url = ownerUsername
+            ? `${window.location.origin}/${ownerUsername}/${slug}`
+            : `${window.location.origin}/g/${slug}`;
         navigator.clipboard.writeText(url).then(() => {
             setCopiedSlug(slug);
             setTimeout(() => setCopiedSlug(null), 2000);
         }).catch(() => null);
     };
+
+    // ── gallery link helper (returns the shareable URL string)
+    const galleryUrl = (slug: string): string => ownerUsername
+        ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${ownerUsername}/${slug}`
+        : `${typeof window !== 'undefined' ? window.location.origin : ''}/g/${slug}`;
 
     // ── send gallery to client via email
     const handleSendToClient = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -614,9 +656,16 @@ function GalleriesTab(): React.JSX.Element {
         setEditSaving(true);
         setEditError(null);
         try {
+            const slugChanged = editSlug.trim() !== activeGallery.slug;
+            if (slugChanged && slugCheck === 'taken') {
+                setEditError('That URL is already taken — choose a different one.');
+                setEditSaving(false);
+                return;
+            }
             const updated = await apiClient.updateGallery(activeGallery.id, {
                 title: editTitle.trim(),
                 description: editDesc.trim() || undefined,
+                slug: slugChanged ? editSlug.trim() : undefined,
                 access_type: editAccessType,
                 pin: editAccessType === 'pin' && editPin.trim() ? editPin.trim() : undefined,
                 clearPin: editAccessType !== 'pin' && activeGallery.access_type === 'pin',
@@ -827,101 +876,41 @@ function GalleriesTab(): React.JSX.Element {
                         ) : (
                             <>
                                 <p style={{ fontSize: '0.75rem', color: c.textMuted, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                    <GripVertical size={12} /> Drag photos to reorder · hover for options · click <Crosshair size={11} style={{ display: 'inline' }} /> to set focal point
+                                    <GripVertical size={12} /> Drag to reorder · click a photo to edit details and set focal point
                                 </p>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
                                     {items.map(item => {
                                         const isCover = activeGallery.cover_image_url === item.display_url;
-                                        const inFocalMode = focalItemId === item.id;
                                         const fp = item.focal_point || '50% 50%';
                                         return (
                                             <div
                                                 key={item.id}
-                                                draggable={!inFocalMode}
+                                                draggable
                                                 onDragStart={() => handleDragStart(item.id)}
                                                 onDragOver={(e) => handleDragOver(e, item.id)}
                                                 onDrop={() => handleDrop(item.id)}
                                                 onDragEnd={() => { setDraggedId(null); setDragOverId(null); }}
+                                                onClick={() => { setPhotoModal(item); setFocalPicking(false); }}
                                                 className="gallery-grid-item"
                                                 style={{
-                                                    position: 'relative', borderRadius: '12px', overflow: 'hidden',
-                                                    background: c.white, aspectRatio: '1',
-                                                    border: dragOverId === item.id
-                                                        ? `2px solid ${c.accent}`
-                                                        : isCover
-                                                            ? `2px solid ${c.accent}`
-                                                            : `1px solid ${c.border}`,
-                                                    opacity: draggedId === item.id ? 0.4 : 1,
-                                                    cursor: inFocalMode ? 'crosshair' : 'grab',
-                                                    transition: 'border-color 0.15s, opacity 0.15s',
+                                                    position: 'relative', borderRadius: '10px', overflow: 'hidden',
+                                                    background: c.bgMuted, aspectRatio: '1',
+                                                    border: dragOverId === item.id ? `2px solid ${c.accent}` : isCover ? `2px solid ${c.accent}` : `1px solid ${c.border}`,
+                                                    opacity: draggedId === item.id ? 0.35 : 1,
+                                                    cursor: 'pointer', transition: 'border-color 0.15s, opacity 0.15s',
                                                 }}
-                                                onClick={inFocalMode ? (e) => handleFocalClick(e, item) : undefined}
                                             >
-                                                <img
-                                                    src={item.display_url}
-                                                    alt={item.filename}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: fp, display: 'block', transition: 'transform 0.25s', pointerEvents: 'none' }}
-                                                />
-
-                                                {/* Cover badge */}
-                                                {isCover && !inFocalMode && (
-                                                    <div style={{ position: 'absolute', top: '8px', left: '8px', background: c.accent, color: c.white, fontSize: '0.65rem', fontWeight: 700, padding: '3px 7px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', pointerEvents: 'none' }}>
-                                                        <Camera size={9} /> Cover
-                                                    </div>
+                                                <img src={item.display_url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: fp, display: 'block', pointerEvents: 'none' }} />
+                                                {isCover && (
+                                                    <div style={{ position: 'absolute', top: '6px', left: '6px', background: c.accent, color: c.white, fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px', borderRadius: '5px', pointerEvents: 'none' }}>Cover</div>
                                                 )}
-
-                                                {/* Focal crosshair dot */}
-                                                {!inFocalMode && item.focal_point && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        left: fp.split(' ')[0],
-                                                        top: fp.split(' ')[1],
-                                                        transform: 'translate(-50%, -50%)',
-                                                        width: '10px', height: '10px',
-                                                        borderRadius: '50%',
-                                                        border: '2px solid white',
-                                                        background: c.accent,
-                                                        boxShadow: '0 0 0 1px rgba(0,0,0,0.4)',
-                                                        pointerEvents: 'none',
-                                                    }} />
+                                                {item.focal_point && (
+                                                    <div style={{ position: 'absolute', left: fp.split(' ')[0], top: fp.split(' ')[1], transform: 'translate(-50%,-50%)', width: '8px', height: '8px', borderRadius: '50%', border: '2px solid white', background: c.accent, boxShadow: '0 0 0 1px rgba(0,0,0,0.4)', pointerEvents: 'none' }} />
                                                 )}
-
-                                                {/* Focal picking mode overlay */}
-                                                {inFocalMode && (
-                                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', zIndex: 5 }}>
-                                                        <Crosshair size={28} color="white" />
-                                                        <p style={{ color: 'white', fontSize: '0.7rem', margin: 0, textAlign: 'center', lineHeight: 1.3, padding: '0 8px' }}>Click where the<br />subject is</p>
-                                                        <button onClick={(e) => { e.stopPropagation(); setFocalItemId(null); }}
-                                                            style={{ marginTop: '4px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)', color: 'white', fontSize: '0.7rem', cursor: 'pointer' }}>
-                                                            Cancel
-                                                        </button>
-                                                    </div>
-                                                )}
-
-                                                {/* Hover overlay (hidden in focal mode) */}
-                                                {!inFocalMode && (
-                                                    <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: 0, transition: 'opacity 0.2s', padding: '10px' }}>
-                                                        <GripVertical size={16} color="rgba(255,255,255,0.5)" style={{ position: 'absolute', top: '8px', right: '8px' }} />
-                                                        <p style={{ color: c.white, fontSize: '0.7rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
-                                                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                                            <button onClick={(e) => { e.stopPropagation(); void handleSetCover(item); }}
-                                                                style={{ padding: '5px 7px', borderRadius: '7px', background: isCover ? `${c.accent}90` : 'rgba(255,255,255,0.15)', color: c.white, fontSize: '0.68rem', border: isCover ? 'none' : '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                <Camera size={9} /> {isCover ? 'Cover ✓' : 'Set cover'}
-                                                            </button>
-                                                            <button onClick={(e) => { e.stopPropagation(); setFocalItemId(item.id); }}
-                                                                style={{ padding: '5px 7px', borderRadius: '7px', background: item.focal_point ? `${c.accent}90` : 'rgba(255,255,255,0.15)', color: c.white, fontSize: '0.68rem', border: item.focal_point ? 'none' : '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                <Crosshair size={9} /> Focus
-                                                            </button>
-                                                            <a href={item.original_url} target="_blank" rel="noreferrer" download style={{ padding: '5px 7px', borderRadius: '7px', background: 'rgba(255,255,255,0.15)', color: c.white, fontSize: '0.68rem', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                <Download size={9} /> Save
-                                                            </a>
-                                                            <button onClick={(e) => { e.stopPropagation(); void handleRemoveItem(item.id); }}
-                                                                style={{ padding: '5px 7px', borderRadius: '7px', background: 'rgba(239,68,68,0.3)', color: '#fca5a5', fontSize: '0.68rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                                <X size={9} /> Remove
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.18s', pointerEvents: 'none' }}>
+                                                    <Eye size={20} color="white" />
+                                                </div>
+                                                <GripVertical size={13} color="white" style={{ position: 'absolute', bottom: '6px', right: '6px', opacity: 0.6, pointerEvents: 'none', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
                                             </div>
                                         );
                                     })}
@@ -930,52 +919,134 @@ function GalleriesTab(): React.JSX.Element {
                         )}
 
                         {/* ── Tips panel ── */}
-                        <div style={{ marginTop: '28px', border: `1px solid ${c.border}`, borderRadius: '14px', overflow: 'hidden' }}>
-                            <button
-                                onClick={() => setShowTips(v => !v)}
-                                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', background: c.white, border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: c.textSecondary }}
-                            >
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}><Info size={14} color={c.accent} /> Photo tips & display guide</span>
-                                {showTips ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        <div style={{ marginTop: '24px', border: `1px solid ${c.border}`, borderRadius: '14px', overflow: 'hidden' }}>
+                            <button onClick={() => setShowTips(v => !v)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: c.white, border: 'none', cursor: 'pointer', fontSize: '0.83rem', fontWeight: 600, color: c.textSecondary }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}><Info size={13} color={c.accent} /> Photo tips & display guide</span>
+                                {showTips ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                             </button>
                             {showTips && (
-                                <div style={{ padding: '0 18px 18px 18px', background: c.white, borderTop: `1px solid ${c.border}` }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px', paddingTop: '16px' }}>
+                                <div style={{ padding: '0 16px 16px 16px', background: c.white, borderTop: `1px solid ${c.border}` }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px', paddingTop: '14px' }}>
                                         {[
-                                            {
-                                                title: 'Cover photo size',
-                                                body: 'Use a landscape image at least 1600 × 900 px. It fills the full screen, so anything smaller will look blurry on large displays. 16:9 ratio works best.',
-                                            },
-                                            {
-                                                title: 'Grid photo size',
-                                                body: 'Photos show as squares in the grid. Keep important subjects centred — or use the Focus button to pin the crop point so faces/subjects stay visible.',
-                                            },
-                                            {
-                                                title: 'How it looks on mobile',
-                                                body: 'On phones the grid shows 2 columns. Portrait shots fill nicely; wide landscapes lose their edges — use the Focus button to lock what matters.',
-                                            },
-                                            {
-                                                title: 'How it looks on desktop',
-                                                body: 'On desktops the grid shows 3–4 columns. Images display as ~280 px squares, so fine detail is less important than composition and colour.',
-                                            },
-                                            {
-                                                title: 'Best file format',
-                                                body: 'JPEG for photos (smaller files, great quality). PNG if you need transparency. WebP is accepted and gives the smallest file size at equal quality.',
-                                            },
-                                            {
-                                                title: 'Upload limit',
-                                                body: 'Up to 50 MB per image, 20 images per batch. Upload multiple batches to add more. No hard cap on total photos per gallery during beta.',
-                                            },
+                                            { title: 'Cover photo', body: 'Use landscape, at least 1600×900 px. It fills the full screen so size matters — anything smaller looks blurry on large displays.' },
+                                            { title: 'Grid crop', body: 'Photos show as squares. Click a photo and use "Set focus" to pin the crop point so faces and subjects stay centred.' },
+                                            { title: 'Mobile (2 columns)', body: 'Portrait shots fill nicely. Wide landscapes lose their edges — set a focus point to lock what matters.' },
+                                            { title: 'Desktop (3–4 cols)', body: 'Images render at ~260 px squares. Fine detail matters less than composition and colour.' },
+                                            { title: 'File format', body: 'JPEG for photos. WebP gives the smallest files at equal quality. PNG only if you need transparency.' },
+                                            { title: 'Upload limits', body: 'Up to 50 MB per image, 20 images per batch. Upload in multiple batches for larger galleries.' },
                                         ].map(tip => (
-                                            <div key={tip.title} style={{ background: c.bgMuted, borderRadius: '10px', padding: '12px 14px' }}>
-                                                <p style={{ fontSize: '0.78rem', fontWeight: 700, margin: '0 0 5px 0', color: c.accent }}>{tip.title}</p>
-                                                <p style={{ fontSize: '0.76rem', color: c.textSecondary, margin: 0, lineHeight: 1.5 }}>{tip.body}</p>
+                                            <div key={tip.title} style={{ background: c.bgMuted, borderRadius: '9px', padding: '10px 12px' }}>
+                                                <p style={{ fontSize: '0.75rem', fontWeight: 700, margin: '0 0 4px 0', color: c.accent }}>{tip.title}</p>
+                                                <p style={{ fontSize: '0.73rem', color: c.textSecondary, margin: 0, lineHeight: 1.5 }}>{tip.body}</p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             )}
                         </div>
+
+                        {/* ── Photo detail / focal-point modal ── */}
+                        {photoModal && (
+                            <div
+                                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+                                onClick={() => { setPhotoModal(null); setFocalPicking(false); }}
+                            >
+                                <div
+                                    style={{ background: c.white, borderRadius: '20px', width: '100%', maxWidth: '820px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    {/* Modal header */}
+                                    <div style={{ padding: '14px 18px', borderBottom: `1px solid ${c.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ minWidth: 0 }}>
+                                            <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{photoModal.filename}</p>
+                                            <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: c.textMuted }}>
+                                                {photoModal.width && photoModal.height ? `${photoModal.width} × ${photoModal.height} px · ` : ''}{formatBytes(photoModal.original_size)}
+                                                {photoModal.focal_point && <span style={{ color: c.accent }}> · focus {photoModal.focal_point}</span>}
+                                            </p>
+                                        </div>
+                                        <button onClick={() => { setPhotoModal(null); setFocalPicking(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.textMuted, flexShrink: 0 }}><X size={18} /></button>
+                                    </div>
+
+                                    {/* Image area */}
+                                    <div style={{ flex: 1, overflow: 'auto', background: '#111', position: 'relative', minHeight: '200px' }}>
+                                        {focalPicking ? (
+                                            <div style={{ position: 'relative', lineHeight: 0 }}>
+                                                <img
+                                                    src={photoModal.display_url}
+                                                    alt={photoModal.filename}
+                                                    onClick={handleFocalClick}
+                                                    style={{ width: '100%', height: 'auto', display: 'block', cursor: 'crosshair', maxHeight: '58vh', objectFit: 'contain' }}
+                                                />
+                                                <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '0.78rem', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <Crosshair size={13} /> Click on the subject to set focal point
+                                                    <button onClick={() => setFocalPicking(false)} style={{ marginLeft: '8px', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px', color: 'white', fontSize: '0.72rem', padding: '3px 8px', cursor: 'pointer' }}>Cancel</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div style={{ position: 'relative', lineHeight: 0 }}>
+                                                <img
+                                                    src={photoModal.display_url}
+                                                    alt={photoModal.filename}
+                                                    style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '58vh', objectFit: 'contain' }}
+                                                />
+                                                {/* Focal point dot on full image (positioned relative to contain-fit image) */}
+                                                {photoModal.focal_point && (
+                                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                                                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                                            <div title={`Focal point: ${photoModal.focal_point}`} style={{ position: 'absolute', left: photoModal.focal_point.split(' ')[0], top: photoModal.focal_point.split(' ')[1], transform: 'translate(-50%,-50%)', width: '16px', height: '16px', borderRadius: '50%', border: '3px solid white', background: c.accent, boxShadow: '0 0 0 1px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.5)' }} />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Actions row */}
+                                    <div style={{ padding: '14px 18px', borderTop: `1px solid ${c.border}`, display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                        {/* Set cover */}
+                                        <button
+                                            onClick={() => { void handleSetCover(photoModal); setPhotoModal(prev => prev ? { ...prev } : null); }}
+                                            style={{ padding: '7px 13px', borderRadius: '9px', border: `1px solid ${activeGallery.cover_image_url === photoModal.display_url ? c.accent : c.border}`, background: activeGallery.cover_image_url === photoModal.display_url ? `${c.accent}15` : c.white, color: activeGallery.cover_image_url === photoModal.display_url ? c.accent : c.textSecondary, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}
+                                        >
+                                            <Camera size={13} /> {activeGallery.cover_image_url === photoModal.display_url ? 'Gallery cover ✓' : 'Set as cover'}
+                                        </button>
+
+                                        {/* Focal point */}
+                                        <button
+                                            onClick={() => setFocalPicking(v => !v)}
+                                            style={{ padding: '7px 13px', borderRadius: '9px', border: `1px solid ${focalPicking ? c.accent : (photoModal.focal_point ? c.accent : c.border)}`, background: focalPicking ? `${c.accent}15` : (photoModal.focal_point ? `${c.accent}08` : c.white), color: focalPicking ? c.accent : (photoModal.focal_point ? c.accent : c.textSecondary), fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}
+                                        >
+                                            <Crosshair size={13} /> {focalPicking ? 'Cancel focus' : photoModal.focal_point ? 'Update focus' : 'Set focus point'}
+                                        </button>
+                                        {photoModal.focal_point && !focalPicking && (
+                                            <button onClick={() => {
+                                                const cleared = { ...photoModal, focal_point: null };
+                                                setItems(prev => prev.map(i => i.id === photoModal.id ? cleared : i));
+                                                setPhotoModal(cleared);
+                                                void apiClient.updateGalleryItem(photoModal.gallery_id, photoModal.id, { focal_point: null });
+                                            }} style={{ padding: '7px 10px', borderRadius: '9px', border: `1px solid ${c.border}`, background: c.white, color: c.textMuted, fontSize: '0.78rem', cursor: 'pointer' }}>
+                                                Clear focus
+                                            </button>
+                                        )}
+
+                                        <div style={{ flex: 1 }} />
+
+                                        {/* Download */}
+                                        <a href={photoModal.original_url} target="_blank" rel="noreferrer" download style={{ padding: '7px 13px', borderRadius: '9px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Download size={13} /> Download original
+                                        </a>
+
+                                        {/* Remove */}
+                                        <button
+                                            onClick={() => { void handleRemoveItem(photoModal.id); setPhotoModal(null); }}
+                                            style={{ padding: '7px 13px', borderRadius: '9px', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)', color: '#ef4444', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                        >
+                                            <X size={13} /> Remove photo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -994,6 +1065,29 @@ function GalleriesTab(): React.JSX.Element {
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>Description <span style={{ fontWeight: 400, color: c.textMuted }}>(optional)</span></label>
                                     <textarea value={editDesc} maxLength={500} rows={2} onChange={(e) => setEditDesc(e.target.value)} style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '4px' }}>Gallery URL</label>
+                                    <p style={{ fontSize: '0.75rem', color: c.textMuted, margin: '0 0 8px 0' }}>
+                                        Customize the end part of your gallery link. Only lowercase letters, numbers, and hyphens.
+                                    </p>
+                                    <div style={{ display: 'flex', alignItems: 'center', background: c.bgMuted, border: `1px solid ${slugCheck === 'taken' ? '#ef4444' : slugCheck === 'available' ? '#22c55e' : c.border}`, borderRadius: '10px', overflow: 'hidden', transition: 'border-color 0.15s' }}>
+                                        <span style={{ padding: '10px 10px 10px 14px', fontSize: '0.82rem', color: c.textMuted, whiteSpace: 'nowrap', borderRight: `1px solid ${c.border}`, background: c.bgMuted }}>
+                                            {ownerUsername ? `/${ownerUsername}/` : '/g/'}
+                                        </span>
+                                        <input
+                                            type="text"
+                                            value={editSlug}
+                                            minLength={3}
+                                            maxLength={80}
+                                            placeholder="your-gallery-name"
+                                            onChange={(e) => { setEditSlug(e.target.value); setSlugCheck('idle'); }}
+                                            style={{ flex: 1, border: 'none', background: 'transparent', padding: '10px 12px', fontSize: '0.85rem', outline: 'none', color: c.text, minWidth: 0 }}
+                                        />
+                                        {slugCheck === 'checking' && <span style={{ padding: '0 12px', fontSize: '0.75rem', color: c.textMuted }}>Checking…</span>}
+                                        {slugCheck === 'available' && <span style={{ padding: '0 12px', fontSize: '0.75rem', color: '#22c55e', fontWeight: 600 }}>Available</span>}
+                                        {slugCheck === 'taken' && <span style={{ padding: '0 12px', fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>Taken</span>}
+                                    </div>
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>Access</label>
@@ -1263,9 +1357,20 @@ function GalleriesTab(): React.JSX.Element {
 }
 
 // ─── Main Component ──────────────────────────────────────────────
-export default function DashboardClient({ user, profile, history: initialHistory }: DashboardClientProps): React.JSX.Element {
+export default function DashboardClient({ user, profile, history: initialHistory, initialTab = 'optimize', initialGalleryId }: DashboardClientProps): React.JSX.Element {
+    const router = useRouter();
     const [history, setHistory] = useState<ProcessingHistoryItem[]>(initialHistory || []);
-    const [activeTab, setActiveTab] = useState<DashboardTab>('optimize');
+    const [activeTab, setActiveTabState] = useState<DashboardTab>(initialTab);
+
+    const setActiveTab = (tab: DashboardTab): void => {
+        setActiveTabState(tab);
+        router.push(`/dashboard/${tab}`, { scroll: false });
+    };
+
+    // Keep active tab in sync when browser back/forward changes the URL
+    useEffect(() => {
+        setActiveTabState(initialTab);
+    }, [initialTab]);
 
     // ── Inline optimizer state ─────────────────────────
     const [files, setFiles] = useState<FileWithCustomName[]>([]);
@@ -1938,7 +2043,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
 
             {/* ═══════════ Tab: Galleries ═══════════ */}
             {activeTab === 'galleries' && (
-                <GalleriesTab />
+                <GalleriesTab ownerUsername={profile?.username ?? null} initialGalleryId={initialGalleryId} />
             )}
 
             {/* ═══════════ Tab: Referrals ═══════════ */}

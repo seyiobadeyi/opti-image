@@ -407,6 +407,8 @@ export interface DashboardClientProps {
   user: { email: string };
   profile: UserProfile | null;
   history: ProcessingHistoryItem[];
+  initialTab?: DashboardTab;
+  initialGalleryId?: string;
 }
 
 // ──────────────────────────────────────────────
@@ -517,6 +519,7 @@ export interface GalleryPublicMeta {
   description: string | null;
   cover_image_url: string | null;
   cover_focal_point: string | null;
+  owner_username: string | null;
   access_type: 'public' | 'pin' | 'email_list' | 'account';
   allow_download: boolean;
   status: 'active' | 'archived' | 'draft';

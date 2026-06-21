@@ -380,9 +380,18 @@ export const apiClient = {
         return response.json() as Promise<Gallery>;
     },
 
+    async checkSlugAvailable(slug: string, excludeGalleryId?: string): Promise<{ available: boolean; slug: string }> {
+        const params = new URLSearchParams({ slug });
+        if (excludeGalleryId) params.set('exclude', excludeGalleryId);
+        const response = await fetch(`${API_BASE}/api/gallery/check-slug?${params}`);
+        if (!response.ok) throw new Error('Failed to check slug');
+        return response.json() as Promise<{ available: boolean; slug: string }>;
+    },
+
     async updateGallery(id: string, data: Partial<{
         title: string;
         description: string;
+        slug: string;
         pin: string;
         clearPin: boolean;
         access_type: 'public' | 'pin' | 'email_list' | 'account';
