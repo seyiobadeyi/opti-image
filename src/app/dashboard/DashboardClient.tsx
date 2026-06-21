@@ -320,6 +320,21 @@ function GalleriesTab(): React.JSX.Element {
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
+    // ── gallery manage tab + edit form
+    const [galleryTab, setGalleryTab]         = useState<'photos' | 'settings' | 'activity'>('photos');
+    const [showMoreMenu, setShowMoreMenu]     = useState<boolean>(false);
+    const [editTitle, setEditTitle]           = useState<string>('');
+    const [editDesc, setEditDesc]             = useState<string>('');
+    const [editAccessType, setEditAccessType] = useState<'public' | 'pin' | 'account'>('public');
+    const [editPin, setEditPin]               = useState<string>('');
+    const [editAllowDownload, setEditAllowDownload]           = useState<boolean>(true);
+    const [editPaymentRequired, setEditPaymentRequired]       = useState<boolean>(false);
+    const [editPaymentInstructions, setEditPaymentInstructions] = useState<string>('');
+    const [editExpiresAt, setEditExpiresAt]   = useState<string>('');
+    const [editSaving, setEditSaving]         = useState<boolean>(false);
+    const [editError, setEditError]           = useState<string | null>(null);
+    const [editSaved, setEditSaved]           = useState<boolean>(false);
+
     // ── Send to client state
     const [sendingTo, setSendingTo]           = useState<string | null>(null); // gallery ID being sent
     const [sendEmail, setSendEmail]           = useState('');
@@ -346,6 +361,18 @@ function GalleriesTab(): React.JSX.Element {
         setItems([]);
         setUploadError(null);
         setItemsLoading(true);
+        setGalleryTab('photos');
+        setShowMoreMenu(false);
+        setEditTitle(gallery.title);
+        setEditDesc(gallery.description || '');
+        setEditAccessType((gallery.access_type === 'email_list' ? 'public' : gallery.access_type) as 'public' | 'pin' | 'account');
+        setEditPin('');
+        setEditAllowDownload(gallery.allow_download ?? true);
+        setEditPaymentRequired(gallery.payment_required ?? false);
+        setEditPaymentInstructions((gallery as Gallery & { payment_instructions?: string }).payment_instructions || '');
+        setEditExpiresAt(gallery.expires_at ? (new Date(gallery.expires_at).toISOString().split('T')[0] ?? '') : '');
+        setEditSaved(false);
+        setEditError(null);
         try {
             // For 'account' type the owner needs to pass their own Supabase token
             let supabaseToken: string | undefined;
@@ -528,6 +555,35 @@ function GalleriesTab(): React.JSX.Element {
         }
     };
 
+    // ── save gallery settings edits
+    const handleUpdateSettings = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        e.preventDefault();
+        if (!activeGallery || !editTitle.trim()) return;
+        setEditSaving(true);
+        setEditError(null);
+        try {
+            const updated = await apiClient.updateGallery(activeGallery.id, {
+                title: editTitle.trim(),
+                description: editDesc.trim() || undefined,
+                access_type: editAccessType,
+                pin: editAccessType === 'pin' && editPin.trim() ? editPin.trim() : undefined,
+                clearPin: editAccessType !== 'pin' && activeGallery.access_type === 'pin',
+                allow_download: editAllowDownload,
+                payment_required: editPaymentRequired,
+                payment_instructions: editPaymentRequired ? editPaymentInstructions.trim() : undefined,
+                expires_at: editExpiresAt ? new Date(editExpiresAt).toISOString() : null,
+            });
+            setActiveGallery(updated);
+            setGalleries(prev => prev.map(g => g.id === updated.id ? updated : g));
+            setEditSaved(true);
+            setTimeout(() => setEditSaved(false), 3000);
+        } catch (err: unknown) {
+            setEditError(err instanceof Error ? err.message : 'Failed to save changes');
+        } finally {
+            setEditSaving(false);
+        }
+    };
+
     // ── Gallery photo upload — react-dropzone (must be declared before any early returns)
     const { getRootProps: getGalleryDropProps, getInputProps: getGalleryInputProps, isDragActive: isGalleryDragActive } = useDropzone({
         onDrop: (acceptedFiles: File[]) => { if (acceptedFiles.length > 0) void handleUpload(acceptedFiles); },
@@ -544,184 +600,310 @@ function GalleriesTab(): React.JSX.Element {
 
     // ─── Manage view (active gallery open)
     if (activeGallery) {
+        const isLive = activeGallery.status !== 'draft';
+        const openPreview = () => {
+            if (activeGallery.status === 'draft') {
+                apiClient.getOwnerPreviewToken(activeGallery.id)
+                    .then(token => window.open(`/g/${activeGallery.slug}?ownerToken=${encodeURIComponent(token)}`, '_blank'))
+                    .catch(() => window.open(`/g/${activeGallery.slug}`, '_blank'));
+            } else {
+                window.open(`/g/${activeGallery.slug}`, '_blank');
+            }
+        };
+
+        const TAB_STYLE = (active: boolean): React.CSSProperties => ({
+            padding: '10px 18px', background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '0.88rem', fontWeight: active ? 600 : 400,
+            color: active ? c.accent : c.textMuted,
+            borderBottom: `2px solid ${active ? c.accent : 'transparent'}`,
+            transition: 'all 0.15s',
+        });
+
         return (
-            <div style={{ maxWidth: '900px' }}>
-                {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                    <button onClick={closeGallery}
-                        style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        ← Back
-                    </button>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <h3 style={{ fontSize: '1.2rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeGallery.title}</h3>
-                            {activeGallery.status === 'draft' && (
-                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(234,179,8,0.12)', borderRadius: '8px', color: '#fbbf24', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={11} /> Offline</span>
-                            )}
-                            {activeGallery.payment_required && !activeGallery.payment_unlocked && (
-                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(249,115,22,0.12)', borderRadius: '8px', color: '#fb923c', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><ClockIcon size={11} /> Awaiting payment</span>
-                            )}
-                            {activeGallery.payment_required && activeGallery.payment_unlocked && (
-                                <span style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'rgba(34,197,94,0.1)', borderRadius: '8px', color: '#22c55e', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={11} /> Payment confirmed</span>
-                            )}
+            <div style={{ maxWidth: '900px' }} onClick={() => showMoreMenu && setShowMoreMenu(false)}>
+
+                {/* ── Header ── */}
+                <div style={{ marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                        <button onClick={closeGallery}
+                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap', marginTop: '2px' }}>
+                            ← Back
+                        </button>
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <h3 style={{ fontSize: '1.25rem', margin: '0 0 4px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {activeGallery.title}
+                            </h3>
+                            <p style={{ color: c.textMuted, fontSize: '0.8rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                {itemsLoading ? '…' : `${items.length} photo${items.length !== 1 ? 's' : ''}`}
+                                <span style={{ opacity: 0.4 }}>·</span>
+                                {activeGallery.access_type === 'pin'
+                                    ? <><Lock size={11} /> PIN protected</>
+                                    : activeGallery.access_type === 'account'
+                                        ? <><UserCircle size={11} /> Account required</>
+                                        : <><Globe size={11} /> Public</>}
+                                {activeGallery.payment_required && !activeGallery.payment_unlocked && (
+                                    <><span style={{ opacity: 0.4 }}>·</span><span style={{ color: '#fb923c', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><ClockIcon size={11} /> Awaiting payment</span></>
+                                )}
+                                {activeGallery.payment_required && activeGallery.payment_unlocked && (
+                                    <><span style={{ opacity: 0.4 }}>·</span><span style={{ color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckCircle size={11} /> Payment confirmed</span></>
+                                )}
+                            </p>
                         </div>
-                        <p style={{ color: c.textMuted, fontSize: '0.8rem', margin: '2px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            {items.length} photo{items.length !== 1 ? 's' : ''} ·{' '}
-                            {activeGallery.access_type === 'pin'
-                                ? <><Lock size={11} style={{ verticalAlign: 'middle' }} /> PIN</>
-                                : activeGallery.access_type === 'account'
-                                    ? <><UserCircle size={11} style={{ verticalAlign: 'middle' }} /> Account</>
-                                    : <><Globe size={11} style={{ verticalAlign: 'middle' }} /> Public</>}
-                        </p>
-                    </div>
-                    <div style={{ position: 'relative', maxWidth: '100%' }}>
-                    {/* Fade gradient — indicates more buttons are scrollable on mobile */}
-                    <div style={{ pointerEvents: 'none', position: 'absolute', right: 0, top: 0, bottom: 4, width: '48px', background: `linear-gradient(to right, transparent, ${c.bgSubtle})`, zIndex: 1, borderRadius: '0 10px 10px 0' }} />
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', paddingBottom: '4px', paddingRight: '40px', maxWidth: '100%', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
-                        {/* Payment unlock button */}
-                        {activeGallery.payment_required && !activeGallery.payment_unlocked && (
-                            <button onClick={() => void handleUnlock()}
-                                style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.4)', background: 'rgba(34,197,94,0.08)', color: '#22c55e', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                                <Unlock size={13} /> Confirm payment received
+
+                        {/* Right-side actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
+                            {/* Status toggle */}
+                            <button onClick={() => void handleToggleDraft()}
+                                style={{ padding: '7px 14px', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', border: `1px solid ${isLive ? 'rgba(34,197,94,0.35)' : 'rgba(234,179,8,0.4)'}`, background: isLive ? 'rgba(34,197,94,0.08)' : 'rgba(234,179,8,0.08)', color: isLive ? '#22c55e' : '#fbbf24' }}>
+                                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
+                                {isLive ? 'Live' : 'Offline'}
                             </button>
-                        )}
-                        {/* Draft toggle */}
-                        <button onClick={() => void handleToggleDraft()}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${activeGallery.status === 'draft' ? 'rgba(34,197,94,0.4)' : 'rgba(234,179,8,0.4)'}`, background: activeGallery.status === 'draft' ? 'rgba(34,197,94,0.08)' : 'rgba(234,179,8,0.08)', color: activeGallery.status === 'draft' ? '#22c55e' : '#fbbf24', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {activeGallery.status === 'draft'
-                                ? <><CheckCircle size={13} /> Take it live</>
-                                : <><AlertTriangle size={13} /> Take offline</>}
+
+                            <button onClick={() => copyLink(activeGallery.slug)}
+                                style={{ padding: '7px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Copy size={13} /> {copiedSlug === activeGallery.slug ? 'Copied!' : 'Copy link'}
+                            </button>
+
+                            <button onClick={openPreview}
+                                style={{ padding: '7px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <ExternalLink size={13} /> Preview
+                            </button>
+
+                            {/* ··· more menu */}
+                            <div style={{ position: 'relative' }}>
+                                <button onClick={(e) => { e.stopPropagation(); setShowMoreMenu(v => !v); }}
+                                    style={{ padding: '7px 10px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '1rem', cursor: 'pointer', lineHeight: 1 }}>
+                                    ···
+                                </button>
+                                {showMoreMenu && (
+                                    <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, background: c.white, border: `1px solid ${c.border}`, borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.10)', zIndex: 50, minWidth: '200px', overflow: 'hidden' }}>
+                                        {activeGallery.payment_required && !activeGallery.payment_unlocked && (
+                                            <button onClick={() => { void handleUnlock(); setShowMoreMenu(false); }}
+                                                style={{ width: '100%', padding: '11px 16px', background: 'none', border: 'none', borderBottom: `1px solid ${c.border}`, color: '#22c55e', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                                                <Unlock size={14} /> Confirm payment received
+                                            </button>
+                                        )}
+                                        <button onClick={() => { setSendingTo(activeGallery.id); setSendEmail(''); setSendMessage(''); setSendSuccess(false); setSendError(null); setShowMoreMenu(false); }}
+                                            style={{ width: '100%', padding: '11px 16px', background: 'none', border: 'none', borderBottom: `1px solid ${c.border}`, color: c.text, fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Send size={14} /> Send to client
+                                        </button>
+                                        <button onClick={() => { void handleDelete(activeGallery.id); setShowMoreMenu(false); }}
+                                            style={{ width: '100%', padding: '11px 16px', background: 'none', border: 'none', color: '#ef4444', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <X size={14} /> Delete gallery
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Tab bar ── */}
+                    <div style={{ display: 'flex', borderBottom: `1px solid ${c.border}`, marginTop: '16px' }}>
+                        <button style={TAB_STYLE(galleryTab === 'photos')} onClick={() => setGalleryTab('photos')}>
+                            Photos
                         </button>
-                        {/* Send to client */}
-                        <button onClick={() => { setSendingTo(activeGallery.id); setSendEmail(''); setSendMessage(''); setSendSuccess(false); setSendError(null); }}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(124,58,237,0.4)', background: 'rgba(124,58,237,0.08)', color: '#c4b5fd', fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Send size={13} /> Send to client
+                        <button style={TAB_STYLE(galleryTab === 'settings')} onClick={() => setGalleryTab('settings')}>
+                            Settings
                         </button>
-                        <button onClick={() => copyLink(activeGallery.slug)}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Copy size={13} /> {copiedSlug === activeGallery.slug ? 'Copied!' : 'Copy link'}
-                        </button>
-                        <button onClick={() => {
-                            // Draft galleries need an owner access token to bypass the draft gate
-                            if (activeGallery.status === 'draft') {
-                                apiClient.getOwnerPreviewToken(activeGallery.id)
-                                    .then(token => {
-                                        window.open(`/g/${activeGallery.slug}?ownerToken=${encodeURIComponent(token)}`, '_blank');
-                                    })
-                                    .catch(() => window.open(`/g/${activeGallery.slug}`, '_blank'));
-                            } else {
-                                window.open(`/g/${activeGallery.slug}`, '_blank');
-                            }
-                        }}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <ExternalLink size={13} /> Preview
-                        </button>
-                        <button onClick={() => handleDelete(activeGallery.id)}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.3)', background: 'transparent', color: '#ef4444', fontSize: '0.82rem', cursor: 'pointer' }}>
-                            Delete gallery
+                        <button style={TAB_STYLE(galleryTab === 'activity')} onClick={() => setGalleryTab('activity')}>
+                            Activity
                         </button>
                     </div>
-                    </div>{/* end pill scroll wrapper */}
                 </div>
 
-                {/* Send to client modal */}
+                {/* ── Send to client panel ── */}
                 {sendingTo === activeGallery.id && (
-                    <div style={{ background: c.white, border: '1px solid rgba(124,58,237,0.3)', borderRadius: '16px', padding: '24px', marginBottom: '20px', maxWidth: 'min(480px, calc(100vw - 32px))' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                            <h4 style={{ margin: 0, fontSize: '1rem' }}>Send gallery to client</h4>
-                            <button onClick={() => setSendingTo(null)} style={{ background: 'none', border: 'none', color: c.textMuted, cursor: 'pointer', padding: '4px' }}><X size={16} /></button>
+                    <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', padding: '20px', margin: '16px 0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                            <h4 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Send size={14} /> Send gallery to client</h4>
+                            <button onClick={() => setSendingTo(null)} style={{ background: 'none', border: 'none', color: c.textMuted, cursor: 'pointer' }}><X size={16} /></button>
                         </div>
                         {sendSuccess ? (
-                            <p style={{ color: '#22c55e', textAlign: 'center', padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                <Check size={15} /> Email sent. Your client will receive the gallery link shortly.
-                            </p>
+                            <p style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}><Check size={15} /> Email sent successfully.</p>
                         ) : (
                             <form onSubmit={handleSendToClient} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {sendError && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: 0 }}>{sendError}</p>}
-                                <input
-                                    type="email" required value={sendEmail} placeholder="Client email address"
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSendEmail(e.target.value)}
-                                    style={GALLERY_INPUT_STYLE}
-                                />
-                                <textarea
-                                    value={sendMessage} rows={3} maxLength={500}
-                                    placeholder="Optional personal message to your client…"
-                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSendMessage(e.target.value)}
-                                    style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }}
-                                />
-                                <button type="submit" disabled={sendLoading} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', alignSelf: 'flex-start' }}>
-                                    <Send size={15} /> {sendLoading ? 'Sending…' : 'Send email'}
+                                <input type="email" required value={sendEmail} placeholder="Client email address" onChange={(e) => setSendEmail(e.target.value)} style={GALLERY_INPUT_STYLE} />
+                                <textarea value={sendMessage} rows={3} maxLength={500} placeholder="Optional personal message…" onChange={(e) => setSendMessage(e.target.value)} style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }} />
+                                <button type="submit" disabled={sendLoading} className="btn btn-primary" style={{ padding: '9px 18px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '7px', alignSelf: 'flex-start' }}>
+                                    <Send size={14} /> {sendLoading ? 'Sending…' : 'Send email'}
                                 </button>
                             </form>
                         )}
                     </div>
                 )}
 
-                {/* Upload zone */}
-                <div {...getGalleryDropProps()} style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    gap: '10px', padding: '32px', borderRadius: '16px',
-                    border: `2px dashed ${isGalleryDragActive ? c.accent : c.border}`,
-                    background: isGalleryDragActive ? c.accentLight : c.white,
-                    cursor: uploadingIds.size > 0 ? 'wait' : 'pointer',
-                    marginBottom: '24px', transition: 'border-color 0.2s, background 0.2s',
-                }}>
-                    <input {...getGalleryInputProps()} />
-                    <Upload size={28} color={isGalleryDragActive ? c.accent : c.textMuted} />
-                    <p style={{ color: c.textSecondary, fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
-                        {uploadingIds.size > 0
-                            ? `Uploading ${uploadingIds.size} photo${uploadingIds.size !== 1 ? 's' : ''}…`
-                            : isGalleryDragActive ? 'Release to upload photos' : 'Drag & drop photos here or click to browse'}
-                    </p>
-                    <p style={{ color: c.textMuted, fontSize: '0.78rem', margin: 0 }}>Up to 20 images per batch · JPEG, PNG, WebP, HEIC</p>
-                </div>
+                {/* ══ PHOTOS TAB ══ */}
+                {galleryTab === 'photos' && (
+                    <div style={{ paddingTop: '20px' }}>
+                        {/* Upload zone — compact when photos exist */}
+                        <div {...getGalleryDropProps()} style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+                            padding: items.length > 0 ? '16px 24px' : '40px 24px',
+                            borderRadius: '14px',
+                            border: `2px dashed ${isGalleryDragActive ? c.accent : c.border}`,
+                            background: isGalleryDragActive ? c.accentLight : c.bgMuted,
+                            cursor: uploadingIds.size > 0 ? 'wait' : 'pointer',
+                            marginBottom: '20px', transition: 'all 0.2s',
+                        }}>
+                            <input {...getGalleryInputProps()} />
+                            <Upload size={items.length > 0 ? 18 : 26} color={isGalleryDragActive ? c.accent : c.textMuted} />
+                            <div>
+                                <p style={{ color: c.textSecondary, fontSize: items.length > 0 ? '0.85rem' : '0.92rem', margin: 0, fontWeight: 500 }}>
+                                    {uploadingIds.size > 0
+                                        ? `Uploading ${uploadingIds.size} photo${uploadingIds.size !== 1 ? 's' : ''}…`
+                                        : isGalleryDragActive ? 'Release to upload' : 'Drag & drop photos here or click to browse'}
+                                </p>
+                                <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: '2px 0 0 0' }}>JPEG, PNG, WebP, HEIC · up to 20 at a time</p>
+                            </div>
+                        </div>
 
-                {uploadError && (
-                    <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        {uploadError}
-                        <button onClick={() => setUploadError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px' }}><X size={14} /></button>
+                        {uploadError && (
+                            <div style={{ padding: '11px 14px', borderRadius: '10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {uploadError}
+                                <button onClick={() => setUploadError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><X size={14} /></button>
+                            </div>
+                        )}
+
+                        {itemsLoading ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: c.textMuted }}>Loading photos…</div>
+                        ) : items.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '32px', color: c.textMuted, fontSize: '0.88rem' }}>
+                                No photos yet — drop some above to get started.
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                                {items.map(item => (
+                                    <div key={item.id} className="gallery-grid-item" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: c.white, border: `1px solid ${c.border}`, aspectRatio: '1' }}>
+                                        <img src={item.display_url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.25s' }} />
+                                        <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: 0, transition: 'opacity 0.2s', padding: '12px' }}>
+                                            <p style={{ color: c.white, fontSize: '0.72rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
+                                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                                <button onClick={(e) => { e.stopPropagation(); void handleSetCover(item); }}
+                                                    style={{ padding: '5px 8px', borderRadius: '8px', background: activeGallery.cover_image_url === item.display_url ? `${c.accent}80` : c.border, color: c.white, fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                    <Camera size={10} /> {activeGallery.cover_image_url === item.display_url ? 'Cover ✓' : 'Set cover'}
+                                                </button>
+                                                <a href={item.original_url} target="_blank" rel="noreferrer" download style={{ padding: '5px 8px', borderRadius: '8px', background: c.border, color: c.white, fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                    <Download size={10} /> Save
+                                                </a>
+                                                <button onClick={() => void handleRemoveItem(item.id)}
+                                                    style={{ padding: '5px 8px', borderRadius: '8px', background: 'rgba(239,68,68,0.25)', color: '#fca5a5', fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                    <X size={10} /> Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
-                {/* Photo grid */}
-                {itemsLoading ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: c.textMuted }}>Loading photos…</div>
-                ) : items.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: c.textMuted, fontSize: '0.9rem' }}>
-                        No photos yet — upload some above.
-                    </div>
-                ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-                        {items.map(item => (
-                            <div key={item.id} className="gallery-grid-item" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: c.white, border: `1px solid ${c.border}`, aspectRatio: '1' }}>
-                                <img
-                                    src={item.display_url}
-                                    alt={item.filename}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.25s' }}
-                                />
-                                {/* Hover overlay */}
-                                <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: 0, transition: 'opacity 0.2s', padding: '12px' }}>
-                                    <p style={{ color: c.white, fontSize: '0.72rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
-                                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                        <button
-                                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); void handleSetCover(item); }}
-                                            style={{ padding: '5px 8px', borderRadius: '8px', background: activeGallery.cover_image_url === item.display_url ? 'rgba(124,58,237,0.5)' : c.border, color: activeGallery.cover_image_url === item.display_url ? '#c4b5fd' : c.white, fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                                            title="Set as gallery cover photo"
-                                        >
-                                            <Camera size={10} /> {activeGallery.cover_image_url === item.display_url ? 'Cover (set)' : 'Set cover'}
-                                        </button>
-                                        <a href={item.original_url} target="_blank" rel="noreferrer" download
-                                            style={{ padding: '5px 8px', borderRadius: '8px', background: c.border, color: c.white, fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                            <Download size={10} /> Save
-                                        </a>
-                                        <button onClick={() => void handleRemoveItem(item.id)}
-                                            style={{ padding: '5px 8px', borderRadius: '8px', background: 'rgba(239,68,68,0.25)', color: '#fca5a5', fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                            <X size={10} /> Remove
-                                        </button>
+                {/* ══ SETTINGS TAB ══ */}
+                {galleryTab === 'settings' && (
+                    <div style={{ paddingTop: '20px' }}>
+                        <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '28px' }}>
+                            <h4 style={{ margin: '0 0 20px 0', fontSize: '1rem', fontWeight: 700 }}>Gallery Settings</h4>
+                            {editError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '12px' }}>{editError}</p>}
+                            {editSaved && <p style={{ color: '#22c55e', fontSize: '0.85rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}><Check size={14} /> Changes saved.</p>}
+                            <form onSubmit={handleUpdateSettings} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>Gallery title</label>
+                                    <input type="text" value={editTitle} required maxLength={120} onChange={(e) => setEditTitle(e.target.value)} style={GALLERY_INPUT_STYLE} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>Description <span style={{ fontWeight: 400, color: c.textMuted }}>(optional)</span></label>
+                                    <textarea value={editDesc} maxLength={500} rows={2} onChange={(e) => setEditDesc(e.target.value)} style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>Access</label>
+                                    <select value={editAccessType} onChange={(e) => setEditAccessType(e.target.value as 'public' | 'pin' | 'account')} style={GALLERY_INPUT_STYLE}>
+                                        <option value="public">Public — anyone with the link</option>
+                                        <option value="pin">PIN protected</option>
+                                        <option value="account">Requires Optimage account</option>
+                                    </select>
+                                </div>
+                                {editAccessType === 'pin' && (
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>New PIN <span style={{ fontWeight: 400, color: c.textMuted }}>(leave blank to keep existing)</span></label>
+                                        <input type="text" value={editPin} maxLength={20} placeholder="Enter new PIN" onChange={(e) => setEditPin(e.target.value)} style={GALLERY_INPUT_STYLE} />
+                                    </div>
+                                )}
+                                <div style={{ paddingTop: '4px', borderTop: `1px solid ${c.border}` }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: c.textSecondary, cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={editAllowDownload} onChange={(e) => setEditAllowDownload(e.target.checked)} />
+                                        Allow clients to download original-quality images
+                                    </label>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: c.textSecondary, cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={editPaymentRequired} onChange={(e) => setEditPaymentRequired(e.target.checked)} />
+                                        Require payment before client can access gallery
+                                    </label>
+                                </div>
+                                {editPaymentRequired && (
+                                    <textarea value={editPaymentInstructions} rows={4} maxLength={1000} placeholder="Payment instructions shown to your client…" onChange={(e) => setEditPaymentInstructions(e.target.value)} style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }} />
+                                )}
+                                <div style={{ paddingTop: '4px', borderTop: `1px solid ${c.border}` }}>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>
+                                        Expiry date <span style={{ fontWeight: 400, color: c.textMuted }}>(optional)</span>
+                                    </label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <input type="date" value={editExpiresAt} min={new Date(Date.now() + 86400000).toISOString().split('T')[0]} onChange={(e) => setEditExpiresAt(e.target.value)} style={{ ...GALLERY_INPUT_STYLE, width: 'auto' }} />
+                                        {editExpiresAt && (
+                                            <button type="button" onClick={() => setEditExpiresAt('')} style={{ background: 'none', border: 'none', color: c.textMuted, fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}>Clear</button>
+                                        )}
                                     </div>
                                 </div>
+                                <div style={{ paddingTop: '8px' }}>
+                                    <button type="submit" disabled={editSaving} className="btn btn-primary" style={{ padding: '10px 22px', fontSize: '0.9rem' }}>
+                                        {editSaving ? 'Saving…' : 'Save changes'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* ══ ACTIVITY TAB ══ */}
+                {galleryTab === 'activity' && (
+                    <div style={{ paddingTop: '20px' }}>
+                        {activityLoading ? (
+                            <div style={{ padding: '40px', textAlign: 'center', color: c.textMuted }}>Loading activity…</div>
+                        ) : !activity || activityGalleryId !== activeGallery.id ? (
+                            <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '40px', textAlign: 'center' }}>
+                                <BarChart3 size={36} style={{ color: c.textMuted, marginBottom: '12px' }} />
+                                <p style={{ fontWeight: 600, marginBottom: '6px' }}>No data loaded</p>
+                                <button className="btn btn-primary" style={{ padding: '9px 20px', fontSize: '0.88rem' }} onClick={() => void loadActivity(activeGallery.id)}>
+                                    Load activity
+                                </button>
                             </div>
-                        ))}
+                        ) : (
+                            <div>
+                                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+                                    <div style={{ padding: '20px 28px', background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', textAlign: 'center', minWidth: '120px' }}>
+                                        <p style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0, color: c.accent }}>{activity.totalViews}</p>
+                                        <p style={{ color: c.textMuted, fontSize: '0.78rem', margin: '4px 0 0 0' }}>total views</p>
+                                    </div>
+                                </div>
+                                {activity.recentViews.length > 0 ? (
+                                    <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', overflow: 'hidden' }}>
+                                        <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: 0, padding: '12px 20px', borderBottom: `1px solid ${c.border}`, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent activity</p>
+                                        {activity.recentViews.slice(0, 20).map((v, i) => (
+                                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '11px 20px', borderBottom: i < Math.min(activity.recentViews.length, 20) - 1 ? `1px solid ${c.border}` : 'none', fontSize: '0.82rem' }}>
+                                                <span style={{ color: c.textSecondary, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                                    {v.viewer_type === 'user' ? <><UserCircle size={13} /> Signed-in viewer</> : <><Globe size={13} /> Guest visitor</>}
+                                                </span>
+                                                <span style={{ color: c.textMuted }}>{new Date(v.created_at).toLocaleString()}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p style={{ color: c.textMuted, fontSize: '0.85rem' }}>No views yet. Share your gallery link to start getting visitors.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -864,7 +1046,7 @@ function GalleriesTab(): React.JSX.Element {
                                         {' · '}
                                         <span
                                             style={{ color: c.accent, cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
-                                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); void loadActivity(gallery.id); }}
+                                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); void openGallery(gallery).then(() => { setGalleryTab('activity'); void loadActivity(gallery.id); }); }}
                                         >
                                             View activity
                                         </span>
@@ -897,49 +1079,6 @@ function GalleriesTab(): React.JSX.Element {
                 </div>
             )}
 
-            {/* Activity panel */}
-            {activityGalleryId && (
-                <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '24px', marginTop: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h4 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Eye size={16} color={c.textMuted} /> Gallery Activity
-                        </h4>
-                        <button onClick={() => { setActivityGalleryId(null); setActivity(null); }}
-                            style={{ background: 'none', border: 'none', color: c.textMuted, cursor: 'pointer' }}><X size={16} /></button>
-                    </div>
-                    {activityLoading ? (
-                        <p style={{ color: c.textMuted, fontSize: '0.9rem' }}>Loading activity…</p>
-                    ) : activity ? (
-                        <div>
-                            <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                                <div style={{ padding: '16px 24px', background: c.bgMuted, borderRadius: '12px', textAlign: 'center', minWidth: '100px' }}>
-                                    <p style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: c.accent }}>{activity.totalViews}</p>
-                                    <p style={{ color: c.textMuted, fontSize: '0.78rem', margin: 0 }}>total views</p>
-                                </div>
-                            </div>
-                            {activity.recentViews.length > 0 ? (
-                                <div>
-                                    <p style={{ color: c.textMuted, fontSize: '0.78rem', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent activity</p>
-                                    {activity.recentViews.slice(0, 20).map((v, i) => (
-                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${c.border}`, fontSize: '0.82rem' }}>
-                                            <span style={{ color: c.textSecondary, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                                                {v.viewer_type === 'user'
-                                                    ? <><UserCircle size={13} style={{ verticalAlign: 'middle' }} /> Signed-in viewer</>
-                                                    : <><Globe size={13} style={{ verticalAlign: 'middle' }} /> Guest visitor</>}
-                                            </span>
-                                            <span style={{ color: c.textMuted }}>
-                                                {new Date(v.created_at).toLocaleString()}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p style={{ color: c.textMuted, fontSize: '0.85rem' }}>No views recorded yet. Share your gallery link to start getting visitors.</p>
-                            )}
-                        </div>
-                    ) : null}
-                </div>
-            )}
         </div>
     );
 }

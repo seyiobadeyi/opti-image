@@ -390,6 +390,9 @@ export const apiClient = {
         watermark: boolean;
         status: 'active' | 'archived' | 'draft';
         cover_image_url: string | null;
+        expires_at: string | null;
+        payment_required: boolean;
+        payment_instructions: string;
     }>): Promise<Gallery> {
         const headers = await getAuthHeaders();
         const response = await fetch(`${API_BASE}/api/gallery/${id}`, {
