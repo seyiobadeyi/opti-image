@@ -390,6 +390,7 @@ export const apiClient = {
         watermark: boolean;
         status: 'active' | 'archived' | 'draft';
         cover_image_url: string | null;
+        cover_focal_point: string | null;
         expires_at: string | null;
         payment_required: boolean;
         payment_instructions: string;
@@ -448,6 +449,27 @@ export const apiClient = {
     async deleteGalleryItem(galleryId: string, itemId: string): Promise<void> {
         const headers = await getAuthHeaders();
         await fetch(`${API_BASE}/api/gallery/${galleryId}/items/${itemId}`, { method: 'DELETE', headers });
+    },
+
+    async reorderGalleryItems(galleryId: string, order: { id: string; sort_order: number }[]): Promise<void> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/items/order`, {
+            method: 'PATCH',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order }),
+        });
+        if (!response.ok) throw new Error('Failed to reorder items');
+    },
+
+    async updateGalleryItem(galleryId: string, itemId: string, data: { focal_point?: string | null }): Promise<GalleryItem> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/items/${itemId}`, {
+            method: 'PATCH',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Failed to update item');
+        return response.json() as Promise<GalleryItem>;
     },
 
     async getGalleryPublic(slug: string): Promise<GalleryPublicMeta> {

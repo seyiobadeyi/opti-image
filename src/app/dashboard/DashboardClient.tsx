@@ -6,7 +6,7 @@ import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
     Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images, Camera, Send, Eye,
-    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock,
+    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info,
 } from 'lucide-react';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
@@ -335,6 +335,12 @@ function GalleriesTab(): React.JSX.Element {
     const [editError, setEditError]           = useState<string | null>(null);
     const [editSaved, setEditSaved]           = useState<boolean>(false);
 
+    // ── Photo reorder + focal point state
+    const [draggedId, setDraggedId]           = useState<string | null>(null);
+    const [dragOverId, setDragOverId]         = useState<string | null>(null);
+    const [focalItemId, setFocalItemId]       = useState<string | null>(null); // item in focal-point picking mode
+    const [showTips, setShowTips]             = useState<boolean>(false);
+
     // ── Send to client state
     const [sendingTo, setSendingTo]           = useState<string | null>(null); // gallery ID being sent
     const [sendEmail, setSendEmail]           = useState('');
@@ -488,6 +494,52 @@ function GalleriesTab(): React.JSX.Element {
         } catch {
             // silently fail — cover is cosmetic
         }
+    };
+
+    // ── drag-to-reorder
+    const handleDragStart = (id: string): void => { setDraggedId(id); };
+    const handleDragOver = (e: React.DragEvent, id: string): void => {
+        e.preventDefault();
+        if (id !== draggedId) setDragOverId(id);
+    };
+    const handleDrop = (targetId: string): void => {
+        if (!draggedId || draggedId === targetId) { setDraggedId(null); setDragOverId(null); return; }
+        setItems(prev => {
+            const arr = [...prev];
+            const fromIdx = arr.findIndex(i => i.id === draggedId);
+            const toIdx   = arr.findIndex(i => i.id === targetId);
+            if (fromIdx === -1 || toIdx === -1) return prev;
+            const [moved] = arr.splice(fromIdx, 1);
+            if (!moved) return prev;
+            arr.splice(toIdx, 0, moved);
+            const reordered = arr.map((item, idx) => ({ ...item, sort_order: idx }));
+            // Persist new order (fire-and-forget)
+            if (activeGallery) {
+                void apiClient.reorderGalleryItems(
+                    activeGallery.id,
+                    reordered.map(({ id, sort_order }) => ({ id, sort_order }))
+                );
+            }
+            return reordered;
+        });
+        setDraggedId(null);
+        setDragOverId(null);
+    };
+
+    // ── set focal point for a photo (click position within the image)
+    const handleFocalClick = (e: React.MouseEvent<HTMLDivElement>, item: GalleryItem): void => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+        const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+        const fp = `${x}% ${y}%`;
+        setItems(prev => prev.map(i => i.id === item.id ? { ...i, focal_point: fp } : i));
+        void apiClient.updateGalleryItem(item.gallery_id, item.id, { focal_point: fp });
+        // If this is the cover photo, update gallery cover_focal_point too
+        if (activeGallery && activeGallery.cover_image_url === item.display_url) {
+            void apiClient.updateGallery(activeGallery.id, { cover_focal_point: fp });
+            setActiveGallery(prev => prev ? { ...prev, cover_focal_point: fp } : prev);
+        }
+        setFocalItemId(null);
     };
 
     // ── copy gallery link
@@ -773,30 +825,157 @@ function GalleriesTab(): React.JSX.Element {
                                 No photos yet — drop some above to get started.
                             </div>
                         ) : (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-                                {items.map(item => (
-                                    <div key={item.id} className="gallery-grid-item" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: c.white, border: `1px solid ${c.border}`, aspectRatio: '1' }}>
-                                        <img src={item.display_url} alt={item.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.25s' }} />
-                                        <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: 0, transition: 'opacity 0.2s', padding: '12px' }}>
-                                            <p style={{ color: c.white, fontSize: '0.72rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
-                                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                                <button onClick={(e) => { e.stopPropagation(); void handleSetCover(item); }}
-                                                    style={{ padding: '5px 8px', borderRadius: '8px', background: activeGallery.cover_image_url === item.display_url ? `${c.accent}80` : c.border, color: c.white, fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                    <Camera size={10} /> {activeGallery.cover_image_url === item.display_url ? 'Cover ✓' : 'Set cover'}
-                                                </button>
-                                                <a href={item.original_url} target="_blank" rel="noreferrer" download style={{ padding: '5px 8px', borderRadius: '8px', background: c.border, color: c.white, fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                    <Download size={10} /> Save
-                                                </a>
-                                                <button onClick={() => void handleRemoveItem(item.id)}
-                                                    style={{ padding: '5px 8px', borderRadius: '8px', background: 'rgba(239,68,68,0.25)', color: '#fca5a5', fontSize: '0.7rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                    <X size={10} /> Remove
-                                                </button>
+                            <>
+                                <p style={{ fontSize: '0.75rem', color: c.textMuted, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <GripVertical size={12} /> Drag photos to reorder · hover for options · click <Crosshair size={11} style={{ display: 'inline' }} /> to set focal point
+                                </p>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                                    {items.map(item => {
+                                        const isCover = activeGallery.cover_image_url === item.display_url;
+                                        const inFocalMode = focalItemId === item.id;
+                                        const fp = item.focal_point || '50% 50%';
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                draggable={!inFocalMode}
+                                                onDragStart={() => handleDragStart(item.id)}
+                                                onDragOver={(e) => handleDragOver(e, item.id)}
+                                                onDrop={() => handleDrop(item.id)}
+                                                onDragEnd={() => { setDraggedId(null); setDragOverId(null); }}
+                                                className="gallery-grid-item"
+                                                style={{
+                                                    position: 'relative', borderRadius: '12px', overflow: 'hidden',
+                                                    background: c.white, aspectRatio: '1',
+                                                    border: dragOverId === item.id
+                                                        ? `2px solid ${c.accent}`
+                                                        : isCover
+                                                            ? `2px solid ${c.accent}`
+                                                            : `1px solid ${c.border}`,
+                                                    opacity: draggedId === item.id ? 0.4 : 1,
+                                                    cursor: inFocalMode ? 'crosshair' : 'grab',
+                                                    transition: 'border-color 0.15s, opacity 0.15s',
+                                                }}
+                                                onClick={inFocalMode ? (e) => handleFocalClick(e, item) : undefined}
+                                            >
+                                                <img
+                                                    src={item.display_url}
+                                                    alt={item.filename}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: fp, display: 'block', transition: 'transform 0.25s', pointerEvents: 'none' }}
+                                                />
+
+                                                {/* Cover badge */}
+                                                {isCover && !inFocalMode && (
+                                                    <div style={{ position: 'absolute', top: '8px', left: '8px', background: c.accent, color: c.white, fontSize: '0.65rem', fontWeight: 700, padding: '3px 7px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '3px', pointerEvents: 'none' }}>
+                                                        <Camera size={9} /> Cover
+                                                    </div>
+                                                )}
+
+                                                {/* Focal crosshair dot */}
+                                                {!inFocalMode && item.focal_point && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        left: fp.split(' ')[0],
+                                                        top: fp.split(' ')[1],
+                                                        transform: 'translate(-50%, -50%)',
+                                                        width: '10px', height: '10px',
+                                                        borderRadius: '50%',
+                                                        border: '2px solid white',
+                                                        background: c.accent,
+                                                        boxShadow: '0 0 0 1px rgba(0,0,0,0.4)',
+                                                        pointerEvents: 'none',
+                                                    }} />
+                                                )}
+
+                                                {/* Focal picking mode overlay */}
+                                                {inFocalMode && (
+                                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', zIndex: 5 }}>
+                                                        <Crosshair size={28} color="white" />
+                                                        <p style={{ color: 'white', fontSize: '0.7rem', margin: 0, textAlign: 'center', lineHeight: 1.3, padding: '0 8px' }}>Click where the<br />subject is</p>
+                                                        <button onClick={(e) => { e.stopPropagation(); setFocalItemId(null); }}
+                                                            style={{ marginTop: '4px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)', color: 'white', fontSize: '0.7rem', cursor: 'pointer' }}>
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {/* Hover overlay (hidden in focal mode) */}
+                                                {!inFocalMode && (
+                                                    <div className="gallery-grid-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: 0, transition: 'opacity 0.2s', padding: '10px' }}>
+                                                        <GripVertical size={16} color="rgba(255,255,255,0.5)" style={{ position: 'absolute', top: '8px', right: '8px' }} />
+                                                        <p style={{ color: c.white, fontSize: '0.7rem', textAlign: 'center', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{item.filename}</p>
+                                                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                                            <button onClick={(e) => { e.stopPropagation(); void handleSetCover(item); }}
+                                                                style={{ padding: '5px 7px', borderRadius: '7px', background: isCover ? `${c.accent}90` : 'rgba(255,255,255,0.15)', color: c.white, fontSize: '0.68rem', border: isCover ? 'none' : '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                <Camera size={9} /> {isCover ? 'Cover ✓' : 'Set cover'}
+                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setFocalItemId(item.id); }}
+                                                                style={{ padding: '5px 7px', borderRadius: '7px', background: item.focal_point ? `${c.accent}90` : 'rgba(255,255,255,0.15)', color: c.white, fontSize: '0.68rem', border: item.focal_point ? 'none' : '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                <Crosshair size={9} /> Focus
+                                                            </button>
+                                                            <a href={item.original_url} target="_blank" rel="noreferrer" download style={{ padding: '5px 7px', borderRadius: '7px', background: 'rgba(255,255,255,0.15)', color: c.white, fontSize: '0.68rem', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                <Download size={9} /> Save
+                                                            </a>
+                                                            <button onClick={(e) => { e.stopPropagation(); void handleRemoveItem(item.id); }}
+                                                                style={{ padding: '5px 7px', borderRadius: '7px', background: 'rgba(239,68,68,0.3)', color: '#fca5a5', fontSize: '0.68rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                <X size={9} /> Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
                         )}
+
+                        {/* ── Tips panel ── */}
+                        <div style={{ marginTop: '28px', border: `1px solid ${c.border}`, borderRadius: '14px', overflow: 'hidden' }}>
+                            <button
+                                onClick={() => setShowTips(v => !v)}
+                                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', background: c.white, border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: c.textSecondary }}
+                            >
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}><Info size={14} color={c.accent} /> Photo tips & display guide</span>
+                                {showTips ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            </button>
+                            {showTips && (
+                                <div style={{ padding: '0 18px 18px 18px', background: c.white, borderTop: `1px solid ${c.border}` }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px', paddingTop: '16px' }}>
+                                        {[
+                                            {
+                                                title: 'Cover photo size',
+                                                body: 'Use a landscape image at least 1600 × 900 px. It fills the full screen, so anything smaller will look blurry on large displays. 16:9 ratio works best.',
+                                            },
+                                            {
+                                                title: 'Grid photo size',
+                                                body: 'Photos show as squares in the grid. Keep important subjects centred — or use the Focus button to pin the crop point so faces/subjects stay visible.',
+                                            },
+                                            {
+                                                title: 'How it looks on mobile',
+                                                body: 'On phones the grid shows 2 columns. Portrait shots fill nicely; wide landscapes lose their edges — use the Focus button to lock what matters.',
+                                            },
+                                            {
+                                                title: 'How it looks on desktop',
+                                                body: 'On desktops the grid shows 3–4 columns. Images display as ~280 px squares, so fine detail is less important than composition and colour.',
+                                            },
+                                            {
+                                                title: 'Best file format',
+                                                body: 'JPEG for photos (smaller files, great quality). PNG if you need transparency. WebP is accepted and gives the smallest file size at equal quality.',
+                                            },
+                                            {
+                                                title: 'Upload limit',
+                                                body: 'Up to 50 MB per image, 20 images per batch. Upload multiple batches to add more. No hard cap on total photos per gallery during beta.',
+                                            },
+                                        ].map(tip => (
+                                            <div key={tip.title} style={{ background: c.bgMuted, borderRadius: '10px', padding: '12px 14px' }}>
+                                                <p style={{ fontSize: '0.78rem', fontWeight: 700, margin: '0 0 5px 0', color: c.accent }}>{tip.title}</p>
+                                                <p style={{ fontSize: '0.76rem', color: c.textSecondary, margin: 0, lineHeight: 1.5 }}>{tip.body}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 

@@ -696,7 +696,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             fill
                             unoptimized
                             priority
-                            style={{ objectFit: 'cover', objectPosition: 'center', filter: 'brightness(0.45)', userSelect: 'none', WebkitUserDrag: 'none' } as React.CSSProperties}
+                            style={{ objectFit: 'cover', objectPosition: gallery.cover_focal_point || 'center', filter: 'brightness(0.45)', userSelect: 'none', WebkitUserDrag: 'none' } as React.CSSProperties}
                             onContextMenu={(e) => e.preventDefault()}
                             draggable={false}
                             onDragStart={(e) => e.preventDefault()}
@@ -1162,7 +1162,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                     src={item.display_url}
                                     alt={item.filename}
                                     fill unoptimized
-                                    style={{ objectFit: 'cover', transition: 'transform 0.3s ease', userSelect: 'none', WebkitUserDrag: 'none' } as React.CSSProperties}
+                                    style={{ objectFit: 'cover', objectPosition: item.focal_point || 'center', transition: 'transform 0.3s ease', userSelect: 'none', WebkitUserDrag: 'none' } as React.CSSProperties}
                                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
                                     onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
                                     draggable={false}

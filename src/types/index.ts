@@ -481,6 +481,7 @@ export interface Gallery {
   title: string;
   description: string | null;
   cover_image_url: string | null;
+  cover_focal_point: string | null;
   access_type: 'public' | 'pin' | 'email_list' | 'account';
   allow_download: boolean;
   watermark: boolean;
@@ -505,6 +506,7 @@ export interface GalleryItem {
   width: number | null;
   height: number | null;
   sort_order: number;
+  focal_point: string | null;
   created_at: string;
 }
 
@@ -514,6 +516,7 @@ export interface GalleryPublicMeta {
   title: string;
   description: string | null;
   cover_image_url: string | null;
+  cover_focal_point: string | null;
   access_type: 'public' | 'pin' | 'email_list' | 'account';
   allow_download: boolean;
   status: 'active' | 'archived' | 'draft';
