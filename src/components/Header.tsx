@@ -212,82 +212,83 @@ export default function Header(): React.JSX.Element {
                 <button
                     className="header-mobile-toggle"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                    aria-label="Open menu"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: clr.g700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}
                 >
-                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    <Menu size={24} />
                 </button>
             </div>
 
-            {/* Mobile overlay */}
-            {isMobileMenuOpen && (
-                <div
-                    style={{
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: '#fff', zIndex: 99,
-                        overflowY: 'auto',
-                    }}
-                >
-                    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '80px 24px 32px' }}>
-                        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '32px' }}>
-                            {[
-                                { href: '/', label: 'Home' },
-                                { href: '/blog', label: 'Blog' },
-                            ].map(({ href, label }) => (
-                                <Link
-                                    key={href} href={href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '12px', background: clr.g50, textDecoration: 'none', color: clr.g900, fontSize: '1rem', fontWeight: 500, marginBottom: '4px' }}
-                                >
-                                    {label} <ChevronRight size={18} color={clr.g400} />
-                                </Link>
-                            ))}
-                            <button
-                                onClick={() => { setIsMobileMenuOpen(false); openGalleries(); }}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '12px', background: clr.g50, border: 'none', color: clr.g900, fontSize: '1rem', fontWeight: 500, cursor: 'pointer', marginBottom: '4px', width: '100%', textAlign: 'left' }}
-                            >
-                                Galleries <ChevronRight size={18} color={clr.g400} />
-                            </button>
-                            {user && (
-                                <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}
-                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '12px', background: clr.accentLt, textDecoration: 'none', color: clr.accent, fontSize: '1rem', fontWeight: 600, marginBottom: '4px' }}>
-                                    Dashboard <ChevronRight size={18} color={clr.accent} />
-                                </Link>
-                            )}
-                        </nav>
+        </header>
 
-                        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {isAuthLoading ? (
-                                <div style={{ width: '100%', height: '50px', background: clr.g50, borderRadius: '12px' }} />
-                            ) : user ? (
-                                <>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: clr.g50, borderRadius: '12px', border: `1px solid ${clr.g200}` }}>
-                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: clr.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-                                            <UserIcon size={20} />
-                                        </div>
-                                        <div style={{ overflow: 'hidden' }}>
-                                            <div style={{ fontSize: '0.78rem', color: clr.g400 }}>Signed in as</div>
-                                            <div style={{ fontWeight: 500, fontSize: '0.9rem', color: clr.g900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
-                                        </div>
+        {/* Mobile overlay — must live OUTSIDE <header> so that the header's
+            transform: translateY() does not trap this fixed-position element
+            inside the header's stacking context (CSS spec: transform creates
+            a new containing block for fixed descendants). */}
+        {isMobileMenuOpen && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#fff', zIndex: 200, overflowY: 'auto' }}>
+                {/* Close button */}
+                <div style={{ height: '62px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', borderBottom: `1px solid ${clr.g200}` }}>
+                    <Link href="/" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                        <img src="/logo.png" alt="Optimage" style={{ height: '34px', width: 'auto', display: 'block' }} />
+                        <span style={{ fontSize: '1.15rem', fontWeight: 700, color: clr.g900 }}>Optimage</span>
+                    </Link>
+                    <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu" style={{ background: 'none', border: 'none', cursor: 'pointer', color: clr.g700, display: 'flex', padding: '8px' }}>
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100% - 62px)', padding: '24px 24px 32px' }}>
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '32px' }}>
+                        {[
+                            { href: '/', label: 'Home' },
+                            { href: '/blog', label: 'Blog' },
+                        ].map(({ href, label }) => (
+                            <Link key={href} href={href} onClick={() => setIsMobileMenuOpen(false)}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '12px', background: clr.g50, textDecoration: 'none', color: clr.g900, fontSize: '1rem', fontWeight: 500, marginBottom: '4px' }}>
+                                {label} <ChevronRight size={18} color={clr.g400} />
+                            </Link>
+                        ))}
+                        <button onClick={() => { setIsMobileMenuOpen(false); openGalleries(); }}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '12px', background: clr.g50, border: 'none', color: clr.g900, fontSize: '1rem', fontWeight: 500, cursor: 'pointer', marginBottom: '4px', width: '100%', textAlign: 'left' }}>
+                            Galleries <ChevronRight size={18} color={clr.g400} />
+                        </button>
+                        {user && (
+                            <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '12px', background: clr.accentLt, textDecoration: 'none', color: clr.accent, fontSize: '1rem', fontWeight: 600, marginBottom: '4px' }}>
+                                Dashboard <ChevronRight size={18} color={clr.accent} />
+                            </Link>
+                        )}
+                    </nav>
+
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {isAuthLoading ? (
+                            <div style={{ width: '100%', height: '50px', background: clr.g50, borderRadius: '12px' }} />
+                        ) : user ? (
+                            <>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: clr.g50, borderRadius: '12px', border: `1px solid ${clr.g200}` }}>
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: clr.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                                        <UserIcon size={20} />
                                     </div>
-                                    <button onClick={handleLogout} style={{ width: '100%', padding: '14px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'none', border: `1.5px solid ${clr.g200}`, borderRadius: '12px', color: clr.g700, fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer' }}>
-                                        <LogOut size={18} /> Log Out
-                                    </button>
-                                </>
-                            ) : (
-                                <button
-                                    onClick={() => { setIsMobileMenuOpen(false); setIsAuthModalOpen(true); }}
-                                    style={{ width: '100%', padding: '16px', background: clr.accent, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
-                                >
-                                    Sign In
+                                    <div style={{ overflow: 'hidden' }}>
+                                        <div style={{ fontSize: '0.78rem', color: clr.g400 }}>Signed in as</div>
+                                        <div style={{ fontWeight: 500, fontSize: '0.9rem', color: clr.g900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                                    </div>
+                                </div>
+                                <button onClick={handleLogout} style={{ width: '100%', padding: '14px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'none', border: `1.5px solid ${clr.g200}`, borderRadius: '12px', color: clr.g700, fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer' }}>
+                                    <LogOut size={18} /> Log Out
                                 </button>
-                            )}
-                        </div>
+                            </>
+                        ) : (
+                            <button onClick={() => { setIsMobileMenuOpen(false); setIsAuthModalOpen(true); }}
+                                style={{ width: '100%', padding: '16px', background: clr.accent, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}>
+                                Sign In
+                            </button>
+                        )}
                     </div>
                 </div>
-            )}
-
-        </header>
+            </div>
+        )}
         <AnimatePresence>
             {isAuthModalOpen && (
                 <AuthModal
