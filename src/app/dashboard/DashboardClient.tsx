@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { apiClient, NetworkError } from '@/lib/api';
+import { cloudinaryDownloadUrl } from '@/lib/download';
 import { createClient } from '@/utils/supabase/client';
 import { loadPrefs, savePrefs } from '@/lib/preferences';
 import type {
@@ -1063,8 +1064,8 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
 
                                         <div style={{ flex: 1 }} />
 
-                                        {/* Download */}
-                                        <a href={photoModal.original_url} target="_blank" rel="noreferrer" download style={{ padding: '7px 13px', borderRadius: '9px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {/* Download — fl_attachment forces an immediate download instead of opening a tab */}
+                                        <a href={cloudinaryDownloadUrl(photoModal.original_url, photoModal.filename)} download={photoModal.filename} rel="noopener" style={{ padding: '7px 13px', borderRadius: '9px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <Download size={13} /> Download original
                                         </a>
 

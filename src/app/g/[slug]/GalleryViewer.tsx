@@ -5,6 +5,7 @@ import Image from 'next/image';
 import JSZip from 'jszip';
 import { Lock, Mail, Download, X, ChevronLeft, ChevronRight, Eye, CheckSquare, Square, Package, UserCircle, Clock, CreditCard, Camera, ArrowRight, AlertTriangle, Heart, Send, Share2, MessageSquare } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import { triggerDownload as downloadAsset } from '@/lib/download';
 import { createClient } from '@/utils/supabase/client';
 import AuthModal from '@/components/AuthModal';
 import type { GalleryPublicMeta, GalleryItem } from '@/types';
@@ -305,15 +306,10 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
         return () => observer.disconnect();
     }, [hasMoreItems, loadMoreItems]);
 
-    // ── Download helper (choose version)
+    // ── Download helper (choose version) — uses Cloudinary fl_attachment so the
+    // file downloads immediately instead of opening in a new tab (see lib/download).
     const triggerDownload = (url: string, filename: string): void => {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        downloadAsset(url, filename);
     };
 
     const downloadOriginal = (item: GalleryItem): void => triggerDownload(item.original_url, item.filename);
