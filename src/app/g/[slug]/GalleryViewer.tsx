@@ -132,6 +132,17 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             .catch(err => setGateError(err instanceof Error ? err.message : 'Access denied'));
     }, [gallery, session, slug, accessToken]);
 
+    // ── Auto-verify for the OWNER, regardless of access_type.
+    // The owner bypasses the PIN/email/account gate, so without this their own
+    // PIN-protected (or email_list) gallery would show the gate-skipped empty
+    // state ("No photos") because an access token was never obtained.
+    useEffect(() => {
+        if (!gallery?.is_owner || !session || accessToken) return;
+        apiClient.verifyGalleryAccess(slug, undefined, undefined, session.access_token)
+            .then(token => setAccessToken(token))
+            .catch(err => setGateError(err instanceof Error ? err.message : 'Failed to load gallery'));
+    }, [gallery, session, slug, accessToken]);
+
     // ── Load items once we have an access token
     useEffect(() => {
         if (!accessToken) return;
