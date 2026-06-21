@@ -7,7 +7,7 @@ import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
     Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images, Camera, Send, Eye,
-    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info, WifiOff,
+    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info, WifiOff, MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { apiClient, NetworkError } from '@/lib/api';
@@ -376,6 +376,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     // ── Activity state
     const [activityGalleryId, setActivityGalleryId] = useState<string | null>(null);
     const [activity, setActivity]             = useState<import('@/types').GalleryActivity | null>(null);
+    const [messages, setMessages]             = useState<Array<{ id: string; guest_name: string; message: string; created_at: string }>>([]);
     const [activityLoading, setActivityLoading] = useState(false);
 
     useEffect(() => {
@@ -628,13 +629,20 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         }
     };
 
-    // ── load activity for a gallery
+    // ── load activity + guestbook messages for a gallery
     const loadActivity = async (id: string): Promise<void> => {
         setActivityGalleryId(id);
         setActivityLoading(true);
-        const data = await apiClient.getGalleryActivity(id);
-        setActivity(data);
-        setActivityLoading(false);
+        try {
+            const [data, msgs] = await Promise.all([
+                apiClient.getGalleryActivity(id),
+                apiClient.getGalleryMessages(id).catch(() => [] as typeof messages),
+            ]);
+            setActivity(data);
+            setMessages(msgs);
+        } finally {
+            setActivityLoading(false);
+        }
     };
 
     // ── unlock gallery after confirming offline payment received
@@ -1208,6 +1216,28 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                 ) : (
                                     <p style={{ color: c.textMuted, fontSize: '0.85rem' }}>No views yet. Share your gallery link to start getting visitors.</p>
                                 )}
+
+                                {/* ── Messages left by visitors ───────────────────────────── */}
+                                <div style={{ marginTop: '24px' }}>
+                                    <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: '0 0 10px 0', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <MessageSquare size={13} /> Messages {messages.length > 0 && <span style={{ background: c.accent, color: '#fff', borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem' }}>{messages.length}</span>}
+                                    </p>
+                                    {messages.length > 0 ? (
+                                        <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', overflow: 'hidden' }}>
+                                            {messages.map((m, i) => (
+                                                <div key={m.id} style={{ padding: '14px 20px', borderBottom: i < messages.length - 1 ? `1px solid ${c.border}` : 'none' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', marginBottom: '4px' }}>
+                                                        <span style={{ fontWeight: 600, fontSize: '0.85rem', color: c.text }}>{m.guest_name}</span>
+                                                        <span style={{ color: c.textMuted, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{new Date(m.created_at).toLocaleString()}</span>
+                                                    </div>
+                                                    <p style={{ margin: 0, fontSize: '0.88rem', color: c.textSecondary, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{m.message}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p style={{ color: c.textMuted, fontSize: '0.85rem', margin: 0 }}>No messages yet. Visitors can leave a note from the “Leave a message” button on your gallery.</p>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
