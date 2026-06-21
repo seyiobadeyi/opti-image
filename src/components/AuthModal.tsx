@@ -49,27 +49,41 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
         if (isOpen) setStep(initialStep ?? 'email');
     }, [isOpen, initialStep]);
 
-    // Reset onboarding wizard when entering that step; pre-fill name from Google OAuth metadata
+    // When entering onboarding: pre-fill name from session (Google metadata or existing profile)
+    // so the name step is never shown to someone whose name we already know.
     useEffect(() => {
-        if (step === 'onboarding') {
-            setFocusAreas([]);
-            setUserRole('');
-            setReferral('');
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                const meta = session?.user?.user_metadata;
-                const gn = meta?.given_name || (meta?.name || meta?.full_name || '').split(' ')[0] || '';
-                const fn = meta?.family_name || (meta?.name || meta?.full_name || '').split(' ').slice(1).join(' ') || '';
-                if (gn) {
-                    setFirstName(gn);
-                    setLastName(fn);
-                    setOnboardingSubStep(1); // skip name step — already have it from Google
-                } else {
-                    setFirstName('');
-                    setLastName('');
-                    setOnboardingSubStep(0);
-                }
-            });
-        }
+        if (step !== 'onboarding') return;
+        setFocusAreas([]);
+        setUserRole('');
+        setReferral('');
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session?.user) { setOnboardingSubStep(0); return; }
+
+            const meta = session.user.user_metadata ?? {};
+            // Google provides given_name / family_name; email OTP users don't have metadata
+            const gn = meta.given_name || (meta.name || meta.full_name || '').split(' ')[0] || '';
+            const fn = meta.family_name || (meta.name || meta.full_name || '').split(' ').slice(1).join(' ') || '';
+
+            if (gn) {
+                setFirstName(gn);
+                setLastName(fn);
+                // Don't override sub-step if OTP flow already forced us to step 1
+                setOnboardingSubStep(prev => prev >= 1 ? prev : 1);
+            } else {
+                // Check profile for an existing display_name (OTP user who already set their name)
+                supabase.from('profiles').select('display_name').eq('id', session.user.id).single()
+                    .then(({ data: profile }) => {
+                        if (profile?.display_name) {
+                            const parts = profile.display_name.split(' ');
+                            setFirstName(parts[0] || '');
+                            setLastName(parts.slice(1).join(' ') || '');
+                            setOnboardingSubStep(prev => prev >= 1 ? prev : 1);
+                        } else {
+                            setOnboardingSubStep(prev => prev >= 1 ? prev : 0);
+                        }
+                    });
+            }
+        });
     }, [step, supabase]);
 
     useEffect(() => {
@@ -204,10 +218,20 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
             if (session?.user?.id) {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('display_name')
+                    .select('display_name, use_case')
                     .eq('id', session.user.id)
                     .single();
-                if (!profile?.display_name) {
+                // Fully onboarded — close and redirect
+                if (profile?.display_name && profile?.use_case) {
+                    // fall through to close/redirect below
+                } else if (!profile?.display_name) {
+                    // No name yet — show wizard from step 0
+                    setStep('onboarding');
+                    setLoading(false);
+                    return;
+                } else {
+                    // Has name but no role/referral — jump wizard to role step
+                    setOnboardingSubStep(1);
                     setStep('onboarding');
                     setLoading(false);
                     return;
