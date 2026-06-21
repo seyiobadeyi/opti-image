@@ -24,7 +24,7 @@ const COLS = [
             { label: 'Auto Enhance',     href: '/enhance' },
             { label: 'Remove Metadata',  href: '/metadata' },
             { label: 'Batch Process',    href: '/compress' },
-            { label: 'Client Galleries', href: '/dashboard?tab=galleries' },
+            { label: 'Client Galleries', href: '/dashboard/galleries' },
         ],
     },
     {

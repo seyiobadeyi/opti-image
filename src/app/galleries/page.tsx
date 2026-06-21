@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { createPublicClient } from '@/utils/supabase/public';
 import GalleriesLandingPage from './GalleriesLandingPage';
 import type { FeaturedPhoto } from '../api/galleries/featured-photos/route';
 
@@ -47,12 +48,58 @@ const CC0_PHOTOS: FeaturedPhoto[] = [
 
 async function getFeaturedPhotos(): Promise<{ isReal: boolean; photos: FeaturedPhoto[] }> {
     try {
-        const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintrepid.com';
-        const res = await fetch(`${base}/api/galleries/featured-photos`, {
-            next: { revalidate: 300 },
+        // Cookieless client → this page stays static/ISR (revalidate = 300).
+        // All rows read here are public galleries, so no auth/cookies are needed.
+        const supabase = createPublicClient();
+        const { data: galleries } = await supabase
+            .from('galleries')
+            .select('id, slug, owner_id')
+            .eq('access_type', 'public')
+            .eq('status', 'active')
+            .limit(20);
+
+        if (!galleries?.length) return { isReal: false, photos: CC0_PHOTOS };
+
+        const galleryIds = galleries.map(g => g.id as string);
+        const ownerIds = [...new Set(galleries.map(g => g.owner_id as string))];
+
+        const { data: items } = await supabase
+            .from('gallery_items')
+            .select('gallery_id, display_url')
+            .in('gallery_id', galleryIds)
+            .not('display_url', 'is', null)
+            .limit(60);
+
+        if (!items?.length || items.length < 15) return { isReal: false, photos: CC0_PHOTOS };
+
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, display_name, branding_studio_name, branding_website, branding_color')
+            .in('id', ownerIds);
+
+        const profileMap = new Map((profiles ?? []).map(p => [p.id as string, p]));
+        const galleryOwnerMap = new Map(galleries.map(g => [g.id as string, g.owner_id as string]));
+        const gallerySlugMap = new Map(galleries.map(g => [g.id as string, g.slug as string]));
+
+        const shuffled = items
+            .filter(i => i.display_url)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 18);
+
+        const photos: FeaturedPhoto[] = shuffled.map(item => {
+            const ownerId = galleryOwnerMap.get(item.gallery_id as string) ?? '';
+            const profile = profileMap.get(ownerId);
+            return {
+                url: item.display_url as string,
+                studioName: profile?.branding_studio_name ?? profile?.display_name ?? 'Photographer',
+                website: profile?.branding_website ?? null,
+                brandingColor: profile?.branding_color ?? '#db5a42',
+                gallerySlug: gallerySlugMap.get(item.gallery_id as string),
+                isReal: true,
+            };
         });
-        if (!res.ok) return { isReal: false, photos: CC0_PHOTOS };
-        return res.json() as Promise<{ isReal: boolean; photos: FeaturedPhoto[] }>;
+
+        return { isReal: true, photos };
     } catch {
         return { isReal: false, photos: CC0_PHOTOS };
     }

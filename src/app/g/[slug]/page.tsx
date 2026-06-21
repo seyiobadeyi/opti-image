@@ -37,7 +37,11 @@ export async function generateMetadata({ params }: GalleryPageProps): Promise<Me
     const title = `${gallery.title}${studioSuffix}`;
     const description = gallery.description ?? `Browse photos from ${gallery.title}`;
     const coverUrl = gallery.cover_image_url ?? undefined;
-    const canonicalUrl = `${siteUrl}/g/${slug}`;
+    // Consolidate SEO onto the personalized URL when the owner has a username,
+    // so /g/:slug passes link equity to /:username/:slug instead of competing.
+    const canonicalUrl = gallery.owner_username
+        ? `${siteUrl}/${gallery.owner_username}/${slug}`
+        : `${siteUrl}/g/${slug}`;
     const isPublic = gallery.access_type === 'public';
 
     return {
@@ -78,7 +82,7 @@ export default async function GalleryPage({ params, searchParams }: GalleryPageP
             '@type': 'ImageGallery',
             name: gallery.title,
             ...(gallery.description ? { description: gallery.description } : {}),
-            url: `${siteUrl}/g/${slug}`,
+            url: gallery.owner_username ? `${siteUrl}/${gallery.owner_username}/${slug}` : `${siteUrl}/g/${slug}`,
             ...(gallery.branding_studio_name || gallery.branding_website
                 ? {
                     author: {

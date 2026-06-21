@@ -280,7 +280,7 @@ export default function ClientGalleriesPage(): React.JSX.Element {
                     </p>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Link
-                            href="/dashboard?tab=galleries"
+                            href="/dashboard/galleries"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -625,7 +625,7 @@ export default function ClientGalleriesPage(): React.JSX.Element {
                             No credit card. No subscription. Create your first client gallery in under two minutes.
                         </p>
                         <Link
-                            href="/dashboard?tab=galleries"
+                            href="/dashboard/galleries"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',

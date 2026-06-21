@@ -703,12 +703,13 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     if (activeGallery) {
         const isLive = activeGallery.status !== 'draft';
         const openPreview = () => {
+            const base = galleryUrl(activeGallery.slug);
             if (activeGallery.status === 'draft') {
                 apiClient.getOwnerPreviewToken(activeGallery.id)
-                    .then(token => window.open(`/g/${activeGallery.slug}?ownerToken=${encodeURIComponent(token)}`, '_blank'))
-                    .catch(() => window.open(`/g/${activeGallery.slug}`, '_blank'));
+                    .then(token => window.open(`${base}?ownerToken=${encodeURIComponent(token)}`, '_blank'))
+                    .catch(() => window.open(base, '_blank'));
             } else {
-                window.open(`/g/${activeGallery.slug}`, '_blank');
+                window.open(base, '_blank');
             }
         };
 
@@ -1337,7 +1338,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                         style={{ padding: '7px 12px', borderRadius: '8px', background: c.bgMuted, border: `1px solid ${c.border}`, color: c.text, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                         <Copy size={11} /> {copiedSlug === gallery.slug ? 'Copied!' : 'Link'}
                                     </button>
-                                    <a href={`/g/${gallery.slug}`} target="_blank" rel="noreferrer"
+                                    <a href={galleryUrl(gallery.slug)} target="_blank" rel="noreferrer"
                                         style={{ padding: '7px 12px', borderRadius: '8px', background: c.bgMuted, border: `1px solid ${c.border}`, color: c.text, fontSize: '0.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                         <ExternalLink size={11} />
                                     </a>
