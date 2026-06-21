@@ -218,20 +218,10 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
             if (session?.user?.id) {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('display_name, use_case')
+                    .select('display_name')
                     .eq('id', session.user.id)
                     .single();
-                // Fully onboarded — close and redirect
-                if (profile?.display_name && profile?.use_case) {
-                    // fall through to close/redirect below
-                } else if (!profile?.display_name) {
-                    // No name yet — show wizard from step 0
-                    setStep('onboarding');
-                    setLoading(false);
-                    return;
-                } else {
-                    // Has name but no role/referral — jump wizard to role step
-                    setOnboardingSubStep(1);
+                if (!profile?.display_name) {
                     setStep('onboarding');
                     setLoading(false);
                     return;

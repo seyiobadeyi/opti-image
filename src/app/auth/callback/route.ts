@@ -14,34 +14,35 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             if (user) {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('display_name, use_case')
+                    .select('display_name')
                     .eq('id', user.id)
                     .single();
 
-                // Fully onboarded — go straight to the destination
-                if (profile?.display_name && profile?.use_case) {
+                if (profile?.display_name) {
+                    // Already has a name — considered onboarded, go straight to destination
                     return NextResponse.redirect(`${origin}${next}`);
                 }
 
-                // If no display_name yet, auto-save from Google OAuth metadata so that
-                // closing or skipping the wizard never leaves the user in a stuck state.
-                if (!profile?.display_name) {
-                    const meta = user.user_metadata ?? {};
-                    const autoName = (
-                        meta.full_name ||
-                        meta.name ||
-                        [meta.given_name, meta.family_name].filter(Boolean).join(' ')
-                    ).trim();
-                    if (autoName) {
-                        await supabase
-                            .from('profiles')
-                            .update({ display_name: autoName })
-                            .eq('id', user.id);
-                    }
+                // No display_name yet. Try to auto-save from Google OAuth metadata so that
+                // even if the user skips the wizard their name is persisted immediately.
+                const meta = user.user_metadata ?? {};
+                const autoName = (
+                    meta.full_name ||
+                    meta.name ||
+                    [meta.given_name, meta.family_name].filter(Boolean).join(' ')
+                ).trim();
+
+                if (autoName) {
+                    await supabase
+                        .from('profiles')
+                        .update({ display_name: autoName.slice(0, 80) })
+                        .eq('id', user.id);
+                    // Name saved — send straight to destination, no wizard needed
+                    return NextResponse.redirect(`${origin}${next}`);
                 }
 
-                // display_name exists but use_case is missing → show wizard for role/referral only
-                // (name step will be auto-skipped in the wizard because metadata is pre-filled)
+                // Genuinely no name available (non-Google provider or empty metadata)
+                // Show the onboarding wizard so the user can provide their name.
                 return NextResponse.redirect(`${origin}/?onboarding=1&next=${encodeURIComponent(next)}`);
             }
             return NextResponse.redirect(`${origin}${next}`);
