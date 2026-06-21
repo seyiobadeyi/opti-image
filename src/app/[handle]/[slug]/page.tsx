@@ -4,7 +4,10 @@ import GalleryViewer from '@/app/g/[slug]/GalleryViewer';
 import type { GalleryPublicMeta } from '@/types';
 
 interface UserGalleryPageProps {
-    params: Promise<{ username: string; slug: string }>;
+    // [handle] here is the owner's username; [slug] is the gallery slug.
+    // The segment is named "handle" because it shares the root dynamic slot with
+    // the campaign route ([handle]/page.tsx) — Next.js requires one slug name.
+    params: Promise<{ handle: string; slug: string }>;
     searchParams: Promise<{ ownerToken?: string }>;
 }
 
@@ -22,7 +25,7 @@ async function fetchGalleryMeta(slug: string): Promise<GalleryPublicMeta | null>
 }
 
 export async function generateMetadata({ params }: UserGalleryPageProps): Promise<Metadata> {
-    const { username, slug } = await params;
+    const { handle: username, slug } = await params;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://optimage.dreamintrepid.com';
 
     const gallery = await fetchGalleryMeta(slug);
@@ -58,7 +61,7 @@ export async function generateMetadata({ params }: UserGalleryPageProps): Promis
 }
 
 export default async function UserGalleryPage({ params, searchParams }: UserGalleryPageProps) {
-    const { username, slug } = await params;
+    const { handle: username, slug } = await params;
     const { ownerToken } = await searchParams;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://optimage.dreamintrepid.com';
 

@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
         callbackUrl.searchParams.set('code', code);
         // Preserve where the user originally landed as the post-auth destination,
         // but fall back to dashboard for root-level redirects.
-        const next = pathname === '/' ? '/dashboard' : pathname;
+        const next = pathname === '/' ? '/dashboard/optimize' : pathname;
         callbackUrl.searchParams.set('next', next);
         return NextResponse.redirect(callbackUrl);
     }

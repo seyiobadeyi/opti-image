@@ -103,7 +103,7 @@ export default function Header(): React.JSX.Element {
         // Show login prompt only when not signed in.
         if (hasOnboarding || (hasLogin && !user)) {
             setAuthModalInitialStep(hasOnboarding ? 'onboarding' : 'email');
-            setRedirectUrl(nextParam ?? (window.location.pathname === '/' ? '/dashboard' : window.location.pathname));
+            setRedirectUrl(nextParam ?? (window.location.pathname === '/' ? '/dashboard/optimize' : window.location.pathname));
             setIsAuthModalOpen(true);
             const url = new URL(window.location.href);
             url.searchParams.delete('onboarding');
@@ -188,7 +188,7 @@ export default function Header(): React.JSX.Element {
                             <div style={{ width: '90px', height: '36px', background: clr.g50, borderRadius: '8px' }} />
                         ) : user ? (
                             <>
-                                <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: clr.g50, border: `1px solid ${clr.g200}`, borderRadius: '8px', textDecoration: 'none', color: clr.g700, fontSize: '0.88rem', fontWeight: 600 }}>
+                                <Link href="/dashboard/optimize" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: clr.g50, border: `1px solid ${clr.g200}`, borderRadius: '8px', textDecoration: 'none', color: clr.g700, fontSize: '0.88rem', fontWeight: 600 }}>
                                     <LayoutDashboard size={14} /> Dashboard
                                 </Link>
                                 <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: clr.g400, fontSize: '0.85rem', padding: '7px 10px' }}>
@@ -254,7 +254,7 @@ export default function Header(): React.JSX.Element {
                             Galleries <ChevronRight size={18} color={clr.g400} />
                         </button>
                         {user && (
-                            <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}
+                            <Link href="/dashboard/optimize" onClick={() => setIsMobileMenuOpen(false)}
                                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '12px', background: clr.accentLt, textDecoration: 'none', color: clr.accent, fontSize: '1rem', fontWeight: 600, marginBottom: '4px' }}>
                                 Dashboard <ChevronRight size={18} color={clr.accent} />
                             </Link>

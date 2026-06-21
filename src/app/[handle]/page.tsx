@@ -45,13 +45,16 @@ const CAMPAIGNS: Record<CampaignSlug, CampaignData> = {
 };
 
 interface CampaignPageProps {
-    params: Promise<{ campaign: string }>;
+    // The root dynamic segment [handle] is shared with the personalized gallery
+    // route [handle]/[slug]. At this (single-segment) level it represents a
+    // campaign keyword, e.g. /seo or /wordpress.
+    params: Promise<{ handle: string }>;
 }
 
 export default async function CampaignPage({ params }: CampaignPageProps): Promise<React.JSX.Element> {
-    const { campaign } = await params;
+    const { handle } = await params;
 
-    const campaignData = CAMPAIGNS[campaign.toLowerCase() as CampaignSlug];
+    const campaignData = CAMPAIGNS[handle.toLowerCase() as CampaignSlug];
 
     if (!campaignData) {
         notFound();

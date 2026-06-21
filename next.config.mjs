@@ -1,5 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fixed-path alias handled at the routing layer (never invokes a function, so it
+  // can't fail the way a Server-Component redirect() can). /dashboard is just an
+  // entry point; the real default tab is /dashboard/optimize.
+  async redirects() {
+    return [
+      {
+        source: '/dashboard',
+        destination: '/dashboard/optimize',
+        permanent: false,
+      },
+    ];
+  },
   // Proxy API requests to the NestJS backend during development
   async rewrites() {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
