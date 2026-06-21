@@ -35,6 +35,50 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     return headers;
 }
 
+/** Error thrown when the API server can't be reached at all (vs. an HTTP error). */
+export class NetworkError extends Error {
+    constructor(message = 'NETWORK') {
+        super(message);
+        this.name = 'NetworkError';
+    }
+}
+
+/**
+ * fetch() that transparently retries transient failures, which typically happen
+ * when the API server (NestJS on Railway) is cold-starting after idle:
+ *   - network-level failures (fetch throws TypeError "Failed to fetch")
+ *   - 502 / 503 / 504 gateway responses (proxy up, app not ready yet)
+ * Real application responses (2xx and genuine 4xx/5xx) are returned as-is and
+ * never retried. After exhausting retries on a network failure, throws
+ * NetworkError so callers can show a connection-specific message.
+ *
+ * Only use for idempotent reads / safe-to-repeat requests.
+ */
+async function fetchWithRetry(
+    input: string,
+    init?: RequestInit,
+    retries = 2,
+    backoffMs = 700,
+): Promise<Response> {
+    for (let attempt = 0; ; attempt++) {
+        try {
+            const res = await fetch(input, init);
+            if ((res.status === 502 || res.status === 503 || res.status === 504) && attempt < retries) {
+                await new Promise(r => setTimeout(r, backoffMs * (attempt + 1)));
+                continue;
+            }
+            return res;
+        } catch {
+            // fetch only throws for network-level errors (offline, DNS, CORS, cold start)
+            if (attempt < retries) {
+                await new Promise(r => setTimeout(r, backoffMs * (attempt + 1)));
+                continue;
+            }
+            throw new NetworkError();
+        }
+    }
+}
+
 export const apiClient = {
     /**
      * Upload and convert images with the given options.
@@ -352,7 +396,7 @@ export const apiClient = {
     async listGalleries(): Promise<Gallery[]> {
         const headers = await getAuthHeaders();
         if (!headers['Authorization']) return [];
-        const response = await fetch(`${API_BASE}/api/gallery`, { headers });
+        const response = await fetchWithRetry(`${API_BASE}/api/gallery`, { headers });
         if (!response.ok) return [];
         return response.json() as Promise<Gallery[]>;
     },
@@ -484,7 +528,7 @@ export const apiClient = {
     async getGalleryPublic(slug: string): Promise<GalleryPublicMeta> {
         // Send auth header if available so the server can detect if the viewer is the owner
         const authHeaders = await getAuthHeaders().catch(() => ({}));
-        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}`, {
+        const response = await fetchWithRetry(`${API_BASE}/api/gallery/public/${slug}`, {
             headers: authHeaders,
         });
         if (!response.ok) throw new Error('Gallery not found');
@@ -494,7 +538,7 @@ export const apiClient = {
     async verifyGalleryAccess(slug: string, pin?: string, email?: string, supabaseToken?: string): Promise<string> {
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
         if (supabaseToken) headers['Authorization'] = `Bearer ${supabaseToken}`;
-        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/verify`, {
+        const response = await fetchWithRetry(`${API_BASE}/api/gallery/public/${slug}/verify`, {
             method: 'POST',
             headers,
             body: JSON.stringify({ pin, email }),
@@ -508,7 +552,7 @@ export const apiClient = {
     },
 
     async getGalleryItems(slug: string, accessToken: string, page = 1, limit = 48): Promise<{ items: GalleryItem[]; total: number; hasMore: boolean }> {
-        const res = await fetch(`${API_BASE}/api/gallery/public/${slug}/items?page=${page}&limit=${limit}`, {
+        const res = await fetchWithRetry(`${API_BASE}/api/gallery/public/${slug}/items?page=${page}&limit=${limit}`, {
             headers: { 'x-gallery-token': accessToken },
         });
         if (!res.ok) throw new Error('Failed to fetch items');

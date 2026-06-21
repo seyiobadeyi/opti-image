@@ -7,10 +7,10 @@ import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
     Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images, Camera, Send, Eye,
-    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info,
+    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info, WifiOff,
 } from 'lucide-react';
 import Link from 'next/link';
-import { apiClient } from '@/lib/api';
+import { apiClient, NetworkError } from '@/lib/api';
 import { createClient } from '@/utils/supabase/client';
 import { loadPrefs, savePrefs } from '@/lib/preferences';
 import type {
@@ -320,6 +320,8 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     const [itemsLoading, setItemsLoading] = useState<boolean>(false);
     const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
     const [uploadError, setUploadError] = useState<string | null>(null);
+    // Separate from uploadError: a failure to LOAD the gallery's photos (vs. a failed upload).
+    const [loadError, setLoadError] = useState<{ message: string; canRetry: boolean } | null>(null);
     const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
     // ── gallery manage tab + edit form
@@ -389,13 +391,40 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialGalleryId]);
 
+    // ── load (or reload) the photos for a gallery; safe to call repeatedly (retry)
+    const loadGalleryItems = async (gallery: Gallery): Promise<void> => {
+        setItems([]);
+        setLoadError(null);
+        setItemsLoading(true);
+        try {
+            // Always pass the owner's Supabase token so the server can grant
+            // owner-level access regardless of gallery access_type (e.g. PIN-protected)
+            const { createClient: mkClient } = await import('@/utils/supabase/client');
+            const { data: sessionData } = await mkClient().auth.getSession();
+            const supabaseToken = sessionData.session?.access_token;
+            const token = await apiClient.verifyGalleryAccess(gallery.slug, undefined, undefined, supabaseToken);
+            const data = await apiClient.getGalleryItems(gallery.slug, token);
+            setItems(data.items);
+        } catch (err) {
+            const isNetwork =
+                err instanceof NetworkError ||
+                (err instanceof Error && /failed to fetch|network|load failed/i.test(err.message));
+            setLoadError(
+                isNetwork
+                    ? { message: 'We couldn’t reach the server to load your photos — it may be waking up after being idle. Give it a moment and try again.', canRetry: true }
+                    : { message: 'Something went wrong loading your photos. Please try again.', canRetry: true },
+            );
+            setItems([]);
+        } finally {
+            setItemsLoading(false);
+        }
+    };
+
     // ── open manage view and load items
     const openGallery = async (gallery: Gallery): Promise<void> => {
         router.push(`/dashboard/galleries?gallery=${gallery.id}`, { scroll: false });
         setActiveGallery(gallery);
-        setItems([]);
         setUploadError(null);
-        setItemsLoading(true);
         setGalleryTab('photos');
         setShowMoreMenu(false);
         setEditTitle(gallery.title);
@@ -410,23 +439,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         setSlugCheck('idle');
         setEditSaved(false);
         setEditError(null);
-        try {
-            // Always pass the owner's Supabase token so the server can grant
-            // owner-level access regardless of gallery access_type (e.g. PIN-protected)
-            const { createClient: mkClient } = await import('@/utils/supabase/client');
-            const { data: sessionData } = await mkClient().auth.getSession();
-            const supabaseToken = sessionData.session?.access_token;
-            const token = await apiClient.verifyGalleryAccess(gallery.slug, undefined, undefined, supabaseToken);
-            const data = await apiClient.getGalleryItems(gallery.slug, token);
-            setItems(data.items);
-        } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            // Surface the error so the user knows something went wrong (e.g. missing DB columns)
-            setUploadError(`Could not load photos: ${msg}. If this is a new setup, you may need to run the DB migration.`);
-            setItems([]);
-        } finally {
-            setItemsLoading(false);
-        }
+        await loadGalleryItems(gallery);
     };
 
     const closeGallery = (): void => {
@@ -434,6 +447,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         setActiveGallery(null);
         setItems([]);
         setUploadError(null);
+        setLoadError(null);
     };
 
     // ── create
@@ -870,6 +884,23 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
 
                         {itemsLoading ? (
                             <div style={{ textAlign: 'center', padding: '40px', color: c.textMuted }}>Loading photos…</div>
+                        ) : loadError ? (
+                            <div style={{ textAlign: 'center', padding: '36px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+                                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+                                    <WifiOff size={22} />
+                                </div>
+                                <p style={{ color: c.text, fontSize: '0.92rem', fontWeight: 600, margin: 0 }}>Couldn’t load your photos</p>
+                                <p style={{ color: c.textMuted, fontSize: '0.85rem', margin: 0, maxWidth: '420px', lineHeight: 1.55 }}>{loadError.message}</p>
+                                {loadError.canRetry && (
+                                    <button
+                                        onClick={() => { void loadGalleryItems(activeGallery); }}
+                                        className="btn btn-primary"
+                                        style={{ padding: '9px 20px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '7px', marginTop: '2px' }}
+                                    >
+                                        <RefreshCw size={14} /> Try again
+                                    </button>
+                                )}
+                            </div>
                         ) : items.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '32px', color: c.textMuted, fontSize: '0.88rem' }}>
                                 No photos yet — drop some above to get started.
