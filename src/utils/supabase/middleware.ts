@@ -35,14 +35,13 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
         data: { user },
     } = await supabase.auth.getUser()
 
-    // For Admin-only routes, check for bypass and redirect if unauthorized
-    if (request.nextUrl.pathname.startsWith('/admin') && !user) {
-        // Only allow logged in users (or specific roles in the future) to access admin
+    // Protect authenticated-only routes
+    if (!user && (
+        request.nextUrl.pathname.startsWith('/admin') ||
+        request.nextUrl.pathname.startsWith('/dashboard')
+    )) {
         return NextResponse.redirect(new URL('/?login=true', request.url))
     }
-
-    // NOTE: You can also protect other routes here by checking if `!user`
-    // and redirecting to the login page.
 
     // ── Geo: set country cookie for client-side currency auto-detection ──
     // Vercel injects x-vercel-ip-country on every request (ISO 3166-1 alpha-2).
