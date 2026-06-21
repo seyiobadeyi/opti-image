@@ -2,8 +2,11 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import DashboardClient from '../DashboardClient';
+import DashboardClient from '@/app/dashboard/DashboardClient';
 import type { UserProfile, ProcessingHistoryItem, DashboardTab } from '@/types';
+
+// Always server-render — never statically pre-generate this route
+export const dynamic = 'force-dynamic';
 
 const VALID_TABS: DashboardTab[] = ['optimize', 'video', 'history', 'galleries', 'referrals', 'settings'];
 

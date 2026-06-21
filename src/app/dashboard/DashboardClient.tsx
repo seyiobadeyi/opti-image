@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
@@ -1357,20 +1357,24 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
 }
 
 // ─── Main Component ──────────────────────────────────────────────
+const VALID_TABS: DashboardTab[] = ['optimize', 'video', 'history', 'galleries', 'referrals', 'settings'];
+
+function tabFromPathname(pathname: string): DashboardTab {
+    const segment = pathname.split('/')[2] as DashboardTab | undefined;
+    return segment && VALID_TABS.includes(segment) ? segment : 'optimize';
+}
+
 export default function DashboardClient({ user, profile, history: initialHistory, initialTab = 'optimize', initialGalleryId }: DashboardClientProps): React.JSX.Element {
     const router = useRouter();
+    const pathname = usePathname();
     const [history, setHistory] = useState<ProcessingHistoryItem[]>(initialHistory || []);
-    const [activeTab, setActiveTabState] = useState<DashboardTab>(initialTab);
+
+    // Derive active tab from URL — always in sync with the address bar
+    const activeTab: DashboardTab = tabFromPathname(pathname) ?? initialTab;
 
     const setActiveTab = (tab: DashboardTab): void => {
-        setActiveTabState(tab);
         router.push(`/dashboard/${tab}`, { scroll: false });
     };
-
-    // Keep active tab in sync when browser back/forward changes the URL
-    useEffect(() => {
-        setActiveTabState(initialTab);
-    }, [initialTab]);
 
     // ── Inline optimizer state ─────────────────────────
     const [files, setFiles] = useState<FileWithCustomName[]>([]);
