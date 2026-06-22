@@ -18,6 +18,8 @@ import type {
     Gallery,
     GalleryItem,
     GalleryPublicMeta,
+    GallerySubmission,
+    AppNotification,
 } from '@/types';
 
 const API_BASE: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -645,6 +647,74 @@ export const apiClient = {
         });
         if (!response.ok) throw new Error('Failed to fetch messages');
         return response.json();
+    },
+
+    /**
+     * Visitor (signed-in) submits a photo to a gallery's review queue.
+     */
+    async submitGalleryPhoto(slug: string, file: File): Promise<void> {
+        const headers = await getAuthHeaders();
+        if (!headers['Authorization']) throw new Error('Please sign in to submit a photo');
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/submit`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to submit photo');
+        }
+    },
+
+    /**
+     * Owner: list photo submissions for a gallery (default: pending).
+     */
+    async getGallerySubmissions(galleryId: string, status: 'pending' | 'approved' | 'rejected' = 'pending'): Promise<GallerySubmission[]> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/submissions?status=${status}`, { headers });
+        if (!response.ok) return [];
+        const data: { submissions: GallerySubmission[] } = await response.json();
+        return data.submissions ?? [];
+    },
+
+    /** Owner: approve a submission (adds it to the gallery). */
+    async approveGallerySubmission(galleryId: string, submissionId: string): Promise<GalleryItem> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/submissions/${submissionId}/approve`, { method: 'POST', headers });
+        if (!response.ok) throw new Error('Failed to approve submission');
+        const data: { item: GalleryItem } = await response.json();
+        return data.item;
+    },
+
+    /** Owner: reject a submission. */
+    async rejectGallerySubmission(galleryId: string, submissionId: string): Promise<void> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/submissions/${submissionId}/reject`, { method: 'POST', headers });
+        if (!response.ok) throw new Error('Failed to reject submission');
+    },
+
+    /**
+     * Get the current user's notifications + unread count.
+     */
+    async getNotifications(): Promise<{ notifications: AppNotification[]; unreadCount: number }> {
+        const headers = await getAuthHeaders();
+        if (!headers['Authorization']) return { notifications: [], unreadCount: 0 };
+        const response = await fetch(`${API_BASE}/api/notifications`, { headers });
+        if (!response.ok) return { notifications: [], unreadCount: 0 };
+        return response.json() as Promise<{ notifications: AppNotification[]; unreadCount: number }>;
+    },
+
+    /** Mark notifications read (specific ids, or all unread when omitted). */
+    async markNotificationsRead(ids?: string[]): Promise<void> {
+        const headers = await getAuthHeaders();
+        if (!headers['Authorization']) return;
+        await fetch(`${API_BASE}/api/notifications/read`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({ ids }),
+        }).catch(() => null);
     },
 
     /**

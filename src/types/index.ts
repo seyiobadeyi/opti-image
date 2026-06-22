@@ -540,6 +540,27 @@ export interface GalleryActivity {
   recentViews: Array<{ viewer_type: string; created_at: string }>;
 }
 
+export interface GallerySubmission {
+  id: string;
+  submitter_name: string;
+  display_url: string;
+  original_url: string;
+  filename: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
+export interface AppNotification {
+  id: string;
+  type: 'message' | 'favorite' | 'submission' | string;
+  gallery_id: string | null;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+}
+
 // ──────────────────────────────────────────────
 // 13. Window Extensions (Global Augmentation)
 // ──────────────────────────────────────────────

@@ -7,6 +7,7 @@ import { LogOut, User as UserIcon, Menu, X, LayoutDashboard, ChevronRight, Camer
 import type { User, GuestHistoryItem, AuthStep } from '@/types';
 import { AnimatePresence } from 'framer-motion';
 import AuthModal from '@/components/AuthModal';
+import NotificationBell from '@/components/NotificationBell';
 import { createClient } from '@/utils/supabase/client';
 import { logout } from '@/app/auth/actions';
 import { apiClient } from '@/lib/api';
@@ -188,6 +189,7 @@ export default function Header(): React.JSX.Element {
                             <div style={{ width: '90px', height: '36px', background: clr.g50, borderRadius: '8px' }} />
                         ) : user ? (
                             <>
+                                <NotificationBell />
                                 <Link href="/dashboard/optimize" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: clr.g50, border: `1px solid ${clr.g200}`, borderRadius: '8px', textDecoration: 'none', color: clr.g700, fontSize: '0.88rem', fontWeight: 600 }}>
                                     <LayoutDashboard size={14} /> Dashboard
                                 </Link>
@@ -208,15 +210,17 @@ export default function Header(): React.JSX.Element {
                     </div>
                 </nav>
 
-                {/* Mobile toggle */}
-                <button
-                    className="header-mobile-toggle"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    aria-label="Open menu"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: clr.g700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}
-                >
-                    <Menu size={24} />
-                </button>
+                {/* Mobile toggle (+ notification bell when signed in) */}
+                <div className="header-mobile-toggle" style={{ alignItems: 'center', gap: '4px' }}>
+                    {!isAuthLoading && user && <NotificationBell />}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        aria-label="Open menu"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: clr.g700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}
+                    >
+                        <Menu size={24} />
+                    </button>
+                </div>
             </div>
 
         </header>

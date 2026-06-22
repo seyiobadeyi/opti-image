@@ -64,6 +64,11 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
     const [favError, setFavError]           = useState<string | null>(null);
     const [showFavMode, setShowFavMode]     = useState(false);
 
+    // ── Photo submission state (visitors contribute photos to the review queue)
+    const [submitting, setSubmitting]           = useState(false);
+    const [submitResult, setSubmitResult]       = useState<'success' | string | null>(null);
+    const photoInputRef = useRef<HTMLInputElement>(null);
+
     // ── Share state
     const [shareCopied, setShareCopied]         = useState(false);
 
@@ -227,6 +232,27 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             setGateError(err instanceof Error ? err.message : 'Access denied');
         } finally {
             setGateLoading(false);
+        }
+    };
+
+    // ── Submit photo(s) to the gallery's review queue (account required)
+    const handleSubmitPhotos = async (files: FileList | null): Promise<void> => {
+        if (!files || files.length === 0) return;
+        const imgs = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 10);
+        if (imgs.length === 0) { setSubmitResult('Only image files can be submitted.'); return; }
+        setSubmitting(true);
+        setSubmitResult(null);
+        try {
+            for (const f of imgs) {
+                await apiClient.submitGalleryPhoto(slug, f);
+            }
+            setSubmitResult('success');
+        } catch (err) {
+            setSubmitResult(err instanceof Error ? err.message : 'Could not submit your photo. Please try again.');
+        } finally {
+            setSubmitting(false);
+            if (photoInputRef.current) photoInputRef.current.value = '';
+            setTimeout(() => setSubmitResult(null), 6000);
         }
     };
 
@@ -899,9 +925,44 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                         >
                             <MessageSquare size={15} /> Leave a message
                         </button>
+                        <button
+                            onClick={() => requireAuth(() => photoInputRef.current?.click())}
+                            disabled={submitting}
+                            title="Have photos of your own? Send them to the organizer"
+                            style={{
+                                padding: '8px 16px', borderRadius: '10px', border: 'none',
+                                background: c.accent, color: c.white,
+                                fontSize: '0.85rem', cursor: submitting ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                opacity: submitting ? 0.7 : 1, transition: 'all 0.15s',
+                            }}
+                        >
+                            <Camera size={15} /> {submitting ? 'Sending…' : 'Send a photo'}
+                        </button>
+                        <input
+                            ref={photoInputRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            style={{ display: 'none' }}
+                            onChange={(e) => void handleSubmitPhotos(e.target.files)}
+                        />
                     </div>
                 </div>
             </header>
+
+            {submitResult && (
+                <div style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000, maxWidth: '92vw' }}>
+                    <div style={{
+                        background: submitResult === 'success' ? 'rgba(22,163,74,0.96)' : 'rgba(220,38,38,0.96)',
+                        color: '#fff', padding: '12px 20px', borderRadius: '12px', fontSize: '0.88rem',
+                        boxShadow: '0 8px 30px rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: '8px',
+                    }}>
+                        {submitResult === 'success'
+                            ? <><CheckSquare size={16} /> Thanks! Your photo was sent to the organizer for review.</>
+                            : <><AlertTriangle size={16} /> {submitResult}</>}
+                    </div>
+                </div>
+            )}
 
             {/* Guestbook modal */}
             {showGuestbook && (

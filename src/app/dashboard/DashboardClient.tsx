@@ -326,7 +326,10 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
     // ── gallery manage tab + edit form
-    const [galleryTab, setGalleryTab]         = useState<'photos' | 'settings' | 'activity'>('photos');
+    const [galleryTab, setGalleryTab]         = useState<'photos' | 'submissions' | 'settings' | 'activity'>('photos');
+    const [submissions, setSubmissions]       = useState<import('@/types').GallerySubmission[]>([]);
+    const [submissionsLoading, setSubmissionsLoading] = useState(false);
+    const [submissionBusyId, setSubmissionBusyId]     = useState<string | null>(null);
     const [showMoreMenu, setShowMoreMenu]     = useState<boolean>(false);
     const [editTitle, setEditTitle]           = useState<string>('');
     const [editDesc, setEditDesc]             = useState<string>('');
@@ -441,6 +444,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         setSlugCheck('idle');
         setEditSaved(false);
         setEditError(null);
+        void loadSubmissions(gallery.id);
         await loadGalleryItems(gallery);
     };
 
@@ -645,6 +649,42 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         }
     };
 
+    // ── load pending photo submissions for a gallery
+    const loadSubmissions = async (id: string): Promise<void> => {
+        setSubmissionsLoading(true);
+        try {
+            setSubmissions(await apiClient.getGallerySubmissions(id, 'pending'));
+        } catch {
+            setSubmissions([]);
+        } finally {
+            setSubmissionsLoading(false);
+        }
+    };
+
+    const handleApproveSubmission = async (subId: string): Promise<void> => {
+        if (!activeGallery) return;
+        setSubmissionBusyId(subId);
+        try {
+            const item = await apiClient.approveGallerySubmission(activeGallery.id, subId);
+            setItems(prev => [...prev, item]);
+            setSubmissions(prev => prev.filter(s => s.id !== subId));
+            setGalleries(prev => prev.map(g => g.id === activeGallery.id ? { ...g, item_count: (g.item_count ?? 0) + 1 } : g));
+        } catch { /* surfaced via disabled state; non-critical */ } finally {
+            setSubmissionBusyId(null);
+        }
+    };
+
+    const handleRejectSubmission = async (subId: string): Promise<void> => {
+        if (!activeGallery) return;
+        setSubmissionBusyId(subId);
+        try {
+            await apiClient.rejectGallerySubmission(activeGallery.id, subId);
+            setSubmissions(prev => prev.filter(s => s.id !== subId));
+        } catch { /* non-critical */ } finally {
+            setSubmissionBusyId(null);
+        }
+    };
+
     // ── unlock gallery after confirming offline payment received
     const handleUnlock = async (): Promise<void> => {
         if (!activeGallery) return;
@@ -827,6 +867,14 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                     <div style={{ display: 'flex', borderBottom: `1px solid ${c.border}`, marginTop: '16px' }}>
                         <button style={TAB_STYLE(galleryTab === 'photos')} onClick={() => setGalleryTab('photos')}>
                             Photos
+                        </button>
+                        <button style={TAB_STYLE(galleryTab === 'submissions')} onClick={() => setGalleryTab('submissions')}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                Submissions
+                                {submissions.length > 0 && (
+                                    <span style={{ background: c.accent, color: '#fff', borderRadius: '999px', padding: '0px 7px', fontSize: '0.7rem', fontWeight: 700 }}>{submissions.length}</span>
+                                )}
+                            </span>
                         </button>
                         <button style={TAB_STYLE(galleryTab === 'settings')} onClick={() => setGalleryTab('settings')}>
                             Settings
@@ -1086,6 +1134,55 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ══ SUBMISSIONS TAB ══ */}
+                {galleryTab === 'submissions' && (
+                    <div style={{ paddingTop: '20px' }}>
+                        <p style={{ fontSize: '0.85rem', color: c.textMuted, margin: '0 0 16px 0', lineHeight: 1.5 }}>
+                            Photos guests sent in for this gallery. Approve to add them to the gallery, or skip to discard. Only signed-in visitors can submit.
+                        </p>
+                        {submissionsLoading ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: c.textMuted }}>Loading submissions…</div>
+                        ) : submissions.length === 0 ? (
+                            <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '16px', padding: '40px', textAlign: 'center' }}>
+                                <Images size={34} style={{ color: c.textMuted, marginBottom: '10px' }} />
+                                <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>No pending submissions</p>
+                                <p style={{ color: c.textMuted, fontSize: '0.85rem', margin: 0 }}>When a visitor sends a photo, it shows up here for your review.</p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
+                                {submissions.map(sub => (
+                                    <div key={sub.id} style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ aspectRatio: '1', background: '#111', overflow: 'hidden' }}>
+                                            <img src={sub.display_url} alt={sub.filename} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                        </div>
+                                        <div style={{ padding: '10px 12px' }}>
+                                            <p style={{ margin: 0, fontSize: '0.78rem', color: c.textSecondary, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                <UserCircle size={13} /> {sub.submitter_name}
+                                            </p>
+                                            <p style={{ margin: '2px 0 0 0', fontSize: '0.7rem', color: c.textMuted }}>{new Date(sub.created_at).toLocaleDateString()}</p>
+                                            <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+                                                <button
+                                                    onClick={() => void handleApproveSubmission(sub.id)}
+                                                    disabled={submissionBusyId === sub.id}
+                                                    className="btn btn-primary"
+                                                    style={{ flex: 1, padding: '7px 0', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', opacity: submissionBusyId === sub.id ? 0.6 : 1 }}>
+                                                    <Check size={13} /> Approve
+                                                </button>
+                                                <button
+                                                    onClick={() => void handleRejectSubmission(sub.id)}
+                                                    disabled={submissionBusyId === sub.id}
+                                                    style={{ flex: 1, padding: '7px 0', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontSize: '0.78rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', opacity: submissionBusyId === sub.id ? 0.6 : 1 }}>
+                                                    <X size={13} /> Skip
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
