@@ -17,12 +17,52 @@ interface GalleryViewerProps {
     ownerToken?: string;
 }
 
+// The server-issued access token is valid for 4 hours (see gallery.service.ts
+// signAccessToken), but without persisting it the PIN/email/account gate
+// re-prompted on every reload. Cache it in sessionStorage, keyed per slug,
+// and skip restoring it if it's already past its own embedded expiry.
+const ACCESS_TOKEN_KEY_PREFIX = 'optimage_gallery_token:';
+
+function loadStoredToken(slug: string): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = window.sessionStorage.getItem(ACCESS_TOKEN_KEY_PREFIX + slug);
+        if (!raw) return null;
+        const data = raw.split('.')[0];
+        if (!data) return null;
+        const b64 = data.replace(/-/g, '+').replace(/_/g, '/');
+        const payload: { exp?: number } = JSON.parse(atob(b64));
+        if (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()) {
+            window.sessionStorage.removeItem(ACCESS_TOKEN_KEY_PREFIX + slug);
+            return null;
+        }
+        return raw;
+    } catch {
+        return null;
+    }
+}
+
+function storeToken(slug: string, token: string): void {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.setItem(ACCESS_TOKEN_KEY_PREFIX + slug, token);
+}
+
+function clearStoredToken(slug: string): void {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.removeItem(ACCESS_TOKEN_KEY_PREFIX + slug);
+}
+
 export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps): React.JSX.Element {
     const [gallery, setGallery]       = useState<GalleryPublicMeta | null>(null);
     const [items, setItems]           = useState<GalleryItem[]>([]);
     // If the caller passes an ownerToken we bootstrap accessToken immediately
-    // so the draft gate / payment gate is bypassed for owner previews
-    const [accessToken, setAccessToken] = useState<string | null>(ownerToken ?? null);
+    // so the draft gate / payment gate is bypassed for owner previews.
+    // Otherwise fall back to a still-valid token cached from a prior visit.
+    const [accessToken, setAccessToken] = useState<string | null>(() => ownerToken ?? loadStoredToken(slug));
+    const applyAccessToken = useCallback((token: string) => {
+        storeToken(slug, token);
+        setAccessToken(token);
+    }, [slug]);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
     // ── Pagination / infinite scroll state
@@ -56,13 +96,21 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
     const [zipProgress, setZipProgress]     = useState<number | null>(null); // 0–100 or null
     const [zipError, setZipError]           = useState<string | null>(null);
 
-    // ── Favourites state
+    // ── Favourites (Likes) state
     const [favoriteIds, setFavoriteIds]     = useState<Set<string>>(new Set());
     const [viewerIdentifier, setViewerIdentifier] = useState<string>('');
     const [favSubmitting, setFavSubmitting] = useState(false);
     const [favSubmitted, setFavSubmitted]   = useState(false);
     const [favError, setFavError]           = useState<string | null>(null);
     const [showFavMode, setShowFavMode]     = useState(false);
+
+    // ── Proofing state (the assigned client's final selection — separate from Likes)
+    const [proofingIds, setProofingIds]             = useState<Set<string>>(new Set());
+    const [proofingFinalizedAt, setProofingFinalizedAt] = useState<string | null>(null);
+    const [proofingSubmitting, setProofingSubmitting]   = useState(false);
+    const [proofingError, setProofingError]             = useState<string | null>(null);
+    const [showProofingMode, setShowProofingMode]       = useState(false);
+    const [clientMessages, setClientMessages]           = useState<Array<{ id: string; guest_name: string; message: string; created_at: string }>>([]);
 
     // ── Photo submission state (visitors contribute photos to the review queue)
     const [submitting, setSubmitting]           = useState(false);
@@ -125,18 +173,18 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
     useEffect(() => {
         if (gallery?.access_type === 'public') {
             apiClient.verifyGalleryAccess(slug)
-                .then(token => setAccessToken(token))
+                .then(token => applyAccessToken(token))
                 .catch(() => setGateError('Failed to load gallery'));
         }
-    }, [gallery, slug]);
+    }, [gallery, slug, applyAccessToken]);
 
     // ── Auto-verify 'account' galleries once we have a session
     useEffect(() => {
         if (gallery?.access_type !== 'account' || !session || accessToken) return;
         apiClient.verifyGalleryAccess(slug, undefined, undefined, session.access_token)
-            .then(token => setAccessToken(token))
+            .then(token => applyAccessToken(token))
             .catch(err => setGateError(err instanceof Error ? err.message : 'Access denied'));
-    }, [gallery, session, slug, accessToken]);
+    }, [gallery, session, slug, accessToken, applyAccessToken]);
 
     // ── Auto-verify for the OWNER, regardless of access_type.
     // The owner bypasses the PIN/email/account gate, so without this their own
@@ -145,9 +193,30 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
     useEffect(() => {
         if (!gallery?.is_owner || !session || accessToken) return;
         apiClient.verifyGalleryAccess(slug, undefined, undefined, session.access_token)
-            .then(token => setAccessToken(token))
+            .then(token => applyAccessToken(token))
             .catch(err => setGateError(err instanceof Error ? err.message : 'Failed to load gallery'));
-    }, [gallery, session, slug, accessToken]);
+    }, [gallery, session, slug, accessToken, applyAccessToken]);
+
+    // ── Auto-verify for the assigned CLIENT, regardless of access_type — same
+    // bypass as the owner above, since gallery.is_client is resolved server-side
+    // by matching the signed-in viewer's email against client_email.
+    useEffect(() => {
+        if (!gallery?.is_client || !session || accessToken) return;
+        apiClient.verifyGalleryAccess(slug, undefined, undefined, session.access_token)
+            .then(token => applyAccessToken(token))
+            .catch(err => setGateError(err instanceof Error ? err.message : 'Failed to load gallery'));
+    }, [gallery, session, slug, accessToken, applyAccessToken]);
+
+    // ── Refresh gallery metadata after a fresh sign-in, so is_owner/is_client
+    // (resolved server-side from the bearer token) reflect who just signed in —
+    // e.g. the client signing in mid-visit via the AuthModal.
+    const resolvedForUserId = useRef<string | undefined>(undefined);
+    useEffect(() => {
+        const uid = session?.user?.id;
+        if (!uid || resolvedForUserId.current === uid) return;
+        resolvedForUserId.current = uid;
+        apiClient.getGalleryPublic(slug).then(setGallery).catch(() => null);
+    }, [session, slug]);
 
     // ── Load items once we have an access token
     useEffect(() => {
@@ -160,17 +229,40 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 setTotalItems(total);
                 setItemsPage(1);
             })
-            .catch(() => setGateError('Failed to load images'))
+            .catch((err: unknown) => {
+                // A cached token that's since expired/been revoked server-side —
+                // drop it and fall back to the gate instead of looping on a dead token.
+                if (err instanceof Error && err.message === 'Access token expired') {
+                    clearStoredToken(slug);
+                    setAccessToken(null);
+                    return;
+                }
+                setGateError('Failed to load images');
+            })
             .finally(() => setItemsLoading(false));
     }, [accessToken, slug]);
 
-    // ── Load existing favourites once we know the viewer identifier
+    // ── Load existing Likes once the viewer is signed in
     useEffect(() => {
-        if (!accessToken || !viewerIdentifier) return;
-        apiClient.getGalleryFavorites(slug, accessToken, viewerIdentifier)
+        if (!accessToken || !session) return;
+        apiClient.getGalleryFavorites(slug, accessToken)
             .then(ids => setFavoriteIds(new Set(ids)))
             .catch(() => null);
-    }, [accessToken, viewerIdentifier, slug]);
+    }, [accessToken, session, slug]);
+
+    // ── Load the client's proofing selection + read-only messages
+    useEffect(() => {
+        if (!accessToken || !gallery?.is_client) return;
+        apiClient.getProofingSelections(slug, accessToken)
+            .then(({ itemIds, finalizedAt }) => {
+                setProofingIds(new Set(itemIds));
+                setProofingFinalizedAt(finalizedAt);
+            })
+            .catch(() => null);
+        apiClient.getMessagesForClient(slug)
+            .then(setClientMessages)
+            .catch(() => null);
+    }, [accessToken, gallery?.is_client, slug]);
 
     // ── Account gate: send OTP email
     const handleSendOtp = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -226,7 +318,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 gallery?.access_type === 'pin' ? pin : undefined,
                 gallery?.access_type === 'email_list' ? emailInput : undefined,
             );
-            setAccessToken(token);
+            applyAccessToken(token);
             if (gallery?.access_type === 'email_list') setViewerIdentifier(emailInput.trim());
         } catch (err: unknown) {
             setGateError(err instanceof Error ? err.message : 'Access denied');
@@ -242,18 +334,26 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
         if (imgs.length === 0) { setSubmitResult('Only image files can be submitted.'); return; }
         setSubmitting(true);
         setSubmitResult(null);
-        try {
-            for (const f of imgs) {
+        let succeeded = 0;
+        let lastError: string | null = null;
+        for (const f of imgs) {
+            try {
                 await apiClient.submitGalleryPhoto(slug, f);
+                succeeded++;
+            } catch (err) {
+                lastError = err instanceof Error ? err.message : 'Could not submit your photo. Please try again.';
             }
-            setSubmitResult('success');
-        } catch (err) {
-            setSubmitResult(err instanceof Error ? err.message : 'Could not submit your photo. Please try again.');
-        } finally {
-            setSubmitting(false);
-            if (photoInputRef.current) photoInputRef.current.value = '';
-            setTimeout(() => setSubmitResult(null), 6000);
         }
+        if (succeeded === imgs.length) {
+            setSubmitResult('success');
+        } else if (succeeded > 0) {
+            setSubmitResult(`Sent ${succeeded} of ${imgs.length} photo(s). ${lastError ?? ''}`.trim());
+        } else {
+            setSubmitResult(lastError ?? 'Could not submit your photo. Please try again.');
+        }
+        setSubmitting(false);
+        if (photoInputRef.current) photoInputRef.current.value = '';
+        setTimeout(() => setSubmitResult(null), 6000);
     };
 
     // ── Infinite scroll — load next page (declared first so lightbox nav can reference it)
@@ -437,13 +537,12 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
     };
 
     const submitFavorites = async (): Promise<void> => {
-        if (!accessToken || !viewerIdentifier || !gallery) return;
+        if (!accessToken || !session || !gallery) return;
         setFavSubmitting(true);
         try {
             await apiClient.setGalleryFavorites(
                 slug, accessToken,
                 Array.from(favoriteIds),
-                viewerIdentifier,
                 true, // notify photographer
             );
             setFavSubmitted(true);
@@ -453,6 +552,45 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             setFavError(err instanceof Error ? err.message : 'Failed to save favourites');
         } finally {
             setFavSubmitting(false);
+        }
+    };
+
+    // ── Proofing helpers (client's final selection — locked once finalized)
+    const toggleProofing = (itemId: string): void => {
+        if (proofingFinalizedAt) return;
+        setProofingIds(prev => {
+            const next = new Set(prev);
+            next.has(itemId) ? next.delete(itemId) : next.add(itemId);
+            return next;
+        });
+    };
+
+    const saveProofingSelection = async (): Promise<void> => {
+        if (!accessToken) return;
+        setProofingSubmitting(true);
+        setProofingError(null);
+        try {
+            await apiClient.setProofingSelections(slug, accessToken, Array.from(proofingIds));
+        } catch (err: unknown) {
+            setProofingError(err instanceof Error ? err.message : 'Failed to save selection');
+        } finally {
+            setProofingSubmitting(false);
+        }
+    };
+
+    const finalizeProofingSelection = async (): Promise<void> => {
+        if (!accessToken) return;
+        setProofingSubmitting(true);
+        setProofingError(null);
+        try {
+            await saveProofingSelection();
+            await apiClient.finalizeProofing(slug, accessToken);
+            setProofingFinalizedAt(new Date().toISOString());
+            setShowProofingMode(false);
+        } catch (err: unknown) {
+            setProofingError(err instanceof Error ? err.message : 'Failed to finalize selection');
+        } finally {
+            setProofingSubmitting(false);
         }
     };
 
@@ -594,7 +732,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
             const handleRetry = (): void => {
                 setGateError(null);
                 apiClient.verifyGalleryAccess(slug, undefined, undefined, session.access_token)
-                    .then(token => setAccessToken(token))
+                    .then(token => applyAccessToken(token))
                     .catch(err => setGateError(err instanceof Error ? err.message : 'Access denied'));
             };
             return (
@@ -697,11 +835,19 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 Cancel / Go Back
                             </button>
                         </form>
+                        {!session && (
+                            <p style={{ textAlign: 'center', marginTop: '4px', fontSize: '0.8rem' }}>
+                                <button type="button" onClick={() => setAuthModalOpen(true)} style={{ background: 'none', border: 'none', color: c.accent, cursor: 'pointer', padding: '4px' }}>
+                                    Assigned client? Sign in here
+                                </button>
+                            </p>
+                        )}
                         <p style={{ textAlign: 'center', marginTop: '20px', color: c.gray500, fontSize: '0.8rem' }}>
                             Powered by <a href="https://optimage.dreamintrepid.com" style={{ color: c.accent, textDecoration: 'none' }}>Optimage</a>
                         </p>
                     </div>
                 </div>
+                <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
             </div>
         );
     }
@@ -867,6 +1013,22 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     </a>
                 </div>
             )}
+            {/* Client bar — only visible to the assigned client when signed in */}
+            {gallery.is_client && (
+                <div style={{
+                    background: 'linear-gradient(90deg, rgba(124,58,237,0.15), rgba(139,92,246,0.08))',
+                    borderBottom: '1px solid rgba(124,58,237,0.25)',
+                    padding: '10px 24px',
+                    display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
+                }}>
+                    <span style={{ fontSize: '0.78rem', color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                        <CheckSquare size={13} /> You&apos;re signed in as the client for this gallery
+                    </span>
+                    {proofingFinalizedAt && (
+                        <span style={{ fontSize: '0.78rem', color: c.textMuted }}>Your final selection is locked in — thank you!</span>
+                    )}
+                </div>
+            )}
             {/* Header */}
             <header style={styles.header}>
                 <div style={styles.headerInner}>
@@ -914,6 +1076,21 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                 ? (favoriteIds.size > 0 ? `${favoriteIds.size} liked` : 'Pick favourites')
                                 : 'Pick favourites'}
                         </button>
+                        {gallery.is_client && (
+                            <button
+                                onClick={() => { setShowProofingMode(v => !v); setSelectMode(false); setShowFavMode(false); setSelectedIds(new Set()); }}
+                                style={{
+                                    padding: '8px 16px', borderRadius: '10px', border: '1px solid #2a2a2a',
+                                    background: showProofingMode ? 'rgba(124,58,237,0.2)' : 'transparent',
+                                    color: showProofingMode ? '#a78bfa' : c.textMuted,
+                                    fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                    transition: 'all 0.15s',
+                                }}
+                            >
+                                <CheckSquare size={15} />
+                                {proofingFinalizedAt ? 'Final selection (locked)' : (showProofingMode ? `${proofingIds.size} selected` : 'Pick final selection')}
+                            </button>
+                        )}
                         <button
                             onClick={() => requireAuth(() => { setShowGuestbook(true); setGbSubmitted(false); setGbError(null); })}
                             style={{
@@ -1002,6 +1179,19 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             </p>
                         </div>
 
+                        {gallery.is_client && clientMessages.length > 0 && (
+                            <div style={{ marginBottom: '20px', maxHeight: '220px', overflowY: 'auto', border: '1px solid #1f1f1f', borderRadius: '12px' }}>
+                                {clientMessages.map((m, i) => (
+                                    <div key={m.id} style={{ padding: '12px 16px', borderBottom: i < clientMessages.length - 1 ? '1px solid #1f1f1f' : 'none' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginBottom: '3px' }}>
+                                            <span style={{ fontWeight: 600, fontSize: '0.82rem', color: c.white }}>{m.guest_name}</span>
+                                            <span style={{ color: c.gray500, fontSize: '0.72rem', whiteSpace: 'nowrap' }}>{new Date(m.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                        <p style={{ margin: 0, fontSize: '0.85rem', color: c.textMuted, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{m.message}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                         {gbSubmitted ? (
                             <div style={{ textAlign: 'center', padding: '24px 0' }}>
                                 <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>✉️</div>
@@ -1188,6 +1378,60 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                 </div>
             )}
 
+            {showProofingMode && (
+                <div style={{
+                    position: 'sticky', top: 0, zIndex: 100,
+                    background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(12px)',
+                    borderBottom: '1px solid #1f1f1f',
+                    padding: '12px 32px',
+                    display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+                }}>
+                    <CheckSquare size={16} color="#a78bfa" />
+                    <span style={{ color: c.textMuted, fontSize: '0.85rem' }}>
+                        {proofingFinalizedAt
+                            ? 'Your selection is finalized — ask your photographer to reopen it for changes'
+                            : proofingIds.size > 0
+                                ? `${proofingIds.size} photo${proofingIds.size !== 1 ? 's' : ''} selected — click photos to add more`
+                                : 'Tap photos to build your final selection'}
+                    </span>
+                    {proofingError && (
+                        <span style={{ color: '#ef4444', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
+                            {proofingError}
+                            <button onClick={() => setProofingError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0 }}><X size={12} /></button>
+                        </span>
+                    )}
+                    {!proofingFinalizedAt && proofingIds.size > 0 && !proofingSubmitting && !proofingError && (
+                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                            <button
+                                onClick={() => void saveProofingSelection()}
+                                style={{
+                                    padding: '8px 16px', borderRadius: '10px',
+                                    background: 'transparent', border: '1px solid #2a2a2a',
+                                    color: c.textMuted, fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Save for later
+                            </button>
+                            <button
+                                onClick={() => void finalizeProofingSelection()}
+                                style={{
+                                    padding: '8px 20px', borderRadius: '10px',
+                                    background: '#7c3aed', border: 'none',
+                                    color: c.white, fontSize: '0.85rem', fontWeight: 600,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                }}
+                            >
+                                <Send size={14} /> Finalize my selection
+                            </button>
+                        </div>
+                    )}
+                    {proofingSubmitting && (
+                        <span style={{ marginLeft: 'auto', color: '#a78bfa', fontSize: '0.85rem' }}>Saving…</span>
+                    )}
+                </div>
+            )}
+
             {/* Favourites submitted confirmation */}
             {favSubmitted && (
                 <div style={{
@@ -1223,7 +1467,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                     outline: isSelected ? `3px solid ${c.accent}` : 'none',
                                     outlineOffset: '-3px',
                                 }}
-                                onClick={() => selectMode ? toggleSelect(item.id) : (showFavMode ? toggleFavorite(item.id) : openLightbox(index))}
+                                onClick={() => selectMode ? toggleSelect(item.id) : showFavMode ? toggleFavorite(item.id) : showProofingMode ? toggleProofing(item.id) : openLightbox(index)}
                                 onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
                             >
                                 <Image
@@ -1266,6 +1510,25 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                                             size={16}
                                             color={favoriteIds.has(item.id) ? c.white : 'rgba(255,255,255,0.7)'}
                                             fill={favoriteIds.has(item.id) ? c.white : 'none'}
+                                        />
+                                    </div>
+                                )}
+                                {/* Proofing indicator (client only) */}
+                                {showProofingMode && (
+                                    <div
+                                        style={{
+                                            position: 'absolute', top: '10px', right: '10px', zIndex: 5,
+                                            background: proofingIds.has(item.id) ? 'rgba(124,58,237,0.85)' : 'rgba(0,0,0,0.5)',
+                                            borderRadius: '50%', width: '32px', height: '32px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            transition: 'all 0.15s', cursor: proofingFinalizedAt ? 'default' : 'pointer',
+                                            border: proofingIds.has(item.id) ? 'none' : '1.5px solid rgba(255,255,255,0.3)',
+                                        }}
+                                        onClick={() => toggleProofing(item.id)}
+                                    >
+                                        <CheckSquare
+                                            size={16}
+                                            color={proofingIds.has(item.id) ? c.white : 'rgba(255,255,255,0.7)'}
                                         />
                                     </div>
                                 )}
@@ -1408,11 +1671,11 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                     onTouchEnd={handleLightboxTouchEnd}
                 >
                     <button style={styles.lbClose} onClick={closeLightbox}><X size={24} /></button>
-                    <button style={{ ...styles.lbNav, left: '16px' }} onClick={(e) => { e.stopPropagation(); prevImage(); }}>
-                        <ChevronLeft size={32} />
+                    <button style={{ ...styles.lbNav, left: 'clamp(4px, 2vw, 16px)' }} onClick={(e) => { e.stopPropagation(); prevImage(); }}>
+                        <ChevronLeft size={28} />
                     </button>
-                    <button style={{ ...styles.lbNav, right: '16px' }} onClick={(e) => { e.stopPropagation(); nextImage(); }}>
-                        <ChevronRight size={32} />
+                    <button style={{ ...styles.lbNav, right: 'clamp(4px, 2vw, 16px)' }} onClick={(e) => { e.stopPropagation(); nextImage(); }}>
+                        <ChevronRight size={28} />
                     </button>
 
                     {/* Lightbox shows display version (2048px WebP — faster + high quality) */}
@@ -1468,7 +1731,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
                                 padding: '8px 16px', borderRadius: '8px',
-                                background: c.bgMuted,
+                                background: 'rgba(20,20,20,0.85)',
                                 border: '1px solid rgba(255,255,255,0.2)',
                                 color: c.white, fontSize: '0.85rem',
                                 cursor: 'pointer', transition: 'background 0.15s',
@@ -1511,12 +1774,12 @@ const styles: Record<string, React.CSSProperties> = {
     grid:        { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px', padding: '4px', maxWidth: '1400px', margin: '0 auto' },
     gridItem:    { position: 'relative', aspectRatio: '1', overflow: 'hidden', cursor: 'pointer', background: '#111', userSelect: 'none' as const, WebkitUserSelect: 'none' as const },
     gridOverlay: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', opacity: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: '12px', transition: 'opacity 0.2s' },
-    downloadBtn: { background: c.border, backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: c.white, padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    downloadBtn: { background: 'rgba(20,20,20,0.85)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '8px', color: c.white, padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
     footer:      { textAlign: 'center', padding: '32px', color: c.gray600, fontSize: '0.85rem', borderTop: '1px solid #1a1a1a', marginTop: '32px' },
     lightboxOverlay: { position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    lightboxContent: { position: 'relative', width: 'calc(100vw - 160px)', height: 'calc(100vh - 120px)', maxWidth: '1200px' },
-    lbClose:     { position: 'absolute', top: '16px', right: '16px', background: c.bgMuted, border: 'none', color: c.white, borderRadius: '50%', width: '44px', height: '44px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
-    lbNav:       { position: 'absolute', top: '50%', transform: 'translateY(-50%)', background: c.bgMuted, border: 'none', color: c.white, borderRadius: '50%', width: '52px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    lightboxContent: { position: 'relative', width: 'calc(100vw - clamp(24px, 8vw, 160px))', height: 'calc(100vh - clamp(56px, 10vh, 120px))', maxWidth: '1200px' },
+    lbClose:     { position: 'absolute', top: '16px', right: '16px', background: 'rgba(20,20,20,0.85)', border: '1px solid rgba(255,255,255,0.2)', color: c.white, borderRadius: '50%', width: 'clamp(36px, 9vw, 44px)', height: 'clamp(36px, 9vw, 44px)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    lbNav:       { position: 'absolute', top: '50%', transform: 'translateY(-50%)', background: 'rgba(20,20,20,0.85)', border: '1px solid rgba(255,255,255,0.2)', color: c.white, borderRadius: '50%', width: 'clamp(38px, 10vw, 52px)', height: 'clamp(38px, 10vw, 52px)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
     lbDownload:  { position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(124,58,237,0.85)', border: '1px solid rgba(124,58,237,0.5)', backdropFilter: 'blur(8px)', color: c.white, borderRadius: '10px', padding: '10px 20px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', zIndex: 10 },
     lbCounter:   { position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', color: c.textMuted, fontSize: '0.85rem', zIndex: 10, whiteSpace: 'nowrap' },
 };

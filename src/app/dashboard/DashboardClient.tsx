@@ -381,6 +381,8 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     const [activity, setActivity]             = useState<import('@/types').GalleryActivity | null>(null);
     const [messages, setMessages]             = useState<Array<{ id: string; guest_name: string; message: string; created_at: string }>>([]);
     const [activityLoading, setActivityLoading] = useState(false);
+    const [clientStatus, setClientStatus]     = useState<{ client_email: string | null; proofing_finalized_at: string | null } | null>(null);
+    const [reopeningProofing, setReopeningProofing] = useState(false);
 
     useEffect(() => {
         apiClient.listGalleries().then(data => {
@@ -638,14 +640,26 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         setActivityGalleryId(id);
         setActivityLoading(true);
         try {
-            const [data, msgs] = await Promise.all([
+            const [data, msgs, client] = await Promise.all([
                 apiClient.getGalleryActivity(id),
                 apiClient.getGalleryMessages(id).catch(() => [] as typeof messages),
+                apiClient.getGalleryClientStatus(id).catch(() => null),
             ]);
             setActivity(data);
             setMessages(msgs);
+            setClientStatus(client);
         } finally {
             setActivityLoading(false);
+        }
+    };
+
+    const handleReopenProofing = async (id: string): Promise<void> => {
+        setReopeningProofing(true);
+        try {
+            await apiClient.reopenProofing(id);
+            setClientStatus(prev => prev ? { ...prev, proofing_finalized_at: null } : prev);
+        } finally {
+            setReopeningProofing(false);
         }
     };
 
@@ -896,6 +910,9 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                             <p style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}><Check size={15} /> Email sent successfully.</p>
                         ) : (
                             <form onSubmit={handleSendToClient} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <p style={{ color: c.textMuted, fontSize: '0.8rem', margin: '0 0 4px 0' }}>
+                                    They&apos;ll be able to sign in with this email to view the gallery, like photos, and finalize their selection — see the Client section under Activity.
+                                </p>
                                 {sendError && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: 0 }}>{sendError}</p>}
                                 <input type="email" required value={sendEmail} placeholder="Client email address" onChange={(e) => setSendEmail(e.target.value)} style={GALLERY_INPUT_STYLE} />
                                 <textarea value={sendMessage} rows={3} maxLength={500} placeholder="Optional personal message…" onChange={(e) => setSendMessage(e.target.value)} style={{ ...GALLERY_INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }} />
@@ -1312,6 +1329,35 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                     </div>
                                 ) : (
                                     <p style={{ color: c.textMuted, fontSize: '0.85rem' }}>No views yet. Share your gallery link to start getting visitors.</p>
+                                )}
+
+                                {/* ── Assigned client / proofing status ─────────────────────── */}
+                                {clientStatus?.client_email && (
+                                    <div style={{ marginTop: '24px' }}>
+                                        <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: '0 0 10px 0', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <UserCircle size={13} /> Client
+                                        </p>
+                                        <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                            <div>
+                                                <p style={{ margin: 0, fontWeight: 600, fontSize: '0.88rem', color: c.text }}>{clientStatus.client_email}</p>
+                                                <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: c.textMuted, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                    {clientStatus.proofing_finalized_at
+                                                        ? <><CheckCircle size={13} style={{ color: '#22c55e' }} /> Finalized their selection on {new Date(clientStatus.proofing_finalized_at).toLocaleDateString()}</>
+                                                        : 'Can sign in to view, like, and finalize their photo selection'}
+                                                </p>
+                                            </div>
+                                            {clientStatus.proofing_finalized_at && (
+                                                <button
+                                                    onClick={() => void handleReopenProofing(activeGallery.id)}
+                                                    disabled={reopeningProofing}
+                                                    className="btn btn-secondary"
+                                                    style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+                                                >
+                                                    {reopeningProofing ? 'Reopening…' : 'Reopen for revisions'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
 
                                 {/* ── Messages left by visitors ───────────────────────────── */}

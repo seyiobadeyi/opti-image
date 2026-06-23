@@ -533,6 +533,8 @@ export interface GalleryPublicMeta {
   expires_at: string | null;
   created_at: string;
   is_owner?: boolean;
+  is_client?: boolean;
+  proofing_finalized_at?: string | null;
 }
 
 export interface GalleryActivity {

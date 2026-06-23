@@ -557,7 +557,7 @@ export const apiClient = {
         const res = await fetchWithRetry(`${API_BASE}/api/gallery/public/${slug}/items?page=${page}&limit=${limit}`, {
             headers: { 'x-gallery-token': accessToken },
         });
-        if (!res.ok) throw new Error('Failed to fetch items');
+        if (!res.ok) throw new Error(res.status === 401 ? 'Access token expired' : 'Failed to fetch items');
         return res.json();
     },
 
@@ -600,12 +600,94 @@ export const apiClient = {
     },
 
     /**
-     * Get favourite item IDs for a viewer in a public gallery.
+     * Owner: get the gallery's assigned client (email + whether they've finalized).
      */
-    async getGalleryFavorites(slug: string, accessToken: string, viewerIdentifier: string): Promise<string[]> {
-        const params = new URLSearchParams({ viewer: viewerIdentifier });
-        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/favorites?${params.toString()}`, {
-            headers: { 'x-gallery-token': accessToken },
+    async getGalleryClientStatus(id: string): Promise<{ client_email: string | null; proofing_finalized_at: string | null }> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/client`, { headers });
+        if (!response.ok) throw new Error('Failed to fetch client status');
+        return response.json();
+    },
+
+    /**
+     * Owner: unassign the client from a gallery (clears their selection too).
+     */
+    async removeGalleryClient(id: string): Promise<void> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/client`, { method: 'DELETE', headers });
+        if (!response.ok) throw new Error('Failed to remove client');
+    },
+
+    /**
+     * Owner: reopen a finalized proofing selection so the client can revise it.
+     */
+    async reopenProofing(id: string): Promise<void> {
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/${id}/proofing/reopen`, { method: 'POST', headers });
+        if (!response.ok) throw new Error('Failed to reopen selection');
+    },
+
+    /**
+     * Client: get the current proofing selection for a gallery.
+     */
+    async getProofingSelections(slug: string, accessToken: string): Promise<{ itemIds: string[]; finalizedAt: string | null }> {
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/proofing`, {
+            headers: { ...authHeaders, 'x-gallery-token': accessToken },
+        });
+        if (!response.ok) return { itemIds: [], finalizedAt: null };
+        return response.json();
+    },
+
+    /**
+     * Client: save the in-progress proofing selection (before finalizing).
+     */
+    async setProofingSelections(slug: string, accessToken: string, itemIds: string[]): Promise<void> {
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/proofing`, {
+            method: 'POST',
+            headers: { ...authHeaders, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: accessToken, itemIds }),
+        });
+        if (!response.ok) throw new Error('Failed to save selection');
+    },
+
+    /**
+     * Client: lock in the final selection. Cannot be edited again until the
+     * photographer reopens it.
+     */
+    async finalizeProofing(slug: string, accessToken: string): Promise<void> {
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/proofing/finalize`, {
+            method: 'POST',
+            headers: { ...authHeaders, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: accessToken }),
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to finalize selection');
+        }
+    },
+
+    /**
+     * Client: read-only guestbook messages for the gallery.
+     */
+    async getMessagesForClient(slug: string): Promise<Array<{ id: string; guest_name: string; message: string; created_at: string }>> {
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/messages/client`, { headers: authHeaders });
+        if (!response.ok) return [];
+        const data: { messages: Array<{ id: string; guest_name: string; message: string; created_at: string }> } = await response.json();
+        return data.messages ?? [];
+    },
+
+    /**
+     * Get Like item IDs for the signed-in viewer in a public gallery.
+     */
+    async getGalleryFavorites(slug: string, accessToken: string): Promise<string[]> {
+        const authHeaders = await getAuthHeaders();
+        if (!authHeaders['Authorization']) return [];
+        const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/favorites`, {
+            headers: { ...authHeaders, 'x-gallery-token': accessToken },
         });
         if (!response.ok) return [];
         const data: { itemIds: string[] } = await response.json();
@@ -613,13 +695,15 @@ export const apiClient = {
     },
 
     /**
-     * Save viewer's favourite selections. Set notifyPhotographer=true to trigger email.
+     * Save the signed-in viewer's Likes. Set notifyPhotographer=true to trigger email.
      */
-    async setGalleryFavorites(slug: string, accessToken: string, itemIds: string[], viewerIdentifier: string, notifyPhotographer = false): Promise<void> {
+    async setGalleryFavorites(slug: string, accessToken: string, itemIds: string[], notifyPhotographer = false): Promise<void> {
+        const authHeaders = await getAuthHeaders();
+        if (!authHeaders['Authorization']) throw new Error('Sign in to like photos');
         const response = await fetch(`${API_BASE}/api/gallery/public/${slug}/favorites`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: accessToken, itemIds, viewerIdentifier, notifyPhotographer }),
+            headers: { ...authHeaders, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: accessToken, itemIds, notifyPhotographer }),
         });
         if (!response.ok) throw new Error('Failed to save favourites');
     },
