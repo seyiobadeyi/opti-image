@@ -74,12 +74,16 @@ const FORMAT_OPTIONS = [
     { value: 'gif',   label: 'GIF',  note: 'Animated image support' },
 ];
 
+// Fixed automatically — no user-facing quality choice.
+const FIXED_QUALITY = 82;
+
 export default function ConvertPage(): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [format, setFormat] = useState('webp');
-    const [quality, setQuality] = useState(85);
     const [processing, setProcessing] = useState(false);
     const [processed, setProcessed] = useState(0);
+    const [stage, setStage] = useState<'uploading' | 'optimizing'>('uploading');
+    const [fileFraction, setFileFraction] = useState(0);
     const [results, setResults] = useState<ResultEntry[] | null>(null);
     const [summary, setSummary] = useState<ProcessingSummary | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -115,10 +119,15 @@ export default function ConvertPage(): React.JSX.Element {
         try {
             for (let i = 0; i < entries.length; i++) {
                 const entry = entries[i]!;
+                setStage('uploading');
+                setFileFraction(0);
                 const namedFile = Object.assign(new File([entry.file], entry.file.name, { type: entry.file.type }), { customName: entry.name });
                 const resp = await apiClient.convertImages([namedFile], {
                     format: format as 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'gif',
-                    quality,
+                    quality: FIXED_QUALITY,
+                }, (fraction) => {
+                    setFileFraction(fraction);
+                    if (fraction >= 0.999) setStage('optimizing');
                 });
                 if (resp.success && resp.results[0]) {
                     const r = resp.results[0];
@@ -126,6 +135,7 @@ export default function ConvertPage(): React.JSX.Element {
                     totalOrig += r.originalSize; totalProc += r.processedSize;
                 }
                 setProcessed(i + 1);
+                setFileFraction(0);
             }
             const savings = totalOrig - totalProc;
             setResults(allResults);
@@ -140,7 +150,7 @@ export default function ConvertPage(): React.JSX.Element {
         } finally {
             setProcessing(false);
         }
-    }, [entries, processing, format, quality]);
+    }, [entries, processing, format]);
 
     const downloadOne = useCallback(async (r: ResultEntry) => {
         try {
@@ -159,7 +169,9 @@ export default function ConvertPage(): React.JSX.Element {
     }, [results]);
 
     const showDrop = entries.length === 0 && !results;
-    const selectedFmt = FORMAT_OPTIONS.find(f => f.value === format);
+    const overallProgress = entries.length > 0
+        ? Math.min(100, ((processed + fileFraction) / entries.length) * 100)
+        : 0;
 
     return (
         <div style={S.page}>
@@ -223,20 +235,6 @@ export default function ConvertPage(): React.JSX.Element {
                             ))}
                         </div>
 
-                        <div style={S.settings}>
-                            <div style={S.sRow}>
-                                <div>
-                                    <div style={S.sLabel}>Quality</div>
-                                    <div style={S.sNote}>{selectedFmt?.note}</div>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <input type="range" min={30} max={100} step={5} value={quality} onChange={e => setQuality(Number(e.target.value))}
-                                        style={{ width: '140px', accentColor: clr.accent, cursor: 'pointer' }} />
-                                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: clr.accent, minWidth: '38px', textAlign: 'right' }}>{quality}%</span>
-                                </div>
-                            </div>
-                        </div>
-
                         {error && <div style={S.errBox}>{error}</div>}
 
                         <button type="button" disabled={processing} onClick={handleProcess}
@@ -248,8 +246,15 @@ export default function ConvertPage(): React.JSX.Element {
 
                         {processing && (
                             <>
-                                <div style={S.progress}><div style={{ ...S.progFill, width: `${(processed / entries.length) * 100}%` }} /></div>
-                                <p style={S.progLbl}>{processed} of {entries.length} done</p>
+                                <div style={S.progress}>
+                                    <div
+                                        className={stage === 'optimizing' ? 'progress-pulse' : undefined}
+                                        style={{ ...S.progFill, width: `${overallProgress}%` }}
+                                    />
+                                </div>
+                                <p style={S.progLbl}>
+                                    {stage === 'optimizing' ? 'Optimizing…' : 'Uploading…'} {processed} of {entries.length} done
+                                </p>
                             </>
                         )}
                     </>
@@ -304,6 +309,11 @@ export default function ConvertPage(): React.JSX.Element {
                     </>
                 )}
             </div>
+
+            <style>{`
+                @keyframes progress-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+                .progress-pulse { animation: progress-pulse 1s ease-in-out infinite; }
+            `}</style>
 
             <Footer />
         </div>

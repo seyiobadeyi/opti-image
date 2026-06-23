@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Bold, Italic, List, Paperclip, X } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { c } from '@/lib/colors';
+
+const MAX_FILES = 5;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB, matches server limit
 
 const CATEGORIES = [
   'Bug Report',
@@ -27,6 +31,7 @@ interface FormState {
   email: string;
   category: Category;
   message: string;
+  website: string; // honeypot — real users never see/fill this
 }
 
 export default function SupportWidget() {
@@ -36,13 +41,17 @@ export default function SupportWidget() {
     email: '',
     category: 'Bug Report',
     message: '',
+    website: '',
   });
   const [emailReadonly, setEmailReadonly] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -75,6 +84,40 @@ export default function SupportWidget() {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
+  // ── Formatting toolbar: insert markdown-style markers around the selection
+  const applyFormat = (marker: string) => {
+    const ta = messageRef.current;
+    if (!ta) return;
+    const { selectionStart, selectionEnd, value } = ta;
+    const selected = value.slice(selectionStart, selectionEnd);
+    const next = value.slice(0, selectionStart) + marker + selected + marker + value.slice(selectionEnd);
+    setForm(prev => ({ ...prev, message: next }));
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.setSelectionRange(selectionStart + marker.length, selectionStart + marker.length + selected.length);
+    });
+  };
+
+  const applyBullet = () => {
+    const ta = messageRef.current;
+    if (!ta) return;
+    const { selectionStart, value } = ta;
+    const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
+    const next = value.slice(0, lineStart) + '- ' + value.slice(lineStart);
+    setForm(prev => ({ ...prev, message: next }));
+    requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(selectionStart + 2, selectionStart + 2); });
+  };
+
+  const addFiles = (newFiles: FileList | null) => {
+    if (!newFiles) return;
+    const imgs = Array.from(newFiles).filter(f => f.type.startsWith('image/'));
+    const oversized = imgs.find(f => f.size > MAX_FILE_SIZE);
+    if (oversized) { setError(`${oversized.name} is over 10MB`); return; }
+    setFiles(prev => [...prev, ...imgs].slice(0, MAX_FILES));
+  };
+
+  const removeFile = (idx: number) => setFiles(prev => prev.filter((_, i) => i !== idx));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -82,23 +125,26 @@ export default function SupportWidget() {
     setLoading(true);
     try {
       const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('email', form.email);
+      formData.append('category', form.category);
+      formData.append('message', form.message);
+      formData.append('website', form.website);
+      formData.append('page', typeof window !== 'undefined' ? window.location.href : '');
+      formData.append('userAgent', typeof navigator !== 'undefined' ? navigator.userAgent : '');
+      files.forEach(f => formData.append('files', f));
+
       const res = await fetch(`${api}/api/support/ticket`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          category: form.category,
-          message: form.message,
-          page: typeof window !== 'undefined' ? window.location.href : '',
-          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-        }),
+        body: formData,
       });
       if (!res.ok) {
         const data = (await res.json()) as { message?: string };
         throw new Error(data.message ?? 'Something went wrong. Please try again.');
       }
       setSubmitted(true);
+      setFiles([]);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
@@ -252,6 +298,18 @@ export default function SupportWidget() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate>
+                  {/* Honeypot — visually hidden, off the tab order; bots fill every field they can see */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={form.website}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}
+                  />
+
                   {/* Name */}
                   <div style={{ marginBottom: 16 }}>
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: 6 }} htmlFor="sw-name">
@@ -320,14 +378,51 @@ export default function SupportWidget() {
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: 6 }} htmlFor="sw-message">
                       Message
                     </label>
+
+                    {/* Formatting toolbar */}
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                      {[
+                        { icon: Bold, title: 'Bold', onClick: () => applyFormat('**') },
+                        { icon: Italic, title: 'Italic', onClick: () => applyFormat('_') },
+                        { icon: List, title: 'Bullet list', onClick: applyBullet },
+                        { icon: Paperclip, title: 'Attach images', onClick: () => fileInputRef.current?.click() },
+                      ].map(({ icon: Icon, title, onClick }) => (
+                        <button key={title} type="button" title={title} onClick={onClick}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 6, border: `1px solid ${c.border}`, background: '#fff', color: c.textSecondary, cursor: 'pointer' }}>
+                          <Icon size={13} />
+                        </button>
+                      ))}
+                    </div>
+
                     <textarea
+                      ref={messageRef}
                       id="sw-message" name="message"
                       value={form.message} onChange={handleChange}
                       onFocus={() => setFocusedField('message')} onBlur={() => setFocusedField(null)}
                       required rows={5} minLength={10} maxLength={2000}
-                      placeholder="Describe your issue or request in detail..."
+                      placeholder="Describe your issue or request in detail... (use **bold**, _italic_, or - for bullets)"
                       style={{ ...getInput('message'), resize: 'vertical', minHeight: 100 }}
                     />
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      style={{ display: 'none' }}
+                      onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
+                    />
+
+                    {files.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                        {files.map((f, i) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 10px', background: c.bgMuted, border: `1px solid ${c.border}`, borderRadius: '8px', fontSize: '0.78rem', color: c.textSecondary }}>
+                            <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                            <button type="button" onClick={() => removeFile(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.textMuted, display: 'flex' }}><X size={11} /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div style={{ textAlign: 'right', fontSize: '0.75rem', color: form.message.length > 1800 ? '#ef4444' : c.textMuted, marginBottom: 20 }}>
                     {form.message.length} / 2000

@@ -84,10 +84,13 @@ async function fetchWithRetry(
 export const apiClient = {
     /**
      * Upload and convert images with the given options.
+     * Pass onUploadProgress to track real upload progress via XHR (fetch has
+     * no upload-progress events) — used by pages that show a live progress bar.
      */
     async convertImages(
         files: FileWithCustomName[],
         options: ConvertImageOptions = {},
+        onUploadProgress?: (fraction: number) => void,
     ): Promise<ConvertResponse> {
         const headers = await getAuthHeaders();
 
@@ -150,6 +153,31 @@ export const apiClient = {
             formData.append('watermarkSize', String(options.watermarkSize));
         if (options.watermarkColor)
             formData.append('watermarkColor', options.watermarkColor);
+
+        if (onUploadProgress) {
+            return new Promise<ConvertResponse>((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', `${API_BASE}/api/images/convert`);
+                Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) onUploadProgress(e.loaded / e.total);
+                };
+                xhr.onload = () => {
+                    try {
+                        const body = JSON.parse(xhr.responseText);
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            resolve(body as ConvertResponse);
+                        } else {
+                            reject(new Error(body?.message || 'Upload failed'));
+                        }
+                    } catch {
+                        reject(new Error('Upload failed'));
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Upload failed'));
+                xhr.send(formData);
+            });
+        }
 
         const response = await fetch(`${API_BASE}/api/images/convert`, {
             method: 'POST',

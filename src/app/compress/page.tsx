@@ -158,12 +158,17 @@ const DropboxIcon = (): React.JSX.Element => (
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
+// Fixed automatically — no user-facing quality choice. 82 is the well-known
+// sweet spot for JPEG/WebP; it also drives the PNG palette size server-side.
+const FIXED_QUALITY = 82;
+
 export default function CompressPage(): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
-    const [quality, setQuality] = useState(80);
     const [format, setFormat] = useState('');
     const [processing, setProcessing] = useState(false);
     const [processed, setProcessed] = useState(0);
+    const [stage, setStage] = useState<'uploading' | 'optimizing'>('uploading');
+    const [fileFraction, setFileFraction] = useState(0);
     const [results, setResults] = useState<ResultEntry[] | null>(null);
     const [summary, setSummary] = useState<ProcessingSummary | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -314,15 +319,21 @@ export default function CompressPage(): React.JSX.Element {
         try {
             for (let i = 0; i < entries.length; i++) {
                 const entry = entries[i]!;
+                setStage('uploading');
+                setFileFraction(0);
                 // Attach customName to the File object so the server uses it
                 const namedFile = new File([entry.file], entry.file.name, { type: entry.file.type });
                 const resp = await apiClient.convertImages(
                     [Object.assign(namedFile, { customName: entry.name })],
                     {
-                        quality,
+                        quality: FIXED_QUALITY,
                         format: format as '' | 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'gif',
                         stripMetadata: true,
-                    }
+                    },
+                    (fraction) => {
+                        setFileFraction(fraction);
+                        if (fraction >= 0.999) setStage('optimizing');
+                    },
                 );
                 if (resp.success && resp.results[0]) {
                     const r = resp.results[0];
@@ -332,6 +343,7 @@ export default function CompressPage(): React.JSX.Element {
                     totalProc += r.processedSize;
                 }
                 setProcessed(i + 1);
+                setFileFraction(0);
             }
 
             const savings = totalOrig - totalProc;
@@ -353,7 +365,7 @@ export default function CompressPage(): React.JSX.Element {
         } finally {
             setProcessing(false);
         }
-    }, [entries, processing, quality, format]);
+    }, [entries, processing, format]);
 
     // ── Downloads
     const downloadOne = useCallback(async (result: ResultEntry) => {
@@ -390,13 +402,10 @@ export default function CompressPage(): React.JSX.Element {
     }, [results, downloadAll]);
 
     // ── Derived
-    const compressionLabel =
-        quality >= 85 ? 'Gentle — closest to original' :
-        quality >= 70 ? 'Balanced — recommended' :
-        quality >= 50 ? 'Strong — great for web' :
-                        'Maximum — smallest file';
-
     const hasSavings = summary && parseFloat(summary.totalSavingsPercent ?? '0') > 0;
+    const overallProgress = entries.length > 0
+        ? Math.min(100, ((processed + fileFraction) / entries.length) * 100)
+        : 0;
     // Show the big dropzone only when no files have been added yet (and no results shown)
     const showDrop   = entries.length === 0 && !results;
 
@@ -541,28 +550,7 @@ export default function CompressPage(): React.JSX.Element {
 
                         {/* Settings */}
                         <div style={S.settingsBox}>
-                            {/* Quality */}
-                            <div style={S.settingRow}>
-                                <div>
-                                    <div style={S.settingLabel}>Compression level</div>
-                                    <div style={S.settingNote}>{compressionLabel}</div>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <input
-                                        type="range"
-                                        min={30}
-                                        max={95}
-                                        step={5}
-                                        value={quality}
-                                        onChange={e => setQuality(Number(e.target.value))}
-                                        style={S.slider}
-                                    />
-                                    <span style={S.sliderVal}>{quality}%</span>
-                                </div>
-                            </div>
-
                             {/* Format */}
-                            <div style={S.divider} />
                             <div style={S.settingRow}>
                                 <div>
                                     <div style={S.settingLabel}>Save as</div>
@@ -599,9 +587,14 @@ export default function CompressPage(): React.JSX.Element {
                         {processing && (
                             <>
                                 <div style={S.progressBar}>
-                                    <div style={{ ...S.progressFill, width: `${(processed / entries.length) * 100}%` }} />
+                                    <div
+                                        className={stage === 'optimizing' ? 'progress-pulse' : undefined}
+                                        style={{ ...S.progressFill, width: `${overallProgress}%` }}
+                                    />
                                 </div>
-                                <p style={S.progressLabel}>{processed} of {entries.length} done</p>
+                                <p style={S.progressLabel}>
+                                    {stage === 'optimizing' ? 'Optimizing…' : 'Uploading…'} {processed} of {entries.length} done
+                                </p>
                             </>
                         )}
                     </>
@@ -692,6 +685,11 @@ export default function CompressPage(): React.JSX.Element {
                     </>
                 )}
             </div>
+
+            <style>{`
+                @keyframes progress-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+                .progress-pulse { animation: progress-pulse 1s ease-in-out infinite; }
+            `}</style>
 
             <Footer />
         </div>

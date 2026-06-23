@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { CheckCircle } from 'lucide-react';
-import type { Metadata } from 'next';
+import React, { useRef, useState } from 'react';
+import { CheckCircle, Bold, Italic, List, Paperclip, X } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { c } from '@/lib/colors';
@@ -10,25 +9,77 @@ import { c } from '@/lib/colors';
 // metadata export must be in a separate server component; for client pages use a layout or separate server wrapper
 // For now we define it here and Next.js will ignore it (client component) - that's acceptable
 
+const MAX_FILES = 5;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB, matches server limit
+
 export default function ContactPage(): React.JSX.Element {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const [website, setWebsite] = useState(''); // honeypot — real users never see/fill this
+    const [files, setFiles] = useState<File[]>([]);
+    const [fileError, setFileError] = useState<string | null>(null);
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // ── Formatting toolbar: insert markdown-style markers around the selection
+    const applyFormat = (before: string, after: string = before): void => {
+        const ta = textareaRef.current;
+        if (!ta) return;
+        const { selectionStart, selectionEnd, value } = ta;
+        const selected = value.slice(selectionStart, selectionEnd);
+        const next = value.slice(0, selectionStart) + before + selected + after + value.slice(selectionEnd);
+        setMessage(next);
+        requestAnimationFrame(() => {
+            ta.focus();
+            ta.setSelectionRange(selectionStart + before.length, selectionStart + before.length + selected.length);
+        });
+    };
+
+    const applyBullet = (): void => {
+        const ta = textareaRef.current;
+        if (!ta) return;
+        const { selectionStart, value } = ta;
+        const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
+        const next = value.slice(0, lineStart) + '- ' + value.slice(lineStart);
+        setMessage(next);
+        requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(selectionStart + 2, selectionStart + 2); });
+    };
+
+    const addFiles = (newFiles: FileList | null): void => {
+        if (!newFiles) return;
+        const imgs = Array.from(newFiles).filter(f => f.type.startsWith('image/'));
+        const oversized = imgs.find(f => f.size > MAX_FILE_SIZE);
+        if (oversized) { setFileError(`${oversized.name} is over 10MB`); return; }
+        setFileError(null);
+        setFiles(prev => [...prev, ...imgs].slice(0, MAX_FILES));
+    };
+
+    const removeFile = (idx: number): void => {
+        setFiles(prev => prev.filter((_, i) => i !== idx));
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!name || !email || !message) return;
         setStatus('loading');
         try {
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('message', message);
+            formData.append('category', 'Other');
+            formData.append('website', website);
+            files.forEach(f => formData.append('files', f));
+
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/support/ticket`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, message, category: 'Other' }),
+                body: formData,
             });
             if (!res.ok) throw new Error('Failed');
             setStatus('success');
-            setName(''); setEmail(''); setMessage('');
+            setName(''); setEmail(''); setMessage(''); setFiles([]);
         } catch {
             setStatus('error');
             setTimeout(() => setStatus('idle'), 4000);
@@ -47,6 +98,12 @@ export default function ContactPage(): React.JSX.Element {
         boxSizing: 'border-box',
         transition: 'border-color 0.15s',
         fontFamily: 'inherit',
+    };
+
+    const toolbarBtnStyle: React.CSSProperties = {
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: '30px', height: '30px', borderRadius: '6px', border: `1px solid ${c.border}`,
+        background: '#fff', color: c.textSecondary, cursor: 'pointer',
     };
 
     return (
@@ -70,6 +127,18 @@ export default function ContactPage(): React.JSX.Element {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {/* Honeypot — visually hidden, off the tab order; bots fill every field they can see */}
+                        <input
+                            type="text"
+                            name="website"
+                            value={website}
+                            onChange={e => setWebsite(e.target.value)}
+                            tabIndex={-1}
+                            autoComplete="off"
+                            aria-hidden="true"
+                            style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}
+                        />
+
                         <div>
                             <label style={{ fontSize: '0.82rem', fontWeight: 600, color: c.textSecondary, display: 'block', marginBottom: '6px' }}>Your name</label>
                             <input type="text" required value={name} onChange={e => setName(e.target.value)}
@@ -88,12 +157,43 @@ export default function ContactPage(): React.JSX.Element {
                         </div>
                         <div>
                             <label style={{ fontSize: '0.82rem', fontWeight: 600, color: c.textSecondary, display: 'block', marginBottom: '6px' }}>Message</label>
-                            <textarea required value={message} onChange={e => setMessage(e.target.value)}
-                                placeholder="Tell us what's on your mind…" rows={5}
+
+                            {/* Formatting toolbar */}
+                            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                                <button type="button" title="Bold" style={toolbarBtnStyle} onClick={() => applyFormat('**')}><Bold size={14} /></button>
+                                <button type="button" title="Italic" style={toolbarBtnStyle} onClick={() => applyFormat('_')}><Italic size={14} /></button>
+                                <button type="button" title="Bullet list" style={toolbarBtnStyle} onClick={applyBullet}><List size={14} /></button>
+                                <button type="button" title="Attach images" style={toolbarBtnStyle} onClick={() => fileInputRef.current?.click()}><Paperclip size={14} /></button>
+                            </div>
+
+                            <textarea ref={textareaRef} required value={message} onChange={e => setMessage(e.target.value)}
+                                placeholder="Tell us what's on your mind… (use **bold**, _italic_, or - for bullet points)" rows={5}
                                 style={{ ...inputStyle, resize: 'vertical', minHeight: '120px' }}
                                 onFocus={e => (e.currentTarget.style.borderColor = c.accent)}
                                 onBlur={e => (e.currentTarget.style.borderColor = c.border)}
                             />
+
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                style={{ display: 'none' }}
+                                onChange={e => { addFiles(e.target.files); e.target.value = ''; }}
+                            />
+
+                            {fileError && <p style={{ color: c.error, fontSize: '0.8rem', marginTop: '6px' }}>{fileError}</p>}
+
+                            {files.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                                    {files.map((f, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 10px', background: c.gray50, border: `1px solid ${c.border}`, borderRadius: '8px', fontSize: '0.8rem', color: c.textSecondary }}>
+                                            <span style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                                            <button type="button" onClick={() => removeFile(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.textMuted, display: 'flex' }}><X size={12} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {status === 'error' && (
