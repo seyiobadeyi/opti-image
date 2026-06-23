@@ -794,6 +794,7 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                         </p>
                     </div>
                 </div>
+                <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
             </div>
         );
     }
