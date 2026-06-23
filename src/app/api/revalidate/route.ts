@@ -5,8 +5,11 @@ import { getStaggeredBatch, getAllPostSlugs } from '@/lib/markdown';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-    // Accept either: Vercel's automatic "Authorization: Bearer $CRON_SECRET" header
-    // (sent on cron-triggered requests), or the manual "?secret=" query param.
+    // Triggered daily by the Railway server's BlogRevalidationService via the
+    // "?secret=" query param (Vercel Cron isn't usable on this project's plan,
+    // so this isn't a Vercel Cron Job — it's a plain outbound HTTP call from
+    // the always-on NestJS server, same pattern as its other scheduled tasks).
+    // The Bearer-header path is left in case Vercel Cron becomes usable later.
     const authHeader = request.headers.get('authorization');
     const querySecret = request.nextUrl.searchParams.get('secret');
     const cronSecret = process.env.CRON_SECRET;
