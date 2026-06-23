@@ -383,6 +383,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     const [activityLoading, setActivityLoading] = useState(false);
     const [clientStatus, setClientStatus]     = useState<{ client_email: string | null; proofing_finalized_at: string | null } | null>(null);
     const [reopeningProofing, setReopeningProofing] = useState(false);
+    const [removingClient, setRemovingClient] = useState(false);
 
     useEffect(() => {
         apiClient.listGalleries().then(data => {
@@ -660,6 +661,17 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
             setClientStatus(prev => prev ? { ...prev, proofing_finalized_at: null } : prev);
         } finally {
             setReopeningProofing(false);
+        }
+    };
+
+    const handleRemoveClient = async (id: string): Promise<void> => {
+        if (!window.confirm('Remove this client? They will lose access and their selection will be cleared.')) return;
+        setRemovingClient(true);
+        try {
+            await apiClient.removeGalleryClient(id);
+            setClientStatus(null);
+        } finally {
+            setRemovingClient(false);
         }
     };
 
@@ -1346,16 +1358,25 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                                         : 'Can sign in to view, like, and finalize their photo selection'}
                                                 </p>
                                             </div>
-                                            {clientStatus.proofing_finalized_at && (
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                {clientStatus.proofing_finalized_at && (
+                                                    <button
+                                                        onClick={() => void handleReopenProofing(activeGallery.id)}
+                                                        disabled={reopeningProofing}
+                                                        className="btn btn-secondary"
+                                                        style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+                                                    >
+                                                        {reopeningProofing ? 'Reopening…' : 'Reopen for revisions'}
+                                                    </button>
+                                                )}
                                                 <button
-                                                    onClick={() => void handleReopenProofing(activeGallery.id)}
-                                                    disabled={reopeningProofing}
-                                                    className="btn btn-secondary"
-                                                    style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+                                                    onClick={() => void handleRemoveClient(activeGallery.id)}
+                                                    disabled={removingClient}
+                                                    style={{ padding: '8px 16px', fontSize: '0.82rem', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: '#ef4444', cursor: 'pointer' }}
                                                 >
-                                                    {reopeningProofing ? 'Reopening…' : 'Reopen for revisions'}
+                                                    {removingClient ? 'Removing…' : 'Remove client'}
                                                 </button>
-                                            )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
