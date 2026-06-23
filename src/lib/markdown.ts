@@ -8,7 +8,7 @@ import remarkRehype from 'remark-rehype';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
-import type { BlogPostMeta, BlogPostData, BlogHeading, BlogVariant } from '@/types';
+import type { BlogPostMeta, BlogPostData, BlogHeading, BlogVariant, BlogFaqItem } from '@/types';
 
 const postsDirectory: string = path.join(process.cwd(), '_posts');
 
@@ -21,6 +21,10 @@ interface PostFrontmatter {
     keyTakeaways?: string[];
     /** Optional rotating variants — excerpt + keyTakeaways rotate every 3 days */
     variants?: BlogVariant[];
+    /** Optional TL;DR shown above the first section — distinct from the meta-description excerpt */
+    summary?: string;
+    /** Optional FAQ section — rendered on-page and emitted as FAQPage JSON-LD */
+    faq?: BlogFaqItem[];
 }
 
 export function getPostCount(): number {
@@ -154,5 +158,7 @@ export async function getPostData(slug: string): Promise<BlogPostData> {
         // Serve the variant excerpt to the page so hero + meta rotate
         excerpt: activeVariant?.excerpt ?? data.excerpt,
         date: data.date,
+        summary: data.summary,
+        faq: data.faq,
     };
 }

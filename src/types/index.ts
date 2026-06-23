@@ -319,12 +319,22 @@ export interface BlogVariant {
   keyTakeaways: string[];
 }
 
+/** A single FAQ entry for FAQPage schema + on-page rendering. */
+export interface BlogFaqItem {
+  question: string;
+  answer: string;
+}
+
 /** Full blog post data including rendered HTML content. */
 export interface BlogPostData extends BlogPostMeta {
   contentHtml: string;
   headings: BlogHeading[];
   keyTakeaways: string[];
   activeVariant: BlogVariant | null;
+  /** Optional TL;DR shown above the first section — distinct from the meta-description excerpt. */
+  summary?: string;
+  /** Optional FAQ section — rendered on-page and emitted as FAQPage JSON-LD. */
+  faq?: BlogFaqItem[];
 }
 
 // ──────────────────────────────────────────────

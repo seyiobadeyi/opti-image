@@ -54,6 +54,32 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     };
 }
 
+function Summary({ text }: { text: string }) {
+    return (
+        <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderLeft: '4px solid #db5a42', borderRadius: '12px', padding: '18px 22px', marginBottom: '32px' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.78rem', color: '#db5a42', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>TL;DR</span>
+            <p style={{ margin: 0, fontSize: '0.95rem', color: '#374151', lineHeight: 1.6 }}>{text}</p>
+        </div>
+    );
+}
+
+function FaqSection({ items }: { items: import('@/types').BlogFaqItem[] }) {
+    if (items.length === 0) return null;
+    return (
+        <div style={{ marginTop: '56px', paddingTop: '40px', borderTop: '1px solid #e5e7eb' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111827', marginBottom: '20px', letterSpacing: '-0.01em' }}>Frequently asked questions</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {items.map((item, i) => (
+                    <div key={i} style={{ padding: '18px 22px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '14px' }}>
+                        <p style={{ margin: '0 0 8px 0', fontWeight: 700, fontSize: '0.95rem', color: '#111827' }}>{item.question}</p>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#374151', lineHeight: 1.6 }}>{item.answer}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function KeyTakeaways({ items }: { items: string[] }) {
     return (
         <div style={{ background: '#fdf3f1', border: '1px solid #f9c5b8', borderRadius: '16px', padding: '24px 28px', marginBottom: '40px' }}>
@@ -144,10 +170,14 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
         dateModified: postData.date,
         inLanguage: 'en-US',
         author: {
-            '@type': 'Organization',
-            name: 'Optimage',
-            '@id': `${SITE_URL}/#organization`,
-            url: SITE_URL,
+            '@type': 'Person',
+            name: 'Optimage Editorial Team',
+            url: `${SITE_URL}/blog`,
+            worksFor: {
+                '@type': 'Organization',
+                name: 'Dream Intrepid Ltd',
+                '@id': `${SITE_URL}/#organization`,
+            },
         },
         publisher: {
             '@type': 'Organization',
@@ -170,10 +200,26 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
         ],
     };
 
+    // FAQPage schema — only emitted when the post actually has a user-facing
+    // Q&A section, per AEO best practice (don't force-fit schema that doesn't
+    // match on-page content).
+    const faqSchema = postData.faq?.length ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: postData.faq.map(item => ({
+            '@type': 'Question',
+            name: item.question,
+            acceptedAnswer: { '@type': 'Answer', text: item.answer },
+        })),
+    } : null;
+
     return (
         <div style={{ background: '#fff', minHeight: '100vh', color: '#111827' }}>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+            {faqSchema && (
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+            )}
 
             {/* Hero band */}
             <div style={{ background: '#fdf3f1', borderBottom: '1px solid #f9c5b8', paddingTop: '96px' }}>
@@ -231,6 +277,9 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
             {/* Article body */}
             <article style={{ maxWidth: '800px', margin: '0 auto', padding: '52px 24px 80px' }}>
 
+                {/* TL;DR */}
+                {postData.summary && <Summary text={postData.summary} />}
+
                 {/* Key Takeaways */}
                 <KeyTakeaways items={postData.keyTakeaways} />
 
@@ -239,6 +288,9 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
 
                 {/* Post content */}
                 <div className="blog-content" dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
+
+                {/* FAQ */}
+                {postData.faq && <FaqSection items={postData.faq} />}
 
                 {/* Related posts */}
                 <RelatedPosts posts={relatedPosts} />

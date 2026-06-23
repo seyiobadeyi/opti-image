@@ -5,10 +5,18 @@ import { getStaggeredBatch, getAllPostSlugs } from '@/lib/markdown';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-    const secret = request.nextUrl.searchParams.get('secret');
-    const expected = process.env.REVALIDATE_SECRET;
+    // Accept either: Vercel's automatic "Authorization: Bearer $CRON_SECRET" header
+    // (sent on cron-triggered requests), or the manual "?secret=" query param.
+    const authHeader = request.headers.get('authorization');
+    const querySecret = request.nextUrl.searchParams.get('secret');
+    const cronSecret = process.env.CRON_SECRET;
+    const manualSecret = process.env.REVALIDATE_SECRET;
 
-    if (!expected || secret !== expected) {
+    const authorized =
+        (!!cronSecret && authHeader === `Bearer ${cronSecret}`) ||
+        (!!manualSecret && querySecret === manualSecret);
+
+    if (!authorized) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -33,12 +41,26 @@ export async function GET(request: NextRequest) {
         // Always keep the blog index fresh
         revalidatePath('/blog', 'layout');
 
-        // Ping sitemaps (fire-and-forget, failures are non-fatal)
+        // Ping Bing's sitemap endpoint (Google retired its sitemap ping in 2023 —
+        // no longer worth calling) and submit the revalidated URLs to IndexNow,
+        // which Bing/Yandex/Naver/Seznam use for near-instant re-crawl.
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintrepid.com';
         const sitemapUrl = encodeURIComponent(`${siteUrl}/sitemap.xml`);
+        const indexNowKey = process.env.INDEXNOW_KEY;
+        const postUrls = slugsToRevalidate.map(slug => `${siteUrl}/blog/${slug}`);
         void Promise.allSettled([
-            fetch(`https://www.google.com/ping?sitemap=${sitemapUrl}`),
             fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`),
+            indexNowKey
+                ? fetch('https://api.indexnow.org/indexnow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({
+                        host: siteUrl.replace(/^https?:\/\//, ''),
+                        key: indexNowKey,
+                        urlList: postUrls,
+                    }),
+                })
+                : Promise.resolve(),
         ]);
 
         const totalPosts = getAllPostSlugs().length;
