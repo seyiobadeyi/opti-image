@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
     title: 'Compress Images Online: Free Image Compressor | Optimage',
     description:
-        'Compress JPEG, PNG, WebP, AVIF, GIF and HEIC images online for free. Reduce file size by up to 90% with no visible quality loss. No signup needed to start. Drag and drop up to 50 images.',
+        'Compress JPEG, PNG, WebP, AVIF, GIF and HEIC online for free. Reduce file size by up to 90% with no visible quality loss. No signup needed.',
     keywords: [
         'image compressor', 'compress images online', 'compress jpeg online free',
         'compress png online free', 'compress webp', 'reduce image size',

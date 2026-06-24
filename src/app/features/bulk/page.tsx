@@ -23,13 +23,11 @@ import { c } from '@/lib/colors';
 export const metadata: Metadata = {
     title: 'Bulk Image Compression & Conversion — Process 50 Images at Once | Optimage',
     description:
-        'Upload up to 50 images at once and compress, convert or resize the entire batch in seconds. ' +
-        'Optimage bulk processing is 100% free — no account required, no file size tricks.',
+        'Upload up to 50 images at once and compress, convert or resize the entire batch in seconds. 100% free — no account required.',
     openGraph: {
         title: 'Bulk Image Compression & Conversion — Process 50 Images at Once | Optimage',
         description:
-            'Upload up to 50 images at once and compress, convert or resize the entire batch in seconds. ' +
-            'Optimage bulk processing is 100% free — no account required, no file size tricks.',
+            'Upload up to 50 images at once and compress, convert or resize the entire batch in seconds. 100% free — no account required.',
         url: 'https://optimage.dreamintrepid.com/features/bulk',
         siteName: 'Optimage',
         type: 'website',

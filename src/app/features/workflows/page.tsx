@@ -8,7 +8,7 @@ import { c } from '@/lib/colors';
 export const metadata: Metadata = {
   title: 'Professional Image Workflow Tools — Rename, Compress, Deliver | Optimage',
   description:
-    'Adjust quality per image, rename files before download and re-compress the same batch with new settings — no re-upload needed. A complete image workflow in your browser.',
+    'Adjust quality per image, rename files before download, and re-compress the same batch with new settings — no re-upload needed.',
 };
 
 const workflowFeatures = [

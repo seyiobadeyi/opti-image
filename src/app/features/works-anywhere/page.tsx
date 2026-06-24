@@ -8,7 +8,7 @@ import { c } from '@/lib/colors';
 export const metadata: Metadata = {
   title: 'Free Online Image Tools That Work in Any Browser | Optimage',
   description:
-    'Compress, resize and convert images directly in your browser — no software to install. Works on iPhone, Android, Windows and Mac with full privacy: images never leave your device.',
+    'Compress, resize and convert images directly in your browser — no software to install. Works on iPhone, Android, Windows and Mac.',
 };
 
 const faqItems = [

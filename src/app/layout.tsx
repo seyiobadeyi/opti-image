@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: '%s | Optimage',
   },
   description:
-    'Every image tool you need, right here. Compress, convert, resize, flip and deliver your images. Free, fast, and built for real work. No installs. Supports JPG, PNG, WebP, AVIF, GIF and HEIC.',
+    'Every image tool you need — compress, convert, resize and deliver. Free, fast, no installs. Supports JPG, PNG, WebP, AVIF, GIF and HEIC.',
   keywords: [
     'image optimizer', 'image compressor', 'bulk image converter', 'webp converter',
     'avif converter', 'png compressor', 'jpeg optimizer', 'image compression tool',

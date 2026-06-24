@@ -9,11 +9,11 @@ import { c } from '@/lib/colors';
 export const metadata: Metadata = {
     title: 'Lightning Fast Image Processing — Optimage',
     description:
-        'Optimage processes your images in under a second using Sharp, the industry-leading image processing library. Compress, resize, and convert up to 50 files at once — completely free, no account required.',
+        'Optimage processes images in under a second using Sharp. Compress, resize and convert up to 50 files at once — free, no account required.',
     openGraph: {
         title: 'Lightning Fast Image Processing — Optimage',
         description:
-            'Optimage processes your images in under a second using Sharp, the industry-leading image processing library. Compress, resize, and convert up to 50 files at once — completely free, no account required.',
+            'Optimage processes images in under a second using Sharp. Compress, resize and convert up to 50 files at once — free, no account required.',
         url: 'https://optimage.dreamintrepid.com/features/fast-processing',
     },
 };
@@ -27,7 +27,7 @@ const jsonLd = {
             url: 'https://optimage.dreamintrepid.com/features/fast-processing',
             name: 'Lightning Fast Image Processing — Optimage',
             description:
-                'Optimage processes your images in under a second using Sharp, the industry-leading image processing library. Compress, resize, and convert up to 50 files at once — completely free, no account required.',
+                'Optimage processes images in under a second using Sharp. Compress, resize and convert up to 50 files at once — free, no account required.',
             isPartOf: { '@id': 'https://optimage.dreamintrepid.com' },
         },
         {

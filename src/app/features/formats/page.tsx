@@ -8,7 +8,7 @@ import { c } from '@/lib/colors';
 export const metadata: Metadata = {
   title: 'Convert Images Between Any Format Free — WebP, AVIF, JPEG, PNG | Optimage',
   description:
-    'Convert JPEG, PNG, WebP, AVIF, GIF and TIFF images free online — no software needed. Switch between any format in seconds and cut file sizes by 35% or more versus JPEG.',
+    'Convert JPEG, PNG, WebP, AVIF, GIF and TIFF free online — no software needed. Cut file sizes by 35% or more versus JPEG.',
 };
 
 const formats = [

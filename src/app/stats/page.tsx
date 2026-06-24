@@ -25,7 +25,7 @@ interface PublicStats {
 export const metadata: Metadata = {
     title: 'Optimage Impact: Live Compression Statistics',
     description:
-        'See real-time compression statistics for Optimage. Discover how many files have been processed, how much data has been saved, and the environmental impact of optimizing images and videos at scale.',
+        'Real-time compression stats for Optimage: files processed, data saved, and the environmental impact of optimizing images and videos at scale.',
     alternates: {
         canonical: `${SITE_URL}/stats`,
     },
@@ -200,7 +200,7 @@ export default async function StatsPage(): Promise<React.JSX.Element> {
         url: pageUrl,
         name: 'Optimage Impact: Live Compression Statistics',
         description:
-            'Real-time aggregated statistics showing the total number of files processed, data saved, and environmental impact of the Optimage image and media optimisation platform.',
+            'Real-time aggregated stats: files processed, data saved, and environmental impact of the Optimage platform.',
         inLanguage: 'en-US',
         isPartOf: {
             '@type': 'WebSite',

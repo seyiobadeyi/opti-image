@@ -7,7 +7,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
     title: 'Free Client Photo Gallery Delivery for Photographers | Optimage',
-    description: 'Deliver private client photo galleries for free. PIN protection, client favourites, payment gate, photographer branding. No commissions, no per-gallery fees. Alternative to Pixieset.',
+    description: 'Deliver private client photo galleries for free — PIN protection, client favourites, payment gate, your branding. No commissions, no fees.',
     keywords: 'free client gallery software, photo delivery platform, photographer client gallery free, alternative to Pixieset, photo gallery no commission, event photo sharing, client proofing software',
     openGraph: {
         title: 'Free Client Photo Gallery Delivery | Optimage',
