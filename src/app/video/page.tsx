@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-    title: 'AI Video & Audio Transcription | Optimage',
+    title: 'AI Video & Audio Transcription',
     description: 'Transcribe and translate video and audio files with AI. Extract audio tracks, get accurate transcriptions in minutes — powered by OpenAI Whisper. Coming soon.',
     keywords: 'AI transcription, video transcription, audio to text, AI translation, OpenAI Whisper, extract audio from video, speech to text online',
     alternates: { canonical: 'https://optimage.dreamintrepid.com/video' },

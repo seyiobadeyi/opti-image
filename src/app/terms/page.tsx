@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Terms of Service | Optimage',
+    title: 'Terms of Service',
     description: 'Terms of Service for Optimage, a product of Dream Intrepid Ltd — covering image optimisation, gallery delivery, subscriptions and acceptable use.',
     alternates: { canonical: '/terms' },
 };

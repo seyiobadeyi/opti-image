@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { c } from '@/lib/colors';
 
 export const metadata: Metadata = {
-  title: 'Convert Images Between Any Format Free — WebP, AVIF, JPEG, PNG | Optimage',
+  title: 'Convert Images Free — JPEG, PNG, WebP, AVIF',
   description:
     'Convert JPEG, PNG, WebP, AVIF, GIF and TIFF free online — no software needed. Cut file sizes by 35% or more versus JPEG.',
   alternates: { canonical: '/features/formats' },

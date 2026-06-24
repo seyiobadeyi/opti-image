@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-    title: 'Increase Image Size - Coming Soon | Optimage',
+    title: 'Increase Image Size - Coming Soon',
     description: 'Export images at a larger canvas size or higher DPI for print-ready output. Coming soon to Optimage.',
     alternates: { canonical: '/increase-size' },
 };

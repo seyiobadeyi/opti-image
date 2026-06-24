@@ -21,7 +21,7 @@ import { c } from '@/lib/colors';
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
-    title: 'Free Client Photo Galleries for Photographers | Optimage',
+    title: 'Free Client Photo Galleries for Photographers',
     description:
         'Optimage gives photographers free private client galleries with PIN protection, custom expiry dates, and download controls — no Pixieset subscription needed.',
     keywords: [

@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-    title: 'Photo Editor - Coming Soon | Optimage',
+    title: 'Photo Editor - Coming Soon',
     description: 'Fine-tune brightness, contrast, saturation and apply filters to any image. Coming soon to Optimage.',
     alternates: { canonical: '/editor' },
 };

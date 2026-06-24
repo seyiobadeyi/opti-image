@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-    title: 'Remove Background - Coming Soon | Optimage',
+    title: 'Remove Background - Coming Soon',
     description: 'Instantly cut out backgrounds from product photos, portraits and logos. Coming soon to Optimage.',
     alternates: { canonical: '/remove-bg' },
 };

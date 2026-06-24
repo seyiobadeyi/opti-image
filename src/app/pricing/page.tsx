@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-    title: 'Free Image Tools | Optimage',
+    title: 'Free Image Tools',
     description: 'Optimage is 100% free. Compress, convert, resize, and enhance images with no limits, no paywalls, and no account required.',
     alternates: { canonical: '/pricing' },
     openGraph: {

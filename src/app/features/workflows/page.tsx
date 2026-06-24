@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { c } from '@/lib/colors';
 
 export const metadata: Metadata = {
-  title: 'Professional Image Workflow Tools — Rename, Compress, Deliver | Optimage',
+  title: 'Image Workflow Tools — Rename, Compress, Deliver',
   description:
     'Adjust quality per image, rename files before download, and re-compress the same batch with new settings — no re-upload needed.',
   alternates: { canonical: '/features/workflows' },

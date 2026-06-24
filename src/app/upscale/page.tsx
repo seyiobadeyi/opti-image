@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-    title: 'Upscale Image - Coming Soon | Optimage',
+    title: 'Upscale Image - Coming Soon',
     description: 'Increase image resolution without blurring. Great for low-res photos and icons. Coming soon to Optimage.',
     alternates: { canonical: '/upscale' },
 };

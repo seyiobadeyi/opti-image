@@ -4,7 +4,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintr
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
-    title: 'Compress Images Online: Free Image Compressor | Optimage',
+    title: 'Compress Images Online: Free Image Compressor',
     description:
         'Compress JPEG, PNG, WebP, AVIF, GIF and HEIC online for free. Reduce file size by up to 90% with no visible quality loss. No signup needed.',
     keywords: [
