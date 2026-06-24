@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { CheckCircle, Bold, Italic, List, Paperclip, X } from 'lucide-react';
+import { CheckCircle, Paperclip, X } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { c } from '@/lib/colors';
@@ -20,32 +20,7 @@ export default function ContactPage(): React.JSX.Element {
     const [files, setFiles] = useState<File[]>([]);
     const [fileError, setFileError] = useState<string | null>(null);
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // ── Formatting toolbar: insert markdown-style markers around the selection
-    const applyFormat = (before: string, after: string = before): void => {
-        const ta = textareaRef.current;
-        if (!ta) return;
-        const { selectionStart, selectionEnd, value } = ta;
-        const selected = value.slice(selectionStart, selectionEnd);
-        const next = value.slice(0, selectionStart) + before + selected + after + value.slice(selectionEnd);
-        setMessage(next);
-        requestAnimationFrame(() => {
-            ta.focus();
-            ta.setSelectionRange(selectionStart + before.length, selectionStart + before.length + selected.length);
-        });
-    };
-
-    const applyBullet = (): void => {
-        const ta = textareaRef.current;
-        if (!ta) return;
-        const { selectionStart, value } = ta;
-        const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
-        const next = value.slice(0, lineStart) + '- ' + value.slice(lineStart);
-        setMessage(next);
-        requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(selectionStart + 2, selectionStart + 2); });
-    };
 
     const addFiles = (newFiles: FileList | null): void => {
         if (!newFiles) return;
@@ -100,12 +75,6 @@ export default function ContactPage(): React.JSX.Element {
         fontFamily: 'inherit',
     };
 
-    const toolbarBtnStyle: React.CSSProperties = {
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        width: '30px', height: '30px', borderRadius: '6px', border: `1px solid ${c.border}`,
-        background: '#fff', color: c.textSecondary, cursor: 'pointer',
-    };
-
     return (
         <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: c.text }}>
             <Header />
@@ -156,19 +125,17 @@ export default function ContactPage(): React.JSX.Element {
                             />
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.82rem', fontWeight: 600, color: c.textSecondary, display: 'block', marginBottom: '6px' }}>Message</label>
-
-                            {/* Formatting toolbar */}
-                            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-                                <button type="button" title="Bold" style={toolbarBtnStyle} onClick={() => applyFormat('**')}><Bold size={14} /></button>
-                                <button type="button" title="Italic" style={toolbarBtnStyle} onClick={() => applyFormat('_')}><Italic size={14} /></button>
-                                <button type="button" title="Bullet list" style={toolbarBtnStyle} onClick={applyBullet}><List size={14} /></button>
-                                <button type="button" title="Attach images" style={toolbarBtnStyle} onClick={() => fileInputRef.current?.click()}><Paperclip size={14} /></button>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: c.textSecondary }}>Message</label>
+                                <button type="button" onClick={() => fileInputRef.current?.click()}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: c.textMuted, fontSize: '0.8rem', cursor: 'pointer', padding: '2px' }}>
+                                    <Paperclip size={13} /> Attach images
+                                </button>
                             </div>
 
-                            <textarea ref={textareaRef} required value={message} onChange={e => setMessage(e.target.value)}
-                                placeholder="Tell us what's on your mind… (use **bold**, _italic_, or - for bullet points)" rows={5}
-                                style={{ ...inputStyle, resize: 'vertical', minHeight: '120px' }}
+                            <textarea required value={message} onChange={e => setMessage(e.target.value)}
+                                placeholder="Tell us what's on your mind…" rows={5}
+                                style={{ ...inputStyle, resize: 'none', minHeight: '120px' }}
                                 onFocus={e => (e.currentTarget.style.borderColor = c.accent)}
                                 onBlur={e => (e.currentTarget.style.borderColor = c.border)}
                             />

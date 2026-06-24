@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bold, Italic, List, Paperclip, X } from 'lucide-react';
+import { Paperclip, X } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { c } from '@/lib/colors';
 
@@ -50,7 +50,6 @@ export default function SupportWidget() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
-  const messageRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -82,30 +81,6 @@ export default function SupportWidget() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  // ── Formatting toolbar: insert markdown-style markers around the selection
-  const applyFormat = (marker: string) => {
-    const ta = messageRef.current;
-    if (!ta) return;
-    const { selectionStart, selectionEnd, value } = ta;
-    const selected = value.slice(selectionStart, selectionEnd);
-    const next = value.slice(0, selectionStart) + marker + selected + marker + value.slice(selectionEnd);
-    setForm(prev => ({ ...prev, message: next }));
-    requestAnimationFrame(() => {
-      ta.focus();
-      ta.setSelectionRange(selectionStart + marker.length, selectionStart + marker.length + selected.length);
-    });
-  };
-
-  const applyBullet = () => {
-    const ta = messageRef.current;
-    if (!ta) return;
-    const { selectionStart, value } = ta;
-    const lineStart = value.lastIndexOf('\n', selectionStart - 1) + 1;
-    const next = value.slice(0, lineStart) + '- ' + value.slice(lineStart);
-    setForm(prev => ({ ...prev, message: next }));
-    requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(selectionStart + 2, selectionStart + 2); });
   };
 
   const addFiles = (newFiles: FileList | null) => {
@@ -375,33 +350,23 @@ export default function SupportWidget() {
 
                   {/* Message */}
                   <div style={{ marginBottom: 6 }}>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: 6 }} htmlFor="sw-message">
-                      Message
-                    </label>
-
-                    {/* Formatting toolbar */}
-                    <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-                      {[
-                        { icon: Bold, title: 'Bold', onClick: () => applyFormat('**') },
-                        { icon: Italic, title: 'Italic', onClick: () => applyFormat('_') },
-                        { icon: List, title: 'Bullet list', onClick: applyBullet },
-                        { icon: Paperclip, title: 'Attach images', onClick: () => fileInputRef.current?.click() },
-                      ].map(({ icon: Icon, title, onClick }) => (
-                        <button key={title} type="button" title={title} onClick={onClick}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 6, border: `1px solid ${c.border}`, background: '#fff', color: c.textSecondary, cursor: 'pointer' }}>
-                          <Icon size={13} />
-                        </button>
-                      ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary }} htmlFor="sw-message">
+                        Message
+                      </label>
+                      <button type="button" onClick={() => fileInputRef.current?.click()}
+                        style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', color: c.textMuted, fontSize: '0.78rem', cursor: 'pointer', padding: 2 }}>
+                        <Paperclip size={12} /> Attach images
+                      </button>
                     </div>
 
                     <textarea
-                      ref={messageRef}
                       id="sw-message" name="message"
                       value={form.message} onChange={handleChange}
                       onFocus={() => setFocusedField('message')} onBlur={() => setFocusedField(null)}
                       required rows={5} minLength={10} maxLength={2000}
-                      placeholder="Describe your issue or request in detail... (use **bold**, _italic_, or - for bullets)"
-                      style={{ ...getInput('message'), resize: 'vertical', minHeight: 100 }}
+                      placeholder="Describe your issue or request in detail..."
+                      style={{ ...getInput('message'), resize: 'none', minHeight: 100 }}
                     />
 
                     <input
