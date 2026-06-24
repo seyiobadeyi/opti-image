@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
             card: 'summary_large_image',
             title: postData.title,
             description: postData.excerpt,
-            images: [`${SITE_URL}/image-2.png`],
+            images: [`${SITE_URL}/og-blog.jpg`],
             creator: '@dreamintrepid',
         },
     };
