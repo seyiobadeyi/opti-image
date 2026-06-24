@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { notFound } from 'next/navigation';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
@@ -13,6 +14,12 @@ import type { BlogPostMeta, BlogPostData, BlogHeading, BlogVariant, BlogFaqItem 
 const postsDirectory: string = path.join(process.cwd(), '_posts');
 
 export const POSTS_PER_PAGE = 9;
+
+/** A post's `date` doubles as its scheduled publish time — hide it everywhere until that time passes. */
+function isPublished(dateStr: string | undefined): boolean {
+    if (!dateStr) return true;
+    return new Date(dateStr).getTime() <= Date.now();
+}
 
 interface PostFrontmatter {
     title: string;
@@ -28,8 +35,7 @@ interface PostFrontmatter {
 }
 
 export function getPostCount(): number {
-    if (!fs.existsSync(postsDirectory)) return 0;
-    return fs.readdirSync(postsDirectory).filter(f => f.endsWith('.md')).length;
+    return getSortedPostsData().length;
 }
 
 export function getTotalPages(): number {
@@ -45,23 +51,32 @@ export function getPostsForPage(page: number): BlogPostMeta[] {
 export function getSortedPostsData(): BlogPostMeta[] {
     if (!fs.existsSync(postsDirectory)) return [];
     const fileNames = fs.readdirSync(postsDirectory);
-    const allPostsData: BlogPostMeta[] = fileNames.map((fileName) => {
-        const slug = fileName.replace(/\.md$/, '');
-        const fullPath = path.join(postsDirectory, fileName);
-        const fileContents = fs.readFileSync(fullPath, 'utf8');
-        const matterResult = matter(fileContents);
-        const data = matterResult.data as PostFrontmatter;
-        const fm = matterResult.data as PostFrontmatter & { description?: string };
-        return { slug, title: data.title, date: data.date, excerpt: fm.excerpt ?? fm.description ?? '' };
-    });
+    const allPostsData: BlogPostMeta[] = fileNames
+        .map((fileName) => {
+            const slug = fileName.replace(/\.md$/, '');
+            const fullPath = path.join(postsDirectory, fileName);
+            const fileContents = fs.readFileSync(fullPath, 'utf8');
+            const matterResult = matter(fileContents);
+            const data = matterResult.data as PostFrontmatter;
+            const fm = matterResult.data as PostFrontmatter & { description?: string };
+            return { slug, title: data.title, date: data.date, excerpt: fm.excerpt ?? fm.description ?? '' };
+        })
+        .filter((post) => isPublished(post.date));
     return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
+/** Used by generateStaticParams and the staggered revalidation batcher — must exclude not-yet-live posts so a future post's URL can't be reached just because its file is already deployed. */
 export function getAllPostSlugs(): Array<{ params: { slug: string } }> {
     if (!fs.existsSync(postsDirectory)) return [];
-    return fs.readdirSync(postsDirectory).map((fileName) => ({
-        params: { slug: fileName.replace(/\.md$/, '') },
-    }));
+    return fs.readdirSync(postsDirectory)
+        .filter((fileName) => {
+            const fullPath = path.join(postsDirectory, fileName);
+            const { data } = matter(fs.readFileSync(fullPath, 'utf8'));
+            return isPublished((data as PostFrontmatter).date);
+        })
+        .map((fileName) => ({
+            params: { slug: fileName.replace(/\.md$/, '') },
+        }));
 }
 
 /** Extract h2/h3 headings from rendered HTML for the TOC. */
@@ -125,10 +140,15 @@ export function getRelatedPosts(currentSlug: string, count = 3): BlogPostMeta[] 
 
 export async function getPostData(slug: string): Promise<BlogPostData> {
     const fullPath = path.join(postsDirectory, `${slug}.md`);
+    if (!fs.existsSync(fullPath)) notFound();
     const fileContents = fs.readFileSync(fullPath, 'utf8');
 
     const matterResult = matter(fileContents);
     const data = matterResult.data as PostFrontmatter;
+
+    // Scheduled posts: the file can already be deployed ahead of its slot, but the
+    // page itself must stay unreachable until `date` actually arrives.
+    if (!isPublished(data.date)) notFound();
 
     const processedContent = await unified()
         .use(remarkParse)
