@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
     title: 'Terms of Service | Optimage',
     description: 'Terms of Service for Optimage, a product of Dream Intrepid Ltd — covering image optimisation, gallery delivery, subscriptions and acceptable use.',
+    alternates: { canonical: '/terms' },
 };
 
 export default function TermsPage(): React.JSX.Element {

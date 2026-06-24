@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
     title: 'Upscale Image - Coming Soon | Optimage',
     description: 'Increase image resolution without blurring. Great for low-res photos and icons. Coming soon to Optimage.',
+    alternates: { canonical: '/upscale' },
 };
 
 const clr = { accent: '#db5a42', accentLt: '#fdf3f1', g200: '#e5e7eb', g400: '#9ca3af', g700: '#374151', g900: '#111827' };

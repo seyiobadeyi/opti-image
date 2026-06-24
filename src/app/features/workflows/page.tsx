@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Professional Image Workflow Tools — Rename, Compress, Deliver | Optimage',
   description:
     'Adjust quality per image, rename files before download, and re-compress the same batch with new settings — no re-upload needed.',
+  alternates: { canonical: '/features/workflows' },
 };
 
 const workflowFeatures = [

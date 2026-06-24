@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
     title: 'Increase Image Size - Coming Soon | Optimage',
     description: 'Export images at a larger canvas size or higher DPI for print-ready output. Coming soon to Optimage.',
+    alternates: { canonical: '/increase-size' },
 };
 
 const clr = { accent: '#db5a42', accentLt: '#fdf3f1', g200: '#e5e7eb', g400: '#9ca3af', g700: '#374151', g900: '#111827' };

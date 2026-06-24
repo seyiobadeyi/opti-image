@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
     title: 'How It Works | Optimage',
     description: 'Learn how Optimage compresses, converts and resizes images. Fast, private and free — no account needed to start.',
+    alternates: { canonical: '/how-it-works' },
 };
 
 const steps = [

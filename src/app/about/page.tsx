@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
     title: 'About Optimage | Dream Intrepid Ltd',
     description: 'Optimage is a free image optimization tool built by Dream Intrepid Ltd. Compress, convert, resize and enhance images — right in your browser.',
+    alternates: { canonical: '/about' },
 };
 
 export default function AboutPage(): React.JSX.Element {

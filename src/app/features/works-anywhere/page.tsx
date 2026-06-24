@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Free Online Image Tools That Work in Any Browser | Optimage',
   description:
     'Compress, resize and convert images directly in your browser — no software to install. Works on iPhone, Android, Windows and Mac.',
+  alternates: { canonical: '/features/works-anywhere' },
 };
 
 const faqItems = [

@@ -11,11 +11,6 @@ import CookieConsent from '@/components/CookieConsent';
 import type { Metadata } from 'next';
 import type { CampaignSlug, CampaignData } from '@/types';
 
-export const metadata: Metadata = {
-    title: 'Optimage AI | Specialized Optimization',
-    description: 'AI-powered media optimization for developers, marketers, and creators.',
-};
-
 const CAMPAIGNS: Record<CampaignSlug, CampaignData> = {
     'bwai': {
         headline: 'AI Image Optimization for <span style="background: linear-gradient(135deg, #db5a42 0%, #c44d32 100%); -webkit-background-clip: text; color: transparent;">Faster Websites.</span><br />Try Optimage live at Build With AI.',
@@ -49,6 +44,26 @@ interface CampaignPageProps {
     // route [handle]/[slug]. At this (single-segment) level it represents a
     // campaign keyword, e.g. /seo or /wordpress.
     params: Promise<{ handle: string }>;
+}
+
+// Was a static `metadata` export with one generic title/description for every
+// campaign (and, worse, no canonical override — silently inheriting the root
+// layout's canonical:'/', telling search engines this page is a duplicate of
+// the homepage). Each campaign already has its own title/subtext; use them.
+export async function generateMetadata({ params }: CampaignPageProps): Promise<Metadata> {
+    const { handle } = await params;
+    const campaignData = CAMPAIGNS[handle.toLowerCase() as CampaignSlug];
+    if (!campaignData) {
+        return { title: 'Optimage AI | Specialized Optimization' };
+    }
+    // Each campaign title already ends in "| Optimage" — use `absolute` to
+    // bypass the root layout's title template, which would otherwise append
+    // "| Optimage" a second time.
+    return {
+        title: { absolute: campaignData.title },
+        description: campaignData.subtext,
+        alternates: { canonical: `/${handle.toLowerCase()}` },
+    };
 }
 
 export default async function CampaignPage({ params }: CampaignPageProps): Promise<React.JSX.Element> {

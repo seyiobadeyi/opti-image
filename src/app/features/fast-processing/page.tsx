@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     title: 'Lightning Fast Image Processing — Optimage',
     description:
         'Optimage processes images in under a second using Sharp. Compress, resize and convert up to 50 files at once — free, no account required.',
+    alternates: { canonical: '/features/fast-processing' },
     openGraph: {
         title: 'Lightning Fast Image Processing — Optimage',
         description:

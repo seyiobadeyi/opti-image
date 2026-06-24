@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Convert Images Between Any Format Free — WebP, AVIF, JPEG, PNG | Optimage',
   description:
     'Convert JPEG, PNG, WebP, AVIF, GIF and TIFF free online — no software needed. Cut file sizes by 35% or more versus JPEG.',
+  alternates: { canonical: '/features/formats' },
 };
 
 const formats = [

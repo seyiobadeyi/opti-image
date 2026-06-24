@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
     title: 'Remove Background - Coming Soon | Optimage',
     description: 'Instantly cut out backgrounds from product photos, portraits and logos. Coming soon to Optimage.',
+    alternates: { canonical: '/remove-bg' },
 };
 
 const clr = { accent: '#db5a42', accentLt: '#fdf3f1', g200: '#e5e7eb', g400: '#9ca3af', g700: '#374151', g900: '#111827' };

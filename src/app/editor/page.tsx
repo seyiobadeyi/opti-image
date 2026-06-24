@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
     title: 'Photo Editor - Coming Soon | Optimage',
     description: 'Fine-tune brightness, contrast, saturation and apply filters to any image. Coming soon to Optimage.',
+    alternates: { canonical: '/editor' },
 };
 
 const clr = { accent: '#db5a42', accentLt: '#fdf3f1', g200: '#e5e7eb', g400: '#9ca3af', g700: '#374151', g900: '#111827' };
