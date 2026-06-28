@@ -1715,7 +1715,9 @@ export default function GalleryViewer({ slug, ownerToken }: GalleryViewerProps):
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                const shareUrl = `${window.location.origin}/g/${slug}`;
+                                const shareUrl = gallery?.owner_username
+                                    ? `${window.location.origin}/${gallery.owner_username}/${slug}`
+                                    : window.location.href;
                                 if (navigator.share) {
                                     void navigator.share({
                                         title: gallery?.title ?? 'Gallery',

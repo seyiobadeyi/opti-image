@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import GalleryViewer from '@/app/g/[slug]/GalleryViewer';
+import GalleryViewer from './GalleryViewer';
 import type { GalleryPublicMeta } from '@/types';
 
 interface UserGalleryPageProps {

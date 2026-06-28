@@ -81,15 +81,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // ── Public gallery routes — fetched from the API ──
     const galleries = await fetchPublicGalleries();
 
-    // Emit the canonical personalized URL (/:username/:slug) when the owner has a
-    // username, matching the canonical set on the gallery pages. Fall back to the
-    // legacy /g/:slug only for galleries whose owner has no username yet.
-    const galleryRoutes: MetadataRoute.Sitemap = galleries.map((g) => ({
-        url: g.owner_username ? `${baseUrl}/${g.owner_username}/${g.slug}` : `${baseUrl}/g/${g.slug}`,
-        lastModified: new Date(g.updated_at),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-    }));
+    // Emit only the canonical personalized URL (/:username/:slug). The legacy
+    // /g/:slug route has been removed, so a gallery whose owner somehow lacks a
+    // username has no public URL and is skipped rather than emitted as a 404.
+    const galleryRoutes: MetadataRoute.Sitemap = galleries
+        .filter((g) => g.owner_username)
+        .map((g) => ({
+            url: `${baseUrl}/${g.owner_username}/${g.slug}`,
+            lastModified: new Date(g.updated_at),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+        }));
 
     // NOTE: profile routes (/p/:username) were intentionally removed — there is no
     // /p/[username] page in the app, so listing them produced 404s in the sitemap.

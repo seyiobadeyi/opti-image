@@ -601,21 +601,22 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         setFocalPicking(false);
     };
 
-    // ── copy gallery link (use /:username/:slug if owner has username)
+    // ── gallery link helper (returns the canonical /:username/:slug URL).
+    // Every account has a username (auto-assigned + backfilled); the legacy /g/
+    // route has been removed, so username is the only address form. The root
+    // fallback only covers the brief window before the profile has loaded.
+    const galleryUrl = (slug: string): string => {
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        return ownerUsername ? `${origin}/${ownerUsername}/${slug}` : origin;
+    };
+
+    // ── copy gallery link to clipboard
     const copyLink = (slug: string): void => {
-        const url = ownerUsername
-            ? `${window.location.origin}/${ownerUsername}/${slug}`
-            : `${window.location.origin}/g/${slug}`;
-        navigator.clipboard.writeText(url).then(() => {
+        navigator.clipboard.writeText(galleryUrl(slug)).then(() => {
             setCopiedSlug(slug);
             setTimeout(() => setCopiedSlug(null), 2000);
         }).catch(() => null);
     };
-
-    // ── gallery link helper (returns the shareable URL string)
-    const galleryUrl = (slug: string): string => ownerUsername
-        ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${ownerUsername}/${slug}`
-        : `${typeof window !== 'undefined' ? window.location.origin : ''}/g/${slug}`;
 
     // ── send gallery to client via email
     const handleSendToClient = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -1241,7 +1242,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                     </p>
                                     <div style={{ display: 'flex', alignItems: 'center', background: c.bgMuted, border: `1px solid ${slugCheck === 'taken' ? '#ef4444' : slugCheck === 'available' ? '#22c55e' : c.border}`, borderRadius: '10px', overflow: 'hidden', transition: 'border-color 0.15s' }}>
                                         <span style={{ padding: '10px 10px 10px 14px', fontSize: '0.82rem', color: c.textMuted, whiteSpace: 'nowrap', borderRight: `1px solid ${c.border}`, background: c.bgMuted }}>
-                                            {ownerUsername ? `/${ownerUsername}/` : '/g/'}
+                                            {ownerUsername ? `/${ownerUsername}/` : '/…/'}
                                         </span>
                                         <input
                                             type="text"
