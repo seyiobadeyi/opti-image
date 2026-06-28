@@ -47,7 +47,7 @@ function positionStyle(pos: WatermarkPosition): React.CSSProperties {
     return base;
 }
 
-export default function WatermarkPage(): React.JSX.Element {
+export function WatermarkTool({ embedded = false }: { embedded?: boolean }): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [activeIdx, setActiveIdx] = useState(0);
 
@@ -311,18 +311,22 @@ export default function WatermarkPage(): React.JSX.Element {
     );
 
     return (
-        <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: c.text }}>
-            <Header />
+        <div style={embedded
+            ? { background: 'transparent', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: c.text }
+            : { minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: c.text }}>
+            {!embedded && <Header />}
 
             {/* Hero */}
-            <div style={{ textAlign: 'center', padding: '40px 24px 24px' }}>
-                <h1 style={{ fontSize: 'clamp(1.7rem, 4vw, 2.4rem)', fontWeight: 800, color: c.text, marginBottom: '8px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                    Add a watermark
-                </h1>
-                <p style={{ color: c.textMuted, fontSize: '0.95rem', maxWidth: '460px', margin: '0 auto', lineHeight: 1.6 }}>
-                    Stamp your name, logo text, or copyright notice across your photos. Batch watermark up to 50 images at once.
-                </p>
-            </div>
+            {!embedded && (
+                <div style={{ textAlign: 'center', padding: '40px 24px 24px' }}>
+                    <h1 style={{ fontSize: 'clamp(1.7rem, 4vw, 2.4rem)', fontWeight: 800, color: c.text, marginBottom: '8px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                        Add a watermark
+                    </h1>
+                    <p style={{ color: c.textMuted, fontSize: '0.95rem', maxWidth: '460px', margin: '0 auto', lineHeight: 1.6 }}>
+                        Stamp your name, logo text, or copyright notice across your photos. Batch watermark up to 50 images at once.
+                    </p>
+                </div>
+            )}
 
             {/* ── Drop zone ── */}
             {!hasFiles && !results && (
@@ -575,7 +579,11 @@ export default function WatermarkPage(): React.JSX.Element {
                 }
             `}</style>
 
-            <Footer />
+            {!embedded && <Footer />}
         </div>
     );
+}
+
+export default function WatermarkPage(): React.JSX.Element {
+    return <WatermarkTool />;
 }

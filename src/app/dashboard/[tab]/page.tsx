@@ -6,7 +6,7 @@ import type { UserProfile, ProcessingHistoryItem, DashboardTab } from '@/types';
 // Never statically pre-generate — this page reads auth cookies on every request
 export const dynamic = 'force-dynamic';
 
-const VALID_TABS: DashboardTab[] = ['optimize', 'video', 'history', 'galleries', 'referrals', 'settings'];
+const VALID_TABS: DashboardTab[] = ['optimize', 'tools', 'video', 'history', 'galleries', 'referrals', 'settings'];
 
 interface Props {
     params: Promise<{ tab: string }>;

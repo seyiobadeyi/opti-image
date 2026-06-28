@@ -23,7 +23,7 @@ export type AuthStep = 'email' | 'otp' | 'onboarding';
 export type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
 /** Dashboard navigation tab keys. */
-export type DashboardTab = 'optimize' | 'video' | 'history' | 'referrals' | 'galleries' | 'settings';
+export type DashboardTab = 'optimize' | 'tools' | 'video' | 'history' | 'referrals' | 'galleries' | 'settings';
 
 /** Values persisted to localStorage for cookie consent. */
 export type CookieConsentValue = 'accepted' | 'declined';

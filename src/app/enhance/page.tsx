@@ -64,7 +64,7 @@ const S: Record<string, React.CSSProperties> = {
     resetBtn:   { display: 'block', width: '100%', textAlign: 'center' as const, marginTop: '20px', color: clr.g400, fontSize: '0.88rem', cursor: 'pointer', background: 'none', border: 'none', padding: '8px', textDecoration: 'underline', textUnderlineOffset: '2px' },
 };
 
-export default function EnhancePage(): React.JSX.Element {
+export function EnhanceTool({ embedded = false }: { embedded?: boolean }): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [autoEnhance, setAutoEnhance] = useState(true);
     const [exposure, setExposure] = useState(1.0);
@@ -158,13 +158,15 @@ export default function EnhancePage(): React.JSX.Element {
     const fmtSlider = (v: number) => `${v >= 1 ? '+' : ''}${((v - 1) * 100).toFixed(0)}%`;
 
     return (
-        <div style={S.page}>
-            <Header />
+        <div style={embedded ? { ...S.page, minHeight: 'auto', background: 'transparent' } : S.page}>
+            {!embedded && <Header />}
 
-            <div style={S.hero}>
-                <h1 style={S.h1}>Auto enhance photos</h1>
-                <p style={S.sub}>Automatically correct colours, contrast and brightness so your photos look their best. Or fine-tune manually.</p>
-            </div>
+            {!embedded && (
+                <div style={S.hero}>
+                    <h1 style={S.h1}>Auto enhance photos</h1>
+                    <p style={S.sub}>Automatically correct colours, contrast and brightness so your photos look their best. Or fine-tune manually.</p>
+                </div>
+            )}
 
             <div style={S.tool}>
                 {showDrop && (
@@ -313,7 +315,11 @@ export default function EnhancePage(): React.JSX.Element {
                 )}
             </div>
 
-            <Footer />
+            {!embedded && <Footer />}
         </div>
     );
+}
+
+export default function EnhancePage(): React.JSX.Element {
+    return <EnhanceTool />;
 }

@@ -213,7 +213,7 @@ function CropOverlay({ box, onChange, ratio, imgW, imgH }: {
     );
 }
 
-export default function CropPage(): React.JSX.Element {
+export function CropTool({ embedded = false }: { embedded?: boolean }): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [imageDims, setImageDims] = useState<Record<number, ImageDims>>({});
     const [cropBoxes, setCropBoxes] = useState<Record<number, Box>>({});
@@ -463,18 +463,22 @@ export default function CropPage(): React.JSX.Element {
     );
 
     return (
-        <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: c.text }}>
-            <Header />
+        <div style={embedded
+            ? { background: 'transparent', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: c.text }
+            : { minHeight: '100vh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: c.text }}>
+            {!embedded && <Header />}
 
             {/* Hero */}
-            <div style={{ textAlign: 'center', padding: '40px 24px 24px' }}>
-                <h1 style={{ fontSize: 'clamp(1.7rem, 4vw, 2.4rem)', fontWeight: 800, color: c.text, marginBottom: '8px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                    Crop images
-                </h1>
-                <p style={{ color: c.textMuted, fontSize: '0.95rem', maxWidth: '460px', margin: '0 auto', lineHeight: 1.6 }}>
-                    Drag to select the area you want to keep, or pick an aspect ratio. Batch crop up to 50 images at once.
-                </p>
-            </div>
+            {!embedded && (
+                <div style={{ textAlign: 'center', padding: '40px 24px 24px' }}>
+                    <h1 style={{ fontSize: 'clamp(1.7rem, 4vw, 2.4rem)', fontWeight: 800, color: c.text, marginBottom: '8px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                        Crop images
+                    </h1>
+                    <p style={{ color: c.textMuted, fontSize: '0.95rem', maxWidth: '460px', margin: '0 auto', lineHeight: 1.6 }}>
+                        Drag to select the area you want to keep, or pick an aspect ratio. Batch crop up to 50 images at once.
+                    </p>
+                </div>
+            )}
 
             {/* ── Drop zone ── */}
             {!hasFiles && !results && (
@@ -778,7 +782,11 @@ export default function CropPage(): React.JSX.Element {
                 }
             `}</style>
 
-            <Footer />
+            {!embedded && <Footer />}
         </div>
     );
+}
+
+export default function CropPage(): React.JSX.Element {
+    return <CropTool />;
 }

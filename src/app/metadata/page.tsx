@@ -67,7 +67,7 @@ const S: Record<string, React.CSSProperties> = {
     resetBtn:   { display: 'block', width: '100%', textAlign: 'center' as const, marginTop: '20px', color: clr.g400, fontSize: '0.88rem', cursor: 'pointer', background: 'none', border: 'none', padding: '8px', textDecoration: 'underline', textUnderlineOffset: '2px' },
 };
 
-export default function MetadataPage(): React.JSX.Element {
+export function MetadataTool({ embedded = false }: { embedded?: boolean }): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [format, setFormat] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -155,13 +155,15 @@ export default function MetadataPage(): React.JSX.Element {
     const showDrop = entries.length === 0 && !results;
 
     return (
-        <div style={S.page}>
-            <Header />
+        <div style={embedded ? { ...S.page, minHeight: 'auto', background: 'transparent' } : S.page}>
+            {!embedded && <Header />}
 
-            <div style={S.hero}>
-                <h1 style={S.h1}>Remove image metadata</h1>
-                <p style={S.sub}>Strip hidden camera data like GPS location, device model and timestamps before you share your photos.</p>
-            </div>
+            {!embedded && (
+                <div style={S.hero}>
+                    <h1 style={S.h1}>Remove image metadata</h1>
+                    <p style={S.sub}>Strip hidden camera data like GPS location, device model and timestamps before you share your photos.</p>
+                </div>
+            )}
 
             <div style={S.infoBox}>
                 <div style={S.infoCard}>
@@ -280,7 +282,11 @@ export default function MetadataPage(): React.JSX.Element {
                 )}
             </div>
 
-            <Footer />
+            {!embedded && <Footer />}
         </div>
     );
+}
+
+export default function MetadataPage(): React.JSX.Element {
+    return <MetadataTool />;
 }

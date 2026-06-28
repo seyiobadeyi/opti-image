@@ -162,7 +162,7 @@ const DropboxIcon = (): React.JSX.Element => (
 // sweet spot for JPEG/WebP; it also drives the PNG palette size server-side.
 const FIXED_QUALITY = 82;
 
-export default function CompressPage(): React.JSX.Element {
+export function CompressTool({ embedded = false }: { embedded?: boolean }): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [format, setFormat] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -411,18 +411,20 @@ export default function CompressPage(): React.JSX.Element {
 
     // ─── Render ───────────────────────────────────────────────────────────────
     return (
-        <div style={S.page}>
+        <div style={embedded ? { ...S.page, minHeight: 'auto', background: 'transparent' } : S.page}>
 
-            <Header />
+            {!embedded && <Header />}
 
             {/* ── Hero ────────────────────────────────────────────────────── */}
-            <div style={S.hero}>
-                <h1 style={S.h1}>Compress your images</h1>
-                <p style={S.subtext}>
-                    Make JPG, PNG, WebP and more up to 90% smaller — with no visible difference.<br />
-                    Free for everyone. No account needed.
-                </p>
-            </div>
+            {!embedded && (
+                <div style={S.hero}>
+                    <h1 style={S.h1}>Compress your images</h1>
+                    <p style={S.subtext}>
+                        Make JPG, PNG, WebP and more up to 90% smaller — with no visible difference.<br />
+                        Free for everyone. No account needed.
+                    </p>
+                </div>
+            )}
 
             {/* ── Tool ────────────────────────────────────────────────────── */}
             <div style={S.tool}>
@@ -663,20 +665,22 @@ export default function CompressPage(): React.JSX.Element {
                             })}
                         </div>
 
-                        {/* Sign-up nudge */}
-                        <div style={{ marginTop: '16px', padding: '14px 16px', background: '#fdf3f1', border: '1px solid #fce4dc', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                            <div>
-                                <div style={{ fontSize: '0.88rem', fontWeight: 600, color: clr.gray900 }}>Save your compression history</div>
-                                <div style={{ fontSize: '0.78rem', color: clr.gray400, marginTop: '2px' }}>Free account — track every file you&apos;ve optimised.</div>
+                        {/* Sign-up nudge — hidden in the dashboard (already signed in) */}
+                        {!embedded && (
+                            <div style={{ marginTop: '16px', padding: '14px 16px', background: '#fdf3f1', border: '1px solid #fce4dc', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                                <div>
+                                    <div style={{ fontSize: '0.88rem', fontWeight: 600, color: clr.gray900 }}>Save your compression history</div>
+                                    <div style={{ fontSize: '0.78rem', color: clr.gray400, marginTop: '2px' }}>Free account — track every file you&apos;ve optimised.</div>
+                                </div>
+                                <button type="button"
+                                    onClick={() => window.dispatchEvent(new Event('open-auth-modal'))}
+                                    style={{ background: clr.blue, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s' }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = clr.blueDark)}
+                                    onMouseLeave={e => (e.currentTarget.style.background = clr.blue)}>
+                                    Sign up free
+                                </button>
                             </div>
-                            <button type="button"
-                                onClick={() => window.dispatchEvent(new Event('open-auth-modal'))}
-                                style={{ background: clr.blue, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.15s' }}
-                                onMouseEnter={e => (e.currentTarget.style.background = clr.blueDark)}
-                                onMouseLeave={e => (e.currentTarget.style.background = clr.blue)}>
-                                Sign up free
-                            </button>
-                        </div>
+                        )}
 
                         {/* Compress more / reset */}
                         <button type="button" style={S.resetBtn} onClick={reset}>
@@ -691,7 +695,11 @@ export default function CompressPage(): React.JSX.Element {
                 .progress-pulse { animation: progress-pulse 1s ease-in-out infinite; }
             `}</style>
 
-            <Footer />
+            {!embedded && <Footer />}
         </div>
     );
+}
+
+export default function CompressPage(): React.JSX.Element {
+    return <CompressTool />;
 }

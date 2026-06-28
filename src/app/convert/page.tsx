@@ -77,7 +77,7 @@ const FORMAT_OPTIONS = [
 // Fixed automatically — no user-facing quality choice.
 const FIXED_QUALITY = 82;
 
-export default function ConvertPage(): React.JSX.Element {
+export function ConvertTool({ embedded = false }: { embedded?: boolean }): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [format, setFormat] = useState('webp');
     const [processing, setProcessing] = useState(false);
@@ -174,13 +174,15 @@ export default function ConvertPage(): React.JSX.Element {
         : 0;
 
     return (
-        <div style={S.page}>
-            <Header />
+        <div style={embedded ? { ...S.page, minHeight: 'auto', background: 'transparent' } : S.page}>
+            {!embedded && <Header />}
 
-            <div style={S.hero}>
-                <h1 style={S.h1}>Convert image format</h1>
-                <p style={S.sub}>Turn any image into WebP, AVIF, JPEG, PNG, TIFF or GIF. Switch to the format your project actually needs.</p>
-            </div>
+            {!embedded && (
+                <div style={S.hero}>
+                    <h1 style={S.h1}>Convert image format</h1>
+                    <p style={S.sub}>Turn any image into WebP, AVIF, JPEG, PNG, TIFF or GIF. Switch to the format your project actually needs.</p>
+                </div>
+            )}
 
             <div style={S.tool}>
                 {/* Format picker always visible */}
@@ -315,7 +317,11 @@ export default function ConvertPage(): React.JSX.Element {
                 .progress-pulse { animation: progress-pulse 1s ease-in-out infinite; }
             `}</style>
 
-            <Footer />
+            {!embedded && <Footer />}
         </div>
     );
+}
+
+export default function ConvertPage(): React.JSX.Element {
+    return <ConvertTool />;
 }

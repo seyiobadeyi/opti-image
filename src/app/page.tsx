@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import PillRail from '@/components/PillRail';
 import CookieConsent from '@/components/CookieConsent';
 import { c } from '@/lib/colors';
 
@@ -181,12 +182,10 @@ const S: Record<string, React.CSSProperties> = {
         maxWidth: '580px',
         margin: '0 auto',
     },
+    // Layout (display/wrap/overflow) is owned by the PillRail component so the
+    // row collapses into a smooth horizontal slider on mobile. Padding only here.
     catRow: {
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '8px',
         padding: '0 24px 44px',
-        flexWrap: 'wrap',
     },
     grid: {
         maxWidth: '1100px',
@@ -444,7 +443,7 @@ export default function Home(): React.JSX.Element {
             </div>
 
             {/* ── Category pills ───────────────────────────────────────── */}
-            <div style={S.catRow}>
+            <PillRail style={S.catRow} ariaLabel="Filter tools by category">
                 {CATEGORIES.map(cat => (
                     <button key={cat.id} type="button" onClick={() => setCategory(cat.id)}
                         style={{
@@ -464,7 +463,7 @@ export default function Home(): React.JSX.Element {
                         {cat.label}
                     </button>
                 ))}
-            </div>
+            </PillRail>
 
             {/* ── Tool grid ───────────────────────────────────────────── */}
             <div style={S.grid}>

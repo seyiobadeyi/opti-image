@@ -71,7 +71,7 @@ const ROTATE_PRESETS = [
     { label: '90° CCW',     value: 270 },
 ];
 
-export default function RotatePage(): React.JSX.Element {
+export function RotateTool({ embedded = false }: { embedded?: boolean }): React.JSX.Element {
     const [entries, setEntries] = useState<FileEntry[]>([]);
     const [rotate, setRotate] = useState(90);
     const [flipH, setFlipH] = useState(false);
@@ -168,13 +168,15 @@ export default function RotatePage(): React.JSX.Element {
     ].filter(Boolean).join(' + ') || 'Apply';
 
     return (
-        <div style={S.page}>
-            <Header />
+        <div style={embedded ? { ...S.page, minHeight: 'auto', background: 'transparent' } : S.page}>
+            {!embedded && <Header />}
 
-            <div style={S.hero}>
-                <h1 style={S.h1}>Flip and rotate images</h1>
-                <p style={S.sub}>Mirror images horizontally or vertically, rotate to any angle. Batch process up to 50 images at once.</p>
-            </div>
+            {!embedded && (
+                <div style={S.hero}>
+                    <h1 style={S.h1}>Flip and rotate images</h1>
+                    <p style={S.sub}>Mirror images horizontally or vertically, rotate to any angle. Batch process up to 50 images at once.</p>
+                </div>
+            )}
 
             <div style={S.tool}>
                 {showDrop && (
@@ -318,7 +320,11 @@ export default function RotatePage(): React.JSX.Element {
                 )}
             </div>
 
-            <Footer />
+            {!embedded && <Footer />}
         </div>
     );
+}
+
+export default function RotatePage(): React.JSX.Element {
+    return <RotateTool />;
 }

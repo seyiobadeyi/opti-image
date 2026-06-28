@@ -7,8 +7,9 @@ import {
     History, Image as ImageIcon, Settings, SlidersHorizontal,
     ArrowRight, Upload, Pencil, Check, X, Download, RefreshCw, AlertTriangle, BarChart3, Film, Package,
     Users, Copy, Share2, Gift, Crown, Calendar, ExternalLink, Images, Camera, Send, Eye,
-    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info, WifiOff, MessageSquare,
+    Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info, WifiOff, MessageSquare, Wrench,
 } from 'lucide-react';
+import ToolsPanel from '@/app/dashboard/ToolsPanel';
 import Link from 'next/link';
 import { apiClient, NetworkError } from '@/lib/api';
 import { cloudinaryDownloadUrl } from '@/lib/download';
@@ -58,6 +59,7 @@ const LogoIcon = ({ size: _size }: { size?: number }): React.JSX.Element => <img
 
 const TABS: { key: DashboardTab; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
     { key: 'optimize', label: 'Images', icon: LogoIcon },
+    { key: 'tools', label: 'Tools', icon: Wrench },
     { key: 'video', label: 'Video', icon: Film },
     { key: 'history', label: 'History', icon: History },
     { key: 'galleries', label: 'Galleries', icon: Images },
@@ -1586,7 +1588,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
 }
 
 // ─── Main Component ──────────────────────────────────────────────
-const VALID_TABS: DashboardTab[] = ['optimize', 'video', 'history', 'galleries', 'referrals', 'settings'];
+const VALID_TABS: DashboardTab[] = ['optimize', 'tools', 'video', 'history', 'galleries', 'referrals', 'settings'];
 
 function tabFromPathname(pathname: string): DashboardTab {
     const segment = pathname.split('/')[2] as DashboardTab | undefined;
@@ -2235,6 +2237,11 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* ═══════════ Tab: Tools ═══════════ */}
+            {activeTab === 'tools' && (
+                <ToolsPanel />
             )}
 
             {/* ═══════════ Tab: History ═══════════ */}
