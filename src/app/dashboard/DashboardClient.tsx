@@ -512,6 +512,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
             try {
                 const item = await apiClient.uploadGalleryImage(activeGallery.id, file);
                 setItems(prev => [...prev, item]);
+                setLoadError(null);
                 // update item_count on gallery card
                 setGalleries(prev => prev.map(g =>
                     g.id === activeGallery.id ? { ...g, item_count: (g.item_count ?? 0) + 1 } : g
