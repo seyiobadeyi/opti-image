@@ -3,6 +3,7 @@ import './blog.css';
 import type { Metadata } from 'next';
 import type { BlogPostData, BlogHeading, BlogPostMeta } from '@/types';
 import Link from 'next/link';
+import AdBanner, { AD_SLOTS } from '@/components/AdBanner';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://optimage.dreamintrepid.com';
 
@@ -286,8 +287,20 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                 {/* Table of Contents */}
                 <TableOfContents headings={postData.headings} />
 
+                {/* In-content ad (after the intro/TOC) */}
+                <div style={{ margin: '32px 0' }}>
+                    <span style={{ display: 'block', fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Advertisement</span>
+                    <AdBanner slot={AD_SLOTS.horizontal} />
+                </div>
+
                 {/* Post content */}
                 <div className="blog-content" dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
+
+                {/* Ad after the article body */}
+                <div style={{ margin: '40px 0' }}>
+                    <span style={{ display: 'block', fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Advertisement</span>
+                    <AdBanner slot={AD_SLOTS.square} />
+                </div>
 
                 {/* FAQ */}
                 {postData.faq && <FaqSection items={postData.faq} />}
