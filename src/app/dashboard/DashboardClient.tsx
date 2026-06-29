@@ -2559,7 +2559,7 @@ export default function DashboardClient({ user, profile, history: initialHistory
                                     <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>
                                         {isVideoDragActive ? 'Release to add video' : 'Drop a video file here or click to browse'}
                                     </p>
-                                    <p style={{ color: c.textMuted, fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max {process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50'}MB • Requires login</p>
+                                    <p style={{ color: c.textMuted, fontSize: '0.9rem' }}>MP4, WebM, MOV, AVI • Max {process.env.NEXT_PUBLIC_MAX_VIDEO_SIZE_MB || '50'}MB</p>
                                 </div>
 
                                 {videoFile && (
@@ -2673,9 +2673,13 @@ export default function DashboardClient({ user, profile, history: initialHistory
                         )}
                     </div>
 
-                    {/* Right: Video Settings */}
-                    <div style={{ flex: '1 1 35%', minWidth: '280px' }}>
-                        <div style={{ background: c.white, borderRadius: '24px', border: `1px solid ${c.border}`, padding: '24px', position: 'sticky', top: '100px' }}>
+                    {/* Right: Video Settings — whole column sticks as one unit.
+                        (Sticky must be on the column wrapper, not the inner card:
+                        a sticky element followed by an in-flow sibling overlaps it
+                        once pinned, which made the CRF help box and the AI card
+                        collapse onto each other while scrolling.) */}
+                    <div style={{ flex: '1 1 35%', minWidth: '280px', position: 'sticky', top: '100px', alignSelf: 'flex-start' }}>
+                        <div style={{ background: c.white, borderRadius: '24px', border: `1px solid ${c.border}`, padding: '24px' }}>
                             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', fontSize: '1.2rem' }}><SlidersHorizontal size={20} /> Video Settings</h3>
 
                             <div style={{ marginBottom: '20px' }}>
