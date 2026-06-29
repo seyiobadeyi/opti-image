@@ -90,6 +90,8 @@ export const metadata: Metadata = {
     google: '3p7H_jwoTvccf1ncRc92VN3OhZFHhIHlJ19ja_7thf8',
     other: {
       'msvalidate.01': 'F2AB3F53958AC1983FAB806849EBB13A',
+      // Google AdSense site verification (current recommended method)
+      'google-adsense-account': 'ca-pub-2857437644082503',
     },
   },
 };
@@ -98,8 +100,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
   return (
     <html lang="en">
       <head>
-        {/* Google AdSense — Replace with your publisher ID */}
-        {/* <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXX" crossOrigin="anonymous"></script> */}
+        {/* Google AdSense loader (publisher ca-pub-2857437644082503).
+            Auto ads is OFF in the account, so this loader alone shows nothing —
+            ads only appear where manual <ins class="adsbygoogle"> units are placed
+            (see AdBanner). Keeps the dashboard/gallery viewers ad-free by default. */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2857437644082503"
+          crossOrigin="anonymous"
+        ></script>
       </head>
       <body suppressHydrationWarning>
         {/* ── Structured Data: Organization + WebSite + SoftwareApplication ── */}
