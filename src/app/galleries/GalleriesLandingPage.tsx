@@ -393,7 +393,31 @@ export default function GalleriesLandingPage({
 
         }, containerRef); // scope to container — auto-cleans child tweens/triggers
 
-        return () => ctx.revert();
+        // The panel photos + hero rain images load lazily AFTER ScrollTrigger has
+        // already measured pin start/end + reveal positions. Without recomputing,
+        // those positions are stale once the images shift layout — which makes the
+        // pinned panels overlap neighbouring sections ("sections flow into each
+        // other"). Refresh once the window fully loads and as each image settles.
+        const refresh = () => ScrollTrigger.refresh();
+        window.addEventListener('load', refresh);
+
+        const imgs = Array.from(containerRef.current?.querySelectorAll('img') ?? []);
+        let remaining = imgs.filter((im) => !im.complete).length;
+        if (remaining === 0) {
+            requestAnimationFrame(refresh);
+        } else {
+            imgs.forEach((im) => {
+                if (im.complete) return;
+                const done = () => { if (--remaining <= 0) refresh(); };
+                im.addEventListener('load', done, { once: true });
+                im.addEventListener('error', done, { once: true });
+            });
+        }
+
+        return () => {
+            window.removeEventListener('load', refresh);
+            ctx.revert();
+        };
     }, []);
 
     const comparisonRows = [
