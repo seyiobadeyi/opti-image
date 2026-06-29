@@ -6,6 +6,11 @@ import type { AdBannerProps } from '@/types';
 // Publisher account (the loader script lives in app/layout.tsx <head>).
 const AD_CLIENT = 'ca-pub-2857437644082503';
 
+// ── Master on/off switch ──────────────────────────────────────────────────────
+// Ads are HIDDEN everywhere while this is false: AdBanner renders nothing (no
+// empty slots, no "Advertisement" labels). Flip to true to display ads live.
+const ADS_ENABLED = false;
+
 /** Ad unit slots created in the AdSense dashboard. */
 export const AD_SLOTS = {
     square: '8987088943',
@@ -20,17 +25,16 @@ declare global {
 }
 
 /**
- * A single AdSense display unit. Auto ads is OFF, so ads only appear where this
- * component is placed. Renders nothing visible until Google fills the slot
- * (and stays blank on localhost / for blocked or not-yet-approved accounts).
+ * A single AdSense display unit (with an "Advertisement" label + spacing).
+ * Renders nothing while ADS_ENABLED is false, or until Google fills the slot.
  */
-export default function AdBanner({ slot, format = 'auto', style }: AdBannerProps): React.JSX.Element {
+export default function AdBanner({ slot, format = 'auto', style, label = true }: AdBannerProps): React.JSX.Element | null {
     const pushed = useRef(false);
 
     useEffect(() => {
         // Push once per mount. AdSense throws if an <ins> is pushed twice, so the
         // ref guards React StrictMode's double-invoke in dev.
-        if (pushed.current) return;
+        if (!ADS_ENABLED || pushed.current) return;
         try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
             pushed.current = true;
@@ -39,14 +43,23 @@ export default function AdBanner({ slot, format = 'auto', style }: AdBannerProps
         }
     }, []);
 
+    if (!ADS_ENABLED) return null;
+
     return (
-        <ins
-            className="adsbygoogle"
-            style={{ display: 'block', ...style }}
-            data-ad-client={AD_CLIENT}
-            data-ad-slot={slot}
-            data-ad-format={format}
-            data-full-width-responsive="true"
-        />
+        <div style={{ margin: '32px 0' }}>
+            {label && (
+                <span style={{ display: 'block', fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                    Advertisement
+                </span>
+            )}
+            <ins
+                className="adsbygoogle"
+                style={{ display: 'block', ...style }}
+                data-ad-client={AD_CLIENT}
+                data-ad-slot={slot}
+                data-ad-format={format}
+                data-full-width-responsive="true"
+            />
+        </div>
     );
 }

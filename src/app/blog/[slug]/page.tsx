@@ -287,20 +287,14 @@ export default async function Post({ params }: BlogPostPageProps): Promise<React
                 {/* Table of Contents */}
                 <TableOfContents headings={postData.headings} />
 
-                {/* In-content ad (after the intro/TOC) */}
-                <div style={{ margin: '32px 0' }}>
-                    <span style={{ display: 'block', fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Advertisement</span>
-                    <AdBanner slot={AD_SLOTS.horizontal} />
-                </div>
+                {/* In-content ad (after the intro/TOC) — hidden until ads are enabled */}
+                <AdBanner slot={AD_SLOTS.horizontal} />
 
                 {/* Post content */}
                 <div className="blog-content" dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
 
-                {/* Ad after the article body */}
-                <div style={{ margin: '40px 0' }}>
-                    <span style={{ display: 'block', fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Advertisement</span>
-                    <AdBanner slot={AD_SLOTS.square} />
-                </div>
+                {/* Ad after the article body — hidden until ads are enabled */}
+                <AdBanner slot={AD_SLOTS.square} />
 
                 {/* FAQ */}
                 {postData.faq && <FaqSection items={postData.faq} />}

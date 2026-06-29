@@ -401,6 +401,8 @@ export interface AdBannerProps {
   slot: string;
   format?: string;
   style?: React.CSSProperties;
+  /** Show the small "Advertisement" label above the unit (default true). */
+  label?: boolean;
 }
 
 export interface TooltipProps {
