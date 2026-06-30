@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         url: 'https://optimage.dreamintrepid.com/galleries',
         siteName: 'Optimage',
         type: 'website',
-        images: [{ url: 'https://optimage.dreamintrepid.com/og-galleries.jpg', width: 1200, height: 630, alt: 'Optimage Client Gallery Delivery Platform' }],
+        // og:image comes from the generated opengraph-image.tsx
     },
     twitter: {
         card: 'summary_large_image',

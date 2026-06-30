@@ -43,13 +43,12 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
             modifiedTime: postData.date,
             authors: [`${SITE_URL}/#organization`],
             section: 'Media Optimization',
-            images: [{ url: `${SITE_URL}/og-blog.jpg`, width: 1200, height: 630, alt: postData.title }],
+            // og:image comes from the generated opengraph-image.tsx (unique per post)
         },
         twitter: {
             card: 'summary_large_image',
             title: postData.title,
             description: postData.excerpt,
-            images: [`${SITE_URL}/og-blog.jpg`],
             creator: '@dreamintrepid',
         },
     };
