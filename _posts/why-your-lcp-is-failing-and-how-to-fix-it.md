@@ -47,7 +47,7 @@ Before fixing it, identify why the browser is taking 3 seconds to paint your ima
 1. **Discovery Time:** The browser downloads HTML, parses it, and doesn't notice the hero image until line 140.
 2. **Resource Contention:** Your image request competes against 15 Megabytes of React hydration scripts, CSS files, and third-party analytics trackers.
 3. **Payload Bloat:** The image is fundamentally too heavy. Downloading 4MB of raw pixels takes a full second over an average 4G connection, regardless of how fast your server is.
-4. **The Lazy Loading Trap:** The single worst mistake developers make is putting `loading="lazy"` on their Hero image. This explicitly tells the browser "this image isn't important, download it last."
+4. **The Lazy Loading Trap:** The single worst mistake developers make is putting `loading="lazy"` on their Hero image. This explicitly tells the browser "this image isn't important, download it last." (Lazy loading is the right call for everything below the fold — see [the complete lazy loading implementation guide](/blog/image-lazy-loading-implementation-guide-2026) for where it actually belongs.)
 
 ## Step 1: Force Early Discovery via Preload Scanners
 
