@@ -219,19 +219,15 @@ export default function GalleriesLandingPage({
     const containerRef    = useRef<HTMLDivElement>(null);
     const heroRef         = useRef<HTMLElement>(null);
     const heroContentRef  = useRef<HTMLDivElement>(null);
-    const audienceWrapRef = useRef<HTMLDivElement>(null);
-    const stepsWrapRef    = useRef<HTMLDivElement>(null);
-    const featSecRef      = useRef<HTMLElement>(null);
-    const featTrackRef    = useRef<HTMLDivElement>(null);
 
     // ── GSAP effects ──────────────────────────────────────────────────────────
     useEffect(() => {
         // gsap + ScrollTrigger are imported synchronously at module level —
         // no async flash, no race with cleanup.
         const ctx = gsap.context(() => {
-            const mm = gsap.matchMedia();
-
-            // ── Animations that run at ALL screen sizes ──────────────────────
+            // Lightweight reveal-on-scroll only — no pinning/scrub/horizontal
+            // scroll. Pinned ScrollTriggers were unreliable (especially on mobile),
+            // so the sections are now conventional responsive flow.
 
             // Hero text parallax out
             if (heroRef.current && heroContentRef.current) {
@@ -289,106 +285,16 @@ export default function GalleriesLandingPage({
                 },
             });
 
-            // ── Desktop only: pinned stacking panels + horizontal scroll ─────
-            // matchMedia disables pin-based effects on narrow viewports where
-            // GSAP pinning is unreliable and hurts UX (industry standard).
-            mm.add('(min-width: 768px)', () => {
-                // ── Audience panels ───────────────────────────────────────────
-                const audiencePanels = gsap.utils.toArray<HTMLElement>('.audience-panel');
-                if (audienceWrapRef.current && audiencePanels.length > 1) {
-                    // GSAP owns the transform — set off-screen synchronously
-                    // before first paint so there's no flash of all panels.
-                    audiencePanels.forEach((p, i) => {
-                        if (i > 0) gsap.set(p, { yPercent: 100 });
-                    });
-
-                    const aCount = audiencePanels.length - 1;
-
-                    const aTl = gsap.timeline({
-                        scrollTrigger: {
-                            trigger: audienceWrapRef.current,
-                            start: 'top top',
-                            // Each transition = 1 full viewport height of scroll
-                            end: () => `+=${aCount * window.innerHeight}`,
-                            pin: true,
-                            pinSpacing: true,
-                            // scrub: true = 1:1 with scroll position (most premium feel)
-                            scrub: true,
-                            invalidateOnRefresh: true,
-                        },
-                    });
-
-                    audiencePanels.forEach((panel, i) => {
-                        if (i === 0) return;
-                        // ease: 'none' is correct for scrub — smoothness comes from
-                        // the scrub lag, not the tween easing.
-                        aTl.to(panel, { yPercent: 0, ease: 'none', duration: 1 }, i - 1);
-                        const img = panel.querySelector<HTMLElement>('.audience-img');
-                        if (img) {
-                            gsap.set(img, { scale: 1.08 });
-                            aTl.to(img, { scale: 1, ease: 'none', duration: 1 }, i - 1);
-                        }
-                    });
-                }
-
-                // ── Step panels ───────────────────────────────────────────────
-                const stepPanels = gsap.utils.toArray<HTMLElement>('.step-panel');
-                if (stepsWrapRef.current && stepPanels.length > 1) {
-                    stepPanels.forEach((p, i) => {
-                        if (i > 0) gsap.set(p, { yPercent: 100 });
-                    });
-
-                    const sCount = stepPanels.length - 1;
-
-                    const sTl = gsap.timeline({
-                        scrollTrigger: {
-                            trigger: stepsWrapRef.current,
-                            start: 'top top',
-                            end: () => `+=${sCount * window.innerHeight}`,
-                            pin: true,
-                            pinSpacing: true,
-                            scrub: true,
-                            invalidateOnRefresh: true,
-                        },
-                    });
-
-                    stepPanels.forEach((panel, i) => {
-                        if (i === 0) return;
-                        sTl.to(panel, { yPercent: 0, ease: 'none', duration: 1 }, i - 1);
-                        const img = panel.querySelector<HTMLElement>('.step-img');
-                        if (img) {
-                            gsap.set(img, { scale: 1.1 });
-                            sTl.to(img, { scale: 1, ease: 'none', duration: 1 }, i - 1);
-                        }
-                    });
-                }
-
-                // ── Features: horizontal scroll ───────────────────────────────
-                if (featSecRef.current && featTrackRef.current) {
-                    const track = featTrackRef.current;
-                    const getOverflow = () => track.scrollWidth - window.innerWidth;
-
-                    gsap.to(track, {
-                        x: () => -getOverflow(),
-                        ease: 'none',
-                        scrollTrigger: {
-                            trigger: featSecRef.current,
-                            start: 'top top',
-                            end: () => `+=${getOverflow()}`,
-                            pin: true,
-                            pinSpacing: true,
-                            scrub: true,
-                            invalidateOnRefresh: true,
-                        },
-                    });
-                }
-
-                // matchMedia callback return = cleanup for this breakpoint
-                return () => {
-                    // Reset panel positions when dropping below 768px
-                    gsap.utils.toArray<HTMLElement>('.audience-panel, .step-panel')
-                        .forEach((p) => gsap.set(p, { clearProps: 'transform' }));
-                };
+            // Gentle one-shot reveal for the audience + step panels as they
+            // enter the viewport (replaces the old pinned scrub timelines).
+            gsap.utils.toArray<HTMLElement>('.audience-panel, .step-panel').forEach((el) => {
+                gsap.from(el, {
+                    y: 32,
+                    opacity: 0,
+                    duration: 0.7,
+                    ease: 'power3.out',
+                    scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
+                });
             });
 
         }, containerRef); // scope to container — auto-cleans child tweens/triggers
@@ -455,14 +361,13 @@ export default function GalleriesLandingPage({
                 }
                 .gallery-rain-card img { pointer-events: none; }
 
-                /* Panel stacking — GSAP owns the transforms, no CSS initial offset */
-                .audience-panel  { position: absolute; inset: 0; will-change: transform; }
-                .step-panel      { position: absolute; inset: 0; will-change: transform; }
+                /* Panels are conventional stacked sections (no pinning). */
+                .audience-panel, .step-panel { position: relative; }
 
-                /* Panel inner layout (default desktop: 50/50 row) */
+                /* Panel inner layout (desktop: 50/50 row) */
                 .audience-inner, .step-inner {
                     display: flex;
-                    height: 100%;
+                    min-height: clamp(440px, 62vh, 660px);
                     align-items: stretch;
                     flex-direction: row;
                 }
@@ -491,7 +396,7 @@ export default function GalleriesLandingPage({
                 }
 
                 /* Feature cards — min width on track items */
-                .feat-card { flex: 0 0 300px; }
+                .feat-card { flex: 0 0 300px; scroll-snap-align: start; }
 
                 /* Showcase grid */
                 .showcase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -514,25 +419,13 @@ export default function GalleriesLandingPage({
                 /* Final CTA buttons */
                 .final-cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
-                /* ── Below 768px: panels leave pin mode, stack as normal flow ── */
-                @media (max-width: 767px) {
-                    /* Panels revert to normal document flow */
-                    .audience-panel, .step-panel {
-                        position: relative !important;
-                        inset: unset !important;
-                        transform: none !important;
-                    }
-                    /* Wrappers auto-height instead of fixed 100vh */
-                    .panel-wrapper { height: auto !important; }
-                }
-
                 /* ── TABLET (≤900px) ── */
                 @media (max-width: 900px) {
                     /* Stack panels vertically on tablet/mobile: image on top, text below */
-                    .audience-inner, .step-inner { flex-direction: column !important; }
+                    .audience-inner, .step-inner { flex-direction: column !important; min-height: 0 !important; }
                     .step-inner.img-left { flex-direction: column !important; }
-                    .panel-img-half { flex: 0 0 42vh !important; width: 100%; }
-                    .panel-text-half { flex: 1 1 auto !important; width: 100%; padding: 28px 24px !important; overflow-y: auto; }
+                    .panel-img-half { flex: 0 0 300px !important; width: 100%; min-height: 0; }
+                    .panel-text-half { flex: 1 1 auto !important; width: 100%; padding: 32px 24px !important; overflow: visible; }
 
                     /* Feature cards narrower */
                     .feat-card { flex: 0 0 260px !important; }
@@ -675,11 +568,7 @@ export default function GalleriesLandingPage({
             </section>
 
             {/* ── AUDIENCE PANELS (stacked, GSAP pinned) ───────────────────── */}
-            <div
-                ref={audienceWrapRef}
-                className="panel-wrapper"
-                style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}
-            >
+            <div className="panel-wrapper">
                 {AUDIENCE_PANELS.map((panel, i) => (
                     <div
                         key={i}
@@ -748,12 +637,7 @@ export default function GalleriesLandingPage({
             </div>
 
             {/* ── STEP PANELS (stacked, GSAP pinned) ───────────────────────── */}
-            <div
-                id="how-it-works"
-                ref={stepsWrapRef}
-                className="panel-wrapper"
-                style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}
-            >
+            <div id="how-it-works" className="panel-wrapper">
                 {STEP_PANELS.map((step, i) => (
                     <div
                         key={i}
@@ -811,10 +695,7 @@ export default function GalleriesLandingPage({
             </div>
 
             {/* ── FEATURES: horizontal scroll ───────────────────────────────── */}
-            <section
-                ref={featSecRef}
-                style={{ background: '#0d0d12', height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-            >
+            <section style={{ background: '#0d0d12', padding: 'clamp(64px,10vw,100px) 0' }}>
                 {/* Header row */}
                 <div style={{ padding: '0 clamp(24px,5vw,64px) 48px', flexShrink: 0 }}>
                     <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#e8866f', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '10px' }}>Feature set</p>
@@ -837,13 +718,13 @@ export default function GalleriesLandingPage({
                             >
                                 Get all features free <ArrowRight size={14} />
                             </Link>
-                            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', margin: 0, textAlign: 'right' }}>Scroll to explore →</p>
+                            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', margin: 0, textAlign: 'right' }}>Swipe to explore →</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Horizontal track */}
-                <div ref={featTrackRef} style={{ display: 'flex', gap: '20px', paddingLeft: 'clamp(24px,5vw,64px)', paddingRight: 'clamp(24px,5vw,64px)', willChange: 'transform', flexShrink: 0 }}>
+                {/* Horizontal scroll strip (native swipe — no pinning) */}
+                <div style={{ display: 'flex', gap: '20px', paddingLeft: 'clamp(24px,5vw,64px)', paddingRight: 'clamp(24px,5vw,64px)', overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', paddingBottom: '14px' }}>
                     {FEATURE_CARDS.map((f) => (
                         <div
                             key={f.name}
