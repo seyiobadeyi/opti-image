@@ -983,7 +983,12 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                         ? `Uploading ${uploadingIds.size} photo${uploadingIds.size !== 1 ? 's' : ''}…`
                                         : isGalleryDragActive ? 'Release to upload' : 'Drag & drop photos here or click to browse'}
                                 </p>
-                                <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: '2px 0 0 0' }}>JPEG, PNG, WebP, HEIC · up to 20 at a time</p>
+                                <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: '2px 0 0 0' }}>JPEG, PNG, WebP, HEIC · up to 20 at a time · 500 photos per gallery</p>
+                                <p style={{ color: c.textMuted, fontSize: '0.72rem', margin: '6px 0 0 0', lineHeight: 1.5 }}>
+                                    Very large photos are automatically optimised to load fast — clients still see full quality.{' '}
+                                    Need full-resolution downloads or higher limits?{' '}
+                                    <a href="/contact" style={{ color: c.accent, textDecoration: 'none', fontWeight: 500 }}>Talk to us</a> — we set those up for busy studios.
+                                </p>
                             </div>
                         </div>
 
@@ -1289,11 +1294,21 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                         <option value="pin">PIN protected</option>
                                         <option value="account">Requires Optimage account</option>
                                     </select>
+                                    <p style={{ fontSize: '0.72rem', color: c.textMuted, margin: '6px 0 0 0', lineHeight: 1.5 }}>
+                                        {editAccessType === 'public'
+                                            ? 'Anyone with the link can view — best for sharing widely.'
+                                            : editAccessType === 'pin'
+                                                ? 'Viewers must enter a PIN you set. Best for private client galleries.'
+                                                : 'Viewers must sign in with a free Optimage account before viewing.'}
+                                        {editAccessType !== activeGallery.access_type && ' Changing this takes effect immediately — anyone currently viewing will need to re-enter.'}
+                                    </p>
                                 </div>
                                 {editAccessType === 'pin' && (
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>New PIN <span style={{ fontWeight: 400, color: c.textMuted }}>(leave blank to keep existing)</span></label>
-                                        <input type="text" value={editPin} maxLength={20} placeholder="Enter new PIN" onChange={(e) => setEditPin(e.target.value)} style={GALLERY_INPUT_STYLE} />
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, marginBottom: '6px' }}>
+                                            {activeGallery.access_type === 'pin' ? <>New PIN <span style={{ fontWeight: 400, color: c.textMuted }}>(leave blank to keep existing)</span></> : 'Set a PIN'}
+                                        </label>
+                                        <input type="text" value={editPin} maxLength={20} placeholder={activeGallery.access_type === 'pin' ? 'Enter new PIN' : 'Choose a PIN for this gallery'} onChange={(e) => setEditPin(e.target.value)} style={GALLERY_INPUT_STYLE} />
                                     </div>
                                 )}
                                 <div style={{ paddingTop: '4px', borderTop: `1px solid ${c.border}` }}>
