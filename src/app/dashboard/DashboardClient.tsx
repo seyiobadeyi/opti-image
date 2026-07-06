@@ -811,21 +811,35 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
             fontSize: '0.88rem', fontWeight: active ? 600 : 400,
             color: active ? c.accent : c.textMuted,
             borderBottom: `2px solid ${active ? c.accent : 'transparent'}`,
-            transition: 'all 0.15s',
+            transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0,
         });
 
         return (
             <div style={{ maxWidth: '900px' }} onClick={() => showMoreMenu && setShowMoreMenu(false)}>
 
                 {/* ── Header ── */}
+                <style>{`
+                    .mgr-header { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+                    .mgr-lead { display: flex; align-items: flex-start; gap: 12px; flex: 1 1 320px; min-width: 0; }
+                    .mgr-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+                    .mgr-tabs { display: flex; border-bottom: 1px solid ${c.border}; margin-top: 16px; overflow-x: auto; }
+                    .mgr-tabs::-webkit-scrollbar { height: 0; }
+                    @media (max-width: 680px) {
+                        .mgr-lead { flex: 1 1 100%; }
+                        .mgr-actions { flex: 1 1 100%; }
+                        .mgr-actions > button { flex: 1 1 auto; justify-content: center; }
+                        .mgr-actions .mgr-more { flex: 0 0 auto; }
+                    }
+                `}</style>
                 <div style={{ marginBottom: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-                        <button onClick={closeGallery}
-                            style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap', marginTop: '2px' }}>
-                            ← Back
-                        </button>
+                    <div className="mgr-header">
+                        <div className="mgr-lead">
+                            <button onClick={closeGallery}
+                                style={{ padding: '8px 14px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.textSecondary, fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap', marginTop: '2px' }}>
+                                ← Back
+                            </button>
 
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
                             <h3 style={{ fontSize: '1.25rem', margin: '0 0 4px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {activeGallery.title}
                             </h3>
@@ -844,10 +858,11 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                     <><span style={{ opacity: 0.4 }}>·</span><span style={{ color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><CheckCircle size={11} /> Payment confirmed</span></>
                                 )}
                             </p>
+                            </div>
                         </div>
 
                         {/* Right-side actions */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
+                        <div className="mgr-actions">
                             {/* Status toggle */}
                             <button onClick={() => void handleToggleDraft()}
                                 style={{ padding: '7px 14px', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', border: `1px solid ${isLive ? 'rgba(34,197,94,0.35)' : 'rgba(234,179,8,0.4)'}`, background: isLive ? 'rgba(34,197,94,0.08)' : 'rgba(234,179,8,0.08)', color: isLive ? '#22c55e' : '#fbbf24' }}>
@@ -866,7 +881,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                             </button>
 
                             {/* ··· more menu */}
-                            <div style={{ position: 'relative' }}>
+                            <div className="mgr-more" style={{ position: 'relative' }}>
                                 <button onClick={(e) => { e.stopPropagation(); setShowMoreMenu(v => !v); }}
                                     style={{ padding: '7px 10px', borderRadius: '10px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '1rem', cursor: 'pointer', lineHeight: 1 }}>
                                     ···
@@ -894,7 +909,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                     </div>
 
                     {/* ── Tab bar ── */}
-                    <div style={{ display: 'flex', borderBottom: `1px solid ${c.border}`, marginTop: '16px' }}>
+                    <div className="mgr-tabs">
                         <button style={TAB_STYLE(galleryTab === 'photos')} onClick={() => setGalleryTab('photos')}>
                             Photos
                         </button>
