@@ -755,6 +755,13 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                 setEditSaving(false);
                 return;
             }
+            // Switching a non-PIN gallery to PIN requires a PIN — otherwise it would
+            // become private with no way in.
+            if (editAccessType === 'pin' && activeGallery.access_type !== 'pin' && !editPin.trim()) {
+                setEditError('Enter a PIN to make this gallery private.');
+                setEditSaving(false);
+                return;
+            }
             const updated = await apiClient.updateGallery(activeGallery.id, {
                 title: editTitle.trim(),
                 description: editDesc.trim() || undefined,
