@@ -10,6 +10,7 @@ import {
     Lock, Globe, UserCircle, Clock as ClockIcon, CheckCircle, Unlock, GripVertical, Crosshair, ChevronDown, ChevronUp, Info, WifiOff, MessageSquare, Wrench,
 } from 'lucide-react';
 import ToolsPanel from '@/app/dashboard/ToolsPanel';
+import MessageCardStudio from '@/app/dashboard/MessageCardStudio';
 import Link from 'next/link';
 import { apiClient, NetworkError } from '@/lib/api';
 import { cloudinaryDownloadUrl } from '@/lib/download';
@@ -382,6 +383,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     const [activityGalleryId, setActivityGalleryId] = useState<string | null>(null);
     const [activity, setActivity]             = useState<import('@/types').GalleryActivity | null>(null);
     const [messages, setMessages]             = useState<Array<{ id: string; guest_name: string; message: string; created_at: string }>>([]);
+    const [showCardStudio, setShowCardStudio] = useState(false);
     const [activityLoading, setActivityLoading] = useState(false);
     const [clientStatus, setClientStatus]     = useState<{ client_email: string | null; proofing_finalized_at: string | null } | null>(null);
     const [reopeningProofing, setReopeningProofing] = useState(false);
@@ -1424,9 +1426,17 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
 
                                 {/* ── Messages left by visitors ───────────────────────────── */}
                                 <div style={{ marginTop: '24px' }}>
-                                    <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: '0 0 10px 0', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <MessageSquare size={13} /> Messages {messages.length > 0 && <span style={{ background: c.accent, color: '#fff', borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem' }}>{messages.length}</span>}
-                                    </p>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                                        <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <MessageSquare size={13} /> Messages {messages.length > 0 && <span style={{ background: c.accent, color: '#fff', borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem' }}>{messages.length}</span>}
+                                        </p>
+                                        {messages.length > 0 && (
+                                            <button onClick={() => setShowCardStudio(true)}
+                                                style={{ padding: '7px 13px', borderRadius: '9px', border: `1px solid ${c.accent}`, background: `${c.accent}10`, color: c.accent, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Share2 size={13} /> Create shareable card
+                                            </button>
+                                        )}
+                                    </div>
                                     {messages.length > 0 ? (
                                         <div style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', overflow: 'hidden' }}>
                                             {messages.map((m, i) => (
@@ -1446,6 +1456,14 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                             </div>
                         )}
                     </div>
+                )}
+                {showCardStudio && activeGallery && (
+                    <MessageCardStudio
+                        messages={messages}
+                        photos={items.map(i => i.display_url)}
+                        galleryTitle={activeGallery.title}
+                        onClose={() => setShowCardStudio(false)}
+                    />
                 )}
             </div>
         );
