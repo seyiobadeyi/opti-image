@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import ToolsPanel from '@/app/dashboard/ToolsPanel';
 import MessageCardStudio from '@/app/dashboard/MessageCardStudio';
+import Tip from '@/components/Tip';
 import Link from 'next/link';
 import { apiClient, NetworkError } from '@/lib/api';
 import { cloudinaryDownloadUrl } from '@/lib/download';
@@ -383,6 +384,10 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     const [activityGalleryId, setActivityGalleryId] = useState<string | null>(null);
     const [activity, setActivity]             = useState<import('@/types').GalleryActivity | null>(null);
     const [messages, setMessages]             = useState<Array<{ id: string; guest_name: string; message: string; created_at: string }>>([]);
+    const [messagesTotal, setMessagesTotal]   = useState(0);
+    const [messagesHasMore, setMessagesHasMore] = useState(false);
+    const [messagesPage, setMessagesPage]     = useState(1);
+    const [messagesLoadingMore, setMessagesLoadingMore] = useState(false);
     const [showCardStudio, setShowCardStudio] = useState(false);
     const [activityLoading, setActivityLoading] = useState(false);
     const [clientStatus, setClientStatus]     = useState<{ client_email: string | null; proofing_finalized_at: string | null } | null>(null);
@@ -647,17 +652,34 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         setActivityGalleryId(id);
         setActivityLoading(true);
         try {
-            const [data, msgs, client] = await Promise.all([
+            const [data, msgRes, client] = await Promise.all([
                 apiClient.getGalleryActivity(id),
-                apiClient.getGalleryMessages(id).catch(() => [] as typeof messages),
+                apiClient.getGalleryMessages(id, { page: 1, limit: 50 }).catch(() => ({ messages: [] as typeof messages, total: 0, hasMore: false })),
                 apiClient.getGalleryClientStatus(id).catch(() => null),
             ]);
             setActivity(data);
-            setMessages(msgs);
+            setMessages(msgRes.messages);
+            setMessagesTotal(msgRes.total);
+            setMessagesHasMore(msgRes.hasMore);
+            setMessagesPage(1);
             setClientStatus(client);
         } finally {
             setActivityLoading(false);
         }
+    };
+
+    // ── load more guestbook messages (Activity tab)
+    const loadMoreMessages = async (): Promise<void> => {
+        if (!activityGalleryId || messagesLoadingMore) return;
+        setMessagesLoadingMore(true);
+        try {
+            const next = messagesPage + 1;
+            const res = await apiClient.getGalleryMessages(activityGalleryId, { page: next, limit: 50 });
+            setMessages(prev => [...prev, ...res.messages]);
+            setMessagesHasMore(res.hasMore);
+            setMessagesPage(next);
+        } catch { /* ignore */ }
+        finally { setMessagesLoadingMore(false); }
     };
 
     const handleReopenProofing = async (id: string): Promise<void> => {
@@ -967,6 +989,9 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                 {/* ══ PHOTOS TAB ══ */}
                 {galleryTab === 'photos' && (
                     <div style={{ paddingTop: '20px' }}>
+                        <Tip id="gallery-basics-v1" icon={<Info size={16} />} title="This is your client’s gallery" style={{ marginBottom: '16px' }}>
+                            Upload your photos below, then use <strong style={{ color: c.accent }}>Copy link</strong> to share, <strong style={{ color: c.accent }}>Preview</strong> to see exactly what your client sees, and the <strong style={{ color: c.accent }}>Live / Offline</strong> toggle to control access anytime.
+                        </Tip>
                         {/* Upload zone — compact when photos exist */}
                         <div {...getGalleryDropProps()} style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
@@ -1426,9 +1451,14 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
 
                                 {/* ── Messages left by visitors ───────────────────────────── */}
                                 <div style={{ marginTop: '24px' }}>
+                                    {messagesTotal > 0 && (
+                                        <Tip id="share-messages-v1" icon={<Share2 size={16} />} title="Turn messages into shareable cards" style={{ marginBottom: '14px' }}>
+                                            Pick the messages you love, style them your way, and share to WhatsApp status, Instagram, and more — your Optimage brand travels with every post. Tap <strong style={{ color: c.accent }}>Create shareable card</strong>.
+                                        </Tip>
+                                    )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
                                         <p style={{ color: c.textMuted, fontSize: '0.75rem', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <MessageSquare size={13} /> Messages {messages.length > 0 && <span style={{ background: c.accent, color: '#fff', borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem' }}>{messages.length}</span>}
+                                            <MessageSquare size={13} /> Messages {messagesTotal > 0 && <span style={{ background: c.accent, color: '#fff', borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem' }}>{messagesTotal}</span>}
                                         </p>
                                         {messages.length > 0 && (
                                             <button onClick={() => setShowCardStudio(true)}
@@ -1448,6 +1478,12 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                                     <p style={{ margin: 0, fontSize: '0.88rem', color: c.textSecondary, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{m.message}</p>
                                                 </div>
                                             ))}
+                                            {messagesHasMore && (
+                                                <button onClick={() => void loadMoreMessages()} disabled={messagesLoadingMore}
+                                                    style={{ width: '100%', padding: '12px', background: 'none', border: 'none', borderTop: `1px solid ${c.border}`, color: c.accent, fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}>
+                                                    {messagesLoadingMore ? 'Loading…' : `Load more (${messagesTotal - messages.length} more)`}
+                                                </button>
+                                            )}
                                         </div>
                                     ) : (
                                         <p style={{ color: c.textMuted, fontSize: '0.85rem', margin: 0 }}>No messages yet. Visitors can leave a note from the “Leave a message” button on your gallery.</p>
@@ -1459,7 +1495,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                 )}
                 {showCardStudio && activeGallery && (
                     <MessageCardStudio
-                        messages={messages}
+                        galleryId={activeGallery.id}
                         photos={items.map(i => i.display_url)}
                         galleryTitle={activeGallery.title}
                         onClose={() => setShowCardStudio(false)}

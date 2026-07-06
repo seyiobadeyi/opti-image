@@ -752,9 +752,17 @@ export const apiClient = {
     /**
      * Owner: fetch all guestbook messages for a gallery.
      */
-    async getGalleryMessages(galleryId: string): Promise<Array<{ id: string; guest_name: string; message: string; created_at: string }>> {
+    async getGalleryMessages(
+        galleryId: string,
+        opts: { page?: number; limit?: number; search?: string } = {},
+    ): Promise<{ messages: Array<{ id: string; guest_name: string; message: string; created_at: string }>; total: number; hasMore: boolean }> {
         const authHeaders = await getAuthHeaders();
-        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/messages`, {
+        const params = new URLSearchParams();
+        if (opts.page) params.set('page', String(opts.page));
+        if (opts.limit) params.set('limit', String(opts.limit));
+        if (opts.search?.trim()) params.set('search', opts.search.trim());
+        const qs = params.toString();
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/messages${qs ? `?${qs}` : ''}`, {
             headers: { ...authHeaders },
         });
         if (!response.ok) throw new Error('Failed to fetch messages');
