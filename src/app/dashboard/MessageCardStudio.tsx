@@ -59,9 +59,22 @@ export default function MessageCardStudio({ messages, photos, galleryTitle, onCl
     const [bg, setBg] = useState<Bg>('brand');
     const [photoUrl, setPhotoUrl] = useState<string | null>(photos[0] ?? null);
     const [sharing, setSharing] = useState(false);
+    const [search, setSearch] = useState('');
+    const [cardText, setCardText] = useState<string>(messages[0]?.message ?? '');
+    const [cardName, setCardName] = useState<string>(messages[0]?.guest_name ?? '');
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const selectedMessages = messages.filter(m => selected.has(m.id));
+    const q = search.trim().toLowerCase();
+    const filtered = q ? messages.filter(m => m.message.toLowerCase().includes(q) || m.guest_name.toLowerCase().includes(q)) : messages;
+
+    // Keep the editable card text in sync with the single message selected.
+    const singleId = template === 'single' ? [...selected][0] : undefined;
+    useEffect(() => {
+        if (template !== 'single' || !singleId) return;
+        const m = messages.find(x => x.id === singleId);
+        if (m) { setCardText(m.message); setCardName(m.guest_name); }
+    }, [singleId, template, messages]);
 
     const toggle = (id: string) => setSelected(prev => {
         const next = new Set(prev);
@@ -108,7 +121,8 @@ export default function MessageCardStudio({ messages, photos, galleryTitle, onCl
 
         // ── Content ──
         if (template === 'single') {
-            const m = sel[0];
+            const text = cardText.trim();
+            const name = cardName.trim();
             ctx.textBaseline = 'top';
             // eyebrow
             ctx.fillStyle = mutedColor;
@@ -119,15 +133,15 @@ export default function MessageCardStudio({ messages, photos, galleryTitle, onCl
             ctx.font = `italic ${msgSize}px Georgia, serif`;
             ctx.fillStyle = textColor;
             const lineH = Math.round(msgSize * 1.34);
-            const lines = m ? wrapLines(ctx, `“${m.message}”`, w - pad * 2) : ['Select a message'];
+            const lines = text ? wrapLines(ctx, `“${text}”`, w - pad * 2) : ['Pick a message'];
             const blockH = lines.length * lineH;
             let y = Math.max(pad + h * 0.14, (h - blockH) / 2 - h * 0.05);
             for (const ln of lines) { ctx.fillText(ln, pad, y); y += lineH; }
             // name
-            if (m) {
+            if (name) {
                 ctx.font = `500 ${Math.round(w * 0.036)}px system-ui, sans-serif`;
                 ctx.fillStyle = mutedColor;
-                ctx.fillText(`— ${m.guest_name}`, pad, y + Math.round(h * 0.015));
+                ctx.fillText(`— ${name}`, pad, y + Math.round(h * 0.015));
             }
         } else {
             // wall
@@ -166,7 +180,7 @@ export default function MessageCardStudio({ messages, photos, galleryTitle, onCl
         ctx.font = `500 ${Math.round(w * 0.024)}px system-ui, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText('made with Optimage', pad + chipSize + 14, wmY + chipSize / 2);
-    }, [template, format, bg, photoUrl, galleryTitle, messages, selected]);
+    }, [template, format, bg, photoUrl, galleryTitle, messages, selected, cardText, cardName]);
 
     useEffect(() => { void render(); }, [render]);
 
@@ -251,9 +265,14 @@ export default function MessageCardStudio({ messages, photos, galleryTitle, onCl
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, display: 'block', marginBottom: '6px' }}>
                                 {template === 'single' ? 'Pick a message' : `Pick messages (${selectedMessages.length} selected)`}
                             </label>
+                            {messages.length > 6 && (
+                                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search messages or names…"
+                                    style={{ width: '100%', padding: '8px 11px', borderRadius: '9px', border: `1px solid ${c.border}`, fontSize: '0.82rem', marginBottom: '8px', outline: 'none', boxSizing: 'border-box' }} />
+                            )}
                             <div style={{ maxHeight: '190px', overflowY: 'auto', border: `1px solid ${c.border}`, borderRadius: '10px' }}>
                                 {messages.length === 0 && <p style={{ padding: '14px', margin: 0, fontSize: '0.82rem', color: c.textMuted }}>No messages yet — they’ll appear here once guests sign your gallery.</p>}
-                                {messages.map(m => {
+                                {messages.length > 0 && filtered.length === 0 && <p style={{ padding: '14px', margin: 0, fontSize: '0.82rem', color: c.textMuted }}>No messages match “{search}”.</p>}
+                                {filtered.map(m => {
                                     const on = selected.has(m.id);
                                     return (
                                         <button key={m.id} onClick={() => template === 'single' ? setSelected(new Set([m.id])) : toggle(m.id)}
@@ -270,6 +289,16 @@ export default function MessageCardStudio({ messages, photos, galleryTitle, onCl
                                 })}
                             </div>
                         </div>
+
+                        {template === 'single' && selectedMessages.length > 0 && (
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, display: 'block', marginBottom: '6px' }}>Card text <span style={{ fontWeight: 400, color: c.textMuted }}>(trim or tidy — only affects the card)</span></label>
+                                <textarea value={cardText} onChange={e => setCardText(e.target.value)} rows={3}
+                                    style={{ width: '100%', padding: '9px 11px', borderRadius: '9px', border: `1px solid ${c.border}`, fontSize: '0.85rem', lineHeight: 1.5, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+                                <input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Attribution (e.g. Aunty Bisi)"
+                                    style={{ width: '100%', padding: '8px 11px', borderRadius: '9px', border: `1px solid ${c.border}`, fontSize: '0.82rem', marginTop: '6px', outline: 'none', boxSizing: 'border-box' }} />
+                            </div>
+                        )}
                     </div>
 
                     {/* Preview */}
