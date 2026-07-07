@@ -394,19 +394,23 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
     const [reopeningProofing, setReopeningProofing] = useState(false);
     const [removingClient, setRemovingClient] = useState(false);
 
+    // Load the owner's galleries once.
     useEffect(() => {
         apiClient.listGalleries().then(data => {
             setGalleries(data);
             setLoading(false);
-            // Auto-open gallery if ID was passed in URL (?gallery=...)
-            if (initialGalleryId) {
-                const target = data.find(g => g.id === initialGalleryId);
-                if (target) void openGallery(target);
-            }
         }).catch(() => setLoading(false));
-        // openGallery is stable (defined in render scope); intentionally omitted from deps
+    }, []);
+
+    // Auto-open a gallery from ?gallery=… — guarded so openGallery's own URL change
+    // (which updates initialGalleryId) doesn't re-trigger a second item load.
+    useEffect(() => {
+        if (!initialGalleryId || galleries.length === 0) return;
+        if (activeGallery?.id === initialGalleryId) return;
+        const target = galleries.find(g => g.id === initialGalleryId);
+        if (target) void openGallery(target);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialGalleryId]);
+    }, [initialGalleryId, galleries]);
 
     // ── load (or reload) the photos for a gallery; safe to call repeatedly (retry)
     const loadGalleryItems = async (gallery: Gallery): Promise<void> => {
@@ -681,6 +685,14 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
         } catch { /* ignore */ }
         finally { setMessagesLoadingMore(false); }
     };
+
+    // Auto-load activity when the Activity tab is opened (no manual "Load" click).
+    useEffect(() => {
+        if (galleryTab === 'activity' && activeGallery && activityGalleryId !== activeGallery.id && !activityLoading) {
+            void loadActivity(activeGallery.id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [galleryTab, activeGallery?.id]);
 
     const handleReopenProofing = async (id: string): Promise<void> => {
         setReopeningProofing(true);

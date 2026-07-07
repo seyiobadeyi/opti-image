@@ -68,6 +68,7 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
     const [bg, setBg] = useState<Bg>('brand');
     const [photoUrl, setPhotoUrl] = useState<string | null>(photos[0] ?? null);
     const [sharing, setSharing] = useState(false);
+    const [feedback, setFeedback] = useState<'idle' | 'saved' | 'copied'>('idle');
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const didInit = useRef(false);
 
@@ -153,12 +154,31 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
             ctx.fillStyle = mutedColor;
             ctx.font = `500 ${Math.round(w * 0.026)}px system-ui, sans-serif`;
             ctx.fillText('FROM THE GUESTBOOK', pad, pad + Math.round(h * 0.02));
-            const msgSize = Math.round(w * (format === 'story' ? 0.062 : 0.056));
-            ctx.font = `italic ${msgSize}px Georgia, serif`;
+
+            // Fit the quote to the available space: shrink the font until it fits,
+            // then (at the minimum size) ellipsize so it never overflows the card.
+            const topY = pad + Math.round(h * 0.16);
+            const availH = h - topY - Math.round(h * 0.16); // reserve for attribution + watermark
+            const minSize = Math.round(w * 0.032);
+            let msgSize = Math.round(w * (format === 'story' ? 0.062 : 0.056));
+            let lines: string[] = [];
+            let lineH = 0;
+            for (;;) {
+                ctx.font = `italic ${msgSize}px Georgia, serif`;
+                lineH = Math.round(msgSize * 1.34);
+                lines = text ? wrapLines(ctx, `“${text}”`, w - pad * 2) : ['Pick a message'];
+                if (lines.length * lineH <= availH || msgSize <= minSize) break;
+                msgSize -= 4;
+            }
+            if (lines.length * lineH > availH) {
+                const maxLines = Math.max(1, Math.floor(availH / lineH));
+                lines = lines.slice(0, maxLines);
+                const last = lines.length - 1;
+                const lastLine = lines[last];
+                if (lastLine !== undefined) lines[last] = lastLine.replace(/[.,;:”"'\s]*$/, '') + '…”';
+            }
             ctx.fillStyle = textColor;
-            const lineH = Math.round(msgSize * 1.34);
-            const lines = text ? wrapLines(ctx, `“${text}”`, w - pad * 2) : ['Pick a message'];
-            let y = Math.max(pad + h * 0.14, (h - lines.length * lineH) / 2 - h * 0.05);
+            let y = topY + Math.max(0, (availH - lines.length * lineH) / 2);
             for (const ln of lines) { ctx.fillText(ln, pad, y); y += lineH; }
             if (name) {
                 ctx.font = `500 ${Math.round(w * 0.036)}px system-ui, sans-serif`;
@@ -174,12 +194,14 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
             let y = pad + Math.round(h * 0.075);
             const cardW = w - pad * 2;
             const bs = Math.round(w * 0.03);
+            const bottomLimit = h - Math.round(h * 0.085); // keep clear of the watermark
             for (const m of items) {
                 const text = resolveText(m);
                 ctx.font = `italic ${bs}px Georgia, serif`;
                 const lines = wrapLines(ctx, `“${text}”`, cardW - Math.round(w * 0.08)).slice(0, 3);
                 const lineH = Math.round(bs * 1.3);
                 const cardH = lines.length * lineH + Math.round(w * 0.11);
+                if (y + cardH > bottomLimit) break; // never overflow the card
                 ctx.fillStyle = onLight ? '#ffffff' : 'rgba(255,255,255,0.10)';
                 roundRect(ctx, pad, y, cardW, cardH, 22);
                 let ty = y + Math.round(w * 0.035);
@@ -206,27 +228,43 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
     useEffect(() => { void render(); }, [render]);
 
     const toBlob = (): Promise<Blob | null> =>
-        new Promise(res => canvasRef.current?.toBlob(res, 'image/png') ?? res(null));
+        new Promise(res => { const cv = canvasRef.current; if (!cv) return res(null); cv.toBlob(b => res(b), 'image/png'); });
+
+    const flash = (state: 'saved' | 'copied') => { setFeedback(state); setTimeout(() => setFeedback('idle'), 1800); };
 
     const download = async () => {
         const blob = await toBlob();
-        if (!blob) return;
+        if (!blob) { alert('Couldn’t generate the image. If you used a gallery photo background, try Brand colour instead.'); return; }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `optimage-messages-${format}.png`; a.click();
-        URL.revokeObjectURL(url);
+        a.href = url; a.download = `optimage-messages-${format}.png`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        flash('saved');
     };
 
     const share = async () => {
         const blob = await toBlob();
-        if (!blob) return;
+        if (!blob) { alert('Couldn’t generate the image. If you used a gallery photo background, try Brand colour instead.'); return; }
         const file = new File([blob], 'optimage-messages.png', { type: 'image/png' });
         const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+        // Mobile / supported browsers: native share sheet (WhatsApp status, IG story…).
         if (nav.canShare && nav.canShare({ files: [file] })) {
             setSharing(true);
-            try { await navigator.share({ files: [file], title: 'A message from my gallery' }); } catch { /* cancelled */ }
+            try { await navigator.share({ files: [file], title: 'A message from my gallery' }); } catch { /* user cancelled */ }
             setSharing(false);
-        } else { await download(); }
+            return;
+        }
+        // Desktop: copy the PNG to the clipboard so it can be pasted straight into
+        // WhatsApp Web, Instagram, an email, etc. Falls back to a download.
+        try {
+            if (navigator.clipboard && 'write' in navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                flash('copied');
+                return;
+            }
+        } catch { /* clipboard blocked — fall through */ }
+        await download();
     };
 
     const CHIP = (active: boolean): React.CSSProperties => ({
@@ -241,7 +279,7 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
 
     return (
         <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: c.white, borderRadius: '18px', width: '100%', maxWidth: '880px', maxHeight: '92vh', overflow: 'auto', padding: '22px' }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: c.white, borderRadius: '18px', width: '100%', maxWidth: '880px', maxHeight: '92vh', overflowY: 'auto', overflowX: 'hidden', padding: '22px', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div>
                         <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Share messages</h3>
@@ -250,7 +288,7 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.textMuted }}><X size={20} /></button>
                 </div>
 
-                <div className="mcs-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: '20px', alignItems: 'start' }}>
+                <div className="mcs-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,280px)', gap: '20px', alignItems: 'start' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <div>
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, display: 'block', marginBottom: '6px' }}>Layout</label>
@@ -258,6 +296,9 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
                                 <button style={CHIP(template === 'single')} onClick={() => setTemplate('single')}>Single message</button>
                                 <button style={CHIP(template === 'wall')} onClick={() => setTemplate('wall')}>Message wall</button>
                             </div>
+                            <p style={{ fontSize: '0.72rem', color: c.textMuted, margin: '6px 0 0' }}>
+                                {template === 'single' ? 'One quote per image. Switch to Message wall to combine several messages into one image.' : 'Tick several messages below — they’ll stack into one image.'}
+                            </p>
                         </div>
                         <div>
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: c.textSecondary, display: 'block', marginBottom: '6px' }}>Format</label>
@@ -345,24 +386,24 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
                     </div>
 
                     {/* Preview */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', position: 'sticky', top: 0 }}>
-                        <div style={{ background: c.bgMuted, borderRadius: '14px', padding: '12px', display: 'flex', justifyContent: 'center' }}>
-                            <canvas ref={canvasRef} style={{ width: format === 'story' ? '190px' : '260px', height: 'auto', borderRadius: '10px', display: 'block' }} />
+                    <div className="mcs-preview" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', position: 'sticky', top: 0 }}>
+                        <div style={{ background: c.bgMuted, borderRadius: '14px', padding: '12px', display: 'flex', justifyContent: 'center', maxWidth: '100%' }}>
+                            <canvas ref={canvasRef} style={{ width: format === 'story' ? '190px' : '260px', maxWidth: '100%', height: 'auto', borderRadius: '10px', display: 'block' }} />
                         </div>
                         <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
                             <button onClick={() => void share()} disabled={!canExport || sharing}
                                 style={{ flex: 1, padding: '11px', borderRadius: '11px', border: 'none', background: c.accent, color: '#fff', fontWeight: 600, fontSize: '0.88rem', cursor: canExport ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', opacity: canExport ? 1 : 0.5 }}>
-                                <Share2 size={15} /> Share
+                                {feedback === 'copied' ? <><Check size={15} /> Copied!</> : <><Share2 size={15} /> {sharing ? 'Sharing…' : 'Share'}</>}
                             </button>
                             <button onClick={() => void download()} disabled={!canExport}
                                 style={{ padding: '11px 14px', borderRadius: '11px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontWeight: 600, fontSize: '0.88rem', cursor: canExport ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '7px', opacity: canExport ? 1 : 0.5 }}>
-                                <Download size={15} /> Save
+                                {feedback === 'saved' ? <><Check size={15} /> Saved!</> : <><Download size={15} /> Save</>}
                             </button>
                         </div>
-                        <p style={{ fontSize: '0.72rem', color: c.textMuted, textAlign: 'center', margin: 0 }}>Share drops it straight into WhatsApp status, Instagram, and more on your phone.</p>
+                        <p style={{ fontSize: '0.72rem', color: c.textMuted, textAlign: 'center', margin: 0 }}>On your phone, Share opens WhatsApp status, Instagram and more. On desktop it copies the image so you can paste it anywhere; Save downloads the PNG.</p>
                     </div>
                 </div>
-                <style>{`.mcs-spin{animation:mcsspin 1s linear infinite}@keyframes mcsspin{to{transform:rotate(360deg)}}@media (max-width:640px){.mcs-grid{grid-template-columns:1fr !important}}`}</style>
+                <style>{`.mcs-spin{animation:mcsspin 1s linear infinite}@keyframes mcsspin{to{transform:rotate(360deg)}}@media (max-width:720px){.mcs-grid{grid-template-columns:1fr !important}.mcs-preview{position:static !important;order:-1}}`}</style>
             </div>
         </div>
     );
