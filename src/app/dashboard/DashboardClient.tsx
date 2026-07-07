@@ -1616,9 +1616,10 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <style>{`@media (max-width:600px){.gal-row{flex-direction:column;align-items:stretch !important}.gal-actions{width:100%}.gal-actions>button,.gal-actions>a{flex:1 1 auto;justify-content:center}}`}</style>
                     {galleries.map(gallery => (
                         <div key={gallery.id} style={{ background: c.white, border: `1px solid ${c.border}`, borderRadius: '14px', padding: '16px 20px', cursor: 'default' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            <div className="gal-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                                 {/* Left: info */}
                                 <div
                                     style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
@@ -1661,7 +1662,7 @@ function GalleriesTab({ ownerUsername, initialGalleryId }: { ownerUsername: stri
                                 </div>
 
                                 {/* Right: actions */}
-                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                <div className="gal-actions" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                                     <button onClick={() => void openGallery(gallery)}
                                         className="btn btn-primary"
                                         style={{ padding: '7px 14px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>

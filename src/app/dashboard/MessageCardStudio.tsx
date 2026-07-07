@@ -70,6 +70,7 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
     const [sharing, setSharing] = useState(false);
     const [feedback, setFeedback] = useState<'idle' | 'saved' | 'copied'>('idle');
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const shareFileRef = useRef<File | null>(null); // kept ready so iOS share fires within the user gesture
     const didInit = useRef(false);
 
     const resolveText = (m: GalleryMessage) => (edits[m.id]?.text ?? m.message);
@@ -223,6 +224,11 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
         ctx.font = `500 ${Math.round(w * 0.024)}px system-ui, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText('made with Optimage', pad + chipSize + 14, wmY + chipSize / 2);
+
+        // Keep a ready-to-share file so the mobile share sheet opens within the
+        // user gesture (awaiting toBlob() inside the click handler loses the
+        // gesture on iOS Safari, so nothing came up before).
+        canvas.toBlob(b => { shareFileRef.current = b ? new File([b], 'optimage-messages.png', { type: 'image/png' }) : null; }, 'image/png');
     }, [template, format, bg, photoUrl, galleryTitle, selected, edits]);
 
     useEffect(() => { void render(); }, [render]);
@@ -244,11 +250,21 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
     };
 
     const share = async () => {
+        const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+        // Mobile: fire the native share sheet SYNCHRONOUSLY with the already-rendered
+        // file. iOS Safari cancels navigator.share() if any awaited work runs first,
+        // which is why nothing came up before.
+        const ready = shareFileRef.current;
+        if (ready && nav.canShare && nav.canShare({ files: [ready] })) {
+            try { setSharing(true); await navigator.share({ files: [ready], title: 'A message from my gallery' }); }
+            catch { /* user cancelled */ }
+            finally { setSharing(false); }
+            return;
+        }
         const blob = await toBlob();
         if (!blob) { alert('Couldn’t generate the image. If you used a gallery photo background, try Brand colour instead.'); return; }
         const file = new File([blob], 'optimage-messages.png', { type: 'image/png' });
-        const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-        // Mobile / supported browsers: native share sheet (WhatsApp status, IG story…).
+        // Fallback native path (in case the ref wasn't ready yet).
         if (nav.canShare && nav.canShare({ files: [file] })) {
             setSharing(true);
             try { await navigator.share({ files: [file], title: 'A message from my gallery' }); } catch { /* user cancelled */ }

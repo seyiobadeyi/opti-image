@@ -322,6 +322,7 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                     boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
                 }}
             >
+                <style>{`@media (max-width:720px){.auth-modal-visual{display:none !important}.auth-modal-form{flex:1 1 100% !important;max-width:100% !important;padding:28px 20px !important}}`}</style>
                 {/* Left: Visual Side — dark background with image */}
                 <div style={{
                     flex: '0 0 360px', position: 'relative', overflow: 'hidden',
@@ -346,10 +347,10 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                 </div>
 
                 {/* Right: Form Side — white */}
-                <div style={{
+                <div className="auth-modal-form" style={{
                     flex: 1, padding: '40px', overflowY: 'auto',
                     display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                    minWidth: '300px', background: T.bg, position: 'relative',
+                    minWidth: 0, background: T.bg, position: 'relative',
                 }}>
                     {/* Close button */}
                     <button onClick={onClose} style={{
@@ -641,11 +642,11 @@ export default function AuthModal({ isOpen, onClose, initialStep, redirectAfterA
                                             onKeyDown={(e) => handleOtpKeyDown(index, e)}
                                             {...(index === 0 ? { onPaste: handleOtpPaste } : {})}
                                             style={{
-                                                width: '38px', height: '50px', textAlign: 'center',
+                                                flex: '1 1 0', minWidth: 0, maxWidth: '46px', height: '50px', textAlign: 'center', padding: 0,
                                                 borderRadius: '10px', border: `1px solid ${T.border}`,
                                                 background: T.bgSub, color: T.text,
                                                 outline: 'none', fontSize: '1.1rem', fontWeight: 600,
-                                                transition: 'border-color 0.2s',
+                                                transition: 'border-color 0.2s', boxSizing: 'border-box',
                                             }}
                                             onFocus={(e) => { e.target.style.borderColor = T.accent; e.target.style.boxShadow = `0 0 0 3px ${T.accent}22`; }}
                                             onBlur={(e) => { e.target.style.borderColor = T.border; e.target.style.boxShadow = 'none'; }}
