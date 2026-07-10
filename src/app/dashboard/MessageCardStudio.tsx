@@ -99,7 +99,7 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
     }, [search, fetchPage]);
 
     const toggle = (m: GalleryMessage) => {
-        if (template === 'single') { setSelected([m]); return; }
+        // Always multi-select. "Single" renders the first pick; "Wall" stacks several.
         setSelected(prev => prev.some(x => x.id === m.id) ? prev.filter(x => x.id !== m.id) : [...prev, m]);
     };
     const move = (id: string, dir: -1 | 1) => setSelected(prev => {
@@ -113,9 +113,6 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
     });
     const editField = (id: string, field: 'text' | 'name', value: string) =>
         setEdits(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
-
-    // Keep single selection to one when switching template.
-    useEffect(() => { if (template === 'single') setSelected(prev => prev.slice(0, 1)); }, [template]);
 
     const render = useCallback(async () => {
         const canvas = canvasRef.current;
@@ -313,7 +310,7 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
                                 <button style={CHIP(template === 'wall')} onClick={() => setTemplate('wall')}>Message wall</button>
                             </div>
                             <p style={{ fontSize: '0.72rem', color: c.textMuted, margin: '6px 0 0' }}>
-                                {template === 'single' ? 'One quote per image. Switch to Message wall to combine several messages into one image.' : 'Tick several messages below — they’ll stack into one image.'}
+                                {template === 'single' ? 'Shows one quote — the first you tick. Want several in one image? Switch to Message wall.' : 'Tick several messages below — they’ll stack into one image.'}
                             </p>
                         </div>
                         <div>
