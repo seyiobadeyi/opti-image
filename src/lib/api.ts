@@ -770,6 +770,27 @@ export const apiClient = {
     },
 
     /**
+     * Owner: host a rendered guestbook share-card (PNG) and get back a public
+     * URL that can be shared/pasted anywhere.
+     */
+    async uploadShareCard(galleryId: string, blob: Blob): Promise<{ url: string }> {
+        const headers = await getAuthHeaders();
+        if (!headers['Authorization']) throw new Error('Please sign in');
+        const formData = new FormData();
+        formData.append('file', new File([blob], 'card.png', { type: 'image/png' }));
+        const response = await fetch(`${API_BASE}/api/gallery/${galleryId}/share-card`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        if (!response.ok) {
+            const err: { message?: string } = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Could not create a share link');
+        }
+        return response.json();
+    },
+
+    /**
      * Visitor (signed-in) submits a photo to a gallery's review queue.
      */
     async submitGalleryPhoto(slug: string, file: File): Promise<void> {

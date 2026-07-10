@@ -69,8 +69,8 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
     const [photoUrl, setPhotoUrl] = useState<string | null>(photos[0] ?? null);
     const [sharing, setSharing] = useState(false);
     const [feedback, setFeedback] = useState<'idle' | 'saved' | 'copied'>('idle');
+    const [shareUrl, setShareUrl] = useState<string | null>(null); // last hosted card link
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const shareFileRef = useRef<File | null>(null); // kept ready so iOS share fires within the user gesture
     const didInit = useRef(false);
 
     const resolveText = (m: GalleryMessage) => (edits[m.id]?.text ?? m.message);
@@ -221,14 +221,12 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
         ctx.font = `500 ${Math.round(w * 0.024)}px system-ui, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText('made with Optimage', pad + chipSize + 14, wmY + chipSize / 2);
-
-        // Keep a ready-to-share file so the mobile share sheet opens within the
-        // user gesture (awaiting toBlob() inside the click handler loses the
-        // gesture on iOS Safari, so nothing came up before).
-        canvas.toBlob(b => { shareFileRef.current = b ? new File([b], 'optimage-messages.png', { type: 'image/png' }) : null; }, 'image/png');
     }, [template, format, bg, photoUrl, galleryTitle, selected, edits]);
 
     useEffect(() => { void render(); }, [render]);
+
+    // A hosted link is stale once the card design changes — drop it.
+    useEffect(() => { setShareUrl(null); }, [template, format, bg, photoUrl, selected, edits]);
 
     const toBlob = (): Promise<Blob | null> =>
         new Promise(res => { const cv = canvasRef.current; if (!cv) return res(null); cv.toBlob(b => res(b), 'image/png'); });
@@ -246,38 +244,34 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
         flash('saved');
     };
 
+    // Share = host the card and hand back a public URL. On phones this opens the
+    // native share sheet with the link (WhatsApp, Instagram…); on desktop it
+    // copies the link. The link is also shown in the UI to grab manually.
     const share = async () => {
-        const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-        // Mobile: fire the native share sheet SYNCHRONOUSLY with the already-rendered
-        // file. iOS Safari cancels navigator.share() if any awaited work runs first,
-        // which is why nothing came up before.
-        const ready = shareFileRef.current;
-        if (ready && nav.canShare && nav.canShare({ files: [ready] })) {
-            try { setSharing(true); await navigator.share({ files: [ready], title: 'A message from my gallery' }); }
-            catch { /* user cancelled */ }
-            finally { setSharing(false); }
-            return;
-        }
-        const blob = await toBlob();
-        if (!blob) { alert('Couldn’t generate the image. If you used a gallery photo background, try Brand colour instead.'); return; }
-        const file = new File([blob], 'optimage-messages.png', { type: 'image/png' });
-        // Fallback native path (in case the ref wasn't ready yet).
-        if (nav.canShare && nav.canShare({ files: [file] })) {
-            setSharing(true);
-            try { await navigator.share({ files: [file], title: 'A message from my gallery' }); } catch { /* user cancelled */ }
-            setSharing(false);
-            return;
-        }
-        // Desktop: copy the PNG to the clipboard so it can be pasted straight into
-        // WhatsApp Web, Instagram, an email, etc. Falls back to a download.
+        if (!canExport) return;
+        setSharing(true);
+        setFeedback('idle');
         try {
-            if (navigator.clipboard && 'write' in navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-                flash('copied');
-                return;
+            const blob = await toBlob();
+            if (!blob) { alert('Couldn’t generate the image. If you used a gallery photo background, try Brand colour instead.'); return; }
+            const { url } = await apiClient.uploadShareCard(galleryId, blob);
+            setShareUrl(url);
+            const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+            if (typeof nav.share === 'function') {
+                try {
+                    await nav.share({ title: 'A message from my gallery', text: 'A message from my gallery', url });
+                    return; // shared via the native sheet
+                } catch (e) {
+                    if ((e as Error)?.name === 'AbortError') return; // user cancelled — leave link visible
+                    // otherwise fall through and copy the link
+                }
             }
-        } catch { /* clipboard blocked — fall through */ }
-        await download();
+            try { await navigator.clipboard?.writeText(url); flash('copied'); } catch { /* shown in UI to copy manually */ }
+        } catch (e) {
+            alert((e as Error)?.message || 'Couldn’t create a share link. Use Save to download instead.');
+        } finally {
+            setSharing(false);
+        }
     };
 
     const CHIP = (active: boolean): React.CSSProperties => ({
@@ -406,14 +400,21 @@ export default function MessageCardStudio({ galleryId, photos, galleryTitle, onC
                         <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
                             <button onClick={() => void share()} disabled={!canExport || sharing}
                                 style={{ flex: 1, padding: '11px', borderRadius: '11px', border: 'none', background: c.accent, color: '#fff', fontWeight: 600, fontSize: '0.88rem', cursor: canExport ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', opacity: canExport ? 1 : 0.5 }}>
-                                {feedback === 'copied' ? <><Check size={15} /> Copied!</> : <><Share2 size={15} /> {sharing ? 'Sharing…' : 'Share'}</>}
+                                {feedback === 'copied' ? <><Check size={15} /> Link copied!</> : <><Share2 size={15} /> {sharing ? 'Creating link…' : 'Share link'}</>}
                             </button>
                             <button onClick={() => void download()} disabled={!canExport}
                                 style={{ padding: '11px 14px', borderRadius: '11px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontWeight: 600, fontSize: '0.88rem', cursor: canExport ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '7px', opacity: canExport ? 1 : 0.5 }}>
                                 {feedback === 'saved' ? <><Check size={15} /> Saved!</> : <><Download size={15} /> Save</>}
                             </button>
                         </div>
-                        <p style={{ fontSize: '0.72rem', color: c.textMuted, textAlign: 'center', margin: 0 }}>On your phone, Share opens WhatsApp status, Instagram and more. On desktop it copies the image so you can paste it anywhere; Save downloads the PNG.</p>
+                        {shareUrl && (
+                            <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                                <input readOnly value={shareUrl} onFocus={e => e.currentTarget.select()} style={{ ...INPUT, fontSize: '0.75rem' }} />
+                                <button onClick={() => { void navigator.clipboard?.writeText(shareUrl).then(() => flash('copied')); }}
+                                    style={{ padding: '8px 12px', borderRadius: '9px', border: `1px solid ${c.border}`, background: c.white, color: c.text, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>Copy</button>
+                            </div>
+                        )}
+                        <p style={{ fontSize: '0.72rem', color: c.textMuted, textAlign: 'center', margin: 0 }}>Share link hosts the card and gives you a public URL — on your phone it opens WhatsApp, Instagram and more; on desktop it copies the link. Save downloads the PNG.</p>
                     </div>
                 </div>
                 <style>{`.mcs-spin{animation:mcsspin 1s linear infinite}@keyframes mcsspin{to{transform:rotate(360deg)}}@media (max-width:720px){.mcs-grid{grid-template-columns:1fr !important}.mcs-preview{position:static !important;order:-1}}`}</style>
