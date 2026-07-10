@@ -384,6 +384,7 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
     const [showShareMenu, setShowShareMenu] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
     const [newsletterEmail, setNewsletterEmail] = useState<string>('');
+    const [newsletterWebsite, setNewsletterWebsite] = useState<string>(''); // honeypot — real users never fill this
     const [newsletterStatus, setNewsletterStatus] = useState<FormStatus>('idle');
     const [badgeCopied, setBadgeCopied] = useState<boolean>(false);
     const [editedNames, setEditedNames] = useState<Record<string, string>>({});
@@ -394,7 +395,7 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
         if (!newsletterEmail.trim()) return;
         setNewsletterStatus('loading');
         try {
-            const result: NewsletterResult = await subscribeNewsletter(newsletterEmail.trim());
+            const result: NewsletterResult = await subscribeNewsletter(newsletterEmail.trim(), newsletterWebsite);
             if (result.error) { setNewsletterStatus('error'); return; }
             setNewsletterStatus('success');
         } catch {
@@ -643,6 +644,10 @@ export default function ResultsPanel({ results, summary, serverUrl, localPreview
                         </span>
                     </div>
                     <form onSubmit={handleNewsletterSubmit} style={{ display: 'flex', gap: '6px', flex: 1, minWidth: '200px' }}>
+                        {/* Honeypot: off-screen, hidden from real users; bots fill it → server drops the request */}
+                        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
+                            value={newsletterWebsite} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewsletterWebsite(e.target.value)}
+                            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }} />
                         <input
                             type="email"
                             placeholder="your@email.com"
