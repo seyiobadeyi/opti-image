@@ -53,6 +53,7 @@ const COLS = [
 
 export default function Footer(): React.JSX.Element {
     const [email, setEmail] = useState('');
+    const [website, setWebsite] = useState(''); // honeypot — real users never fill this
     const [status, setStatus] = useState<FormStatus>('idle');
     const [isAlreadySubscribed, setIsAlreadySubscribed] = useState(false);
 
@@ -64,7 +65,7 @@ export default function Footer(): React.JSX.Element {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/newsletter/subscribe`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email, website }),
             });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
@@ -111,6 +112,10 @@ export default function Footer(): React.JSX.Element {
 
                     {/* Form row */}
                     <form onSubmit={handleSubscribe} className="footer-newsletter-form" style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+                        {/* Honeypot: off-screen, hidden from real users; bots fill it → server drops the request */}
+                        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
+                            value={website} onChange={e => setWebsite(e.target.value)}
+                            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }} />
                         <input
                             type="email"
                             placeholder="your@email.com"

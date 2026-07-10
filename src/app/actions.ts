@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import type { NewsletterResult } from '@/types';
 
-export async function subscribeNewsletter(email: string): Promise<NewsletterResult> {
+export async function subscribeNewsletter(email: string, website = ''): Promise<NewsletterResult> {
     if (!email || typeof email !== 'string') {
         return { error: 'Invalid email format' };
     }
@@ -23,7 +23,7 @@ export async function subscribeNewsletter(email: string): Promise<NewsletterResu
         const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: cleanEmail }),
+            body: JSON.stringify({ email: cleanEmail, website }),
         });
 
         const data: unknown = await response.json().catch(() => null);

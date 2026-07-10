@@ -12,6 +12,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
     const [status, setStatus] = useState<FormStatus>('idle');
     const [errorMsg, setErrorMsg] = useState<string>('');
     const [isAlreadySubscribed, setIsAlreadySubscribed] = useState<boolean>(false);
+    const [website, setWebsite] = useState<string>(''); // honeypot — real users never fill this
     const popupRef = useRef<HTMLDivElement | null>(null);
     // Track whether any other overlay (AuthModal, SubscriptionPaywall) is open
     const overlayOpenRef = useRef<boolean>(false);
@@ -94,7 +95,7 @@ export default function NewsletterPopup(): React.JSX.Element | null {
         setStatus('loading');
         setErrorMsg('');
         try {
-            const result: NewsletterResult = await subscribeNewsletter(email);
+            const result: NewsletterResult = await subscribeNewsletter(email, website);
 
             if (result.error) {
                 setStatus('error');
@@ -180,6 +181,10 @@ export default function NewsletterPopup(): React.JSX.Element | null {
                 </p>
 
                 <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Honeypot: off-screen, hidden from real users; bots fill it → server drops the request */}
+                    <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
+                        value={website} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWebsite(e.target.value)}
+                        style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }} />
                     <div style={{ position: 'relative' }}>
                         <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
                         <input
