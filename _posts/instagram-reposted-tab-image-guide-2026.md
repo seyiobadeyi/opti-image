@@ -72,7 +72,7 @@ If you're prepping a batch of photos for posting and want them consistently size
 **Related reading:**
 - [Instagram Photo Comments Feature: Image Guide](/blog/instagram-photo-comments-feature-image-guide) — another recent Instagram image feature
 - [Instagram Algorithm 2026 Image Quality Guide](/blog/instagram-algorithm-2026-image-quality-guide) — how upload quality affects reach
-- [Instagram Caption Links & OG Image Guide 2026](/blog/instagram-caption-links-og-image-guide-2026) — getting images to display correctly off-platform
+- [Instagram's Instants Camera Now Shoots Video Into DMs](/blog/instagram-instants-dm-video-file-size-guide) — the video version of the same file-size problem
 
 <script type="application/ld+json">
 {
