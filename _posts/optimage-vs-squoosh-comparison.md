@@ -118,6 +118,10 @@ Optimage is right for you if:
 
 Squoosh is among the best single-image optimisation tools available, full stop. If fine-grained codec control for a single file is your priority, use it. If your workflow involves more than one image at a time, or if you need any tooling beyond compression, Optimage fills the gaps Squoosh leaves open — at no cost and without a sign-in.
 
+**Related reading:**
+- [Cloudflare vs BunnyCDN vs KeyCDN for Image Delivery](/blog/cloudflare-vs-bunnycdn-vs-keycdn-image-delivery-2026) — compression is one half of the pipeline; delivery is the other
+- [TinyPNG Alternatives in 2026](/blog/tinypng-alternatives-2026) — more single-image and bulk options compared
+
 ---
 
 ## Frequently Asked Questions
